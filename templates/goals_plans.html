@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block addl_stylesheets %}
+
+
+{% endblock addl_stylesheets %}
+
+
+{% block content %}
+<div class="large-12 large-centered">
+	<div class="row">&nbsp;</div>
+	
+	{% if alert %}
+	<div class="row">
+		<div class="alert callout">You have an alert that you should find here. This is the place to find it.</div>
+	</div>
+	<div class="row">&nbsp;</div>
+	{% endif %}
+	
+	<div class="row">
+			<div class="large-12">
+				<div class="image gray">
+					{%	if goal.image %}
+					<div class="nailthumb-container square dark">
+							<img src="{{ goal.image.url }}">
+						</div>
+					{% else %}
+							<div class="big_image goalPlaceholder">&nbsp;</div>
+					{% endif %}
+					<div class="overlay_text">{{goal.title}}</div>
+				</div>
+
+		
+
+				
+  			</div>
+	</div>
+	<div class="row">
+		{% if plans %}
+		<h2 class="float-center">Plans</h2></div>
+		{% for plan in plans %}
+		 <div>{{plan.title}}</div>
+		{% endfor %}
+		{% else %}
+		
+	
+	
+<h2 class="float-center">Create Plan</h2></div>
+<div class="row">
+	<form class="login" method="POST" action="/goals/{{goal.id}}/plans/" enctype="multipart/form-data">
+	  {% csrf_token %}
+	
+	<label>Title</label>
+	{{planForm.title}}
+	{{planForm.title.errors}}
+	
+	<label>Description</label>
+	{{planForm.description}}
+	{{planForm.description.errors}}
+	
+	<label>Who should be able to see this plan?</label>
+	{{planForm.viewableBy}}
+	{{planForm.viewableBy.errors}}
+	
+	<label>When do you want to start this plan?</label>
+	{{planForm.startDate}}
+	{{planForm.startDate.errors}}
+	
+	<label>When do you want to finish this plan? Your goal's deadline is {{goal.deadline}}</label>
+	{{planForm.endDate}}
+	{{planForm.endDate.errors}}
+	
+	
+	
+	
+	<button class="small-10 large-12 button" type="submit">Create Plan</button>
+</form>
+{% endif %}
+</div>
+{% endblock %}
+
+
+{% block after_body %}
+	<script src="/static/datetimepicker-master/build/jquery.datetimepicker.full.min.js"></script>
+	
+	<script type="text/javascript">
+	jQuery(document).ready(function () {
+         jQuery('.nailthumb-container').nailthumb({width:1200, height:200,fitDirection:'center'});
+     });
+	   </script>
+	
+	
+	
+	<script type="text/javascript">
+	jQuery('#id_startDate').datetimepicker({
+	  format:'m-d-Y H:i',
+	  lang:'en',
+	timepicker:false,
+
+	});
+	</script>
+	<script type="text/javascript">
+	
+	jQuery('#id_endDate').datetimepicker({
+	  format:'m-d-Y H:i',
+	  lang:'en',
+	timepicker:false,
+
+	});
+	   </script>
+	
+{% endblock after_body %}
+

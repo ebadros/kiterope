@@ -1,0 +1,62 @@
+{% load render_bundle from webpack_loader %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+
+
+    <!-- styles -->  <link href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+
+    <!-- -->
+
+  </head>
+
+  <body>
+
+
+  <div id="token"></div>
+  {% block content %}
+      <div class="ui fixed top inverted blue menu" style="margin-top:0">
+        <div ><a  href="/"><img style="margin-left: 1rem; margin-top:1rem;" height="40" src="/static/images/kiterope_logo_v01.png"></a></div>
+      {% if not user.is_authenticated %}
+				<div class="right menu">
+				   <div class="ui item"><a href="/accounts/signup">Sign up</a></div>
+						<div class="ui item"><a href="/accounts/login">Log in</a></div>
+				    </ul>
+				  </div>
+			{% else %}
+
+				<div class="right menu">
+				      	<div class="ui simple dropdown item"><img src="/static/images/avatar-placeholder.png">{{user.username}}
+
+                <div class="menu">
+                <a class="item" href="/accounts/logout">Logout</a>
+
+                </div></div>
+
+				  </div>
+		  {% endif %}
+                </div>
+
+<script>
+    var CSRF_TOKEN = '{{ csrf_token }}';
+
+</script>
+
+
+<div id="react-app" class="ui page container"></div>
+            {% render_bundle 'main' %}
+
+
+
+  </div>
+
+    {% endblock %}
+
+
+
+    </body>
+</html>

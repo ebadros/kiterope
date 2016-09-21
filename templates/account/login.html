@@ -1,0 +1,76 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+
+{% block content %}
+<div class="row">&nbsp;</div>
+
+<div class="large-4 large-centered columns bordered padded-top">
+	<div class="row">&nbsp;</div>
+	<h2>Log in</h2>
+	
+
+{% get_providers as socialaccount_providers %}
+
+{% if socialaccount_providers %}
+
+
+<div class="socialaccount_ballot">
+
+  <div class="stacked button-group">
+    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+  </div>
+	<div class="row">
+  <div class="centered">{% trans 'or' %}</div>
+</div>
+</div>
+
+{% include "socialaccount/snippets/login_extra.html" %}
+
+{% else %}
+<p>{% blocktrans %}If you have not created an account yet, then please
+<a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+{% endif %}
+
+<form class="login" method="POST" action="{% url 'account_login' %}">
+  {% csrf_token %}
+{{form.hidden}}
+<div class="float-left">{{form.login.label}}</div>
+
+{{form.login}}
+<div class="float-left">{{form.password.label}}</div>
+{{form.password}}
+
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-error login-alert">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-error login-alert">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+<div class="expanded row">
+	<div class="float-right"><a href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></div>
+</div>
+  <button class="expanded button" type="submit">{% trans "Sign In" %}</button>
+</form>
+<hr>
+<div class="row">
+<div class="small-3 large-8 columns">Don't have an account?</div>
+<div class="float-right"><a href="{{ signup_url }}" class="expanded button">Sign up</a></div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block addl_stylesheets %}
+
+
+{% endblock addl_stylesheets %}
+
+
+{% block content %}
+<div class="large-12 large-centered">
+	<div class="row">&nbsp;</div>
+	
+	{% if alert %}
+	<div class="row">
+		<div class="alert callout">You have an alert that you should find here. This is the place to find it.</div>
+	</div>
+	<div class="row">&nbsp;</div>
+	{% endif %}
+	
+	
+<div class="row"><a class="pageTitle" data-toggle="example-dropdown">{{plan.title}}</a></div>
+<div class="row">
+
+{% if durationInWeeks > 1 %}
+	<div class="large-12">Schedule Length: {{durationInWeeks}} weeks</div>	
+{% else %}
+	<div class="large-12">Schedule Length: {{durationInDays}} days</div>	
+{% endif %}
+</div>
+
+	
+
+
+<div class="row">
+	<div class="dropdown-pane" id="example-dropdown" data-dropdown data-auto-focus="true">
+	<form class="login" method="POST" action="/goals/{{goal.id}}/plans/" enctype="multipart/form-data">
+	  {% csrf_token %}
+	
+	<label>Title</label>
+	{{planForm.title}}
+	{{planForm.title.errors}}
+	
+	<label>Description</label>
+	{{planForm.description}}
+	{{planForm.description.errors}}
+	
+	<label>Who should be able to see this plan?</label>
+	{{planForm.viewableBy}}
+	{{planForm.viewableBy.errors}}
+	
+	<label>When do you want to start this plan?</label>
+	{{planForm.startDate}}
+	{{planForm.startDate.errors}}
+	
+	<label>When do you want to finish this plan? Your goal's deadline is {{goal.deadline}}</label>
+	{{planForm.endDate}}
+	{{planForm.endDate.errors}}
+	
+	
+	
+	
+	<button class="small-10 large-12 button" type="submit">Save Plan</button>
+</form>
+</div>
+</div>
+{% endblock %}

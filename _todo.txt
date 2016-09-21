@@ -1,0 +1,7 @@
+-- Fix Linkedin django-allauth integration
+-- Get goal image working with S3
+-- Save the datetime in the goal correctly, right now it's saving as a text file, may need the text that comes from the form converted into a date time
+--Figure out how a rest framework works Django-rest-framework
+
+
+

@@ -1,0 +1,150 @@
+.login-reveal {
+    width:450px;
+}
+
+.google {
+    color:black;
+    background-color:white;
+    border-color:#c4c4c4;
+}
+
+.facebook {
+    color:white;
+    background-color: #3b5998;
+    border-radius: 2px;
+    border: 1px solid;
+    text-align: center;
+
+}
+
+.linkedin_oauth2 {
+    background-color: #0077b5;
+}
+
+.centered {
+    text-align: center;
+}
+
+.bordered {
+    border-radius: 2px;
+    border: 1px solid;
+    text-align: center;
+}
+
+.left {
+    float:left !important;
+}
+
+.gray {
+    background-color: gray;
+}
+
+
+.custom-error {
+    color: red;
+    font-size:.75em;
+    text-decoration:none;
+}
+
+.custom-error ul {
+    list-style:none;
+}
+
+a.addGoalButton {
+    background-color: lightblue;
+    width:20rem;
+    height:20rem;
+    line-height:7.5rem;
+    font-size:3em;
+    text-align:bottom;
+    padding:.25rem;
+}
+
+
+
+
+.goalPlaceholder {
+    width:200px;
+    height:200px;
+}
+
+
+
+
+
+
+
+
+
+.goalActions {
+    top:90px;
+    bottom: 20px;
+}
+
+
+.goalPropertiesContainer {
+    height:5rem;
+    background-color:#e6e6e6;
+
+}
+
+.dark {
+    background: black;
+    float: left;
+}
+.dark img {
+    opacity: .4;
+    display: inline;
+}
+
+
+
+a.pageTitle {
+    font-size:2.5rem;
+}
+
+.login-alert {
+    color:orangered;
+}
+
+
+.overlayText {
+
+    z-index:100;
+    position:absolute;
+    color:white;
+    font-size: 4rem;
+    font-weight:bold;
+    left:10px;
+    top:25px;
+    text-align:center;
+    line-height: 4rem;
+}
+
+
+.blue {
+    background-color: #2199e8;
+}
+
+.goal {
+    padding-top:1rem;
+    padding-bottom:1rem;
+}
+
+.spacer {
+    height:6rem;
+    display:block;
+}
+
+.overlayedImage {
+
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.overlayedImageContainer {
+
+    position:relative;
+}
+

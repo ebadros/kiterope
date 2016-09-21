@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="large-12 large-centered">
+	<div class="row">&nbsp;</div>
+	
+	{% if alert %}
+	<div class="row">
+		<div class="alert callout">You have an alert that you should find here. This is the place to find it.</div>
+	</div>
+	<div class="row">&nbsp;</div>
+	{% endif %}
+	
+	
+
+			{% if user.is_authenticated %}
+			
+                {% if userGoals %}
+                    <div class="row">
+
+                        {% for userGoal in userGoals %}
+                            <div class="column large-4 left">
+                                <div class="image gray">
+                                    {%	if userGoal.image %}
+                                        <div class="nailthumb-container dark"><img src="{{ userGoal.image.url }}"></div>
+                                    {% else %}
+                                        <div class="big_image goalPlaceholder">&nbsp;</div>
+                                    {% endif %}
+                                    <div class="overlay_text">{{userGoal.title}}</div>
+                                </div>
+                                <div class="expanded row">
+                                    <div class="large-12 columns ">
+                                        {% if userGoal.plans %}
+                                            <a class="expanded button"href="/goals/{{userGoal.id}}/plans">View Plans</a>
+
+                                        {% else %}
+                                            <a class="expanded button" href="/goals/{{userGoal.id}}/plans">Make a Plan for This Goal</a>
+
+                                        {% endif %}
+                                        <a class="expanded button secondary float-right" href="/goals/{{userGoal.id}}/coaches">Work with a Coach</a></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+
+                {% else %}
+                    <div class="row">&nbsp;</div>
+                    <div class="row">&nbsp;</div>
+
+
+
+                    <div class="centered">You haven't created any goals yet. Your first step is to decide what you want.</div>
+
+                    <div class="row small-up-1 medium-up-2 large-up-4">
+                        <div class="row">&nbsp;</div>
+
+                    <div class="column">
+                        <div class="bordered"><a href="/goals/add" class="addGoalButton button bordered"><div class="row">+</div><div class="row">Add Goal</div></a></div>
+                      </div>
+                    </div>
+                {% endif %}
+            {% else %}
+
+			
+			{% endif %}
+
+			</div>
+            {% endblock content %}
+
+
+
+
+			
+			
+			
+			
+			
+
+

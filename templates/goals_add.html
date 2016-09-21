@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block addl_stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/datetimepicker-master/jquery.datetimepicker.css"/ >
+
+
+{% endblock addl_stylesheets %}
+
+
+{% block content %}
+<div class="large-12 large-centered">
+	<div class="row">&nbsp;</div>
+	
+	{% if alert %}
+	<div class="row">
+		<div class="alert callout">You have an alert that you should find here. This is the place to find it.</div>
+	</div>
+	<div class="row">&nbsp;</div>
+	{% endif %}
+	<div class="row">
+	
+<h2 class="float-center">New Goal</h2></div>
+<div class="row">
+	<form class="login" method="POST" action="{% url 'goals_add' %}" enctype="multipart/form-data">
+	  {% csrf_token %}
+	
+	<label>What is your goal?</label>
+	{{goalForm.title}}
+	{{goalForm.title.errors}}
+	
+	
+	<!--<label>Visualizing your goal can be a great help to keeping it in the front of your mind.</label>
+	<label for="id_image" class="button">Select Image</label>
+	<input id="id_image" name="image" type="file" class="show-for-sr" required />-->
+	{{goalForm.image.label}}
+	{{goalForm.image}}
+	{{goalForm.image.errors}}
+	
+	<label>Describe your goal as specifically as possible.</label>
+	{{goalForm.description}}
+	{{goalForm.description.errors}}
+	
+	
+	<label>Building emotion into a goal makes it much more likely to achieve. Why do you want to achieve this goal?</label>
+	{{goalForm.why}}
+	{{goalForm.why.errors}}
+	
+	
+	<label>By when do you want to accomplish this?</label>
+	{{goalForm.deadline }}
+	{{goalForm.deadline.errors}}
+
+	
+	<label>Who should be able to see this goal?</label>
+	{{goalForm.viewableBy}}
+	{{goalForm.viewableBy.errors}}
+	
+	
+	<button class="small-10 large-12 button" type="submit">Create Goal</button>
+</form>
+
+</div>
+{% endblock %}
+
+{% block after_body %}
+
+	<script src="/static/datetimepicker-master/jquery.js"></script>
+	<script src="/static/datetimepicker-master/build/jquery.datetimepicker.full.min.js"></script>
+	<script>
+	jQuery('#id_deadline').datetimepicker({
+	  format:'m-d-Y H:i',
+	  lang:'en',
+	timepicker:false,
+
+	});
+	</script>
+	
+{% endblock after_body %}
+
