@@ -14,6 +14,7 @@ ALLOWED_HOSTS = ['*']
     os.path.join(BASE_DIR, "static"),
     '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )'''
+IN_DEVELOPMENT = True
 
 TEMPLATES = [
     {
