@@ -97,5 +97,7 @@ urlpatterns = [
 
 if settings.IN_PRODUCTION:
     urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+
     url(r'^$', views.splash, name='splash'),
  ]
