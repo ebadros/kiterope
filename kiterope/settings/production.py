@@ -1,7 +1,7 @@
 #
 from kiterope.settings.common import *
 
-DEBUG = False
+DEBUG = True
 DOMAIN_NAME = 'kiterope.com'
 ALLOWED_HOSTS = ['localhost', 'kiterope.com']
 
