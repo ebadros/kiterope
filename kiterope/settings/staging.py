@@ -5,9 +5,12 @@ DEBUG = True
 WWW_ROOT = '/home/ebadros/webapps/kiterope_dev/kiterope'
 DOMAIN_NAME = 'dev.kiterope.com'
 
+''' VP
 STATICFILES_DIRS = (
     '/home/ebadros/webapps/kiterope_dev/kiterope/static/',
+
 )
+'''
 # This is where the static files will be collected to
 STATIC_ROOT = '/home/ebadros/webapps/kiterope_dev_static/'
 

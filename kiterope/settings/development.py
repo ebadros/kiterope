@@ -10,10 +10,10 @@ IS_PROD = False
 ALLOWED_HOSTS = ['*']
 
 
-STATICFILES_DIRS = (
+'''VP STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
     '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
-)
+)'''
 
 TEMPLATES = [
     {
