@@ -22,6 +22,7 @@ from rest_framework.views import APIView
 from django.views.generic import TemplateView
 from django.conf.urls import url
 from kiterope.views import schema_view
+from django.conf import settings
 
 
 import apps
@@ -40,7 +41,7 @@ router.register(r'steps', views.StepViewSet)
 
 
 
-
+if settings.staging or settings.development:
 urlpatterns = [
     url(r'^swagger/', schema_view),
     url(r'^api/', include(router.urls)),
@@ -93,3 +94,8 @@ urlpatterns = [
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+
+if settings.production:
+    urlpatterns = [
+    url(r'^$', views.splash, name='splash'),
+ ]
