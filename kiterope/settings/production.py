@@ -1,7 +1,7 @@
 #
 from kiterope.settings.common import *
 
-DEBUG = True
+DEBUG = False
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
