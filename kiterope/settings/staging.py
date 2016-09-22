@@ -1,5 +1,8 @@
 #
-from vp.settings.common import *
+
+
+
+from settings.common import *
 
 DEBUG = True
 WWW_ROOT = '/home/ebadros/webapps/kiterope_dev/kiterope'
@@ -16,6 +19,7 @@ STATIC_ROOT = '/home/ebadros/webapps/kiterope_dev_static/'
 
 ALLOWED_HOSTS = ['*']
 
+IN_STAGING=True
 
 DATABASES = {
     'default': {

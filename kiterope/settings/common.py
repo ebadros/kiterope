@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import sys
 import os
+from os.path import abspath, basename, dirname, join, normpath
+IN_PRODUCTION = False
+IN_STAGING=False
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gk+*onp#as%pbku(=zq=o!z7holbpq(8@r!tuc5+6ac8f!4yh)'
+SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
 
@@ -81,25 +85,7 @@ DOMAIN_NAME = 'kiterope.com'
 
 #)
 
-'''VP
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-				#'django_common.context_processors.common_settings',
-				'django.core.context_processors.request',
 
-            ],
-        },
-    },
-]'''
 
 TEMPLATES = [
     {
@@ -127,9 +113,12 @@ WSGI_APPLICATION = 'kiterope.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -156,43 +145,7 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
-# Stripe Settings
-''' VP
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_aLA2aAG4xCLXlIy27JI1YFGb")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_8VtVvYtNnV678SUg2aY3GVqV")
 
-DJSTRIPE_PLANS = {
-    "monthly": {
-        "stripe_plan_id": "vp-monthly-2015",
-        "name": "Monthly ($7/month)",
-        "description": "",
-        "price": 700,  # $7.00
-        "currency": "usd",
-        "interval": "month"
-    },
-    "yearly": {
-        "stripe_plan_id": "vp-yearly-2015",
-        "name": "Yearly ($79/year)",
-        "description": "",
-        "price": 7900,  # $79.00
-        "currency": "usd",
-        "interval": "year"
-    },
-}
-
-
-
-
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-    'admin',
-    'about',
-	'protect3',
-	'/',
-	'protectMyHome',
-	''
-    
-
-)'''
 
 # Django-allauth Settings
 
