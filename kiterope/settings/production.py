@@ -1,7 +1,7 @@
 #
 from settings.common import *
 
-DEBUG = False
+DEBUG = True
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
