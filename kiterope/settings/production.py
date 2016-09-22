@@ -19,6 +19,7 @@ DATABASES = {
          'PORT': '5432',
     }
 }
+ROOT_URLCONF = 'kiterope.urls_production'
 
 TEMPLATES = [
     {

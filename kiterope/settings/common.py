@@ -73,7 +73,6 @@ MIDDLEWARE = [
 
 
 #REGISTRATION_FORM = 'registration.forms.UserRegistrationForm'
-ROOT_URLCONF = 'kiterope.urls'
 DOMAIN_NAME = 'kiterope.com'
 
 

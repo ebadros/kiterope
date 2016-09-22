@@ -9,17 +9,19 @@ IS_DEV = True
 IS_PROD = False
 
 ALLOWED_HOSTS = []
+ROOT_URLCONF = 'kiterope.urls_development'
 
 #ALLOWED_HOSTS = ['*']
 
 TEMPLATE_DEBUG = True
 THUMBNAIL_DEBUG = True
 
+
 '''VP STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
     '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )'''
-IN_DEVELOPMENT = True
+
 
 
 

@@ -40,7 +40,7 @@ router.register(r'steps', views.StepViewSet)
 
 
 
-if settings.MEDIA_URL or settings.IN_DEVELOPMENT:
+if settings.STAGING or settings.IN_DEVELOPMENT:
     urlpatterns = [
         url(r'^swagger/', schema_view),
         url(r'^api/', include(router.urls)),
@@ -99,4 +99,4 @@ if settings.IN_PRODUCTION:
         url(r'^admin/', admin.site.urls),
 
         url(r'^$', views.splash, name='splash'),
- ]
+ ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
