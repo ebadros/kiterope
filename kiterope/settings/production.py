@@ -1,5 +1,5 @@
 #
-from settings.common import *
+from kiterope.settings.common import *
 
 DEBUG = True
 IN_PRODUCTION = True

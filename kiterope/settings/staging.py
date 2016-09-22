@@ -2,7 +2,7 @@
 
 
 
-from settings.common import *
+from kiterope.settings.common import *
 
 DEBUG = True
 WWW_ROOT = '/home/ebadros/webapps/kiterope_dev/kiterope'

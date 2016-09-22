@@ -43,3 +43,8 @@ module.exports = {
   resolveLoader: { fallback: path.join(__dirname, "node_modules") }
 
 }
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'STATS_FILE': path.join(__dirname, 'webpack-stats.json')
+    }
+}
