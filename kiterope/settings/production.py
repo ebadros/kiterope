@@ -1,7 +1,7 @@
 #
 from kiterope.settings.common import *
 
-DEBUG = False
+DEBUG = True
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
@@ -24,7 +24,7 @@ ROOT_URLCONF = 'kiterope.urls_production'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['/home/ebadros/webapps/kiterope/kiterope/templates/'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

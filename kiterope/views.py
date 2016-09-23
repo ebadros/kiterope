@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Plan, Step, Coach, Student, Session, Review, Update, Rate, Question, Answer
+from kiterope.models import Goal, Plan, Step, Coach, Student, Session, Review, Update, Rate, Question, Answer, Interest
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -18,8 +18,8 @@ from kiterope.helpers import formattime
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from kiterope.serializers import UserSerializer, GoalSerializer, PlanSerializer, StepSerializer, CoachSerializer, QuestionSerializer
-from kiterope.serializers import StudentSerializer, SessionSerializer, ReviewSerializer, UpdateSerializer, RateSerializer, AnswerSerializer
-from kiterope.forms import UserForm, ProfileForm, GoalForm, PlanForm
+from kiterope.serializers import StudentSerializer, SessionSerializer, ReviewSerializer, UpdateSerializer, RateSerializer, AnswerSerializer, InterestSerializer
+from kiterope.forms import UserForm, ProfileForm, GoalForm, PlanForm, InterestForm
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -121,6 +121,15 @@ class UserDetail(generics.RetrieveAPIView):
         console.log("post called")
         return self.create(request, *args, **kwargs)
 '''
+
+class InterestList(generics.ListCreateAPIView):
+    queryset = Interest.objects.all()
+    serializer_class = InterestSerializer
+
+
+class InterestDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Interest.objects.all()
+    serializer_class = InterestSerializer
 
 class GoalDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Goal.objects.all()
@@ -227,7 +236,18 @@ class AnswerDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 
+def interest(request):
+    interestForm = InterestForm()
 
+    if request.method == 'POST':
+        interestForm = InterestForm(request.POST)
+
+        if interestForm.is_valid():
+            interest = interestForm.save()
+            interest.save()
+
+
+    return render(request, "interest.html", {'interestForm': interestForm})
 
 
 def splash(request):

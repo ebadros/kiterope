@@ -38,6 +38,7 @@ router.register(r'plans', views.PlanViewSet)
 router.register(r'steps', views.StepViewSet)
 
 urlpatterns = [
+    url(r'^interest', views.interest, name="interest"),
       url(r'^swagger/', schema_view),
       url(r'^api/', include(router.urls)),
 

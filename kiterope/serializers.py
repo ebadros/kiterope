@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Plan, Step, Coach, Update, Session, Student, Review, Answer, Question, Rate
+from kiterope.models import Goal, Plan, Step, Coach, Update, Session, Student, Review, Answer, Question, Rate, Interest
 from rest_framework import serializers
 
 
@@ -19,6 +19,11 @@ def makeSerializer(serializerName, source, many,read_only):
         'Rate': lambda: RateSerializer(source, many, read_only),
 
     }[serializerName]
+
+class InterestSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model= Interest
+        fields = ('id', 'name', 'email', 'goal')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

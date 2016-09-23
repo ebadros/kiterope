@@ -16,6 +16,11 @@ VIEWABLE_CHOICES = (
     
     )
 
+class Interest(models.Model):
+    name = models.CharField(max_length=30, default = " ")
+    email = models.EmailField(max_length=70,)
+    goal = models.CharField(max_length=1000, default = " ")
+
 class Goal(models.Model):
     title = models.CharField(max_length=200, default=" ")
     deadline = models.CharField(max_length=16, default = " " )

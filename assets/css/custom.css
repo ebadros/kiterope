@@ -148,3 +148,9 @@ a.pageTitle {
     position:relative;
 }
 
+.holder {
+  height: 50rem;
+}
+.holder .middle {
+  height: 100%
+}

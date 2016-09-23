@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from kiterope.models import Profile, User, Goal, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer
+from kiterope.models import Profile, User, Goal, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer, Interest
 from django.contrib.admin import widgets
 
 
@@ -28,3 +28,8 @@ class PlanForm(ModelForm):
      class Meta:
          model = Plan
          fields = {'title', 'viewableBy','description', 'startDate', 'endDate'}
+
+class InterestForm(ModelForm):
+    class Meta:
+        model = Interest
+        fields = {'name', 'email', 'goal'}
