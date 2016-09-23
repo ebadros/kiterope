@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.10/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+sys.path.insert(0, "/home/ebadros/webapps/kiterope/kiterope/")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "kiterope.settings.settingsConfiguration")
 
