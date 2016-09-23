@@ -41,5 +41,5 @@ router.register(r'steps', views.StepViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', views.splash, name='splash'),
+    url(r'^$', views.interest, name="interest"),
  ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
