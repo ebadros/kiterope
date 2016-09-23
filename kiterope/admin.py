@@ -1,5 +1,5 @@
 from django.contrib import admin
-from kiterope.models import Profile, User, Goal, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer
+from kiterope.models import Profile, User, Goal, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer, Interest
 admin.site.register(Profile)
 admin.site.register(Goal)
 admin.site.register(Student)
@@ -13,3 +13,4 @@ admin.site.register(Plan)
 admin.site.register(Step)
 admin.site.register(Question)
 admin.site.register(Answer)
+admin.site.register(Interest)

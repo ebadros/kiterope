@@ -30,6 +30,8 @@ class PlanForm(ModelForm):
          fields = {'title', 'viewableBy','description', 'startDate', 'endDate'}
 
 class InterestForm(ModelForm):
+    goal = forms.CharField(widget=forms.Textarea(attrs={'rows':3}))
+
     class Meta:
         model = Interest
         fields = {'name', 'email', 'goal'}

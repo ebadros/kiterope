@@ -21,6 +21,9 @@ class Interest(models.Model):
     email = models.EmailField(max_length=70,)
     goal = models.CharField(max_length=1000, default = " ")
 
+    def __str__(self):
+        return "%s" % (self.name)
+
 class Goal(models.Model):
     title = models.CharField(max_length=200, default=" ")
     deadline = models.CharField(max_length=16, default = " " )

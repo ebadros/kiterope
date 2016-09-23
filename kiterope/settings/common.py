@@ -85,7 +85,6 @@ DOMAIN_NAME = 'kiterope.com'
 #)
 
 
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

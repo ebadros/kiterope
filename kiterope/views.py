@@ -11,6 +11,12 @@ import datetime, time
 from time import mktime
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from django.core.mail import EmailMessage
+import requests
+import json
+
+
 
 from kiterope.helpers import formattime
 
@@ -238,6 +244,7 @@ class AnswerDetail(generics.RetrieveUpdateDestroyAPIView):
 
 def interest(request):
     interestForm = InterestForm()
+    displaySuccessMessage = False
 
     if request.method == 'POST':
         interestForm = InterestForm(request.POST)
@@ -245,9 +252,27 @@ def interest(request):
         if interestForm.is_valid():
             interest = interestForm.save()
             interest.save()
+            displaySuccessMessage = True
 
+            headers = {'Content-Type': 'application/json'}
 
-    return render(request, "interest.html", {'interestForm': interestForm})
+            helpdeskTicket = {
+                "helpdesk_ticket":{
+                "description":"Their dream is to: %s" % interest.goal,
+                "subject":"New Potential Customer: %s" % interest.name,
+                "name": interest.name,
+                "email":interest.email,
+                "priority":1,
+                "status":2
+                  },
+                }
+
+            r = requests.post("https://kiterope.freshdesk.com/helpdesk/tickets.json", auth=("HrB9zJ9AYJaBEivf0s","x" ),
+                              headers=headers, data=json.dumps(helpdeskTicket))
+
+            return render(request, "interest.html", {'interestForm': interestForm, 'displaySuccessMessage': displaySuccessMessage})
+
+    return render(request, "interest.html", {'interestForm': interestForm, 'displaySuccessMessage':displaySuccessMessage})
 
 
 def splash(request):
@@ -502,11 +527,7 @@ def plan_edit(request, plan_id=None):
     
     
     
-    
 
-    
-    
-    
     
     
     

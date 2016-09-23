@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}Kiterope - Results-Based, Personal Goal Achievement{% endblock %}</title>
+			{% load static from staticfiles %}
 
 
     <!-- styles -->  <link href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css" rel="stylesheet">
@@ -13,47 +14,84 @@
   </head>
 <body class=" blue">
   {% block content %}
-<div class="ui container">
+<div class="ui one column grid ">
+<div class="form-holder whiteType">
+    <div class="ui four column grid">
 <div class="ui row">
-    <div class="ui one column">
-        <img height="80rem;" src="/static/images/kiterope_logo_v01.png"/></div>
-    </div>
-<div class="ui row">
-                    <div class="ui five wide column">
-                        <h1>We help you achieve your goals!</h1>
-                        <h2>Results-based, personal goal coaching for $20/month.</h2>
-                    </div>
-                    <div class="ui eight wide column form">
+        <div class="two wide column">&nbsp;</div>
+            <div class="six wide column"><img height="80rem;" src="/static/images/kiterope_logo_v01.png"/></div>
+            <div class="eight wide column">&nbsp;</div>
+</div>
 
-                        {%  csrf_token %}<form class="login" method="POST" action="{% url 'interest' %}">
+
+        <div class="ui row">
+        <div class="two wide column">&nbsp;</div>
+            {% if displaySuccessMessage %}
+            <div class="eight wide column">
+                <h1>Congratulations! You just took the first step towards achieving your goals!</h1>
+                <h2>One of our pros will be in touch soon!</h2>
+            </div>
+                <div class="ui five wide column">&nbsp;</div>
+
+
+                {% else %}
+            <div class="six wide column">
+                <h1>We help you achieve your goals!</h1>
+                <h2>Results-based, personal goal coaching for $20/month.</h2>
+            </div>
+
+
+
+            <div class="ui seven wide column form whiteType">
+                        <h2>We're looking for testers.</h2>
+                <h2>Tell us what you want to achieve.</h2>
+
+                    <form class="login" method="POST" action="{% url 'interest' %}">
+                        {%  csrf_token %}
+                        <div class="ui divider" />
+                        <div>&nbsp;</div>
+                    <div class="field">
+                        <label>Your name (That's right, your real name)</label>
+                        {{ interestForm.name }}
+                        {{ interestForm.name.errors }}
+
+                    </div>
                         <div class="field">
-                            <label>Your name (That's right, your real name)</label>
-                            {{ interestForm.name }}
-                            {{ interestForm.name.errors }}
+                        <label>Email Address (Only if you want us to get back to you)</label>
+                        {{ interestForm.email }}
+                        {{ interestForm.email.errors }}
 
-                        </div>
-                            <div class="field">
-                            <label>Email Address (Only if you want us to get back to you)</label>
-                            {{ interestForm.email }}
-                            {{ interestForm.email.errors }}
+                    </div>
+                        <div class="field">
+                        <label>Your goal, dream, desire, nemesis</label>
+                        {{ interestForm.goal }}
+                        {{ interestForm.goal.errors }}
 
-                        </div>
-                            <div class="field">
-                            <label>Your goal, dream, desire, nemesis</label>
-                            {{ interestForm.goal }}
-                            {{ interestForm.goal.errors }}
+                    </div>
+                    <button class="ui fluid secondary button" type="submit">Let's Do It!</button>
+                        </form>
 
-                        </div>
-                        <button class="ui fluid secondary button" type="submit">Let's Do It!</button>
-                            </form>
+
+
+
+
                     </div>
 
-                              <div class="ui three wide column">&nbsp;</div>
+{% endif %}
 
-    </div>
+
+                <div class="one wide column">&nbsp;</div>
+                </div>
+
+        </div>
 
 
 </div>
+
+</div>
+
+
+
 {% endblock %}
 
 </body>
