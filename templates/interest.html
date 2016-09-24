@@ -17,17 +17,14 @@
 <div class="ui one column grid ">
 <div class="form-holder whiteType">
     <div class="ui four column grid">
-<div class="ui row">
-        <div class="two wide column">&nbsp;</div>
-            <div class="six wide column"><img height="80rem;" src="/static/images/kiterope_logo_v01.png"/></div>
-            <div class="eight wide column">&nbsp;</div>
-</div>
+
 
 
         <div class="ui row">
-        <div class="two wide column">&nbsp;</div>
+        <div class="three wide column">&nbsp;</div>
             {% if displaySuccessMessage %}
             <div class="eight wide column">
+                <img height="80rem;" src="/static/images/kiterope_logo_v01.png"/>
                 <h1>Congratulations! You just took the first step towards achieving your goals!</h1>
                 <h2>One of our pros will be in touch soon!</h2>
             </div>
@@ -36,8 +33,12 @@
 
                 {% else %}
             <div class="six wide column">
+            <img height="80rem;" src="/static/images/kiterope_logo_v01.png"/>
+
                 <h1>We help you achieve your goals!</h1>
                 <h2>Results-based, personal goal coaching for $20/month.</h2>
+                <h3>Absolutely no risk. No credit card needed. Free first month. Every adventure begins with a first step.</h3>
+
             </div>
 
 
@@ -68,7 +69,7 @@
                         {{ interestForm.goal.errors }}
 
                     </div>
-                    <button class="ui fluid secondary button" type="submit">Let's Do It!</button>
+                    <button class="ui large fluid purple button" type="submit">Let's Do It!</button>
                         </form>
 
 
@@ -80,7 +81,6 @@
 {% endif %}
 
 
-                <div class="one wide column">&nbsp;</div>
                 </div>
 
         </div>
