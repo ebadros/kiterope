@@ -22,6 +22,9 @@ from rest_framework.views import APIView
 from django.views.generic import TemplateView
 from django.conf.urls import url
 from kiterope.views import schema_view
+from .views import ApiEndpoint
+import oauth2_provider.views as oauth2_views
+
 
 
 import apps
@@ -37,19 +40,47 @@ router.register(r'goals', views.GoalViewSet)
 router.register(r'plans', views.PlanViewSet)
 router.register(r'steps', views.StepViewSet)
 
+
+oauth2_endpoint_views = [
+    url(r'^authorize/$', oauth2_views.AuthorizationView.as_view(), name="authorize"),
+    url(r'^token/$', oauth2_views.TokenView.as_view(), name="token"),
+    url(r'^revoke-token/$', oauth2_views.RevokeTokenView.as_view(), name="revoke-token"),
+]
+
+if settings.DEBUG:
+    # OAuth2 Application Management endpoints
+    oauth2_endpoint_views += [
+        url(r'^applications/$', oauth2_views.ApplicationList.as_view(), name="list"),
+        url(r'^applications/register/$', oauth2_views.ApplicationRegistration.as_view(), name="register"),
+        url(r'^applications/(?P<pk>\d+)/$', oauth2_views.ApplicationDetail.as_view(), name="detail"),
+        url(r'^applications/(?P<pk>\d+)/delete/$', oauth2_views.ApplicationDelete.as_view(), name="delete"),
+        url(r'^applications/(?P<pk>\d+)/update/$', oauth2_views.ApplicationUpdate.as_view(), name="update"),
+    ]
+
+    # OAuth2 Token Management endpoints
+    oauth2_endpoint_views += [
+        url(r'^authorized-tokens/$', oauth2_views.AuthorizedTokensListView.as_view(), name="authorized-token-list"),
+        url(r'^authorized-tokens/(?P<pk>\d+)/delete/$', oauth2_views.AuthorizedTokenDeleteView.as_view(),
+            name="authorized-token-delete"),
+    ]
+
 urlpatterns = [
     url(r'^interest', views.interest, name="interest"),
       url(r'^swagger/', schema_view),
+      url(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
       url(r'^api/', include(router.urls)),
+      url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
-      # url(r'^$', views.splash, name='splash'),
+
+                # url(r'^$', views.splash, name='splash'),
 
       url(r'^$', TemplateView.as_view(template_name='index.html')),
       url(r'^admin/', admin.site.urls),
       url(r'^accounts/', include('allauth.urls')),
       url(r'^goals/add', views.goals_add, name='goals_add'),
+      url(r'^secret', views.secret_page, name='secret'),
 
-      # REST FRAMEWORK URLS
+                # REST FRAMEWORK URLS
       # url(r'^users/$', views.UserList.as_view()),
       # url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
       # url(r'^goals/$', views.GoalList.as_view()),

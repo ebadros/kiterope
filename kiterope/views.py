@@ -13,6 +13,12 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
+from oauth2_provider.views.generic import ProtectedResourceView
+from django.http import HttpResponse
+from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
+
+
+
 import requests
 import json
 
@@ -38,6 +44,11 @@ from rest_framework import response, schemas
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
 
 
+
+class ApiEndpoint(ProtectedResourceView):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse('Hello, OAuth2!')
+
 @api_view()
 @renderer_classes([OpenAPIRenderer, SwaggerUIRenderer])
 def schema_view(request):
@@ -49,6 +60,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 class GoalViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
     queryset = Goal.objects.all()
     serializer_class = GoalSerializer
 
@@ -81,6 +94,8 @@ class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
 
 class StepViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
     queryset = Step.objects.all()
     serializer_class = StepSerializer
 
@@ -154,11 +169,15 @@ class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class StepList(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
     queryset = Step.objects.all()
     serializer_class = StepSerializer
 
 
 class StepDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
     queryset = Step.objects.all()
     serializer_class = StepSerializer
 
@@ -270,10 +289,9 @@ def interest(request):
             r = requests.post("https://kiterope.freshdesk.com/helpdesk/tickets.json", auth=("HrB9zJ9AYJaBEivf0s","x" ),
                               headers=headers, data=json.dumps(helpdeskTicket))
 
-            return render(request, "interest.html", {'interestForm': interestForm, 'displaySuccessMessage': displaySuccessMessage})
+            return render(request, "interest2.html", {'interestForm': interestForm, 'displaySuccessMessage': displaySuccessMessage})
 
-    return render(request, "interest.html", {'interestForm': interestForm, 'displaySuccessMessage':displaySuccessMessage})
-
+    return render(request, "interest2.html", {'interestForm': interestForm, 'displaySuccessMessage':displaySuccessMessage})
 
 def splash(request):
     hasGoals = None
@@ -305,7 +323,9 @@ def splash(request):
     return render(request, 'splash.html', {'userForm': userForm, 'profileForm': profileForm ,  'hasGoals':hasGoals, 'userGoals':userGoals} )
 
 
-
+@login_required()
+def secret_page(request, *args, **kwargs):
+    return HttpResponse('Secret contents!', status=200)
 
 @csrf_exempt
 @api_view(['GET', 'PUT', 'DELETE'])

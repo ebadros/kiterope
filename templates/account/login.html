@@ -46,7 +46,8 @@
 {{form.password}}
 
   {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+       <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+
   {% endif %}
 {% if form.errors %}
     {% for field in form %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}Kiterope - Results-Based, Personal Goal Achievement{% endblock %}</title>
+			{% load static from staticfiles %}
+
+
+    <!-- styles -->  <link href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+
+    <!-- -->
+
+  </head>
+<body class=" blue">
+  {% block content %}
+<div class="ui one column center aligned grid ">
+<div class="form-holder whiteType">
+        <img height="80rem;" src="/static/images/kiterope_logo_v01.png"/>
+
+    <div class="ui two column grid">
+        <div class="ui row">
+
+  <div class="eight wide column">
+                        <h1>We help you achieve your goals!</h1>
+                        <h2>Results-based, personal goal coaching for $20/month.</h2>
+                    </div>
+    <div class="column eight wide ">
+
+        <div class="center aligned">
+
+                    <div class="ui right floated eight wide column form ">
+
+                        <form class="login " method="POST" action="{% url 'interest' %}">
+                            {%  csrf_token %}
+                        <div class="field">
+                            <label>Your name (That's right, your real name)</label>
+                            {{ interestForm.name }}
+                            {{ interestForm.name.errors }}
+
+                        </div>
+                            <div class="field">
+                            <label>Email Address (Only if you want us to get back to you)</label>
+                            {{ interestForm.email }}
+                            {{ interestForm.email.errors }}
+
+                        </div>
+                            <div class="field">
+                            <label>Your goal, dream, desire, nemesis</label>
+                            {{ interestForm.goal }}
+                            {{ interestForm.goal.errors }}
+
+                        </div>
+                        <button class="ui fluid secondary button" type="submit">Let's Do It!</button>
+                            </form>
+                    </div>
+
+
+    </div>
+</div>
+
+</div>
+      </div>
+      </div>
+            </div>
+
+{% endblock %}
+
+</body>

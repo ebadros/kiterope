@@ -5,3 +5,14 @@
 
 
 
+Kiterope-mobile:
+
+Heroku
+Client-id: t05ha8qyC282QKzKEMWnH5abYRf6UmanCHKR1Dac
+Client-secret: JrWRQ5P07jpq4GobxsL3Hz65gK8ZuRwmbPj9AeeSfnhBeOuCvTR7U9sjRyDZzFgK4bsFYaWcDL2F8bjBL8cQYWLErSGv3HFDX5g8B1Hd04pjwGUsPJE2zyIFXDHJDTpc
+
+
+Kiterope
+Client-id: fqzScFblFbhAWXPK7AxGNACkYPGvXiBRJrifNeBf
+Client-secret: GxzPAx1I6Lv1bfOyVsb0vc9OOy1wt92LtbXqobuTq9Oy1tfbfir2yQ7lY0C66NDSCxTJM50s4wOUJ9uBKqUlnfDRial4q7HqaplxLSqhOn6TieebKiVbF9DbHh91ZuE7
+Access Token FQFIIR8lguHzH4N43afhJPbaKJi6Tl

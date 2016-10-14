@@ -16,6 +16,9 @@ ROOT_URLCONF = 'kiterope.urls_development'
 TEMPLATE_DEBUG = True
 THUMBNAIL_DEBUG = True
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+
 
 '''VP STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),

@@ -16,6 +16,18 @@ VIEWABLE_CHOICES = (
     
     )
 
+TIME_METRIC_CHOICES = (
+    ("DAY", "Day"),
+    ("WEEK", "Week"),
+    ("MONTH", "Month"),
+)
+
+FREQUENCY_CHOICES = (
+    ("DAILY", "Daily"),
+    ("WEEKLY", "Weekly"),
+    ("MONTHLY", "Monthly"),
+)
+
 class Interest(models.Model):
     name = models.CharField(max_length=30, default = " ")
     email = models.EmailField(max_length=70,)
@@ -57,9 +69,9 @@ class Plan(models.Model):
     calendar = models.FileField(null=True, upload_to='calendars')
     viewableBy = models.CharField(max_length=20, choices=VIEWABLE_CHOICES, default="ONLY_ME")
     steps = models.ManyToManyField('Step', blank=True, related_name='steps')
-    startDate = models.CharField(max_length=16, default = " " )
-    endDate = models.CharField(max_length=16, default = " " )
     goals = models.ManyToManyField(Goal, blank=True);
+    scheduleLength = models.IntegerField(null=False)
+    timeMetric = models.CharField(max_length=10, choices=TIME_METRIC_CHOICES, default="WEEK")
 
     def get_steps(self):
         return Step.objects.filter(plan=self)
@@ -70,20 +82,30 @@ class Plan(models.Model):
 
 class Step(models.Model):
     plan = models.ForeignKey(Plan, null=True)
-    description = models.CharField(max_length=200, default=" ")
+    title = models.CharField(max_length=100, default=" ")
+    description = models.CharField(max_length=300, default=" ")
     substeps = models.ManyToManyField('Step', blank=True, )
     frequency = models.CharField(max_length=20, null=True)
-    onSunday = models.BooleanField(default=False)
-    onMonday = models.BooleanField(default=False)
-    onTuesday = models.BooleanField(default=False)
-    onWednesday = models.BooleanField(default=False)
-    onThursday = models.BooleanField(default=False)
-    onFriday = models.BooleanField(default=False)
-    onSaturday = models.BooleanField(default=False)
+    day01 = models.BooleanField(default=False)
+    day02 = models.BooleanField(default=False)
+    day03 = models.BooleanField(default=False)
+    day04 = models.BooleanField(default=False)
+    day05 = models.BooleanField(default=False)
+    day06 = models.BooleanField(default=False)
+    day07 = models.BooleanField(default=False)
+    date = models.IntegerField(null=True)
+    begins = models.IntegerField(null=False)
+    ends = models.IntegerField(null=False)
+
     startTime = models.DateTimeField(null=True)
     endTime = models.DateTimeField(null=True)
-    duration = models.DurationField(null=True)
+    duration = models.IntegerField(null=True)
+
     wasCompleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "%s" % (self.description)
+
 
 class Profile(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
@@ -153,13 +175,19 @@ class Review(models.Model):
     reviewedUser = models.OneToOneField(User, null=True, related_name='reviewedUser')
     
 class Update(models.Model):
-    goal = models.ForeignKey(Goal, null=True)
-    measurement = models.FloatField(null=True)
     hasMetric = models.BooleanField(default=False)
-    #metric
+    metric = models.CharField(default=" ", max_length=2-,)
+
+
+    integerMeasurement = models.IntegerField(null=True)
+    floatMeasurement = models.FloatField(null=True)
+    audioMeasurement = models.FileField(null=True, update_to='updates_audio')
+    videoMeasurement = models.FileField(null=True, update_to='updates_video')
+
     step = models.ForeignKey(Step)
     author = models.ForeignKey(User, null=True, blank=True)
     description = models.CharField(max_length=1000)
+
 
 class Post(models.Model):
     author = models.ForeignKey(User, null=True, blank=True)
