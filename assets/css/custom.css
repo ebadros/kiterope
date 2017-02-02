@@ -1,6 +1,9 @@
+
 .login-reveal {
     width:450px;
 }
+
+
 
 .google {
     color:black;
@@ -70,12 +73,6 @@ a.addGoalButton {
 
 
 
-
-
-
-
-
-
 .goalActions {
     top:90px;
     bottom: 20px;
@@ -113,12 +110,24 @@ a.pageTitle {
     z-index:100;
     position:absolute;
     color:white;
-    font-size: 4rem;
     font-weight:bold;
     left:10px;
     top:25px;
     text-align:center;
-    line-height: 4rem;
+
+}
+
+.overlayTextSmall {
+
+    z-index:100;
+    position:absolute;
+    color:white;
+    font-size: 2rem;
+    font-weight:bold;
+    left:10px;
+    top:10px;
+    text-align:center;
+    line-height: 2rem;
 }
 
 
@@ -132,20 +141,22 @@ a.pageTitle {
 }
 
 .spacer {
-    height:6rem;
+    height:120px;
     display:block;
 }
 
 .overlayedImage {
-
     position:absolute;
     left:0;
     top:0;
 }
 
+
+
 .overlayedImageContainer {
 
     position:relative;
+
 }
 
 .holder {
@@ -157,7 +168,7 @@ a.pageTitle {
 
 .form-holder {
     background: rgba(255,255,255,0.0);
-    margin-top: 15%;
+    margin-top: 20%;
     border-radius: 3px;
 }
 
@@ -175,5 +186,431 @@ a.pageTitle {
 }
 
 .ui.form .field > label {
+    color:black;
+}
+
+
+
+ul.days {
+    list-style:none;
+    display:inline-block;
+}
+
+.days li {
+    display:inline-block;
+
+}
+
+ul.days2 {
+    list-style:none;
+}
+
+
+.isSelected {
+    color:purple;
+}
+
+.inline-field-label {
+    display: inline-block;
+    float:left;
+}
+
+.purple {
+    background-color:purple !important;
     color:white;
+}
+.purple-inverted {
+    background-color:white !important;
+    color:purple;
+}
+
+.green {
+    background-color:#06D6A0 !important;
+    color:white;
+}
+
+.yellow {
+    background-color:#FFD166 !important;
+    color:white;
+}
+
+.red {
+    background-color: #eb3b49 !important;
+    color:white;
+}
+
+
+div.ui.segment.noBottomMargin {
+    margin-bottom:0;
+}
+div.ui.segment.noBottomMargin.noTopMargin {
+    margin-top:0;
+    margin-bottom:0;
+
+}
+
+div.ui.segment.noTopMargin {
+    margin-top:0;
+}
+
+
+.plan {
+    background-color: #e0e0e0
+}
+
+html { height: 100%; margin-bottom: 1px; }
+
+
+
+.errorField {
+ border:1px solid red;
+}
+
+.errorText {
+    color:red;
+}
+
+input.inline-edit{
+  /* Eliminate borders and padding */
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  /* Inherit the parent element's typography */
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  font-size: inherit;
+  text-align: inherit;
+
+  /* Seems to help alignment in headers */
+  vertical-align: top;
+}
+
+/* Add interaction cues on hover and focus */
+input.inline-edit:hover,
+input.inline-edit:focus{
+  /* Change the background to a light yellow */
+  background-color: #FFD;
+
+  /* A subtle transition never hurts */
+  -webkit-transition: background-color 0.5s;
+     -moz-transition: background-color 0.5s;
+      -ie-transition: background-color 0.5s;
+          transition: background-color 0.5s;
+}
+
+.smallPadding {
+    padding-top:.4rem !important;
+    padding-bottom:.4rem !important;
+
+    margin:.3rem !important;
+}
+
+.tinyPadding {
+    padding-top:.2rem !important;
+    padding-bottom:.2rem !important;
+    margin:.1rem !important;
+}
+
+.noPadding {
+    padding-bottom:0 !important;
+}
+
+.huge-checkbox {
+    font-size:8rem;
+}
+
+.height-100 {
+    height:100%;
+}
+.username {
+    margin-left:10px;
+}
+
+.ui.sidebar {
+    overflow: visible !important;
+}
+
+.sidebar-spacer {
+    height:6rem;
+}
+
+.onTop {
+    z-index:1;
+}
+
+.sk-search-box__icon {
+    display:none;
+}
+
+
+.sk-search-box input.sk-search-box__text {
+    padding:0 0 !important;
+    margin:-.25rem .5rem !important;
+        width:60rem;
+
+}
+.search {
+    width:75%;
+}
+input.sk-search-box__text {
+    background:none !important;
+    border:none;
+    border-bottom: 1px dashed #2185d0 !important;
+    color: #2185d0 !important;
+    float:right;
+    font-size:2.5rem !important;
+    display:inline-block;
+    float:right;
+    line-height:2.5rem;
+    padding:0 0;
+    margin:0 0;
+}
+
+
+input.sk-search-box__text::-webkit-input-placeholder {
+   color: lightgrey !important;
+}
+
+input.sk-search-box__text::-moz-placeholder { /* Firefox 18- */
+   color: lightgrey !important;
+}
+
+input.sk-search-box__text::-moz-placeholder {  /* Firefox 19+ */
+   color: lightgrey !important;
+}
+
+input.sk-search-box__text::-ms-input-placeholder {
+   color: lightgrey !important;
+}
+
+
+input.NLtextinput {
+    background:none !important;
+    border:none;
+    border-bottom: 1px dashed #2185d0 !important;
+    color: #2185d0;
+    width:60rem;
+    float:right;
+    font-size:2.5rem;
+    display:inline-block;
+    float:right;
+    line-height:2.5rem;
+    padding:0 0;
+    margin:-.25rem .5rem;
+
+
+
+}
+
+input.NLtextinput:focus {
+    outline:none;
+
+}
+
+label.NLtextinput {
+    line-height:2.5rem;
+    font-size:2.5rem;
+        clear: both;
+
+    padding:0 0;
+    margin:0 0;
+    display:inline-block;
+    float:left;
+
+
+
+}
+
+.hidden {
+    display:none;
+}
+
+.calendarContainer {
+    height:40rem;
+}
+
+/* React Big Calendar Overrides*/
+.rbc-event {
+    background-color:purple !important;
+    color:white;
+}
+
+.closeWindow {
+    margin-right:-2rem;
+    padding-top:.8rem;
+    font-size:2rem;
+}
+
+.rc-time-picker-input {
+    line-height:2em important!;
+
+}
+
+.Select-input input {
+    border:none !important;
+    padding: 8px 0 12px !important;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+
+.hugeType {
+    font-size:3vw;
+    line-height:2.5vw;
+}
+
+.largeType {
+    font-size:2vw;
+    line-height:2.25vw;
+}
+
+.searchInput {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #2185d0 !important;
+    color: #2185d0;
+    display:inline-block;
+    float:right;
+    padding:0 0 !important;
+    margin-left: .5vw !important;
+    font-size:2vw !important;
+    line-height:2vw;
+
+
+
+}
+
+.searchLabel {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #FFFFFF !important;
+
+    color: #2185d0;
+    display:inline-block;
+    padding:0 0 !important;
+    margin:0 0 !important;
+    font-size:2vw !important;
+    line-height:2vw;
+
+}
+
+.middleOfScreen{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -50%;
+    margin-left: -50%;
+    width: 100%;
+    height: 100%;
+    background: red;
+}
+
+.splashPageSection {
+
+    height: 22vw;
+    min-height:150px;
+}
+
+.blue {
+    background-color:#2199E8;
+
+    color:white;
+}
+
+.topPadding {
+    padding-top: 5vw;
+
+}
+
+.noMargin {
+    margin:0 0 !important;
+    padding:.2rem .2rem !important;
+    text-align:center;
+}
+
+.massiveType {
+    font-size: 4vw;
+    line-height:4vw;
+    font-weight:bold;
+
+}
+
+ul.pagination {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+ul.pagination li {display: inline;}
+
+ul.pagination li a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+ul.pagination li.active a {
+    background-color: #4CAF50 !important;
+    color: white;
+}
+
+ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+
+
+
+
+
+ul.pagination li a {
+    border: 1px solid #ddd; /* Gray */
+}
+
+.pagination li:first-child a {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.pagination li:last-child a {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.ginormousType {
+    font-size: 6vw;
+    line-height:6vw;
+}
+
+.callNotification {
+    position: absolute;
+    height:3vw;
+    width:5vw;
+}
+
+.notifications-tr {
+    background-color: white !important;
 }

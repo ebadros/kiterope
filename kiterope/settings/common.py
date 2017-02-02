@@ -48,16 +48,19 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.linkedin_oauth2',
-    'allauth.socialaccount.providers.facebook',
+    #'allauth.socialaccount.providers.google',
+    #'allauth.socialaccount.providers.linkedin_oauth2',
+    #'allauth.socialaccount.providers.facebook',
     'sorl.thumbnail',
     'rest_framework',
+    'haystack',
     'oauth2_provider', #django-oauth-toolkit
     'corsheaders',
-    # 'pipeline',
+    'timezone_field',
+    'tinymce',
     'webpack_loader',
     'rest_framework_swagger',
+    'djangosecure',
 
 ]
 AUTHENTICATION_BACKENDS = (
@@ -67,20 +70,33 @@ AUTHENTICATION_BACKENDS = (
 
 )
 
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+        'TIMEOUT': 60
+    },
+}
+
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
 
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
@@ -91,7 +107,6 @@ OAUTH2_PROVIDER = {
 DOMAIN_NAME = 'kiterope.com'
 
 
-
 #DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
 #    'home',
 #    'about',
@@ -99,6 +114,7 @@ DOMAIN_NAME = 'kiterope.com'
 
 #)
 
+SECURE_SSL_REDIRECT = False
 
 TEMPLATES = [
     {
@@ -147,7 +163,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -170,8 +186,13 @@ STATICFILES_DIRS = (
 
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'eric@kiterope.com'
+EMAIL_HOST_PASSWORD = 'passionate1'
+DEFAULT_FROM_EMAIL = 'support@kiterope.com'
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -183,8 +204,9 @@ WEBPACK_LOADER = {
 }
 
 LOGIN_REDIRECT_URL = '/'
+ACCOUNT_EMAIL_REQUIRED=True
 ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_PROVIDERS = \
     {
@@ -240,10 +262,7 @@ if USE_S3:
 
 #MEDIA_ROOT = os.path.join(PROJECT_ROOT, '../..',  'media')
 #STATIC_ROOT = os.path.join(PROJECT_ROOT, '../..', 'static')
-AWS_HEADERS = {
-    'Expires': 'Thu, 15 Apr 2010 20:00:00 GMT',
-    'Cache-Control': 'max-age=86400',
-}
+
 
 DATETIME_INPUT_FORMATS = [
     '%Y-%m-%d %H:%i' ,
@@ -252,9 +271,19 @@ DATETIME_INPUT_FORMATS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+
     ),
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
-    'PAGE_SIZE': 10
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+
+    ),
+
+    'PAGE_SIZE': 9,
+
 }
 
 # Django Pipeline (and browserify)

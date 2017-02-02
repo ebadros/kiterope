@@ -4,14 +4,19 @@
 {% for provider in socialaccount_providers %}
 {% if provider.id == "openid" %}
 {% for brand in provider.get_brands %}
-  <a title="{{brand.name}}" 
-     class="socialaccount_provider {{provider.id}} {{brand.id}} button" 
+    <div class="ui row">
+  <a title="{{brand.name}}"
+     class="ui fluid button {{provider.id}} {{brand.id}}"
      href="{% provider_login_url provider.id openid=brand.openid_url process=process %}"
      >Log in with {{brand.name}}</a>
+    </div><div class="ui row">&nbsp;</div>
 
 {% endfor %}
 {% endif %}
+	<div class="ui row">
 
-  <a title="Sign up with {{provider.name}}" class="socialaccount_provider {{provider.id}} button" 
+  <a title="Sign up with {{provider.name}}" class="ui {{provider.id}} fluid large button"
      href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">Log in with {{provider.name}}</a>
+    </div><div class="ui row">&nbsp;</div>
+
 {% endfor %}

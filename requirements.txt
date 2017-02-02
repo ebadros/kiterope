@@ -1,5 +1,5 @@
 dj-stripe==0.7.0
-Django==1.8
+Django==1.10
 django-braces==1.8.1
 django-model-utils==2.3.1
 django-parsley==0.6
@@ -22,3 +22,8 @@ requests==2.8.1
 six==1.10.0
 stripe==1.27.1
 tensorflow==0.8.0
+# Elasticsearch 2.x
+elasticsearch>=2.0.0,<3.0.0
+
+
+opentok>=2.4.1

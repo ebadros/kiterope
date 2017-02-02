@@ -16,3 +16,34 @@ Kiterope
 Client-id: fqzScFblFbhAWXPK7AxGNACkYPGvXiBRJrifNeBf
 Client-secret: GxzPAx1I6Lv1bfOyVsb0vc9OOy1wt92LtbXqobuTq9Oy1tfbfir2yQ7lY0C66NDSCxTJM50s4wOUJ9uBKqUlnfDRial4q7HqaplxLSqhOn6TieebKiVbF9DbHh91ZuE7
 Access Token FQFIIR8lguHzH4N43afhJPbaKJi6Tl
+
+
+TokBox
+Kiterope Web
+API Key: 45757612
+
+Secret: a2287c760107dbe1758d5bc9655ceb7135184cf9
+
+Test
+********
+--cancel button resets everything (either clears it or resets it to normal)
+
+
+Plan
+--add in Time commitment per day and week
+--allow Plan Headers and Goal Headers to edit
+
+Step
+--figure out how to get the Update to save on a new Step
+
+--Need to create a profile for each new user and only one profile
+
+--incorporate payments
+
+--incorporate a way to communicate with coaches
+
+--if you navigate away from search results then you should be able to go back to the search results
+
+
+Change Searchkit/Searchbox code line 101 to:
+            React.createElement("div", {type: "submit", value: "search", className: "ui two column wide purple button", "data-qa": "submit"},"Search"),

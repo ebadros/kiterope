@@ -23,7 +23,6 @@ from django.views.generic import TemplateView
 from django.conf.urls import url
 from kiterope.views import schema_view
 
-
 import apps
 from kiterope import views
 
@@ -32,10 +31,12 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'goals', views.GoalViewSet)
-router.register(r'plans', views.PlanViewSet)
-router.register(r'steps', views.StepViewSet)
+router.register(r'users', views.UserViewSet, 'User')
+router.register(r'goals', views.GoalViewSet, 'Goal')
+router.register(r'plans', views.PlanViewSet, 'Plan')
+router.register(r'steps', views.StepViewSet, 'Step')
+router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
+
 
 
 

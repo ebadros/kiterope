@@ -12,7 +12,7 @@ class UserForm(ModelForm):
 class ProfileForm(ModelForm):
     class Meta:
         model = Profile
-        fields = {'bio','images'}
+        fields = {'bio',}
         
 class GoalForm(ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={'rows':4}))
@@ -27,7 +27,7 @@ class PlanForm(ModelForm):
      
      class Meta:
          model = Plan
-         fields = {'title', 'viewableBy','description', 'startDate', 'endDate'}
+         fields = {'title', 'viewableBy','description', 'startDate', }
 
 class InterestForm(ModelForm):
     goal = forms.CharField(widget=forms.Textarea(attrs={'rows':4}))
@@ -35,3 +35,10 @@ class InterestForm(ModelForm):
     class Meta:
         model = Interest
         fields = {'name', 'email', 'goal'}
+
+class StepForm(ModelForm):
+
+    class Meta:
+        model = Step
+        fields = {'title', 'plan', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates', 'startTime', 'duration', }
+

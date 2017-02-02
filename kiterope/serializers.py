@@ -1,6 +1,12 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Plan, Step, Coach, Update, Session, Student, Review, Answer, Question, Rate, Interest
+from kiterope.models import Goal, SearchQuery, Plan, Step, Coach, Profile, Update, Participant, Notification, Session, Student, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
+
+from drf_haystack.serializers import HaystackSerializer
+from drf_haystack.viewsets import HaystackViewSet
+
+from kiterope.search_indexes import PlanIndex
+
 
 
 def makeSerializer(serializerName, source, many,read_only):
@@ -17,6 +23,8 @@ def makeSerializer(serializerName, source, many,read_only):
         'Answer': lambda: AnswerSerializer(source, many, read_only),
         'Question': lambda: QuestionSerializer(source, many, read_only),
         'Rate': lambda: RateSerializer(source, many, read_only),
+        'Update': lambda: UpdateSerializer(source, many, read_only),
+        'Metric': lambda: MetricSerializer(source, many, read_only),
 
     }[serializerName]
 
@@ -25,41 +33,100 @@ class InterestSerializer(serializers.HyperlinkedModelSerializer):
         model= Interest
         fields = ('id', 'name', 'email', 'goal')
 
+class StepSerializer2(serializers.HyperlinkedModelSerializer):
+    plan = serializers.PrimaryKeyRelatedField(many=False, queryset=Plan.objects.all())
+    absoluteStartDate = serializers.DateField()
+    absoluteEndDate = serializers.DateField()
+    useAbsoluteTime = serializers.BooleanField()
+
+    class Meta:
+        model = Step
+        fields = ('id', 'plan', 'title', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime', 'startDate', 'endDate','absoluteStartDate', 'absoluteEndDate','useAbsoluteTime','duration', 'durationMetric')
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('id','url', 'username', 'email', 'groups')
 
 
-class StepSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Step
-        fields =('id','plan', 'description', 'substeps', 'frequency', 'onSunday', 'onMonday', 'onTuesday', 'onWednesday', 'onThursday', 'onFriday', 'onSaturday', 'startTime', 'endTime', 'duration', 'wasCompleted')
 
-    #plan = makeSerializer('Plan', source='get_plan', many=False, read_only=True)
+
+class SearchQuerySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SearchQuery
+        fields = ('id', 'query')
+
+
+
+class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
+
+    #step = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    step = StepSerializer2()
+    planOccurrence = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    posts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = StepOccurrence
+        fields=( 'id','date', 'step','planOccurrence', 'wasCompleted', 'posts', )
+
+class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = PlanOccurrence
+        fields=('id','plan', 'goal', 'startDate')
+
     plan = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    goal = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+class UpdateSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Update
+        fields = ('id','measuringWhat', 'units','format','metricLabel', 'step' )
+
+    step = serializers.PrimaryKeyRelatedField(many=False, queryset=Step.objects.all())
+
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto')
+
+class UpdateOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
+
+    #update = UpdateSerializer()
+    stepOccurrence = StepOccurrenceSerializer()
+    update = UpdateSerializer()
+
+
+    class Meta:
+        model = UpdateOccurrence
+        field = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text','longText', 'time' )
 
 
 class PlanSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Plan
-        fields = ('id','title', 'author', 'description', 'steps', 'viewableBy', 'startDate', 'endDate', 'goals')
+        fields = ('id','image','title', 'author', 'description', 'viewableBy', 'scheduleLength', 'startDate', 'cost', 'costFrequencyMetric','timeCommitment', 'steps' )
 
-    #author = serializers.HyperlinkedRelatedField(many=False, queryset=User.objects.all(), view_name='author_detail')
-    #steps = serializers.HyperlinkedRelatedField(many=True, queryset=Step.objects.all(), view_name='step_detail')
-    #goals = serializers.HyperlinkedRelatedField(many=True, queryset=Goal.objects.all(), view_name='goal_detail')
-
-    author = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    steps = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    goals = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-
-    #author = UserSerializer(many=False, read_only=True)
-    #steps = makeSerializer('Step', source='get_steps', many=True, read_only=True)
-    #goals = makeSerializer('Goal', source='get_goals', many=True, read_only=True)
-    #steps = StepSerializer(many=False, read_only=True)
-    #goals = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='goal-detail')
+    timeCommitment = serializers.SerializerMethodField()
+    scheduleLength = serializers.SerializerMethodField()
+    viewableBy = serializers.SerializerMethodField()
+    costFrequencyMetric = serializers.SerializerMethodField()
 
 
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
+
+    def get_timeCommitment(self, obj):
+        return obj.get_timeCommitment_display()
+
+    def get_scheduleLength(self, obj):
+        return obj.get_scheduleLength_display()
+
+    def get_viewableBy(self, obj):
+        return obj.get_viewableBy_display()
+
+    def get_costFrequencyMetric(self, obj):
+        return obj.get_costFrequencyMetric_display()
 
     def create(self, validated_data):
         steps_data = validated_data.pop('plans')
@@ -69,27 +136,57 @@ class PlanSerializer(serializers.HyperlinkedModelSerializer):
         return plan
 
     def update(self, instance, validated_data):
+        print ("inside planSerializer update")
+        instance.image = validated_data.get('image', instance.image)
+
         instance.title = validated_data.get('title', instance.title)
         instance.author = validated_data.get('author', instance.author)
         instance.description = validated_data.get('description', instance.description)
-        instance.steps = validated_data.get('steps', instance.steps)
+        #instance.steps = validated_data.get('steps', instance.steps)
         instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
+        instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
+
         instance.startDate = validated_data.get('startDate', instance.startDate)
-        instance.endDate = validated_data.get('endDate', instance.endDate)
-        instance.goals = validated_data.get('goals', instance.goals)
+        instance.cost = validated_data.get('cost', instance.cost)
+        instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
+        instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
+
+
+        #instance.goals = validated_data.get('goals', instance.goals)
 
         instance.save()
         return instance
 
+class PlanSearchSerializer(HaystackSerializer):
+    class Meta:
+        index_classes = [PlanIndex]
+        fields = ['id','text','title', 'description', 'author','image', 'author_id', 'timeCommitment', 'scheduleLength', 'costFrequencyMetric', 'cost']
+
+
+class StepSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Step
+        fields =('id', 'plan', 'title', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime', 'startDate', 'endDate','duration', )
+
+    plan = serializers.PrimaryKeyRelatedField(many=False, queryset=Plan.objects.all())
+    #plan = PlanSerializer()
+
+class NotificationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ('id', 'user', 'type', 'call')
+
+    call = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
 
 
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'why', 'image', 'votes', 'viewableBy', 'priority', 'user', 'coaches', 'updates', 'wasAchieved', 'hasMetric', 'plans')
+        fields =('id','title', 'deadline', 'description', 'why', 'image', 'votes', 'viewableBy',  'user', 'coaches', 'updates', 'wasAchieved', 'plans')
 
-    plans = serializers.PrimaryKeyRelatedField( many=True, queryset=Plan.objects.all())
+    plans = serializers.PrimaryKeyRelatedField(many=True, queryset=Plan.objects.all())
     coaches = serializers.PrimaryKeyRelatedField(many=True, queryset=Coach.objects.all())
     updates = serializers.PrimaryKeyRelatedField(many=True,  queryset=Update.objects.all())
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -116,33 +213,33 @@ class CoachSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-class UpdateSerializer(serializers.HyperlinkedModelSerializer):
+
+
+class ParticipantSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Update
-        fields = ('id','goal', 'measurement', 'hasMetric', 'step', 'author', 'description',)
+        model = Participant
+        fields = ('id', 'user', 'role', 'joiningTime', 'leavingTime')
 
-    goal = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    step = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    author = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    user = UserSerializer()
 
-    #goal = makeSerializer('Goal',  source='get_goal', many=False, read_only=True)
-    #step = makeSerializer('Step', source='get_step', many=True, read_only=True)
-    #author = makeSerializer('User', source='get_author', many=True, read_only=True)
-    #answers = makeSerializer('Answer', source='get_answers', many=True, read_only=True)
-
-
+class RateSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Rate
+        fields = ('id', 'inPersonRate', 'inPersonRateUnit', 'realtimeRate', 'realtimeRateUnit', 'feedbackRate', 'feedbackTurnaroundTime', 'turnaroundUnit', 'answerRate', 'activePlanManagementRate', 'activePlanManagementRateUnit')
 
 
 
 class SessionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Session
-        fields = ('id','startTime', 'endTime', 'duration', 'coach', 'students', 'mode', 'media', 'isGroup')
+        fields = ('id','startTime', 'endTime', 'duration', 'type', 'tokBoxSessionId', 'tokBoxToken', )
 
     #coach = makeSerializer('Coach',  source='get_coach', many=False, read_only=True)
     #students = makeSerializer('Student', source='get_students', many=False, read_only=True)
-    coach = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    students = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+
+
+
 
 
 

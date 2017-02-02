@@ -5,48 +5,67 @@
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
 {% block content %}
-<div class="row">&nbsp;</div>
+            <div class="ui text container">
 
-<div class="large-4 large-centered columns bordered padded-top">
-	<div class="row">&nbsp;</div>
+    <div class="fullPageDiv">
+
+    <div class="spacer">&nbsp;</div>
+    <div class="ui alert"></div>
+    <div class="ui two column stackable grid">
+
+        <div class="ui eight wide segment column"><h1>Join Kiterope</h1>
+
+        <form class="ui form" id="signup_form" method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            {{ form.hidden }}
+            <div class="field">
+                {{ form.username.label }}:
+                {{ form.username }}
+                <div class="custom-error">{{ form.username.errors }}</div>
+            </div>
+
+            <div class="field">
+                {{ form.email.label }}:
+                {{ form.email }}
+                <div class="custom-error">{{ form.email.errors }}</div>
+            </div>
+
+            <div class="field">
+                {{ form.password1.label }}:
+                {{ form.password1 }}
+
+                <div class="custom-error">{{ form.password1.errors }}</div>
+            </div>
+
+            <div class="field">
+                {{ form.password2.label }}:
+                {{ form.password2 }}
+
+                <div class="custom-error">{{ form.password2.errors }}</div>
+            </div>
 
 
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+            {% endif %}
+            <div class="ui row">
+                <button class="ui fluid large purple button" type="submit">{% trans "Sign Up" %}</button>
+            </div>
+        </form>
+        <hr>
+                <div class="ui row">&nbsp;</div>
+                        <div class="ui row">&nbsp;</div>
 
 
-<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-  {% csrf_token %}
-<h2>Sign Up</h2>
-
-{{form.hidden}}
-<div class="float-left">{{form.username.label}}</div>
-{{form.username}}
-<div class="custom-error">{{form.username.errors}}</div>
-<div class="float-left">{{form.email.label}}</div>
-
-{{form.email}}
-<div class="custom-error">{{form.email.errors}}</div>
-<div class="float-left">{{form.password1.label}}</div>
-
-{{form.password1}}
-
-<div class="custom-error">{{form.password1.errors}}</div>
-<div class="float-left">{{form.password2.label}}</div>
-
-{{form.password2}}
-
-<div class="custom-error">{{form.password2.errors}}</div>
-
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-<div class="expanded row">
-  <button class="expanded button" type="submit">{% trans "Sign Up" %}</button></div>
-</form>
-<hr>
-<div class="row">
-<div class="float-left">Already have an account?</div>
-<div class="float-right"><a href="{{ login_url }}" class="expanded button">Log in</a></div>
-</div>
-</div>
+        <div class="ui row">
+            <div class="float-left">Already have an account?</div>
+            <a href="{{ login_url }}" class="ui fluid large  button">Log in</a>
+        </div>
+    </div>
+     <div class="ui eight wide column">
+ <div class="massiveType">
+    Joining Kiterope is a great first step towards making your goals become real.</div>
+    </div></div>
+    </div></div>
 
 {% endblock %}

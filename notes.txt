@@ -1,0 +1,55 @@
+Step
+-Don't repeat
+--Start Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--Start Time
+--Duration
+
+-Daily
+--Start Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--End Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--Start Time
+--Duration
+
+--Weekly
+--Start Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--End Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--Which Days
+
+--Start Time
+--Duration
+
+Monthly
+--Start Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--End Date
+---(React - actual date relative to the plan's start date)
+---(Django - converted to an integer relative to the plan's start date)
+--Date (is a range + individual dates that can be created per month)
+Start Time
+Duration
+
+Migration Notes:
+TinyMCE needs this added to make it work with props changing after mounting
+componentWillReceiveProps(nextProps) {
+        if (!isEqual(this.props.config, nextProps.config)) {
+          this._init(nextProps.config, nextProps.content)
+        }
+        if (!isEqual(this.props.id, nextProps.id)) {
+          this.id = nextProps.id
+        }
+        // Added
+        if (!isEqual(this.props.content, nextProps.content)) {
+          tinymce.EditorManager.get(this.id).setContent(nextProps.content)
+        }
+    }

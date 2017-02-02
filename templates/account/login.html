@@ -7,43 +7,44 @@
 
 
 {% block content %}
-<div class="row">&nbsp;</div>
+    <div class="ui text container">
+    <div class="fullPageDiv">
+                    <div class="spacer">&nbsp;</div>
+                    <div class="ui alert"></div>
+    <div class="ui one column grid">
+<div class="ui eight wide segment column">
+	<div class="ui row">
+        <div class="header"><h1>Sign In</h1></div>
+		<div class="ui row">&nbsp;</div>
 
-<div class="large-4 large-centered columns bordered padded-top">
-	<div class="row">&nbsp;</div>
-	<h2>Log in</h2>
-	
-
+<!--
 {% get_providers as socialaccount_providers %}
 
 {% if socialaccount_providers %}
 
 
-<div class="socialaccount_ballot">
-
-  <div class="stacked button-group">
     {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </div>
-	<div class="row">
-  <div class="centered">{% trans 'or' %}</div>
-</div>
-</div>
+
+	<div class="ui row">
+     <div class="centered">{% trans 'or' %}</div>
+    </div>
 
 {% include "socialaccount/snippets/login_extra.html" %}
 
 {% else %}
 <p>{% blocktrans %}If you have not created an account yet, then please
 <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
-{% endif %}
+{% endif %} -->
 
-<form class="login" method="POST" action="{% url 'account_login' %}">
+<form class="ui form" method="POST" action="{% url 'account_login' %}">
   {% csrf_token %}
 {{form.hidden}}
-<div class="float-left">{{form.login.label}}</div>
+<div class="field">{{form.login.label}}
 
-{{form.login}}
-<div class="float-left">{{form.password.label}}</div>
-{{form.password}}
+{{form.login}}</div>
+<div class="field">
+{{form.password.label}}
+{{form.password}}</div>
 
   {% if redirect_field_value %}
        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
@@ -63,15 +64,24 @@
         </div>
     {% endfor %}
 {% endif %}
-<div class="expanded row">
+<div class="ui row">
 	<div class="float-right"><a href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></div>
 </div>
-  <button class="expanded button" type="submit">{% trans "Sign In" %}</button>
+  <button class="ui fluid purple button" type="submit">{% trans "Sign In" %}</button>
 </form>
-<hr>
+    <hr>
+<div class="ui row">&nbsp;</div>
+                        <div class="ui row">&nbsp;</div>
 <div class="row">
-<div class="small-3 large-8 columns">Don't have an account?</div>
-<div class="float-right"><a href="{{ signup_url }}" class="expanded button">Sign up</a></div>
+<div >Don't have an account?</div>
+<div ><a href="{{ signup_url }}" class="ui  large fluid button">Join Kiterope</a></div>
+</div></div>
+    </div> <div class="ui eight wide column">
+ <div class="massiveType">
+    10 minutes a day is better than 90 minutes a week</div>
+    </div>
+    </div>
 </div>
-</div>
+    </div>
+    </div>
 {% endblock %}
