@@ -1,5 +1,9 @@
 from rest_framework import permissions
 
+SAFE_ALL_ACCESS_POST_METHODS = ['POST', 'HEAD', 'OPTIONS']
+SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+
+SAFE_ADMIN_METHODS = ['GET', 'UPDATE', 'PATCH', 'HEAD', 'OPTIONS', 'PUT', 'POST']
 
 class UserPermission(permissions.BasePermission):
 
@@ -24,6 +28,37 @@ class UserPermission(permissions.BasePermission):
         else:
             return False
 
+class IsReceiverSenderOrReadOnly(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    Assumes the model instance has an `owner` attribute.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Instance must have an attribute named `author`.
+        if obj.receiver == request.user or obj.sender == request.user:
+            return True
+
+class PostPutAuthorOrNone(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    Assumes the model instance has an `owner` attribute.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_ALL_ACCESS_POST_METHODS:
+            return True
+
+        # Instance must have an attribute named `author`.
+        return obj.author == request.user
+
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -38,7 +73,10 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
         # Instance must have an attribute named `author`.
         return obj.author == request.user
-SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+
+class IsOwnerOrNone(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -56,8 +94,21 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         else:
             return obj.user == request.user
 
-SAFE_ALL_ACCESS_POST_METHODS = ['POST', 'HEAD', 'OPTIONS']
-SAFE_ADMIN_METHODS = ['GET', 'UPDATE', 'PATCH', 'HEAD', 'OPTIONS', 'PUT', 'POST']
+class IsProgramOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    Assumes the model instance has an `owner` attribute.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            return True
+
+        # Instance must have an attribute named `author`.
+        else:
+            return obj.program.author == request.user
 
 class AllAccessPostingOrAdminAll(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -67,4 +118,9 @@ class AllAccessPostingOrAdminAll(permissions.BasePermission):
             return request.user.is_authenticated() and (request.user.is_superuser)
         else:
             False
+
+class NoPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+         False
+
 

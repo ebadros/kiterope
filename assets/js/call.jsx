@@ -3,7 +3,7 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ObjectList, ObjectListAndUpdate, FormAction, Sidebar } from './base'
+import {FormAction, Sidebar } from './base'
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 var MaskedInput = require('react-maskedinput');
@@ -24,25 +24,8 @@ var Iframe = require("react-iframe");
 
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';
 
-var theServer = 'https://192.168.1.156:8000/'
-
-const customStyles = {
-    overlay : {
-
-    backgroundColor   : 'rgba(0, 0, 0, 0.75)'
-  },
-
-  content : {
-    top                   : '15%',
-    left                  : '10%',
-    right                 : '10%',
-    bottom                : '10%',
-    WebkitOverflowScrolling    : 'touch',
-    borderRadius               : '4px',
-    outline                    : 'none',
-    padding                    : '40px'
-  }
-};
+import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions } from './constants'
 
 
 var notificationStyle = {

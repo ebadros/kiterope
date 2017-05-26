@@ -13,7 +13,6 @@ var UpdatesList = require('./update');
 var Modal = require('react-modal');
 var DatePicker = require('react-datepicker');
 var moment = require('moment');
-import { MessageWindowContainer } from './message'
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
 import { ValidatedInput}  from './app'
@@ -42,7 +41,7 @@ function printObject(o) {
 }
 
 
-export class ProfileListPage extends React.Component {
+export class ClientListPage extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
@@ -51,7 +50,7 @@ export class ProfileListPage extends React.Component {
             activePage:1,
             serverErrors:"",
             formIsOpen:false,
-            headerActionButtonLabel:"Add Profile"
+            headerActionButtonLabel:"Add Client"
 
 
         }
@@ -66,22 +65,13 @@ export class ProfileListPage extends React.Component {
 
 
 
-  loadProfilesFromServer = () => {
-
-      if (this.props.myContacts) {
-
-          if (this.state.activePage != 1) {
-              var theUrl = theServer + "api/contacts/?page=" + this.state.activePage
-          } else {
-              var theUrl = theServer + "api/contacts/"
-          }
-      } else {
-          if (this.state.activePage != 1) {
-              var theUrl = theServer + "api/profiles/?page=" + this.state.activePage
-          } else {
-              var theUrl = theServer + "api/profiles/"
-          }
+  loadClientsFromServer = () => {
+      if (this.state.activePage != 1) {
+                var theUrl = theServer + "api/clients/?page=" + this.state.activePage
+      }  else {
+          var theUrl = theServer + "api/clients/"
       }
+      console.log(theUrl)
     $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -95,10 +85,9 @@ export class ProfileListPage extends React.Component {
             next:data.next,
             previous:data.previous,
             data: data.results});
-          console.log(data.results)
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
+        console.error(this.props.url, status, err.toString());
 
       }.bind(this),
 
@@ -107,7 +96,7 @@ export class ProfileListPage extends React.Component {
 
   handleGoalSubmit (goal) {
     $.ajax({
-        url: theServer + "api/profiles/",
+        url: theServer + "api/clients/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -115,7 +104,7 @@ export class ProfileListPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
         success: function(data) {
-            this.loadProfilesFromServer()
+            this.loadCommentsFromServer()
         }.bind(this),
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
@@ -138,7 +127,7 @@ handleToggleForm = () => {
     }
 
     componentDidMount() {
-        this.loadProfilesFromServer();
+        this.loadClientsFromServer();
         //var intervalID = setInterval(this.loadCommentsFromServer, 2000);
         //this.setState({intervalID: intervalID});
         var self = this;
@@ -159,7 +148,7 @@ handleToggleForm = () => {
     }
   }
   handlePageChange = (pageNumber) => {
-        this.setState({activePage: pageNumber}, () => this.loadProfilesFromServer());
+        this.setState({activePage: pageNumber}, () => this.loadClientsFromServer());
 
     }
 
@@ -195,7 +184,7 @@ handleCancelClicked = () => {
       $(this.refs['ref_whichProfileForm']).slideUp()
       this.setState({
           formIsOpen:false,
-          headerActionButtonLabel: "Create Profile"
+          headerActionButtonLabel: "Add Client"
       })
 
   }
@@ -203,7 +192,7 @@ handleCancelClicked = () => {
 
   handleCloseForm = () => {
         this.setState({
-            headerActionButtonLabel: "Create Profile",
+            headerActionButtonLabel: "Add Client",
             formIsOpen:false,
         }, () => $(this.refs['ref_whichProfileForm']).slideUp())
 
@@ -248,15 +237,15 @@ componentWillUnmount() {
                 <Link to={`/#`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">Users</div></Link>
+                  <Link to={`/#`}><div className="active section">My Clients</div></Link>
             </div>
             <div>&nbsp;</div>
-                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Users" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
+                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="My Clients" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
         <div ref="ref_whichProfileForm">
-            <ProfileForm cancelClicked={this.handleCancelClicked} onProfileSubmit={this.handleProgileSubmit} serverErrors={this.state.serverErrors} />
+            <ProfileForm cancelClicked={this.handleCancelClicked} onProfileSubmit={this.handleProfileSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
-                    <ProfileList data={this.state.data} />
+                    <ClientList data={this.state.data} />
                 <div className="spacer">&nbsp;</div>
                 {pagination}
             </div>
@@ -391,7 +380,7 @@ export class ProfileForm extends React.Component {
             var smallColumnWidth = "three wide column"
         }
             var theImage = s3ImageUrl + this.state.profilePhoto
-            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com/", "");
+            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/images/", "");
 
             return (
                 <div className="ui row">
@@ -770,7 +759,7 @@ export class ProfileViewPage extends React.Component {
 
 
 
-export class ProfileDetailPage extends React.Component {
+export class ClientDetailPage extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
@@ -787,7 +776,7 @@ export class ProfileDetailPage extends React.Component {
 
     loadDetailFromServer = () => {
 
-        var theURL = theServer + "api/profiles/" + this.props.params.profile_id + "/"
+        var theURL = theServer + "api/clients/" + this.props.params.profile_id + "/"
 
 
     $.ajax({
@@ -849,9 +838,9 @@ export class ProfileDetailPage extends React.Component {
     }
 
   determineOptions = () => {
-            var theUrl = theServer + "api/profiles/" + this.props.params.profile_id + "/"
+            var theURL = theServer + "api/profiles/" + this.props.params.profile_id + "/"
       $.ajax({
-      url: theUrl,
+      url: theURL,
       dataType: 'json',
       cache: false,
           type: 'OPTIONS',
@@ -859,17 +848,16 @@ export class ProfileDetailPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
-                    if (data.actions) {
-
           if (data.actions["PUT"]) {
               this.setState({
                   editable: true
               });
+              console.log("PUTTING THIS")
 
-          }}
+          }
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
+        console.error(theURL, status, err.toString());
       }.bind(this),
 
 
@@ -912,11 +900,11 @@ export class ProfileDetailPage extends React.Component {
 
 
                 <div className="fullPageDiv">
-                    <div className="ui page container footerAtBottom">
+                    <div className="ui page container">
                         <div className="spacer">&nbsp;</div>
 
                          <Breadcrumb values={[
-                                    {url:"/profiles/" + this.props.params.profile_id + "/plans/", label:"Profile Detail"},
+                                    {url:"/profiles/" + this.props.params.profile_id + "/plans/", label:"My Profile Detail"},
 
                         ]}/>
                         <div>&nbsp;</div>
@@ -925,7 +913,7 @@ export class ProfileDetailPage extends React.Component {
                                                    apiUrl="api/profiles/"
                                                    id={this.props.params.profile_id}
                                                    data={this.state.data}
-                                                   currentView="Basic"/>
+                                                    currentView="Basic"/>
                         <div>&nbsp;</div>
                         <div>&nbsp;</div>
                 <FormHeaderWithActionButton formActionClick={this.handleFormActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
@@ -966,7 +954,7 @@ export class ProfileBasicView extends React.Component {
     }
 
     goToDetail() {
-        hashHistory.push("/profiles/" + this.state.data.id + "/")
+        hashHistory.push("/plans/" + this.state.data.id + "/steps")
 
 }
     render() {
@@ -979,10 +967,30 @@ export class ProfileBasicView extends React.Component {
                 <div className="ui grid" >
                     <div className="sixteen wide column">
 
+                        <div className="planTitle">                {this.state.data.title}
+
+                        </div>
                         <div className="row">&nbsp;</div>
-                        <div className="planTitle"> {this.state.data.firstName} {this.state.data.lastName} </div>
 
+                        <div className="row" >
+                            <div className="ui two column grid">
+                                <div className="ui left aligned column">
+                                    <IconLabelCombo size="extramini" orientation="left" text="100% Success" icon="success" background="Light" link="/goalEntry" />
+</div>
+                                <div className="ui right aligned column">
+                                    <IconLabelCombo size="extramini" orientation="right" text={this.state.data.scheduleLength} icon="deadline" background="Light" link="/goalEntry" />
+</div></div>
+                            </div>
+                        <div className="row" >
 
+                            <div className="ui two column grid">
+                                <div className="ui left aligned column">
+                                    <IconLabelCombo size="extramini" orientation="left" text={this.state.data.cost} icon="cost" background="Light" link="/goalEntry" />
+</div>
+                                <div className="ui right aligned column">
+                                    <IconLabelCombo size="extramini" orientation="right" text={this.state.data.timeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
+</div></div>
+</div>
 
 
                     </div>
@@ -1013,41 +1021,6 @@ export class ProfileBasicView extends React.Component {
         }
 
     }
-}
-
-export class ProfileItemMenu extends React.Component {
-    constructor(props) {
-        super(props);
-        autobind(this);
-     }
-
-     handleClick = (callbackData) => {
-         this.props.click(callbackData)
-     }
-
-     render () {
-         var myStyle = { display: "block"}
-         return(
-
-                  <div className="ui simple dropdown item" >
-                      <div className="ui extramini image controlButtonMargin">
-                      <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
-
-                          <div className="ui item">
-                              <IconLabelCombo size="extramini" orientation="left" text="Add as Coach" icon="goal" background="Light" click={this.handleClick} />
-                              </div>
-                          <div className="ui item">
-                            <IconLabelCombo size="extramini" orientation="left" text="Add as Client" icon="step" background="Light" click={this.handleClick} />
-                            </div>
-
-                      </div>
-                  </div>
-
-
-         )
-     }
-
 }
 
 export class ProfileView extends React.Component {
@@ -1129,42 +1102,21 @@ export class ProfileView extends React.Component {
 }
 
 
-export class ProfileList extends React.Component {
+export class ClientList extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
         this.state = {
-            data:[],
-            user:""
+            data:[]
         }
     }
 
     componentDidMount () {
-        this.checkIfUser()
         this.loadFromServer()
     }
 
-    checkIfUser() {
-        $.ajax({
-            method: 'GET',
-            url: '/api/users/i/',
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(res) {
-                this.setState({
-                    'user': res
-                })
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-        }
-        })
-    }
-
     loadFromServer = () => {
-        var theURL = theServer + "api/profiles"
+        var theURL = theServer + "api/clients"
 
       $.ajax({
       url: theURL,
@@ -1181,7 +1133,7 @@ export class ProfileList extends React.Component {
             data: data.results});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
+        console.error(this.props.url, status, err.toString());
       }.bind(this),
 
     });
@@ -1203,22 +1155,19 @@ export class ProfileList extends React.Component {
             height: '300px',
         }
 
-        if (this.state.data && this.state.user) {
+        if (this.state.data) {
 
-        var profileList = this.state.data.map((profile) => {
-
-            if (profile.id != this.state.user.profileId) {
+        var planList = this.state.data.map((profile) => {
             return (
                     <ProfileViewEditDeleteItem key={profile.id}
                                             isListNode={true}
                                             showCloseButton={false}
-                                            apiUrl="api/profiles/"
+                                            apiUrl="api/clients/"
                                             id={profile.id}
                                             data={profile}
                                             currentView="Basic"/>
 
-
-)}
+)
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })
@@ -1227,7 +1176,7 @@ export class ProfileList extends React.Component {
 
     return (
           <div className='ui three column doubling stackable grid'>
-        {profileList}
+        {planList}
       </div>
     );
   }
@@ -1235,4 +1184,4 @@ export class ProfileList extends React.Component {
 }
 
 
-module.exports = { ProfileViewPage, ProfileItemMenu, ProfileView, ProfileViewAndEditPage, ProfileDetailPage, ProfileBasicView, ProfileForm, ProfileListPage , ProfileList }
+module.exports = { ProfileViewPage, ProfileView, ProfileViewAndEditPage, ClientDetailPage, ProfileBasicView, ProfileForm, ClientListPage , ClientList }

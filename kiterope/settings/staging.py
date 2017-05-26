@@ -1,7 +1,3 @@
-#
-
-
-
 from kiterope.settings.common import *
 
 DEBUG = True

@@ -3,37 +3,23 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ObjectList, ObjectListAndUpdate, FormAction,  } from './base'
+import {FormAction, ItemControlBar , ItemControlBarButton } from './base'
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import ValidatedInput from './app'
-var Modal = require('react-modal');
+import { ValidatedInput } from './app'
+import { IconLabelCombo } from './elements'
 
-const customStyles = {
-    overlay : {
+import Modal from 'react-modal'
+import autobind from 'class-autobind'
+import Select from 'react-select'
 
-    backgroundColor   : 'rgba(0, 0, 0, 0.75)'
-  },
 
-  content : {
-    top                   : '50%',
-    left                  : '50%',
-    right                 : 'auto',
-    bottom                : 'auto',
-    transform             : 'translate(-50%, -50%)',
-      overflow                   : 'hidden',
 
-    WebkitOverflowScrolling    : 'touch',
-    borderRadius               : '4px',
-    outline                    : 'none',
-    padding                    : '40px'
-  }
-};
-
-var theServer = 'https://192.168.1.156:8000/'
+import { theServer, s3IconUrl, formats, s3ImageUrl, customStepModalStyles, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions, metricFormatOptions} from './constants'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -41,33 +27,56 @@ $.ajaxSetup({
     }
 });
 
-var UpdatesList = React.createClass({
-    componentDidMount: function() {
-        var self = this;
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
 
-        self.loadObjectsFromServer();
+export class UpdatesList extends React.Component {
+
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data: [],
+        modalIsOpen: false,
+            stepId:"",
+        }
+    }
+    componentDidMount = () => {
+        this.loadObjectsFromServer(this.props.stepId)
+        this.setState({stepId: this.props.stepId})
 
       //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID:intervalID});
 
-    },
+    }
 
-    componentWillUnmount: function() {
+    componentWillUnmount = () => {
    // use intervalId from the state to clear the interval
    //clearInterval(this.state.intervalId);
-    },
+    }
+
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.stepId != nextProps.stepId) {
+            this.setState({ stepId: nextProps.stepId}, this.loadObjectsFromServer(nextProps.stepId))
+
+        }
+        if ((this.state.data != nextProps.updates) && (nextProps.updates != undefined) && (this.state.stepId === undefined)) {
+            this.setState({data: nextProps.updates})
+        }
+    }
+    handleUpdateAdded= (data) => {
+        this.props.updateAdded(data)
+    }
 
 
 
-    getInitialState: function() {
-        return {
-            data: [],
-        modalIsOpen: false,
-        };
-
-    },
-
-    handleFormSubmit: function (update, callback) {
+    handleFormSubmit = (update, callback) => {
         if (this.props.updateId) {
             var theUrl = theServer + "api/updates/" + this.props.updateId + "/";
             var theType = 'PATCH';
@@ -82,37 +91,57 @@ var UpdatesList = React.createClass({
             dataType: 'json',
             type: theType,
             data: update,
-            success: callback,
-            error: function (xhr, status, err) {
+            success: function (data) {
+                this.props.updateAdded(data)
+                callback
+                console.log("callback called")
+
+            }.bind(this),
+        error: function (xhr, status, err) {
                 console.error(theURL, status, err.toString());
             }.bind(this)
         });
-    },
+    }
 
-    loadObjectsFromServer: function () {
-        $.ajax({
-          url: theServer + "api/steps/" + this.props.stepId + "/updates",
-          dataType: 'json',
-          cache: false,
-          success: function(data) {
+    loadObjectsFromServer = (theStepId) => {
 
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-      },
+        if (theStepId !== undefined) {
+            var theUrl = theServer + "api/steps/" + theStepId + "/updates/"
+
+            $.ajax({
+                url: theUrl ,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                        data:data
+                    })
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this)
+            });
+        }
+      }
+
+
+    handleReloadItem = () => {
+        this.loadObjectsFromServer(this.state.stepId)
+    }
 
 
 
-
-    render: function() {
+    render = () => {
 
     if (this.state.data) {
         var objectNodes = this.state.data.map(function (objectData) {
 
             return (
-                <UpdateItem ref={`ref_update_${objectData.id}`} key={objectData.id} updateData={objectData} stepId={this.props.stepId} onFormSubmit={this.handleFormSubmit} />
+<UpdateItem ref={`ref_update_${objectData.id}`} key={objectData.id} updateData={objectData} updateAdded={this.handleUpdateAdded} stepId={this.state.stepId} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem.bind(this)}/>
 
             )
         }.bind(this));
@@ -123,7 +152,7 @@ var UpdatesList = React.createClass({
                 <div className="ui header eight wide column">Updates</div>
                 <div className="four wide column">&nbsp;</div>
                 <div className="four wide column">
-                     <UpdateAddAndEditItemForm edit="false" stepId={this.props.stepId} onFormSubmit={this.handleFormSubmit} />
+                     <UpdateAddAndEditItemForm edit="true"  currentView="UpdateBasic" stepId={this.state.stepId} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem.bind(this)} />
 
                 </div>
                 </div>
@@ -136,30 +165,104 @@ var UpdatesList = React.createClass({
 
     )
     }
-});
+}
 
-var UpdateAddAndEditItemForm = React.createClass({
-    componentDidMount: function() {
-        var self = this;
 
-    },
+export class UpdateAddAndEditItemForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            currentView: "",
+            editable: false,
+            serverErrors: "",
+            data: "",
+            modalIsOpen: false,
+            units: "",
+            metricLabel: "",
+            measuringWhat: "",
+            format: "",
+            updateData: ""
 
-    openModal: function() {
-        this.setState({modalIsOpen: true});
-    },
 
-    afterOpenModal: function() {
+        }
+    }
+    componentDidMount() {
+        this.setState({
+            data: this.props.updateData,
+        })
+        if (this.props.updateData != undefined) {
+            this.setState({
+                id: this.props.updateData.id,
+                units: this.props.updateData.units,
+                format: this.props.updateData.format,
+                metricLabel: this.props.updateData.metricLabel,
+                measuringWhat: this.props.updateData.measuringWhat,
+                currentView: this.props.currentView,
+
+            })
+
+
+        }
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.data != nextProps.updateData) {
+            this.setState({data: nextProps.updateData})
+            if (nextProps.updateData != undefined) {
+                this.setState({
+                    id: nextProps.updateData.id,
+                    units: nextProps.updateData.units,
+                    format: nextProps.updateData.format,
+                    metricLabel: nextProps.updateData.metricLabel,
+                    measuringWhat: nextProps.updateData.measuringWhat,
+                })
+            }
+        }
+
+
+            if (this.state.currentView != nextProps.currentView) {
+                this.setState({currentView: nextProps.currentView})
+            }
+
+    }
+
+    openModal() {
+        this.setState({
+            modalIsOpen: true});
+
+        if (this.state.data) {
+            this.setState({
+                id: this.state.data.id,
+                units: this.state.data.units,
+                format: this.state.data.format,
+                metricLabel: this.state.data.metricLabel,
+                measuringWhat: this.state.data.measuringWhat,
+            })
+        }
+
+    }
+
+    afterOpenModal() {
         // references are now sync'd and can be accessed.
         //this.refs.subtitle.style.color = '#f00';
-    },
+    }
 
-    closeModal: function() {
+    closeModal() {
         if (this.props.edit == "true") {
             this.setState({modalIsOpen:false});
+            this.setState({
+                format: "",
+                modalIsOpen: false,
+                units: "",
+                metricLabel: "",
+                measuringWhat: "",
+            });
         }
         else {
             this.setState({
-                format: "text",
+                format: "",
                 modalIsOpen: false,
                 units: "",
                 metricLabel: "",
@@ -167,70 +270,32 @@ var UpdateAddAndEditItemForm = React.createClass({
             });
         }
 
-    },
+    }
 
-    getInitialState: function() {
-        if (this.props.edit=="true") {
-            return {
-                id: this.props.updateData.id,
-                measuringWhat: this.props.updateData.measuringWhat,
-                units: this.props.updateData.units,
-                format: this.props.updateData.format,
-                metricLabel: this.props.updateData.metricLabel,
-                step: this.props.stepId,
-                modalIsOpen: false,
-            }
-        } else {
-        return {
-            format: "text",
-        modalIsOpen: false,
 
-        }}
 
-    },
 
-    loadObjectsFromServer: function () {
-        $.ajax({
-          url: theServer + "api/steps/" + this.props.stepId + "/updates",
-          dataType: 'json',
-          cache: false,
-          success: function(data) {
-            this.setState({data: data.results});
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-      },
-
-    handleMeasuringWhatChange: function(value) {
+    handleMeasuringWhatChange(value) {
         this.setState({measuringWhat: value});
-    },
-    handleMetricLabelChange: function(value) {
+    }
+    handleMetricLabelChange(value) {
         this.setState({metricLabel: value});
-    },
-    handleUnitsChange: function(value) {
+    }
+    handleUnitsChange(value) {
         this.setState({units: value});
-    },
-    handleFormatChange: function(value) {
-        this.setState({format: value});
-    },
+    }
+    handleFormatChange(option) {
+        this.setState({format: option.value});
+    }
 
-    handleSubmit: function(e) {
-
-
+    handleSubmit(e) {
         e.preventDefault();
 
         var measuringWhat = this.state.measuringWhat;
         var metricLabel = this.state.metricLabel;
         var units = this.state.units;
         var format = this.state.format;
-
         var step = this.props.stepId;
-
-
-
-
 
         this.props.onFormSubmit({
             measuringWhat: measuringWhat,
@@ -240,46 +305,94 @@ var UpdateAddAndEditItemForm = React.createClass({
             step:step,
 
         },
-            function(){
+          this.finishSubmit());
+
+    }
+
+    finishSubmit = () => {
                 this.closeModal()
-        }.bind(this));
+                this.props.reloadItem()
+    }
 
-    },
+    deleteUpdate() {
 
-    deleteUpdate: function() {
-
-        $(this.refs['ref_update_' + this.props.updateData.id]).slideToggle();
+        var theUrl = theServer + "api/updates/" + this.state.data.id + "/"
 
         $.ajax({
-        url: (theServer + "api/updates/" + this.props.updateData.id + "/"),
+        url: theUrl,
         dataType: 'json',
         type: 'DELETE',
-        //data: step,
-        success: function() {
+        success: () => {
+            //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
+
+            this.props.reloadItem()
 
         },
         error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
+            console.error(theUrl, status, err.toString());
         }
     });
 
 
-    },
+    }
+    handleClick (theClick) {
+        switch(theClick) {
+            case ("Edit"):
+                this.openModal()
+                break;
+            case ("Delete"):
+                this.deleteUpdate()
+                break;
+        }
 
-    render: function() {
+    }
 
-        if (this.state.id) {
+    render() {
+ if (this.state.data ) {
 return (
-        <div className="ui grid">
+    <div>
+        <ItemControlBar myRef="ref_itemControlBar"
+                        label="Update" click={this.handleClick}
+                        currentView="UpdateBasic"
+                        editable={true}
+                        showCloseButton={false} />
 
-                            <div className="left aligned nine wide column">Update</div>
+
+
+
+    <div className="ui noTopMargin segment">
+
+                            <div className="field">
+                                <label>Label:</label>
+                                <div>{this.state.data.metricLabel}</div>
+                            </div>
+                            <div className="field">
+
+                                <label>Metric:</label>
+
+                                <div>{this.state.data.measuringWhat} in {this.state.data.units} using {this.state.data.format}</div>
+                            </div>
+                        </div>
+
+            {/*  <div className="ui two column grid">
+
+                <div className="column left aligned">{this.props.label}</div>
+                <div className="column right aligned noRightPadding">
+
+                        <ItemControlBarButton myRef="ref_cancelButton" label="Cancel"
+                                              click={this.handleCancelClicked}/>
+                    {menuButton}
+                    {closeButton}
+
+                    </div>
+                </div><div className="left aligned nine wide column">Update</div>
             <div ref={`editButtonRef_${this.state.id}`} className="ui three wide column tiny smallPadding middle aligned purple-inverted button"  onClick={this.openModal}>Edit</div>
-            <div ref={`deleteButtonRef_${this.state.id}`} className="ui three wide column tiny smallPadding middle aligned purple-inverted button"  onClick={this.deleteUpdate}>Delete</div>
+            <div ref={`deleteButtonRef_${this.state.id}`} className="ui three wide column tiny smallPadding middle aligned purple-inverted button"  onClick={this.deleteUpdate}>Delete</div>*/}
                      <Modal
                             isOpen={this.state.modalIsOpen}
                             onAfterOpen={this.afterOpenModal}
                             onRequestClose={this.closeModal}
-                            style={customStyles} >
+                            style={customModalStyles} >
 
                             <div className="ui grid">
                                 <div className="header sixteen wide column"><h2>Update</h2></div>
@@ -295,6 +408,7 @@ return (
                                         label="What are you measuring?"
                                         id="id_measuringWhat"
                                         placeholder="distance, weight, time, etc"
+                                        value={this.state.measuringWhat}
                                         initialValue={this.state.measuringWhat}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -312,6 +426,7 @@ return (
                                         placeholder="miles, pounds, hours, etc"
                                         label="What units are you measuring?"
                                         id="id_metricLabel"
+                                        value={this.state.units}
                                         initialValue={this.state.units}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -325,17 +440,9 @@ return (
                             <div className="sixteen wide column">
                                 <div className="field">
                                 <label htmlFor="format">What type of input?</label>
-                                <select id="id_format" name="format" value={this.state.format} onChange={this.handleFormatChange}>
-                                                <option value="text" >text</option>
-                                                <option value="decimal">decimal</option>
-                                                <option value="integer">integer</option>
-                                                <option value="time">time</option>
-                                                <option value="url">url</option>
-                                                <option value="picture">picture</option>
-                                                <option value="video">video</option>
-                                        `       <option value="audio">audio</option>
+                                    <Select value={this.state.format}  onChange={this.handleFormatChange} name="format" options={metricFormatOptions} clearable={false}/>
 
-                                </select>
+
                                 </div>
                                 </div>
                     </div>
@@ -349,6 +456,7 @@ return (
                                         label="How do you want to label this measurement?"
                                         placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
                                         id="id_metricLabel"
+                                        value={this.state.metricLabel}
                                         initialValue={this.state.metricLabel}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -367,7 +475,7 @@ return (
                                              <a className="ui fluid button" onClick={this.closeModal}>Cancel</a>
                                         </div>
                                         <div className="ui  column">
-                                            <button type="submit" className="ui primary fluid button">Save</button>
+                                            <div className="ui primary fluid button" onClick={this.handleSubmit}>Save</div>
                                         </div>
                                     <div className="ui row">&nbsp;</div>
                              </div>
@@ -380,9 +488,10 @@ return (
                     </Modal>
 
                 </div>
-)
-        }
-            else {
+)} else
+
+
+            {
 
 
     return (
@@ -393,7 +502,7 @@ return (
                             isOpen={this.state.modalIsOpen}
                             onAfterOpen={this.afterOpenModal}
                             onRequestClose={this.closeModal}
-                            style={customStyles} >
+                            style={customModalStyles} >
 
                             <div className="ui grid">
                                 <div className="header sixteen wide column"><h2>Update</h2></div>
@@ -409,6 +518,7 @@ return (
                                         label="What are you measuring?"
                                         id="id_measuringWhat"
                                         placeholder="distance, weight, time, etc"
+                                        value={this.state.measuringWhat}
 
                                         initialValue={this.state.measuringWhat}
                                         validators='"!isEmpty(str)"'
@@ -427,6 +537,8 @@ return (
                                         placeholder="miles, pounds, hours, etc"
                                         label="What units are you measuring?"
                                         id="id_metricLabel"
+                                        value={this.state.units}
+
                                         initialValue={this.state.units}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -440,17 +552,8 @@ return (
                             <div className="sixteen wide column">
                                 <div className="field">
                                 <label htmlFor="format">What type of input?</label>
-                                <select id="id_format" name="format" value={this.state.format} onChange={this.handleFormatChange}>
-                                                <option value="text">text</option>
-                                                <option value="decimalNumber">decimal number</option>
-                                                <option value="integer">whole number</option>
-                                                <option value="time">time</option>
-                                                <option value="url">url</option>
-                                                <option value="picture">picture</option>
-                                                <option value="video">video</option>
-                                        `       <option value="audio">audio</option>
+                                                                    <Select value={this.state.format}  onChange={this.handleFormatChange} name="format" options={metricFormatOptions} clearable={false}/>
 
-                                </select>
                                 </div>
                                 </div>
                     </div>
@@ -464,6 +567,8 @@ return (
                                         label="How do you want to label this measurement?"
                                         placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
                                         id="id_metricLabel"
+                                                                                value={this.state.metricLabel}
+
                                         initialValue={this.state.metricLabel}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -500,81 +605,9 @@ return (
 
     )
     }
-}});
-
-var UpdateFormAction = React.createClass({
-
-    componentDidMount: function() {
-        var self = this;
-        console.log("this update" + this.props.update)
+}}
 
 
-    },
-
-    getInitialState: function() {
-        return {data: []};
-
-    },
-
-    handleSubmit: function(e) {
-
-        e.preventDefault();
-        var metric = this.state.metric;
-        var metricLabel = this.state.metricLabel;
-
-        this.props.onFormSubmit({
-            metric: metric,
-            metricLabel: metricLabel
-        },
-            );
-    },
-
-
-
-    handleMetricChange: function(e) {
-
-        this.setState({metric: e.target.value});
-    },
-
-    handleMetricLabelChange: function(e) {
-        this.setState({metricLabel: e.target.value});
-    },
-
-
-    render: function() {
-        console.log("inside render2 " + this.props.update);
-
-        if (this.props.update) {
-
-        return (
-            <div className="ui row">
-                <div className="six wide column">Update 1
-                    <div  className="field fluid">
-                            <MetricSelectButton name="metric" id="id_metric" initialValue={this.state.metric} />
-                    </div>
-                    <div  className="field fluid">
-                        <ValidatedInput
-                            type="text"
-                            name="metricLabel"
-                            label="Label for Metric:"
-                            id="id_metricLabel"
-                            value={this.state.metricLabel}
-                            initialValue={this.state.metricLabel}
-                            validators='"!isEmpty(str)"'
-                            onChange={this.validate}
-                            stateCallback={this.setMetricLabel}
-                            />
-                    </div>
-                    </div>
-                </div>
-        );
-
-    }
-    else {
-            return null;
-        }
-    }
-});
 
 var MetricSelectButton = React.createClass({
     loadObjectsFromServer: function () {
@@ -631,50 +664,128 @@ var MetricSelectButton = React.createClass({
   }
 });
 
-var UpdateItem = React.createClass({
-    componentDidMount: function() {
-        var self = this;
+export class UpdateItemMenu extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+     }
 
-    },
+     handleClick = (callbackData) => {
+         this.props.click(callbackData)
+     }
 
-    getInitialState:function() {
-        return {
+     getProfileMenu () {
+
+     }
+
+     render () {
+         var myStyle = { display: "block"}
+         return(
+
+                  <div className="ui simple dropdown item" >
+                      <div className="ui extramini image controlButtonMargin">
+                      <img src={`${s3IconUrl}menuDark.svg`} /></div>
+                      <div className="menu">
+
+                          <div className="ui item">
+                              <IconLabelCombo size="extramini" orientation="left" text="Delete" icon="trash" background="Light" click={this.handleClick} />
+                              </div>
+
+                      </div>
+                  </div>
+
+
+         )
+     }
+
+}
+
+
+
+export class UpdateItem extends React.Component{
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            id: "",
+            measuringWhat: "",
+            units: "",
+            format: "",
+            metricLabel: "",
+            step: "",
+            updateData:{}
+        }
+    }
+
+    componentDidMount () {
+            this.setState({updateData: this.props.updateData})
+
+        this.setState({
             id: this.props.updateData.id,
             measuringWhat:this.props.updateData.measuringWhat,
             units:this.props.updateData.units,
             format: this.props.updateData.format,
             metricLabel: this.props.updateData.metricLabel,
             step: this.props.stepId,
+        })
+
+    }
+
+    handleFormSubmit = (update, callback) => {
+        if (this.state.id) {
+            var theUrl = theServer + "api/updates/" + this.state.id + "/";
+            var theType = 'PATCH';
+
         }
-    },
+        else {
+            var theUrl = theServer + "api/updates/";
+            var theType = 'POST';
+        }
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: theType,
+            data: update,
+            success: function (data) {
+                this.props.updateAdded(data)
+                callback
+                console.log("callback called")
+
+            }.bind(this),
+        error: function (xhr, status, err) {
+                console.error(theURL, status, err.toString());
+            }.bind(this)
+        });
+    }
+
+    handleReloadItem() {
+        this.props.reloadItem()
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.updateData != nextProps.updateData ) {
+            this.setState({updateData: nextProps.updateData})
+        }
+
+    }
 
 
-    render: function() {
+
+    render () {
         return (
-            <div className="ui tinyPadding row">
+            <div ref={`ref_update_${this.state.updateData.id}`} className="ui tinyPadding row">
                     <div className="sixteen wide column">
- <div className="ui top attached orange large button " >
+
+                        {/*<div className="ui top attached orange large button " >*/}
 
 
-                        <UpdateAddAndEditItemForm edit="true" updateData={this.props.updateData} stepId={this.props.stepId} onFormSubmit={this.handleFormSubmit} />
+                        <UpdateAddAndEditItemForm edit="true" currentView="UpdateBasic" updateData={this.state.updateData} stepId={this.state.updateData.step} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem}/>
 
-                                </div>
+                        {/*</div>*/}
 
 
 
-                        <div className="ui noTopMargin segment">
 
-                            <div className="field">
-                                <label>Label:</label>
-                                <div>{this.state.metricLabel}</div>
-                            </div>
-                            <div className="field">
-
-                                <label>Metric:</label>
-
-                                <div>{this.state.measuringWhat} in {this.state.units} using {this.state.format}</div>
-                            </div>
-                        </div>
 
 
                     </div>
@@ -683,7 +794,7 @@ var UpdateItem = React.createClass({
 
         )
     }
-})
+}
 
 function getCookie(name) {
     var cookieValue = null;
@@ -701,4 +812,4 @@ function getCookie(name) {
     return cookieValue;
 }
 
-module.exports = UpdatesList;
+module.exports = { UpdatesList, UpdateItemMenu };

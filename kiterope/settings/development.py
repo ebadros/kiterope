@@ -8,7 +8,7 @@ WWW_ROOT = '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope'
 IS_DEV = True
 IS_PROD = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.156', '*']
 ROOT_URLCONF = 'kiterope.urls_development'
 
 #ALLOWED_HOSTS = ['*']
@@ -30,4 +30,4 @@ INSTALLED_APPS += [
 
 
 
-
+SITE_ID=3

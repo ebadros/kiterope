@@ -25,12 +25,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
+
+
+
+ALLOWED_HOSTS = ['192.168.1.156', '*']
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
-
-
-
-ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -48,27 +49,43 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'tinymce',
+    'colorfield',
     #'allauth.socialaccount.providers.google',
     #'allauth.socialaccount.providers.linkedin_oauth2',
     #'allauth.socialaccount.providers.facebook',
     'sorl.thumbnail',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_auth.registration',
     'haystack',
     'oauth2_provider', #django-oauth-toolkit
     'corsheaders',
     'timezone_field',
-    'tinymce',
     'webpack_loader',
     'rest_framework_swagger',
-    'djangosecure',
+    #'debug_toolbar',
+    'channels',
 
 ]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "kiterope.routing.channel_routing",
+    },
+}
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
     'oauth2_provider.backends.OAuth2Backend',
 
 )
+
 
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -78,7 +95,7 @@ HAYSTACK_CONNECTIONS = {
         'TIMEOUT': 60
     },
 }
-
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
@@ -87,16 +104,20 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
 
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ('kiterope.com', 'localhost')
+CORS_REPLACE_HTTPS_REFERER = True
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
@@ -119,7 +140,7 @@ SECURE_SSL_REDIRECT = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS':  [os.path.join(BASE_DIR, 'templates')],
+        'DIRS':  [os.path.join(BASE_DIR, 'templates'),'/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/templates/' ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,7 +158,6 @@ TEMPLATES = [
     },
 ]
 
-SITE_ID=1
 
 
 WSGI_APPLICATION = 'kiterope.wsgi.application'
@@ -165,7 +185,9 @@ USE_L10N = True
 
 #USE_TZ = True
 
-
+INTERNAL_IPS = (
+    '192.168.1.156',
+)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
@@ -177,7 +199,20 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
-
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+]
 
 # Django-allauth Settings
 
@@ -270,10 +305,12 @@ DATETIME_INPUT_FORMATS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+
+        #'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+
+        #'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
 
     ),
 
@@ -282,9 +319,15 @@ REST_FRAMEWORK = {
 
     ),
 
-    'PAGE_SIZE': 9,
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
+
+    #'DEFAULT_PAGINATION_CLASS': 'kiterope.views.StandardResultsSetPagination',
+
+    #'PAGE_SIZE': 9,
 
 }
+
+REST_SESSION_LOGIN = False
 
 # Django Pipeline (and browserify)
 #STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'

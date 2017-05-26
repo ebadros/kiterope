@@ -1,11 +1,14 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Plan, Step, Coach, Profile, Update, Participant, Notification, Session, Student, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Message, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
 
-from kiterope.search_indexes import PlanIndex
+from kiterope.search_indexes import ProgramIndex
+from kiterope.validators import RequiredValidator
+import json
+import datetime
 
 
 
@@ -14,7 +17,7 @@ def makeSerializer(serializerName, source, many,read_only):
         'User': lambda: UserSerializer(source, many, read_only),
         'Step': lambda: StepSerializer(source, many, read_only),
         'Goal': lambda: GoalSerializer(source, many, read_only),
-        'Plan': lambda: PlanSerializer(source, many, read_only),
+        'Program': lambda: ProgramSerializer(source, many, read_only),
         'Coach': lambda: CoachSerializer(source, many, read_only),
         'Update': lambda: UpdateSerializer(source, many, read_only),
         'Session': lambda: SessionSerializer(source, many, read_only),
@@ -25,6 +28,7 @@ def makeSerializer(serializerName, source, many,read_only):
         'Rate': lambda: RateSerializer(source, many, read_only),
         'Update': lambda: UpdateSerializer(source, many, read_only),
         'Metric': lambda: MetricSerializer(source, many, read_only),
+        'Contact': lambda: ContactSerializer(source, many, read_only),
 
     }[serializerName]
 
@@ -33,22 +37,137 @@ class InterestSerializer(serializers.HyperlinkedModelSerializer):
         model= Interest
         fields = ('id', 'name', 'email', 'goal')
 
-class StepSerializer2(serializers.HyperlinkedModelSerializer):
-    plan = serializers.PrimaryKeyRelatedField(many=False, queryset=Plan.objects.all())
+class StepSerializer(serializers.HyperlinkedModelSerializer):
+    program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     absoluteStartDate = serializers.DateField()
     absoluteEndDate = serializers.DateField()
-    useAbsoluteTime = serializers.BooleanField()
+    useAbsoluteTime = serializers.BooleanField(required=False)
+    programStartDate = serializers.SerializerMethodField(required=False, read_only=True)
+    isAllDay = serializers.SerializerMethodField(required=False, read_only=True)
+    absoluteStartDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
+    absoluteEndDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_absoluteStartDateForCalendar(self,obj):
+        #date_1 = datetime.datetime.strptime(obj.absoluteStartDate, "%y-%m-%d")
+        new_date = obj.absoluteStartDate + datetime.timedelta(days=1)
+        return new_date
+
+    def get_absoluteEndDateForCalendar(self,obj):
+        #date_1 = datetime.datetime.strptime(obj.absoluteEndDate, "%y-%m-%d")
+        new_date = obj.absoluteEndDate + datetime.timedelta(days=1)
+        return new_date
+
+    def get_isAllDay(self,obj):
+        return True
+
+    def get_programStartDate(self, obj):
+        return obj.get_programStartDate()
+
+    def get_senderName(self, obj):
+        return obj.sender.profile.get_fullName()
+
+    def get_permissions(self,obj):
+        if self.context['request'].user == obj.program.author:
+            return True
 
     class Meta:
         model = Step
-        fields = ('id', 'plan', 'title', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime', 'startDate', 'endDate','absoluteStartDate', 'absoluteEndDate','useAbsoluteTime','duration', 'durationMetric')
+        fields = ('id', 'program', 'image', 'absoluteStartDate', 'absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
+
+class KChannelSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = KChannel
+        fields = ('id', 'label', 'users', 'permission' )
+
+    users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('id','url', 'username', 'email', 'groups')
+        fields = ('id', 'url', 'first_name', 'last_name', 'username', 'email', 'groups', 'name', 'profilePhoto', 'isCoach', 'bio', 'notificationChannelLabel', 'notificationChannel','profile', 'profileId')
 
+    name = serializers.SerializerMethodField()
+    profilePhoto = serializers.SerializerMethodField()
+    isCoach = serializers.SerializerMethodField()
+    bio = serializers.SerializerMethodField()
+    notificationChannelLabel = serializers.SerializerMethodField()
+    notificationChannel = serializers.SerializerMethodField()
+
+    profile = serializers.SerializerMethodField()
+    profileId = serializers.SerializerMethodField()
+
+
+
+
+    def get_profile(self, obj):
+        if Profile.objects.filter(user=obj.id).exists():
+
+            return obj.profile.get_fullName()
+        else:
+            try:
+                User.profile = property(lambda u: Profile.objects.get_or_create(user=u)[0])
+
+                return obj.profile.get_fullName()
+
+            except:
+                return "Profile has not been created."
+
+
+
+
+
+    def get_profileId(self, obj):
+        try:
+            return obj.profile.id
+        except:
+            return "Profile has not been created"
+
+    def get_name(self, obj):
+        try:
+            return obj.profile.get_fullName()
+        except:
+            return "User is anonymous"
+
+    def get_profilePhoto(self,obj):
+        try:
+            return obj.profile.profilePhoto
+        except:
+            return "User is anonymous"
+
+    def get_isCoach(self,obj):
+        try:
+            return obj.profile.isCoach
+        except:
+            return "User is anonymous"
+
+
+    def get_bio(self, obj):
+        try:
+            return obj.profile.bio
+        except:
+            return "User is anonymous"
+
+    def get_notificationChannelLabel(self, obj):
+
+        try:
+
+            theChannel = obj.profile.get_notificationChannel()
+
+            return theChannel.label
+        except:
+            return "User has no notification channel"
+
+    def get_notificationChannel(self, obj):
+
+        try:
+
+            theChannel = obj.profile.get_notificationChannel()
+
+            return theChannel.id
+        except:
+            return "User has no notification channel"
 
 
 
@@ -62,59 +181,126 @@ class SearchQuerySerializer(serializers.HyperlinkedModelSerializer):
 class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
     #step = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    step = StepSerializer2()
+    step = StepSerializer(read_only=True)
     planOccurrence = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     posts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_updateOccurrences(self, obj):
+        serializer = UpdateOccurrenceSerializer(obj.get_updateOccurrences(), many=True, )
+        return serializer.data
+
 
     class Meta:
         model = StepOccurrence
-        fields=( 'id','date', 'step','planOccurrence', 'wasCompleted', 'posts', )
+        fields=( 'id','date', 'step','planOccurrence', 'wasCompleted', 'posts', 'updateOccurrences' )
 
-class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = PlanOccurrence
-        fields=('id','plan', 'goal', 'startDate')
 
-    plan = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    goal = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+
 
 class UpdateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Update
         fields = ('id','measuringWhat', 'units','format','metricLabel', 'step' )
 
-    step = serializers.PrimaryKeyRelatedField(many=False, queryset=Step.objects.all())
+    step = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Step.objects.all())
 
-class ProfileSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto')
-
-class UpdateOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
+class UpdateOccurrenceSerializer(serializers.ModelSerializer):
 
     #update = UpdateSerializer()
-    stepOccurrence = StepOccurrenceSerializer()
-    update = UpdateSerializer()
+    stepOccurrence = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    update = UpdateSerializer(read_only=True)
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
 
     class Meta:
         model = UpdateOccurrence
-        field = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text','longText', 'time' )
+        field = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
 
 
-class PlanSerializer(serializers.HyperlinkedModelSerializer):
+class ContactListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        duration = time.strftime('%M:%S', time.gmtime(value.duration))
+        return 'Track %d: %s (%s)' % (value.order, value.name, duration)
+
+class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Plan
-        fields = ('id','image','title', 'author', 'description', 'viewableBy', 'scheduleLength', 'startDate', 'cost', 'costFrequencyMetric','timeCommitment', 'steps' )
+        model = Profile
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'user',  )
 
-    timeCommitment = serializers.SerializerMethodField()
-    scheduleLength = serializers.SerializerMethodField()
-    viewableBy = serializers.SerializerMethodField()
-    costFrequencyMetric = serializers.SerializerMethodField()
+    bio = serializers.CharField(max_length=2000, required=False)
+    notificationChannel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
+    user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
 
-    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'user',  )
+
+
+    bio = serializers.CharField(max_length=2000, required=False)
+    notificationChannel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
+    user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+
+
+class ContactSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ('id', 'sender', 'receiver', 'wasConfirmed', 'relationship',  )
+
+    sender = ProfileSerializer()
+    receiver = ProfileSerializer()
+    wasConfirmed = serializers.CharField(max_length=20, )
+    relationship = serializers.CharField(max_length=20, )
+
+
+
+
+class KRMessageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = KRMessage
+        fields = ('id', 'room', 'message', 'handle', 'timestamp')
+
+
+
+
+class ProgramSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Program
+        fields = ('id','image','title', 'author', 'description', 'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000)
+    scheduleLength = serializers.CharField()
+    timeCommitment = serializers.CharField(max_length=20)
+    costFrequencyMetric = serializers.CharField(max_length=20)
+    cost = serializers.CharField(max_length=20)
+    startDate = serializers.DateField()
+    author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+    userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+    def get_userPlanOccurrenceId(self,obj):
+        try:
+            return obj.get_userPlanOccurrenceId(self.context['request'].user)
+        except:
+            return ""
+
+
+
+
+    def get_isSubscribed(self, obj):
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(program=self, user=self.context['request'].user, isSubscribed=True)
+            return thePlanOccurrence.isSubscribed
+        except:
+            return False
+
 
     def get_timeCommitment(self, obj):
         return obj.get_timeCommitment_display()
@@ -128,15 +314,14 @@ class PlanSerializer(serializers.HyperlinkedModelSerializer):
     def get_costFrequencyMetric(self, obj):
         return obj.get_costFrequencyMetric_display()
 
-    def create(self, validated_data):
-        steps_data = validated_data.pop('plans')
-        plan = Plan.objects.create(**validated_data)
+    '''def create(self, validated_data):
+        steps_data = validated_data.pop('program')
+        program = Program.objects.create(**validated_data)
         for steps_data in steps_data:
-            Step.objects.create(plan=plan, **steps_data)
-        return plan
+            Step.objects.create(program=program, **steps_data)
+        return program'''
 
     def update(self, instance, validated_data):
-        print ("inside planSerializer update")
         instance.image = validated_data.get('image', instance.image)
 
         instance.title = validated_data.get('title', instance.title)
@@ -157,19 +342,49 @@ class PlanSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
-class PlanSearchSerializer(HaystackSerializer):
+class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        index_classes = [PlanIndex]
-        fields = ['id','text','title', 'description', 'author','image', 'author_id', 'timeCommitment', 'scheduleLength', 'costFrequencyMetric', 'cost']
+        model = PlanOccurrence
+        fields=('id', 'program', 'goal', 'startDate', 'user', 'isSubscribed', )
+
+    #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
+    program = ProgramSerializer()
+    goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    isSubscribed = serializers.BooleanField()
 
 
-class StepSerializer(serializers.HyperlinkedModelSerializer):
+
+
+
+
+
+
+class ProgramSearchSerializer(HaystackSerializer):
     class Meta:
-        model = Step
-        fields =('id', 'plan', 'title', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime', 'startDate', 'endDate','duration', )
+        index_classes = [ProgramIndex]
+        fields = ['id','text','title', 'isSubscribed', 'description', 'author','image', 'author_id', 'timeCommitment', 'scheduleLength', 'costFrequencyMetric', 'cost', 'userPlanOccurrenceId']
 
-    plan = serializers.PrimaryKeyRelatedField(many=False, queryset=Plan.objects.all())
-    #plan = PlanSerializer()
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+    userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_userPlanOccurrenceId(self, obj):
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(program=obj.id, user=self.context['request'].user, isSubscribed=True)
+            return thePlanOccurrence.id
+        except:
+            return ""
+
+
+    def get_isSubscribed(self, obj):
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(program=obj.id, user=self.context['request'].user, isSubscribed=True)
+            return thePlanOccurrence.isSubscribed
+        except:
+            return False
+
+
+
 
 class NotificationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -184,32 +399,102 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'why', 'image', 'votes', 'viewableBy',  'user', 'coaches', 'updates', 'wasAchieved', 'plans')
+        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences')
 
-    plans = serializers.PrimaryKeyRelatedField(many=True, queryset=Plan.objects.all())
-    coaches = serializers.PrimaryKeyRelatedField(many=True, queryset=Coach.objects.all())
-    updates = serializers.PrimaryKeyRelatedField(many=True,  queryset=Update.objects.all())
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000, required=False)
+    why = serializers.CharField(max_length=2000)
+    metric = serializers.CharField(max_length=200)
+    deadline = serializers.DateField()
 
-    #coaches = makeSerializer('Coach', source='get_coaches', many=True, read_only=True)
-    #updates = makeSerializer('Update', source='get_updates', many=True, read_only=True)
+    planOccurrences = serializers.SerializerMethodField(required=False,read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+
+    def get_planOccurrences(self, obj):
+        serializer = PlanOccurrenceSerializer(obj.get_planOccurrences(), many=True)
+        return serializer.data
 
 
 
 
-class CoachSerializer(serializers.HyperlinkedModelSerializer):
+
+
+class LabelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Coach
-        fields = ('sessions', 'students', 'reviews', 'answers', 'rating', )
+        model = Label
+        fields = ('id', 'text', 'color', 'user', 'type')
 
-    #sessions = makeSerializer('Session', source='get_sessions', many=True, read_only=True)
-    #students = makeSerializer('Student', source='get_students', many=True, read_only=True)
-    #reviews = makeSerializer('Review', source='get_reviews', many=True, read_only=True)
-    #answers = makeSerializer('Answer', source='get_answers', many=True, read_only=True)
-    sessions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    students = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    reviews = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    answers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+
+
+
+class MessageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Message
+        fields = ('id','thread', 'text', 'sender' )
+
+    thread = serializers.PrimaryKeyRelatedField(many=False, queryset=MessageThread.objects.all())
+    sender = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+
+
+
+class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = MessageThread
+        fields = ('id', 'sender', 'latestMessage', 'receiver', 'senderName', 'senderPhoto','receiverName', 'receiverPhoto', 'labels', 'labelsList', 'channel', 'channelLabel')
+
+    receiver = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    sender = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    senderName = serializers.SerializerMethodField()
+    senderPhoto = serializers.SerializerMethodField()
+    receiverName = serializers.SerializerMethodField()
+    receiverPhoto = serializers.SerializerMethodField()
+    #messages = serializers.SerializerMethodField()
+
+    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all())
+    labelsList = serializers.SerializerMethodField(required=False,read_only=True)
+    channel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
+    channelLabel = serializers.SerializerMethodField(required=False,read_only=True)
+
+    #labels = LabelSerializer()
+    #labels_id = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), write_only=True)
+
+
+    latestMessage = serializers.SerializerMethodField(read_only=True)
+
+    #def create(self, validated_data):
+    #    messageThread = MessageThread.objects.create(**validated_data)
+
+#        return messageThread
+
+    def get_channelLabel(self, obj):
+        return obj.channel.label
+
+
+    def get_labelsList(self, obj):
+        return obj.get_labels()
+
+
+
+    def get_senderName(self, obj):
+        return obj.sender.profile.get_fullName()
+
+    def get_senderPhoto(self, obj):
+        return obj.sender.profile.get_profilePhoto()
+
+    def get_receiverName(self, obj):
+        return obj.receiver.profile.get_fullName()
+
+    def get_receiverPhoto(self, obj):
+        return obj.receiver.profile.get_profilePhoto()
+
+
+
+
+    def get_latestMessage(self, obj):
+        return obj.get_latest_message()
+
+
 
 
 
@@ -239,79 +524,10 @@ class SessionSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-
-
-
-
-
-class StudentSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Student
-        fields = ('id','goals', 'coaches', 'sessions', 'reviews', 'questions', 'settings', 'plans', 'user')
-
-    #goals = makeSerializer('Goal',  source='get_goals', many=True, read_only=True)
-    #coaches = makeSerializer('Coach',  source='get_coaches', many=True, read_only=True)
-    #sessions = makeSerializer('Session',  source='get_sessions', many=True, read_only=True)
-    #questions = makeSerializer('Question',  source='get_questions', many=True, read_only=True)
-    #plans = makeSerializer('Plan',  source='get_plans', many=True, read_only=True)
-    #user = makeSerializer('User', source='get_user', many=False, read_only=True)
-
-    goals = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    coaches = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    sessions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    questions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    plans = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-
-
-
-
-
-class ReviewSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Review
-        fields = ('id','rating', 'description', 'title', 'author', 'isStudentReviewed', 'reviewedUser')
-
-    #author = makeSerializer('User', source='get_author', many=False, read_only=True)
-    #reviewedUser = makeSerializer('User', source='get_reviewedUser', many=False, read_only=True)
-    author = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    reviewedUser = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-
-
-
-
-
-class QuestionSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Question
-        fields = ('id','text', 'author', 'needAnswerBy', 'answers', 'media', 'price')
-
-    #author = makeSerializer('User', source='get_author', many=False, read_only=True)
-    #answers = makeSerializer('Answer', source='get_answers', many=True, read_only=True)
-    author = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    answers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-
-
-
-
-
-class AnswerSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Answer
-        fields = ('id','question', 'author', 'text', 'media', 'votes')
-
-    #author = makeSerializer('User', source='get_author', many=False, read_only=True)
-    #question = makeSerializer('Question', source='get_question', many=False, read_only=True)
-    author = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    question = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-
-
-
-
-
 class RateSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model= Rate
         fields = ('id','inPersonRate', 'inPersonRateUnit', 'realtimeRate', 'realtimeRateUnit', 'feedbackRate', 'feedbackTurnaroundTime', 'turnaroundUnit', 'answerRate', 'activePlanManagementRate', 'activePlanManagementRateUnit')
+
 

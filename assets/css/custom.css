@@ -1,3 +1,9 @@
+@mobileBreakpoint            : 320px;
+@tabletBreakpoint            : 768px;
+@computerBreakpoint          : 992px;
+@largeMonitorBreakpoint      : 1280px;
+@widescreenMonitorBreakpoint : 1920px;
+
 
 .login-reveal {
     width:450px;
@@ -26,6 +32,10 @@
 
 .centered {
     text-align: center;
+}
+
+.leftAligned {
+    text-align:left;
 }
 
 .bordered {
@@ -111,9 +121,9 @@ a.pageTitle {
     position:absolute;
     color:white;
     font-weight:bold;
-    left:10px;
-    top:25px;
-    text-align:center;
+    padding:10px;
+    height:100%;
+    width:100%;
 
 }
 
@@ -128,6 +138,7 @@ a.pageTitle {
     top:10px;
     text-align:center;
     line-height: 2rem;
+
 }
 
 
@@ -141,7 +152,7 @@ a.pageTitle {
 }
 
 .spacer {
-    height:120px;
+    height:80px;
     display:block;
 }
 
@@ -149,6 +160,12 @@ a.pageTitle {
     position:absolute;
     left:0;
     top:0;
+    height:20vw;
+
+}
+
+.matchingHeight {
+    height:20vw !important;
 }
 
 
@@ -156,7 +173,13 @@ a.pageTitle {
 .overlayedImageContainer {
 
     position:relative;
+    cursor:pointer !important;
 
+
+}
+.menuIcon {
+    height:32px;
+    width:32px;
 }
 
 .holder {
@@ -207,7 +230,7 @@ ul.days2 {
 
 
 .isSelected {
-    color:purple;
+    color:#A333C8;
 }
 
 .inline-field-label {
@@ -215,13 +238,18 @@ ul.days2 {
     float:left;
 }
 
+.cyan2 {
+    background-color: #07DFF0 !important;
+    color:white;
+}
+
 .purple {
-    background-color:purple !important;
+    background-color:#A333C8 !important;
     color:white;
 }
 .purple-inverted {
     background-color:white !important;
-    color:purple;
+    color:#A333C8;
 }
 
 .green {
@@ -313,8 +341,18 @@ input.inline-edit:focus{
     margin:.1rem !important;
 }
 
-.noPadding {
+.reverseSegmentMargin {
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-top:-15px;
+    margin-bottom: 10px;
+}
+.noPaddingBottom {
     padding-bottom:0 !important;
+}
+
+.noPaddingTop {
+    padding-top:0 !important;
 }
 
 .huge-checkbox {
@@ -330,7 +368,12 @@ input.inline-edit:focus{
 
 .ui.sidebar {
     overflow: visible !important;
+    zIndex:2000 !important;
 }
+
+
+
+
 
 .sidebar-spacer {
     height:6rem;
@@ -362,7 +405,7 @@ input.sk-search-box__text {
     float:right;
     font-size:2.5rem !important;
     display:inline-block;
-    float:right;
+    float:right;c
     line-height:2.5rem;
     padding:0 0;
     margin:0 0;
@@ -433,7 +476,7 @@ label.NLtextinput {
 
 /* React Big Calendar Overrides*/
 .rbc-event {
-    background-color:purple !important;
+    background-color:#B90245 !important;
     color:white;
 }
 
@@ -576,7 +619,7 @@ ul.pagination li a {
 }
 
 ul.pagination li.active a {
-    background-color: #4CAF50 !important;
+    background-color: #1678C2 !important;
     color: white;
 }
 
@@ -613,4 +656,423 @@ ul.pagination li a {
 
 .notifications-tr {
     background-color: white !important;
+}
+
+@media only screen and (min-width: 1280px)
+img.clippedImage  {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 20vw, 0% 20vw);
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 20vw, 0% 20vw);
+    overflow-y:hidden !important;
+
+}
+
+
+
+.disabledForm input {
+    background:none !important;
+    border:none !important;
+    color: black;
+    display:inline-block;
+    padding:0 0 !important;
+    margin:0 0 !important;
+}
+
+input[disabled]{
+    opacity: 1.0 !important;
+}
+
+.ui.small.button {
+    font-size:.75rem !important;
+}
+
+img.listNodeImage {
+    display: block;
+  max-width:100% !important;
+  max-height:200px !important;
+  width: auto;
+  height: auto;
+}
+
+.ui.purple.button {
+    background-color:#a333c8 !important
+}
+
+
+.iconLabel {
+    margin-left:5px;
+    margin-right:5px;
+}
+
+
+.ui.extramini.images .image, .ui.extramini.images img, .ui.extramini.images svg, .ui.extramini.image {
+    width: 21px;
+    height: auto;
+    font-size: 0.7rem;
+    margin-bottom:4px;
+}
+
+.controlButtonMargin {
+    margin-right:5px !important;
+}
+
+
+
+.planTitle {
+    height: 50px;
+    width:100%;
+    font-weight:bold;
+    font-size:20px;
+    line-height:22px;
+    overflow:hidden;
+}
+
+.stepTitle {
+    height: 50px;
+    width:100%;
+    font-weight:bold;
+    font-size:16px;
+    line-height:22px;
+    overflow:hidden;
+}
+
+
+
+
+.showMoreText {
+    font-size:.7rem;
+}
+
+.itemDetailSmall {
+    margin-top:2rem;
+}
+
+.choiceModalMargins {
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+}
+
+.absolutelyNoMargin {
+    margin:0 !important;
+
+}
+
+.overlayText span {
+    height:100%;
+    width:100%;
+    line-height:normal;
+}
+
+.noRadius {
+    border-radius:0px 0px 0px 0px !important;
+}
+
+
+.messageInput {
+    position:absolute;
+  padding: 15px 0;
+    background-color:white;
+    border: 1px solid gray;
+    border-top:none;
+
+
+}
+.messageInput2 {
+  position: absolute;
+    margin-top:-15vh;
+  /* bottom: 0;  remove this */
+  left: 0;
+  width: 100%;
+  padding: 15px 0;
+}
+
+
+.messageThreadPane {
+    height: 100%;
+    width:100%;
+}
+
+.contactListPane {
+    height:100%;
+    width:100%;
+}
+
+.messageScrollArea {
+    border:0;
+    width:100%;
+    height:100%;
+    box-sizing:border-box;
+    background-color:white;
+
+
+}
+.windowPane {
+     height:calc(100% - 54px);
+    width:100%;
+}
+.contactListScrollArea {
+    border:0;
+    width:100%;
+    height:100%;
+    box-sizing:border-box;
+    background-color:white;
+    border-bottom:2px #2185D0 solid;
+}
+
+.messageWindowPlayground {
+    position:absolute;
+    left:1px;
+    width:calc(100% - 1px);
+    top:70px;
+    height:100% ;
+
+}
+
+.messageContainer {
+    margin:10px;
+    padding:10px;
+}
+
+.rightMessage {
+    background-color: #a333c8;
+    color: white;
+    border-radius:4px;
+    padding:5px;
+    margin-right:30%;
+}
+
+.leftMessage {
+    background-color: #2185D0;
+    color: white;
+    border-radius:4px;
+    padding:5px;
+    margin-left:30%;
+}
+
+.react-draggable, .cursor {
+      cursor: move !important;
+    }
+
+.no-cursor {
+    cursor: auto;
+}
+
+.cursor-y {
+    cursor: ns-resize;
+}
+
+.cursor-x {
+    cursor: ew-resize;
+}
+
+.messageWindowMenubarItem  {
+    background-color: #c6c6c6;
+    white-space:nowrap !important;
+    border-right:1px #d4d4d5 solid !important;
+}
+
+.box {
+    background: #fff;
+    border: 1px solid #999;
+    border-radius: 3px 3px 0px 0px;
+    width: 180px;
+    height: 180px;
+    margin: 10px;
+    float: left;
+}
+
+.messageControlBar {
+    width:100%;
+    height:40px;
+}
+
+.contactItem {
+    padding:.8rem;
+}
+
+.messageWindowMenuBarItemIcon {
+    padding-left:10px;
+}
+
+.messageThreadList {
+    border-top: 5px solid #2199e8;
+    padding-top: 10px;
+}
+
+.messageThreadListItem {
+    border-top: 0px;
+
+}
+.messageThreadListItemDivider {
+    margin-top:5px !important;
+}
+
+.messageThreadItemAddLabel {
+    color:#2199e8;
+    float:right;
+    cursor:pointer;
+    height:100%;
+    display:block;
+}
+
+.scrollAreaContent {
+    padding-bottom:20px;
+}
+
+.messageWindowBarMenuItems {
+    overflow:hidden;
+    width:calc(100% - 60px);
+}
+
+.hidingOverflow {
+        overflow:hidden;
+    width:calc(100% - 60px);
+
+}
+
+.overflowHidden {
+    overflow:hidden;
+}
+
+.messageWindowMenuBarAdditionalItems {
+    background-color:white !important;
+    z-index:100;
+    border:none !important;
+}
+
+.noBorder {
+    border:none !important;
+}
+
+
+.messageLabelMenuItem {
+    padding: 5px;
+    border-radius:3px;
+        cursor:pointer;
+
+
+}
+
+div.messageLabelMenuItem:hover {
+    background-color: #efefef;
+}
+
+
+.activeItem {
+    background-color:#2185d0 !important;
+    color:white !important;
+
+}
+.fixedToRightEdge {
+    position:relative !important;
+    right:0 !important;
+    top:0 !important;
+}
+
+.noBoxShadow {
+    box-shadow:none !important;
+}
+
+.messageThreadItemLabelClose {
+    float:right;
+    padding-left:15px;
+}
+
+.messageThreadItemLabel {
+    font-size:.7rem !important;
+}
+
+.messageThreadItemLabelsListContainer {
+    margin-top:10px;
+    width:100%;
+
+}
+
+.messageThreadItemLabelsList {
+    width:calc(100% - 60px);
+    overflow:hidden;
+    float:left;
+
+}
+
+.contextualMenu {
+    color: #2185d0 !important;
+    border: 1px solid #2185d0 !important;
+}
+
+.ui.cyan.button {
+    background-color: #07DFF0 !important;
+    color: white !important;
+}
+
+.noRightPadding {
+    padding-right:0px !important;
+}
+
+.Dark {
+    color:white !important;
+}
+
+.Light {
+    color:black !important;
+}
+
+.raspberry {
+    background-color: #B90245 !important;
+    color:white !important;
+}
+
+.raspberry-inverted {
+    background-color:white !important;
+    color:#B90245;
+}
+
+.ui.raspberry.button {
+    background-color:#B90245 !important;
+    color:white !important;
+}
+
+.bottomMargin14 {
+    margin-bottom:14px !important;
+}
+
+.sidebarCloseButton i.icon {
+    margin-top:40px;
+    text-align:left !important;
+    height:60px;
+
+}
+
+.customFooter {
+    background-color: black;
+    color:white;
+    height:100px;
+    text-align:center;
+    margin-bottom:-20px;
+
+}
+
+.customFooter .ui.text.menu a {
+    text-decoration:none;
+    margin:0;
+    color:white;
+    padding-top:50px;
+
+}
+.customFooter a {
+    color:white;
+}
+
+.footerSpacer {
+    height:200px;
+}
+
+.footerAtBottom {
+    min-height:100vh;
+}
+
+.largeItalic {
+    margin-top:1em;
+    font-size:2em;
+    font-style:italic;
+    color:gray;
 }

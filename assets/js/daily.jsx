@@ -3,7 +3,9 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ObjectList, ObjectListAndUpdate, FormAction, Sidebar } from './base'
+import {ImageUploader, Breadcrumb, PlanForm2, ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import autobind from 'class-autobind'
+
 
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
@@ -13,9 +15,14 @@ import validator from 'validator';
 import ValidatedInput from './app'
 import Funnybar  from './search'
 
+import { StandardSetOfComponents, ErrorReporter } from './accounts'
 
-var theServer = 'https://192.168.1.156:8000/'
+import { Provider, connect, store, dispatch } from 'react-redux'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 
+import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 var moment = require('moment');
 import {
   ShareButtons,
@@ -61,128 +68,177 @@ function getCookie(name) {
     return cookieValue;
 }
 
-var DailyList = React.createClass({
+@connect(mapStateToProps, mapDispatchToProps)
+export class DailyList extends React.Component{
+     constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data:[]
 
-    loadObjectsFromServer: function () {
-        //var periodRangeStart = new Date();
-        //var periodRangeEnd = new Date();
-        //periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
-        //periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+
+        }
+    }
+
+    loadObjectsFromServer () {
+        var periodRangeStart = new Date();
+        var periodRangeEnd = new Date();
+        periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
+        periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+        var theUrl = theServer + "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+        console.log("checking this url " + theUrl)
+
         $.ajax({
-            url: theServer + "api/period/2016-11-16/2016-12-20/",
+            url: theUrl,
             dataType: 'json',
             cache: false,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
             success: function (data) {
-                this.setState({data: data.results});
-                console.log("data.results " + data.results)
-
+                this.setState({data: data});
 
             }.bind(this),
             error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
+                console.error(theUrl, status, err.toString());
             }.bind(this)
         });
-    },
+    }
 
-    componentDidMount: function () {
+    componentDidMount () {
         this.loadObjectsFromServer();
 
         //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID: intervalID});
 
-        var self = this;
-    },
+    }
 
-    getInitialState: function() {
-        return {data: []};
-    },
 
-    render: function () {
-        var dateData, dateObject, dateReadable;
+
+
+    render () {
+        var dateData, dateObject, readableDate;
         dateObject = new Date();
-        dateReadable = dateObject.toDateString();
+        readableDate = dateObject.toDateString();
 
 
 
         return (
-            <div>
+           <div>
+    <StandardSetOfComponents  modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
 
-            <div className="fullPageDiv">
-                <div className="ui page container">
 
-                <div className="spacer">&nbsp;</div>
-                <div className="ui alert"></div>
-                <div className="ui grid">
-                    <div className="header"><h1>{dateReadable}</h1></div>
-                    <StepOccurrenceList data={this.state.data}/>
+
+
+
+        <div className="fullPageDiv">
+            <div className="ui page container footerAtBottom">
+
+
+            <div className="spacer">&nbsp;</div>
+            <div className="ui large breadcrumb">
+                <Link to={`/#`}><div className="section">Home</div></Link>
+
+                  <i className="right chevron icon divider"></i>
+                  <Link to={`/#`}><div className="active section">Today's Work</div></Link>
+            </div>
+            <div>&nbsp;</div>
+<div className="ui column header">
+            <h1>{readableDate}</h1>
+        </div>                    <StepOccurrenceList data={this.state.data}/>
+
                 </div>
             </div>
     </div>
-                </div>
 
 
         )
     }
-});
+}
 
 
 
-var StepOccurrenceList = React.createClass({
+export class StepOccurrenceList2 extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data: []
 
 
-    componentDidMount: function() {
+        }
+    }
 
-        var self = this;
-    },
 
-    render: function() {
+    componentDidMount() {
+        this.setState({data: this.props.data})
 
-        if (this.props.data) {
-            var objectNodes = this.props.data.map(function (objectData) {
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({data: nextProps.data})
+        }
+    }
+
+    render() {
+
+        if (this.state.data) {
+            var objectNodes = this.state.data.map(function (objectData) {
 
                 return (
-                        <div key={objectData.id}>
-                            <StepOccurrenceItem  stepOccurrenceData={objectData} />
-                            <div>&nbsp;</div>
-                        </div>
+                    <div key={objectData.id}>
+                        <StepOccurrenceItem stepOccurrenceData={objectData}/>
+                        <div>&nbsp;</div>
+                    </div>
                 )
             }.bind(this));
+        } else {
+            var objectNodes = () => {return (<div>You don't have any steps to accomplish today.</div>)}
         }
         return (
             //<div className="ui divided link items">
             <div className="sixteen wide column">
                 {objectNodes}
             </div>
-            )
-}});
+        )
+    }
+}
 
-var StepOccurrenceItem = React.createClass({
+export class StepOccurrenceItem2 extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data:[]
 
-    componentDidMount:function() {
-        var self = this;
+
+        }
+    }
 
 
-    },
-
-    getInitialState: function() {
-                    console.log("stepOccurrence id " + this.props.key)
-
-        return {
+    componentDidMount() {
+        this.setState({
             id: this.props.stepOccurrenceData.id,
             title: this.props.stepOccurrenceData.step.title,
             description: this.props.stepOccurrenceData.step.description,
             wasCompleted: this.props.stepOccurrenceData.wasCompleted,
+        })
+
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({data: this.props.data})
+        }
+    }
 
 
 
 
-        };
-
-
-    },
-
-
-    render: function() {
+    render () {
 
         return (
             <div>
@@ -221,17 +277,26 @@ var StepOccurrenceItem = React.createClass({
                     </div></div></div>
         )
     }
-});
+}
 
-var UpdateOccurrenceList = React.createClass({
+export class UpdateOccurrenceList extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data:[]
 
-    loadObjectsFromServer: function () {
+
+        }
+    }
+
+    loadObjectsFromServer () {
         //var periodRangeStart = new Date();
         //var periodRangeEnd = new Date();
         //periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         //periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
         $.ajax({
-            url: theServer + "api/stepOccurrences/" + this.props.stepOccurrenceId + "/updateOccurrences/",
+            url: theServer + "api/stepOccurrences/" + this.state.stepOccurrenceId + "/updateOccurrences/",
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -243,24 +308,25 @@ var UpdateOccurrenceList = React.createClass({
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
-    },
+    }
 
-    componentDidMount: function() {
-        this.loadObjectsFromServer();
-        var self = this;
+    componentDidMount () {
+        this.setState({
+            stepOccurrenceId: this.props.stepOccurrenceId,
+        }, this.loadObjectsFromServer())
 
-    },
 
-    getInitialState: function() {
-      return {
-          data:[],
-      }
-    },
+    }
+    componentWillReceiveProps (nextProps) {
+        if (this.state.stepOccurrenceId != nextProps.stepOccurrenceId)
+            this.setState({stepOccurrenceId:nextProps.stepOccurrenceId})
+    }
 
-    render: function() {
+
+
+    render () {
 
         if (this.state.data) {
-            console.log("inside this.state.data")
             var objectNodes = this.state.data.map(function (objectData) {
 
                 return (
@@ -287,7 +353,7 @@ var UpdateOccurrenceList = React.createClass({
 }
 
 
-});
+}
 
 
 var UpdateOccurrenceForm = React.createClass({

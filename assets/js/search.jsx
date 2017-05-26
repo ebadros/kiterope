@@ -3,7 +3,7 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ObjectList, ObjectListAndUpdate, FormAction, Sidebar } from './base'
+import {Sidebar, ProgramViewEditDeleteItem } from './base'
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
@@ -22,7 +22,8 @@ import autobind from 'class-autobind'
 
 import Pagination from "react-js-pagination";
 
-
+import { Provider, connect, store, dispatch } from 'react-redux'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'
@@ -42,15 +43,22 @@ import {
 InitialLoader,
     } from "searchkit";
 
+import { theServer } from './constants'
+
 var Searchkit = require('searchkit')
 var imageDirectory = "https://kiterope.s3.amazonaws.com/"
 
-const host = "https://192.168.1.156:8000/api/plan/search"
-const searchkit = new Searchkit.SearchkitManager("https://127.0.0.1:9200/")
+const host = "http://127.0.0.1:8000/api/plan/search"
+const searchkit = new Searchkit.SearchkitManager("http://127.0.0.1:9200/")
 
-var theServer = 'https://192.168.1.156:8000/'
 
 import CallManager from './call'
+
+import { Menubar, StandardSetOfComponents } from './accounts'
+
+
+
+
 
 
 const placeholderText = [
@@ -67,7 +75,7 @@ const placeholderText = [
 ]
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class SearchPage extends React.Component {
     constructor(props) {
         super(props);
@@ -102,6 +110,7 @@ export class SearchPage extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class Search extends React.Component {
 
     constructor(props) {
@@ -114,6 +123,8 @@ export class Search extends React.Component {
             queryUrl:"",
             placeholderIterator:0,
             placeholder:placeholderText[0],
+            signInOrSignUpModalFormIsOpen:false,
+            user:"",
         }
 
 
@@ -136,6 +147,8 @@ export class Search extends React.Component {
 
     }
 
+
+
     componentWillUnmount = () => {
         clearInterval(this.state.intervalID)
     }
@@ -151,6 +164,7 @@ export class Search extends React.Component {
         })
 
     }
+
 
 
 
@@ -179,6 +193,8 @@ export class Search extends React.Component {
             resultsVisible:"false",
 
             },
+                            //store.dispatch(push('/search/'))
+
             hashHistory.push("/search/")
 
 
@@ -186,6 +202,18 @@ export class Search extends React.Component {
         )
 
     }
+    handleNeedsLogin = () => {
+            this.setState({
+                signInOrSignUpModalFormIsOpen: true
+            },)
+
+  }
+
+  handleModalClosed = () => {
+      this.setState({
+                signInOrSignUpModalFormIsOpen: false
+            })
+  }
 
 handleChangeQuery = (e) => {
     this.setState({
@@ -202,9 +230,12 @@ handleChangeQuery = (e) => {
 
         }
     return (
+        <div>
+        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
         <div className="fullPageDiv">
             <div className="ui page container">
                 <div className="spacer">&nbsp;</div>
+
 
                 <div className="ui alert"></div>
                 <form className="ui form" onSubmit={this.handleSubmit}>
@@ -213,10 +244,11 @@ handleChangeQuery = (e) => {
 
 
                         <div className="ui grid ">
+                            <div className="ui row">&nbsp;</div>
                             <div className="ui centered row massiveType">What do you want?</div>
                                                 <div className="ui row">&nbsp;</div>
 
-                            <div className="ui row noPadding">
+                            <div className="ui row noPaddingBottom">
 
                                 <input value="I want to" className="ui two wide column right aligned  searchLabel"
                                        type="text" disabled/>
@@ -234,7 +266,7 @@ handleChangeQuery = (e) => {
                         </div>
                     </div>
                 </form>
-                <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible} />
+                <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible} needsLogin={this.handleNeedsLogin}/>
             </div>
                 <div className="spacer">&nbsp;</div>
 
@@ -280,6 +312,7 @@ handleChangeQuery = (e) => {
             </div>
 
         </div>
+            </div>
 
 
 
@@ -304,9 +337,9 @@ export class SearchHitsGrid extends React.Component {
     loadObjectsFromServer = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
-                var theUrl = theServer + "api/plan/search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
+                var theUrl = theServer + "api/program/search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
             } else {
-                var theUrl = theServer + "api/plan/search/?text__contains=" + this.state.url
+                var theUrl = theServer + "api/program/search/?text__contains=" + this.state.url
             }
             $.ajax({
                 url: theUrl,
@@ -388,10 +421,25 @@ export class SearchHitsGrid extends React.Component {
           }
       }
 
+      handleWePlanClick() {
+                          //store.dispatch(push('/goalEntry'))
+
+      hashHistory.push('/goalEntry')
+      }
+
+      handleYouPlanClick() {
+          //store.dispatch(push('/goalEntry'))
+      hashHistory.push('/goalEntry')
+      }
+
 
     handlePageChange(pageNumber) {
         this.setState({activePage: pageNumber});
     }
+
+    handleNeedsLogin = () => {
+      this.props.needsLogin()
+  }
 
     render () {
         if (this.state.visible == 'true') {
@@ -406,7 +454,18 @@ export class SearchHitsGrid extends React.Component {
             var objectNodes = this.state.data.map(function (objectData) {
 
                 return (
-                        <PlanHit key={objectData.id} result={objectData} />
+                <ProgramViewEditDeleteItem isListNode={true}
+                                        currentView="Basic"
+                                        showCloseButton={false}
+                                        hideControlBar={true}
+                                        apiUrl="api/programs/"
+                                        id={objectData.id}
+                                        data={objectData}
+                                        editable={false}
+                                           needsLogin={this.handleNeedsLogin}
+                />
+
+                      //  <PlanHit key={objectData.id} result={objectData} />
 
                 )
             }.bind(this));
@@ -422,8 +481,17 @@ export class SearchHitsGrid extends React.Component {
                         <div className="ui row">
                             <div className="ui two wide column">&nbsp;</div>
 
-                    <div className="ui center aligned ten wide column">If you're serious about achieving your goals, we'll help you <Link to="/goalEntry"> design a plan to achieve your goal.</Link></div>
-                    </div></div>
+                    <div className="ui center aligned ten wide column">
+                        <div className="ui two column grid">
+                            <div className="column">
+
+                            <div className="ui fluid  large purple button" onClick={this.handleWePlanClick}>Let Us Design a Plan for You</div>
+                            </div>
+                            <div className="column">
+
+                             <div className="ui fluid  large purple button" onClick={this.handleYouPlanClick}>  Design Your Own Plan</div>
+                        </div>
+                        </div>    </div>   </div></div>
                     )
 
         }
@@ -648,6 +716,52 @@ var OverlayText = React.createClass({
 
 })
 
+export class PlanHit2 extends React.Component {
+
+    render () {
+        const result = this.props.result;
+        let url = theServer + "/plans/" + result.id + "/steps"
+        return (
+                <div className="column" key={result.id}>
+
+
+                    <Link to={`/plans/${result.id}/steps`}>
+                    <div className="ui fluid card">
+
+
+                        <div className="image" ><div className="ui purple large right ribbon label">100% Success</div>
+
+                            <img src={imageDirectory + result.image} />
+                        </div>
+                        <div className="content">
+
+                        <div className="header">{result.title}</div>
+                            </div>
+
+                              <div className="extra content">
+                                            <div dangerouslySetInnerHTML={{__html: result.description}}></div>
+                                  <div>&nbsp;</div>
+
+                                        <div>Requires {result.timeCommitment} for {result.scheduleLength}</div>
+<div>&nbsp;</div>
+                                  <div>${result.cost} {result.costFrequencyMetric}</div>
+                                  <div>&nbsp;</div>
+
+<Link to={`/profiles/${result.author_id}/`}><UserLink userId={result.author_id} /></Link>
+
+                              </div>
+
+
+
+                            </div>
+
+</Link>
+            </div>
+
+        )
+    }
+}
+
 var PlanHit = React.createClass({
     render: function() {
         const result = this.props.result;
@@ -719,7 +833,6 @@ export class UserLink extends React.Component {
           dataType: 'json',
           cache: false,
           success: function(data) {
-              console.log("objects loaded in UserLink")
               this.setState({
                   firstName:data.firstName,
                   lastName:data.lastName,
@@ -784,4 +897,4 @@ function printObject(o) {
 
 
 
-module.exports = SearchPage
+module.exports = { SearchPage }

@@ -9,9 +9,30 @@ from tinymce import models as tinymce_models
 import pytz
 from timezone_field import TimeZoneField
 import datetime
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user, get_user_model
+from colorfield.fields import ColorField
+from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
+from django.core.validators import MinLengthValidator
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+import json
+import ast
+from django.db.models import Q
+
+
+
 
 
 TIME_COMMITMENT_CHOICES = (
+("10m", "10 minutes per day"),
+("20m", "20 minutes per day"),
+("30m", "30 minutes per day"),
+("40m", "40 minutes per day"),
+("50m", "50 minutes per day"),
     ("1h", "1 hour per day"),
     ("2h", "2 hours per day"),
     ("3h", "3 hours per day"),
@@ -29,22 +50,22 @@ SESSION_TYPE_CHOICES = (
 
 VIEWABLE_CHOICES = (
     ("ONLY_ME", "Only me"),
-    ("SHARED", "Just people I've shared this goal with"),
-    ("MY_COACHES", "Just my coaches"),
+    ("SHARED", "Just people I've shared this with"),
+    ("ONLY_COACHES", "Just my coaches"),
     ("ALL_COACHES", "All coaches"),
     ("ANYONE", "Anyone"),
     
     )
-PLAN_VIEWABLEBY_CHOICES =(
+PROGRAM_VIEWABLEBY_CHOICES =(
     ("ONLY_ME", "Only me"),
     ("ONLY_CLIENTS", "Just my clients"),
     ("ANYONE", "Anyone"),
 
     )
 
-PLAN_COST_FREQUENCY_METRIC_CHOICES = (
-    ("FREE", "Free"),
+PROGRAM_COST_FREQUENCY_METRIC_CHOICES = (
     ("MONTH", "Per Month" ),
+    ("WEEK", "Per Week" ),
     ("ONE_TIME", "One Time" ),
 
 )
@@ -79,7 +100,7 @@ UPDATE_METRIC_CHOICES = (
 METRIC_FORMAT_CHOICES = (
     ("text", "text"),
     ("integer","integer"),
-    ("float", "float"),
+    ("decimal", "decimal"),
     ("url", "url"),
     ("picture", "picture"),
     ("video", "video"),
@@ -118,8 +139,93 @@ SCHEDULE_LENGTH_CHOICES = (
 
 NOTIFICATION_CHOICES = (
     ('CALL', "Call"),
+    ('TEXT', "Text"),
+    ('NOTIFICATION_REFERENCE', 'Notification Reference'),
+    ('NOTIFICATION', 'Notification')
+
 
 )
+
+KCHANNEL_PERMISSION_CHOICES = (
+    ('ONLYRECEIVER_ONLYSENDER', "Only receiver and sender"),
+    ('ONLYRECEIVER_ANYSENDER', "Only receiver, any sender"),
+
+)
+
+DURATION_CHOICES = [
+    ('1', "1 minute"),
+    ('2', "2 minutes"),
+    ('3', "3 minutes"),
+    ('4', "4 minutes"),
+    ('5', "5 minutes"),
+    ('6', "6 minutes"),
+    ('7', "7 minutes"),
+    ('8', "8 minutes"),
+    ('9', "9 minutes"),
+    ('10', "10 minutes"),
+    ('15', "15 minutes"),
+    ('20', "20 minutes"),
+    ('30', "30 minutes"),
+    ('45', "45 minutes"),
+    ('(60', "1 hour"),
+    ('90', "1.5 hours"),
+    ('120', "2 hours"),
+    ('150', "2.5 hours"),
+    ('180', "3 hours"),
+]
+
+START_TIME_CHOICES = [
+    ('12:00', "12:00 am"),
+    ('12:30', "12:30 am"),
+    ('01:00',  "1:00 am"),
+    ('01:30',  "1:30 am"),
+    ('02:00',  "2:00 am"),
+    ('02:30',  "2:30 am"),
+    ('03:00',  "3:00 am"),
+    ('03:30',  "3:30 am"),
+    ('04:00',  "4:00 am"),
+    ('04:30',  "4:30 am"),
+    ('05:00',  "5:00 am"),
+    ('05:30',  "5:30 am"),
+    ('06:00',  "6:00 am"),
+    ('06:30',  "6:30 am"),
+    ('07:00',  "7:00 am"),
+    ('07:30',  "7:30 am"),
+    ('08:00',  "8:00 am"),
+    ('08:30',  "8:30 am"),
+    ('09:00',  "9:00 am"),
+    ('09:30',  "9:30 am"),
+    ('10:00', "10:00 am"),
+    ('10:30', "10:30 am"),
+    ('11:00', "11:00 am"),
+    ('11:30', "11:30 am"),
+    ('12:00', "12:00 pm"),
+    ('12:30', "12:30 pm"),
+    ('13:00',  "1:00 pm"),
+    ('13:30',  "1:30 pm"),
+    ('14:00',  "2:00 pm"),
+    ('14:30',  "2:30 pm"),
+    ('15:00',  "3:00 pm"),
+    ('15:30',  "3:30 pm"),
+    ('16:00',  "4:00 pm"),
+    ('16:30',  "4:30 pm"),
+    ('17:00',  "5:00 pm"),
+    ('17:30',  "5:30 pm"),
+    ('18:00',  "6:00 pm"),
+    ('18:30',  "6:30 pm"),
+    ('19:00',  "7:00 pm"),
+    ('19:30',  "7:30 pm"),
+    ('20:00',  "8:00 pm"),
+    ('20:30',  "8:30 pm"),
+    ('21:00',  "9:00 pm"),
+    ('21:30',  "9:30 pm"),
+    ('22:00', "10:00 pm"),
+    ('22:30', "10:30 pm"),
+    ('23:00', "11:00 pm"),
+    ('23:30', "11:30 pm"),
+    ]
+
+
 
 class NotificationManager(models.Manager):
 
@@ -162,64 +268,71 @@ class Interest(models.Model):
         return "%s" % (self.name)
 
 class Goal(models.Model):
-    title = models.CharField(max_length=200, default=" ", blank=True)
-    deadline = models.CharField(max_length=16, default = " " , null=True, blank=True)
-    description = models.CharField(max_length=2000, default = " ", null=True, blank=True)
-    coreValues = models.CharField(max_length=2000, default = " ", null=True, blank=True)
-    goalInAlignmentWithCoreValues = models.BooleanField(default=False)
-    obstacles = models.CharField(max_length=2000, default=" ", null=True, blank=True)
-    isThisReasonable = models.BooleanField(default=False)
-    why = models.CharField(max_length=2000, default = " ", null=True, blank=True)
+    title = models.CharField(max_length=200, default="", blank=False, null=True,)
+    deadline = models.DateField(null=True, default=datetime.date.today, blank=False)
+    description = models.CharField(max_length=2000, null=True, blank=False)
+    why = models.CharField(max_length=2000, null=True, blank=False)
     image = models.CharField(max_length=200, null=True, blank=True)
     votes = models.IntegerField(null=True, blank=True)
     viewableBy = models.CharField(max_length=20, choices=VIEWABLE_CHOICES, default="ONLY_ME")
     user = models.ForeignKey(User)
-    coaches = models.ManyToManyField('Coach', blank=True, related_name='coaches')
-    updates = models.ManyToManyField('Update', blank=True, related_name='updates')
     wasAchieved = models.BooleanField(default=False)
-    metric = models.CharField(max_length=100, default=" ", blank=True, null=True)
+    metric = models.CharField(max_length=100, blank=False, null=True)
 
-    plans = models.ManyToManyField("Plan", blank=True, related_name='plans')
+
+    #plans = models.ManyToManyField("Plan", blank=True, related_name='plans')
     #metric = 
     def __str__(self):
         return "%s" % (self.title)
 
-    #def get_plans(self):
-    #    return Plan.objects.filter(goals=self)
-    
-    
 
 
 
-class Plan(models.Model):
+    def get_planOccurrences(self):
+        #str_w_quotes = ast.literal_eval(my_str)
+        planOccurrences = PlanOccurrence.objects.filter(goal=self)
+
+        return planOccurrences
+
+
+def date_handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    else:
+        raise TypeError
+
+
+class Program(models.Model):
     title = models.CharField(max_length=200, default=" ")
     author = models.ForeignKey(User, null=True, blank=True)
     description = models.CharField(max_length=1000, default=" ")
     image = models.CharField(max_length=200, null=True, blank=True)
-    calendar = models.FileField(null=True, upload_to='calendars', blank=True)
-    viewableBy = models.CharField(max_length=20, choices=PLAN_VIEWABLEBY_CHOICES, default="ONLY_ME")
+    viewableBy = models.CharField(max_length=20, choices=PROGRAM_VIEWABLEBY_CHOICES, default="ONLY_ME")
     steps = models.ManyToManyField('Step', blank=True, related_name='steps')
-    goals = models.ManyToManyField(Goal, blank=True, )
     scheduleLength = models.CharField(max_length=20, null=False, choices=SCHEDULE_LENGTH_CHOICES, default="3m")
-    templatePlan = models.ForeignKey('Plan', null=True, blank=True)
     startDate = models.DateField(null=True, blank=True)
-    users = models.ManyToManyField(User, blank=True, related_name='users')
     timeCommitment = models.CharField(max_length=100, choices=TIME_COMMITMENT_CHOICES, blank=True, default="1h")
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    costFrequencyMetric = models.CharField(max_length=20, choices=PLAN_COST_FREQUENCY_METRIC_CHOICES, default="PER MONTH")
+    costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="PER MONTH")
 
 
+    def get_userPlanOccurrenceId(self, theUser):
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(program=self, user=theUser, isSubscribed=True)
+            return thePlanOccurrence.id
+        except:
+            return ""
 
     def __str__(self):
         return "%s" % (self.title)
 
     def get_steps(self):
-        return Step.objects.filter(plan=self)
+        return Step.objects.filter(program=self)
 
     def get_goals(self):
-        return Goal.objects.filter(plan=self)
+        return Goal.objects.filter(program=self)
 
-    def get_scheduleLength(self):
+    '''def get_scheduleLength(self):
         theScheduleLength = self.scheduleLength
         if theScheduleLength > 90:
             metric = "months"
@@ -230,16 +343,18 @@ class Plan(models.Model):
         else:
             formattedScheduleLength = theScheduleLength
             metric="days"
-        return "%s %s" % (formattedScheduleLength, metric)
+        return "%s %s" % (formattedScheduleLength, metric)'''
 
     def get_author_id(self):
         return "%s" % self.author.id
 
 class Step(models.Model):
-    plan = models.ForeignKey(Plan, null=True, blank=True)
+    program = models.ForeignKey(Program, null=True, blank=True)
     title = models.CharField(max_length=100, default=" ")
-    description = tinymce_models.HTMLField(blank=True)
+    description = models.CharField(max_length=1000, default=" ")
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, null=False, default='ONCE')
+    image = models.CharField(max_length=200, null=True, blank=True, default="images/stepDefaultImage.svg")
+
 
     # These dates are absolute dates and are used to calculate the startDate and endDate
     absoluteStartDate = models.DateField(blank=True, null=True)
@@ -249,15 +364,12 @@ class Step(models.Model):
     startDate = models.IntegerField(blank=True, null=True)
     endDate = models.IntegerField(blank=True, null=True)
 
-    startTime = models.CharField(max_length=20, blank=True, default=" ")
+    startTime = models.CharField(max_length=20, blank=True, default=" ", choices=START_TIME_CHOICES,)
 
     # If useAbsoluteTime is True, the timezone value will be used to set it so all people on the step will be doing things at the same time
     useAbsoluteTime = models.BooleanField(blank=True, default=False)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
-
-
-    duration = models.IntegerField(blank=True, null=True)
-    durationMetric = models.CharField(max_length=10, blank=True, default="Hour")
+    duration = models.CharField(max_length=20, choices=DURATION_CHOICES, null=False, default='1')
 
     day01 = models.BooleanField(default=False)
     day02 = models.BooleanField(default=False)
@@ -274,6 +386,15 @@ class Step(models.Model):
 
     def get_updates(self):
         return Update.objects.filter(step=self)
+
+    def get_programStartDate(self):
+        try:
+            programStartDate = Program.objects.get(id=self.program.id).startDate
+        except:
+            programStartDate = None
+        return programStartDate
+
+
 
 class StepOccurrenceManager(models.Manager):
     def create_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUser):
@@ -314,7 +435,7 @@ class StepOccurrence(models.Model):
         return theStep.description
 
     def get_updateOccurrences(self):
-        updateOccurrences = UpdateOccurrence.objects.filter(stepOccurrence_id=id)
+        updateOccurrences = UpdateOccurrence.objects.filter(stepOccurrence=self)
         return updateOccurrences
 
     @classmethod
@@ -322,35 +443,100 @@ class StepOccurrence(models.Model):
         print("inside test")
 
 
+class Contact(models.Model):
+    sender = models.ForeignKey('Profile', related_name="contact_sender")
+    receiver = models.ForeignKey('Profile', related_name="contact_receiver")
+    relationship = models.CharField(max_length=20, default=" ")
+    wasConfirmed = models.CharField(max_length=20, default=" ", blank=True)
+
+    def get_senderBio(self):
+        return self.sender.bio
+
+
+    def get_senderProfile(self):
+        theQueryset = Profile.objects.filter(id=self.sender.id)
+
+        return theQueryset
+
+    def get_receiverProfile(self):
+        theQueryset = Profile.objects.filter(id=self.receiver.id)
+
+        return theQueryset
 
 
 
 class PlanOccurrence(models.Model):
-    plan = models.ForeignKey(Plan, null=True, blank=True)
+    program = models.ForeignKey(Program, null=True, blank=True)
     goal = models.ForeignKey(Goal, null=True, blank=True)
     startDate = models.DateField(blank=True, null=True)
     user = models.ForeignKey(User, null=True, blank=True)
+    isSubscribed = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "Program: %s, User: %s" % (self.program,  self.user)
+
+
+
+
+
+
+
+
 
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, null=True, blank=True)
-    bio = models.CharField(max_length=2000, default=" ")
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.CharField(max_length=2000, default=" ", blank=True)
     isCoach = models.BooleanField(default=False)
     firstName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     lastName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     zipCode = models.CharField(max_length=10, blank=True, null=True)
-    profilePhoto = models.FileField(null=True, upload_to='images', blank=True)
-    
-    
-    def create_profile(sender, instance, created, **kwargs):
+    profilePhoto = models.CharField(max_length=200, null=True, blank=True, default="images/user.svg")
+    notificationChannel = models.OneToOneField('KChannel', null=True, blank=True)
+
+
+    def get_profilePhoto(self):
+        return self.profilePhoto
+
+
+
+    def get_notificationChannel(self):
+
+        if self.notificationChannel != None:
+            theNotificationChannel = self.notificationChannel
+        else:
+            theNotificationChannel = self.createNotificationChannel()
+
+        return theNotificationChannel
+
+    def createNotificationChannel(self):
+        self.notificationChannel = KChannel.objects.create_channel([self.user.id], "ONLYRECEIVER_ANYSENDER")
+        self.save()
+        return self.notificationChannel;
+
+
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            Profile.objects.create(user=instance)
+            print("create user profile")
+            Profile.objects.create(user=instance, firstName=instance.first_name, lastName = instance.last_name)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
+
+    def save(self, *args, **kwargs):
+        super(Profile, self).save(*args, **kwargs)
+        if self.notificationChannel == None:
+            self.notificationChannel = KChannel.objects.create_channel([self.user.id], 'ONLYRECEIVER_ANYSENDER')
+            self.save()
 
     def get_goals(self):
         return Goal.objects.filter(user=user.id)
 
-    def get_plans(self):
-        return Plan.objects.filter(user=user.id)
+    def get_programs(self):
+        return Program.objects.filter(user=user.id)
 
     def get_planOccurrences(self):
         return PlanOccurrence.objects.filter(user=user.id)
@@ -358,34 +544,19 @@ class Profile(models.Model):
     def get_stepOccurrences(self):
         return StepOccurrence.object.filter(user=user.id)
 
+    def get_fullName(self):
+        return "%s %s" % (self.firstName, self.lastName)
+
     def __str__(self):
         return "Username: %s Name: %s %s" % (self.user, self.firstName, self.lastName)
 
-    post_save.connect(create_profile, sender=User)
+    #post_save.connect(create_profile, sender=User)
 
 class SearchQuery(models.Model):
     query = models.CharField(max_length=2000, default=" ")
-    
 
-class Student(models.Model):
-    goals = models.ManyToManyField(Goal, blank=True, )
-    coaches = models.ManyToManyField('Coach', blank=True, )
-    sessions = models.ManyToManyField('Session', blank=True, )
-    reviews = models.ManyToManyField('Review', blank=True, )
-    questions = models.ManyToManyField('Question', blank=True, )
-    settings = models.ForeignKey('StudentSettings', null=True, blank=True)
-    plans = models.ManyToManyField(Plan,blank=True, )
-    user = models.ForeignKey(User, null=True, blank=True)
-    
-class Coach(models.Model):
-    students = models.ManyToManyField(Student, blank=True, )
-    sessions = models.ManyToManyField('Session', related_name='sessions', blank=True, )
-    reviews = models.ManyToManyField('Review', blank=True, )
-    answers = models.ManyToManyField('Question', blank=True, )
-    rating = models.FloatField(null=True)
-    planTemplates = models.ManyToManyField(Plan,blank=True,  )
-    rates = models.ManyToManyField('Rate', blank=True, )
-    #domains = models.ManyToManyField(Domain, null=True)
+
+
 
 class Metric(models.Model):
     measuringWhat = models.CharField(max_length=30, default="emotions and thoughts")
@@ -448,6 +619,136 @@ class Session(models.Model):
 
     def __str__(self):
         return "%s" % (self.tokBoxSessionId)
+
+class Label(models.Model):
+    text = models.CharField(max_length=20, blank=False, default = "")
+    color = ColorField(default="#2199E8", )
+    type = models.CharField(max_length=20, blank=False, default = "")
+    user = models.ForeignKey(User, null=False, blank=False)
+
+    def __str__(self):
+        return "%s" % (self.text)
+
+class Message(models.Model):
+    text = models.CharField(max_length=1000, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    thread = models.ForeignKey('MessageThread', null=False, blank=False, related_name="messageThread")
+    sender = models.ForeignKey(User, null=False, blank=False, related_name="messageSender")
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+    typeOfMessage = models.TextField(choices=NOTIFICATION_CHOICES)
+
+
+
+    def __str__(self):
+        return "%s" % (self.text)
+
+class KRMessage(models.Model):
+    channel = models.ForeignKey('KChannel', related_name='krmessages')
+    typeOfMessage = models.TextField(choices=NOTIFICATION_CHOICES)
+    message = models.TextField()
+    sender = models.ForeignKey(User, null=True, blank=False)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+
+class KChannelManager(models.Manager):
+    def create_channel(self, theUserIds, thePermission):
+        print("inside create_channel")
+        print(thePermission)
+        theChannel = KChannel.objects.create()
+        if thePermission:
+            theChannel.permission = thePermission
+            theChannel.save()
+
+        for theUserId in theUserIds:
+            theChannelUser = KChannelUser.objects.create(channel_id=theChannel.id, user_id=theUserId)
+            theChannelUser.save()
+
+        return theChannel
+
+    def create(self, **kwargs):
+        """
+        Creates a new object with the given kwargs, saving it to the database
+        and returning the created object.
+        """
+        obj = self.model(**kwargs)
+
+        self._for_write = True
+
+        obj.save(force_insert=True, using=self.db)
+
+        return obj
+
+class KChannel(models.Model):
+    label = models.TextField(max_length=16, unique=True)
+    users = models.ManyToManyField(User, blank=True, through="KChannelUser", related_name="%(app_label)s_%(class)s_related")
+    permission = models.CharField(max_length=30, choices=KCHANNEL_PERMISSION_CHOICES, default="ONLYRECEIVER_ONLYSENDER", )
+
+    objects=KChannelManager()
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            print("inside channel save")
+
+            super(KChannel, self).save(*args, **kwargs)
+
+        else:
+            print("no id")
+            unique = False
+            while not unique:
+                print("while not unique")
+                try:
+                    print("try")
+
+                    self.label = get_random_string(length=16, allowed_chars=u'-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+                    print("self.label %s" % self.label)
+
+                    super(KChannel, self).save(*args, **kwargs)
+                    print("saved")
+                except IntegrityError:
+                    self.label = get_random_string(length=16, allowed_chars=u'-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+                else:
+                    unique = True
+
+    def __str__(self):
+        return "%s" % (self.label)
+
+
+class KChannelUser(models.Model):
+    channel = models.ForeignKey(KChannel )
+    user = models.ForeignKey(User)
+
+    def __str__(self):
+        return "ChannelLabel: %s %s " % (self.channel.label, self.user)
+
+
+
+
+
+
+class MessageThread(models.Model):
+    sender = models.ForeignKey(User, null=False, blank=False, related_name="sender")
+    receiver = models.ForeignKey(User, null=False, blank=False, related_name="receiver")
+    labels = models.ManyToManyField('Label', blank=True, related_name="labels")
+    channel = models.OneToOneField('KChannel', blank=True, null=True)
+
+    def get_latest_message(self):
+        try:
+            if Message.objects.filter(thread=self).exists():
+                return [Message.objects.filter(thread=self).latest('created_at')][0].text
+            else:
+                return "No messages in this thread"
+        except:
+            return "No messages in this thread"
+
+
+    def get_messages(self):
+        messages = Message.objects.filter(thread=self)
+        return messages
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.get_latest_message())
+
+    def get_labels(self):
+        return self.labels.all().values()
 
 
 
@@ -570,6 +871,8 @@ class UpdateOccurrence(models.Model):
     longText = models.CharField(max_length=1000, blank=True, )
 
     objects = UpdateOccurrenceManager()
+
+
 
 
 

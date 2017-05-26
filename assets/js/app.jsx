@@ -3,33 +3,66 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import { Router, Route, Link, browserHistory } from 'react-router'
+import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 var validator = require('validator');
 var TinyMCE = require('react-tinymce')
 var theServer = 'https://192.168.1.156:8000/'
 
+import autobind from 'class-autobind'
+var auth = require('./auth')
+var Global = require('react-global');
+import Select from 'react-select'
 
 
 
-const App = React.createClass({
-  render() {
-    return (
-      <div>
-        <h1>App</h1>
-        <ul>
-          <li><Link to="/goals">Goal</Link></li>
-          <li><Link to="/plans">Plan</Link></li>
-                      <li><Link to="/plans/2">Plan</Link></li>
 
-            <li><Link to="/steps">Step</Link></li>
+export class App extends React.Component {
+
+    constructor (props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            'user': [],
+        }
+    }
 
 
-        </ul>
-        {this.props.children}
-      </div>
-    )
-  }
-});
+    componentDidMount() {
+        this.loadUserData()
+    }
+
+
+    logoutHandler(){
+        auth.logout()
+        hashHistory.push('/account/login/')
+    }
+
+    loadUserData() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/users/i/',
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(res) {
+                this.setState({
+                    'user': res
+                })
+            }.bind(this)
+        })
+    }
+
+    render() {
+        return (
+            <div><div className="spacer"></div>
+            <h1>You are now logged in, {this.state.user.username}</h1>
+            <button onClick={this.logoutHandler}>Log out</button>
+            </div>
+        )
+    }
+}
+
 
 String.prototype.replaceAll = function(str1, str2, ignore)
 {
@@ -40,29 +73,110 @@ String.prototype.replaceAll = function(str1, str2, ignore)
 {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
 };
-
-var ValidatedInput = React.createClass({
-
-    componentDidMount: function() {
-
-        var self = this;
-    },
-
-    getInitialState: function() {
-        return {
-            initialValue: this.props.initialValue,
-            value: "",
-
+export class KSSelect extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            serverErrors:"",
+            errors:"",
+            value:""
         }
-    },
+    }
 
-    componentWillReceiveProps: function(nextProps) {
-                this.setState({
+    componentDidMount () {
+        this.setState({
+            value: this.props.value
+        })
+    }
+
+
+
+    handleValueChange(option){
+        this.setState({value: option.value});
+        this.props.valueChange(option)
+    }
+
+
+
+    buildErrors = () => {
+        var i;
+        var errorsHTML = "";
+        if (this.state.serverErrors) {
+            for (i = 0; i < this.state.serverErrors.length; i++) {
+                errorsHTML += "<div>" + this.state.serverErrors[i] + "</div>"
+            }
+        } else {
+            if (typeof this.state.errors !== 'undefined' && this.state.errors.length > 0) {
+                for (i = 0; i < this.state.errors.length; i++) {
+                    errorsHTML += "<div>" + this.state.errors[i] + "</div>"
+                }
+            }
+        }
+        return errorsHTML
+
+    }
+
+    render= () => {
+
+        var errorsHTML = this.buildErrors()
+            if (errorsHTML != "") {
+
+        return (
+             <div className="field error">
+                 <label htmlFor={this.props.name}>{this.props.label}</label>
+                 <Select value={this.state.value}
+                                              onChange={this.handleValueChange} name={this.props.name}
+                                              options={this.props.options} clearable={this.props.isClearable} />
+                 <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
+
+                 </div>
+        )
+    } else {
+    return (
+             <div className="field">
+                 <label htmlFor={this.props.name}>{this.props.label}</label>
+                 <Select value={this.state.value}
+                                              onChange={this.handleValueChange} name={this.props.name}
+                                              options={this.props.options} clearable={this.props.isClearable} />
+                 </div>
+        )}
+    }
+}
+
+export class ValidatedInput extends React.Component{
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+        }
+    }
+
+    componentDidMount () {
+        this.setState({
+            initialValue: this.props.initialValue,
+            value: this.props.initialValue,
+        })
+
+    }
+
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.value != nextProps.value) {
+            this.setState({
                     value: nextProps.value,
                 })
-    },
 
-    getError: function(failedEvalString) {
+        }
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors:nextProps.serverErrors
+            })
+        }
+    }
+
+    getError = (failedEvalString) => {
         var i=0;
         var error;
         var errorArray = {
@@ -70,6 +184,8 @@ var ValidatedInput = React.createClass({
             "isEmpty": "This cannot be empty.",
             "isDate": "This needs to be a valid date of format.",
             "isTime": "This needs to be a valid time of format.",
+            "isInt":"This needs to be a whole number.",
+            "isDecimal":"This needs to be a number."
 
         };
         for(var key in errorArray) {
@@ -86,9 +202,9 @@ var ValidatedInput = React.createClass({
 
         return error;
 
-    },
+    }
 
-    validate: function(e) {
+    validate = (e) => {
         this.setState({value: e.target.value});
         this.props.stateCallback(e.target.value);
 
@@ -107,10 +223,8 @@ var ValidatedInput = React.createClass({
             var currentValidationString = stringArray[i];
 
             if (String(currentValidationString).charAt(0) == "!") {
-
                 var validationString = String(currentValidationString).slice(1);
                 var evalString = "validator." + validationString;
-
                 if (eval(evalString)) {
                 //if ("validator.isEmpty('Here's a new ')") {
                     var theError = this.getError(evalString);
@@ -119,17 +233,18 @@ var ValidatedInput = React.createClass({
 
                 }
 
-            }
-            var evalString = "validator." + currentValidationString;
+            } else {
+
+                var evalString = "validator." + currentValidationString;
+
+                if (!eval(evalString)) {
+                    var theError = this.getError(evalString);
 
 
-            if (!eval('"' + evalString + '"')) {
-                var theError = this.getError(evalString);
-
-                this.state.errors.push(theError);
-                        console.log("this state erorrs" + this.state.errors)
+                    this.state.errors.push(theError);
 
 
+                }
             }
 
 
@@ -139,20 +254,40 @@ var ValidatedInput = React.createClass({
 
 
         return this.state.errors;
-    },
+    }
 
-    updateState: function(targetValue) {
+    updateState = (targetValue) => {
         this.setState({value: targetValue});
 
-    },
+    }
 
-    render: function() {
+    buildErrors = () => {
         var i;
         var errorsHTML = "";
-        if (typeof this.state.errors !== 'undefined' && this.state.errors.length > 0) {
-            for (i = 0; i < this.state.errors.length; i++) {
-                errorsHTML += "<div>" + this.state.errors[i] + "</div>"
+        if (this.state.serverErrors) {
+            for (i = 0; i < this.state.serverErrors.length; i++) {
+                errorsHTML += "<div>" + this.state.serverErrors[i] + "</div>"
             }
+        } else {
+            if (typeof this.state.errors !== 'undefined' && this.state.errors.length > 0) {
+                for (i = 0; i < this.state.errors.length; i++) {
+                    errorsHTML += "<div>" + this.state.errors[i] + "</div>"
+                }
+            }
+        }
+        return errorsHTML
+
+    }
+
+
+
+
+    render = () => {
+        var errorsHTML = this.buildErrors()
+
+        if (this.props.isEnabled == null) {
+
+
         }
         if (this.props.type == "text") {
 
@@ -161,7 +296,7 @@ var ValidatedInput = React.createClass({
                     <div className="field error">
                         <label htmlFor={this.props.id}>{this.props.label}</label>
                         <input  type="text" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value}
-                               onChange={this.validate}/>
+                               onChange={this.validate} disabled={this.props.isDisabled}/>
                         <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
                     </div>
 
@@ -171,7 +306,7 @@ var ValidatedInput = React.createClass({
                 return (
                     <div className="field">
                     <label htmlFor={this.props.id}>{this.props.label}</label>
-                     <input type="text" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} />
+                     <input type="text" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} disabled={this.props.isDisabled}/>
                     </div>
 
                 )
@@ -183,7 +318,7 @@ var ValidatedInput = React.createClass({
                     <div className="fluid field error">
                         <label htmlFor={this.props.id}>{this.props.label}</label>
                         <textarea  placeholder={this.props.placeholder}  type="textarea" rows={this.props.rows} name={this.props.name} id={this.props.id} value={this.state.value}
-                               onChange={this.validate}></textarea>
+                               onChange={this.validate} disabled={this.props.isDisabled} />
                         <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
                     </div>
 
@@ -193,7 +328,7 @@ var ValidatedInput = React.createClass({
                 return (
                     <div className="fluid field">
                     <label htmlFor={this.props.id}>{this.props.label}</label>
-                     <textarea placeholder={this.props.placeholder}  rows={this.props.rows} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} ></textarea>
+                     <textarea placeholder={this.props.placeholder}  rows={this.props.rows} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} disabled={this.props.isDisabled}/>
                     </div>
 
                 )
@@ -202,15 +337,41 @@ var ValidatedInput = React.createClass({
 
 
         }
+         else if (this.props.type == "password") {
+
+            if (errorsHTML != "") {
+                return (
+                    <div className="field error">
+                        <label htmlFor={this.props.id}>{this.props.label}</label>
+                        <input  type="password" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value}
+                               onChange={this.validate} disabled={this.props.isDisabled}/>
+                        <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
+                    </div>
+
+                )
+            }
+            else {
+                return (
+                    <div className="field">
+                    <label htmlFor={this.props.id}>{this.props.label}</label>
+                     <input type="password" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} disabled={this.props.isDisabled}/>
+                    </div>
+
+                )
+
+            }
+        }
 
     }
 
-});
+}
 
 ValidatedInput.propTypes = {
         stateCallback: React.PropTypes.func,
     };
 
+App.contextTypes = {
+  router: React.PropTypes.object.isRequired
+};
 
-module.exports = App;
-module.exports = ValidatedInput;
+module.exports =  { App, ValidatedInput, KSSelect }

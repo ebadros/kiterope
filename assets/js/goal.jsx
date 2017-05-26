@@ -6,15 +6,28 @@ var forms = require('newforms');
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 
+import {ClippedImage , ClippedImageOverlayedText } from './elements'
+
 import {Sidebar} from './base'
 import autobind from 'class-autobind'
 var Select = require('react-select');
 
-var ValidatedInput = require('./app')
+import { ValidatedInput } from './app'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
-import {ImageUploader} from './base'
 
+import { ImageUploader, FormHeaderWithActionButton, GoalViewEditDeleteItem, Breadcrumb, ErrorWrapper } from './base'
+import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
+import { PlanForm, PlanList } from './plan'
+import {ChoiceModal, IconLabelCombo} from './elements'
+import { Textfit } from 'react-textfit';
+
+import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions, userSharingOptions } from './constants'
+
+import Measure from 'react-measure'
+
+import Pagination from "react-js-pagination";
 
 export const isThisReasonableOptions = [
         {value:null, label: ""},
@@ -29,66 +42,185 @@ export const goalInAlignmentWithCoreValuesOptions = [
     {value:true, label: "Yes, this goal aligns with my core values."},
     {value:false, label: "No, this goal does not align with my core values. I should rethink my goal."},
     ]
+
 $.ajaxSetup({
     beforeSend: function(xhr) {
         xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Connection', 'keep-alive');
+        xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
+
     }
 });
 
-var theServer = 'https://192.168.1.156:8000/'
 
+export class GoalEntryPage extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data: []
+        }
+    }
 
-var Goal = React.createClass({
-  render: function() {
-    return (
-      <div className="goal">
+    handleError = (theError) => {
+        this.setState({
+            error:theError,
+        })
 
-        {this.props.children}
-      </div>
-    );
-  }
-});
+    }
 
-// tutorial20.js
-var GoalBox = React.createClass({
-  loadCommentsFromServer: function() {
-    $.ajax({
-      url: theServer + "api/goals/",
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data.results});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
+    handleCancelClicked = () => {
+        $(this.refs['ref_goalForm']).slideUp();
+        $(this.refs['ref_goalsStepsHeader']).slideDown();
+    }
 
-  handleGoalSubmit: function(goal) {
+     handleGoalSubmit (goal) {
     $.ajax({
         url: theServer + "api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
         success: function(data) {
             this.setState({data: data});
         }.bind(this),
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
+            var serverErrors = xhr.responseJSON;
+            this.setState({
+                serverErrors:serverErrors,
+            })
+
         }.bind(this)
     });
-  },
+  }
 
-  getInitialState: function() {
-    return {data: []};
-  },
-    componentDidMount: function() {
+    componentDidMount() {
+        $(this.refs['ref_goalForm']).hide();
+
+    }
+    showGoalEntryForm() {
+        $(this.refs['ref_goalForm']).slideDown();
+        $(this.refs['ref_goalsStepsHeader']).slideUp();
+
+    }
+
+    render() {
+        return(
+            <div>
+                <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} />
+            <div className="fullPageDiv">
+                <div className="ui page container">
+                    <div className="spacer">&nbsp;</div>
+                </div>
+                <div ref="ref_goalsStepsHeader">
+                <GoalStepsHeader goalEntryFormClicked={this.showGoalEntryForm} /></div>
+                <div ref="ref_goalForm">
+                    <div className="ui row">
+                                    <div className="centered hugeType">Create a goal that is SMART</div>
+                                </div>
+                        <GoalForm cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
+                    </div>
+                </div>
+                </div>
+        )
+    }
+}
+
+export class GoalListPage extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data: [],
+            activePage:1,
+            serverErrors:"",
+            formIsOpen:false,
+            headerActionButtonLabel:"Add Goal"
+
+
+        }
+    }
+
+    handleError = (theError) => {
+        this.setState({
+            error:theError,
+        })
+
+    }
+
+
+
+  loadCommentsFromServer = () => {
+      if (this.state.activePage != 1) {
+                var theUrl = theServer + "api/goals/?page=" + this.state.activePage
+      }  else {
+          var theUrl = theServer + "api/goals/"
+      }
+    $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+        this.setState({
+            count: data.count,
+            next:data.next,
+            previous:data.previous,
+            data: data.results});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+
+      }.bind(this),
+
+    });
+  }
+
+  handleGoalSubmit (goal) {
+    $.ajax({
+        url: theServer + "api/goals/",
+        dataType: 'json',
+        type: 'POST',
+        data: goal,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+        success: function(data) {
+            this.loadCommentsFromServer()
+        }.bind(this),
+        error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+            var serverErrors = xhr.responseJSON;
+            this.setState({
+                serverErrors:serverErrors,
+            })
+
+        }.bind(this),
+        complete: function (jqXHR, textStatus){
+                if (textStatus == "success"){
+                    $(this.refs['ref_whichGoalForm']).slideUp();
+
+                }
+            }.bind(this)
+    });
+  }
+handleToggleForm = () => {
+        $(this.refs['ref_whichGoalForm']).slideToggle()
+    }
+
+    componentDidMount() {
         this.loadCommentsFromServer();
         //var intervalID = setInterval(this.loadCommentsFromServer, 2000);
         //this.setState({intervalID: intervalID});
         var self = this;
-        $(this.refs['id_whichGoalForm']).hide();
+        $(this.refs['ref_whichGoalForm']).hide();
 
 
     $(window).on('modal.visible', function(ev){
@@ -97,25 +229,92 @@ var GoalBox = React.createClass({
     $(window).on('modal.hidden', function(ev){
       self.setState(self.getInitialState());
     });
-    },
+    }
 
-    handleClick: function(ev){
+    handleClick(ev){
     if (ev.target == this.getDOMNode()){
       $(window).trigger('modal.hidden');
     }
-  },
+  }
+  handlePageChange = (pageNumber) => {
+        this.setState({activePage: pageNumber}, () => this.loadCommentsFromServer());
 
-componentWillUnmount: function() {
+    }
+
+  getPagination()  {
+          if (this.state.next != null || this.state.previous != null) {
+              return (
+                  <div className="ui center aligned one column grid">
+                  <Pagination activePage={this.state.activePage}
+                              itemsCountPerPage={9}
+                              totalItemsCount={this.state.count}
+                              pageRangeDisplayed={5}
+                              onChange={this.handlePageChange}/>
+                      </div>
+              )
+          } else {
+          return ("")
+          }
+      }
+
+      handleOpenForm = () => {
+        this.setState({
+            openModal:false,
+            headerActionButtonLabel: "Close Form",
+            formIsOpen:true,
+        }, () => {$(this.refs['ref_whichGoalForm']).slideDown()} )
+
+
+    }
+    handleReloadItem = () => {
+        this.loadStepsFromServer()
+    }
+handleCancelClicked = () => {
+      $(this.refs['ref_whichGoalForm']).slideUp()
+      this.setState({
+          formIsOpen:false,
+          headerActionButtonLabel: "Add Goal"
+      })
+
+  }
+
+
+  handleCloseForm = () => {
+        this.setState({
+            headerActionButtonLabel: "Add Goal",
+            formIsOpen:false,
+        }, () => $(this.refs['ref_whichGoalForm']).slideUp())
+
+    }
+
+  handleActionClick = () => {
+      if (this.state.formIsOpen == true) {
+        this.handleCloseForm()
+
+      }
+      else {
+          this.handleOpenForm()
+      }
+    }
+
+
+componentWillUnmount() {
    // use intervalId from the state to clear the interval
    //clearInterval(this.state.intervalId);
-},
-    toggle: function() {
-        $(this.refs['id_whichGoalForm']).slideToggle()
-    },
+}
+    toggle() {
+        $(this.refs['ref_whichGoalForm']).slideToggle()
+    }
 
-  render: function() {
+  render() {
+      var pagination = this.getPagination()
 
     return (
+
+<div>               <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} />
+
+
+
 
 
         <div className="fullPageDiv">
@@ -123,8 +322,6 @@ componentWillUnmount: function() {
 
 
             <div className="spacer">&nbsp;</div>
-            <div className="ui alert"></div>
-
             <div className="ui large breadcrumb">
                 <Link to={`/#`}><div className="section">Home</div></Link>
 
@@ -132,89 +329,774 @@ componentWillUnmount: function() {
                   <Link to={`/#`}><div className="active section">My Goals</div></Link>
             </div>
             <div>&nbsp;</div>
-            <GoalForm onGoalSubmit={this.handleGoalSubmit} />
+                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Goals" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
+        <div ref="ref_whichGoalForm">
+            <GoalForm cancelClicked={this.handleCancelClicked} onGoalSubmit={this.handleGoalSubmit} serverErrors={this.state.serverErrors} />
+            </div>
 
                     <GoalList data={this.state.data} />
+                <div className="spacer">&nbsp;</div>
+                {pagination}
             </div>
             </div>
-
+</div>
     );
   }
-});
+}
 
-// tutorial10.js
-var GoalList = React.createClass({
 
-    clearPage: function(goal_id) {
-        $(".fullPageDiv").slideToggle("slow", function () {
+export class GoalList extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data:[]
+        }
+    }
 
-                hashHistory.push('/goals/' + goal_id + '/plans')
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({
+                data:nextProps.data
+            })
+        }
+    }
 
+    render () {
+    var placeholderImageStyle = {
+        backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
+        width: '300px',
+        height: '300px',
+    }
+                console.log("props data length " + this.state.data.length)
+
+
+            var goalNodes2 = this.state.data.map((goal) => {
+                return (<GoalNode key={goal.id} goal={goal}/>)
+            })
+
+
+    return (
+          <div className='ui three column doubling stackable grid'>
+        {goalNodes2}
+      </div>
+    );
+  }
+
+}
+
+
+
+export class GoalDetailPage extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            data:[],
+            editable:false,
+            serverErrors:"",
+
+            openModal:false,
+            formIsOpen:false,
+            headerActionButtonLabel: "Add Plan"
+        }
+    }
+
+    handleGoalSubmit (goal) {
+        $.ajax({
+                url: theServer + "api/goals/" + goal.id +"/",
+                dataType: 'json',
+                type: 'PUT',
+                data: goal,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({data: data});
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+                    this.setState({
+                serverErrors:serverErrors,
+            })
+
+                }.bind(this)
             });
 
+  }
 
-    },
+    loadDetailFromServer = () => {
+        var theURL = theServer + "api/goals/" + this.props.params.goal_id + "/"
+
+    $.ajax({
+      url: theURL,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+        this.setState({
+            data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this),
+
+    });
+  }
+
+  handleActionClick = () => {
+      if (this.state.formIsOpen == true) {
+          this.setState({
+              headerActionButtonLabel: "Add Plan",
+            formIsOpen:false,
+        }, () => {$(this.refs['id_whichPlanForm']).slideUp()})
+
+      } else if (this.state.formIsOpen == false && this.state.openModal == false) {
+          this.setState({
+              openModal:true
+          })
+
+      }
+
+}
+    handleCloseModalClicked = () => {
+        this.setState({openModal:false})
+    }
+
+    handleOpenModal = () => {
+        this.setState({openModal:true})
+        //$(this.refs['id_whichPlanForm']).slideToggle()
+    }
+
+    handleOpenForm = () => {
+        this.setState({
+            openModal:false,
+            headerActionButtonLabel: "Close Form",
+            formIsOpen:true,
+        }, () => {$(this.refs['id_whichPlanForm']).slideDown()} )
 
 
-    componentDidMount: function() {
-        var self = this
+    }
 
 
-    },
-    render: function() {
-    var placeholderImageStyle = {
-        backgroundImage:"url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
-        width:'300px',
-        height:'300px',
+    handleCloseForm = () => {
+        this.setState({
+            headerActionButtonLabel: "Add Plan",
+            formIsOpen:false,
+        }, $(this.refs['id_whichPlanForm']).slideUp())
+
+    }
+
+  determineOptions = () => {
+      var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
+
+      $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+          type: 'OPTIONS',
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+          if (data.actions["PUT"]) {
+              this.setState({
+                  editable: true
+              });
+
+          }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this),
 
 
-        };
+    });
+  }
 
-    var goalNodes = this.props.data.map (function(goal) {
-        if (goal.image) {
-            var goalImage = <img src={goal.image}/>
+  componentDidMount() {
+      this.determineOptions()
+      this.loadDetailFromServer()
+      this.determineOptions()
+              $(this.refs['id_whichPlanForm']).hide()
+
+
+  }
+
+
+  handleModalClick = (callbackData) => {
+      switch(callbackData.action) {
+          case ("existing"):
+              hashHistory.push("/search")
+              break;
+          case ("create"):
+              this.handleOpenForm()
+              break;
+          case ("kiterope"):
+              hashHistory.push("/goalEntry")
+              break;
+      }
+  }
+
+    render () {
+        return (
+            <div>
+                <ChoiceModal  closeModalClicked={this.handleCloseModalClicked} click={this.handleModalClick} modalIsOpen={this.state.openModal} header="Add a plan" description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you." buttons={[
+                            {text:"Use an existing plan", action:"existing", color:"purple"},
+                            {text:"Create your own plan", action:"create", color:"" },
+                            {text:"Have Kiterope build you a plan", action:"kiterope", color:""},
+                        ]} />
+                <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+
+
+                <div className="fullPageDiv">
+                    <div className="ui page container">
+                        <div className="spacer">&nbsp;</div>
+                        <div className="ui alert"></div>
+                        <Breadcrumb values={[
+                                    {url:"/goals", label:"My Goals"},
+                                    {url:"/goals/" + this.props.params.goal_id + "/plans/", label:"Goal Detail"},
+
+                        ]}/>
+
+                        {/*
+                        <div className="ui large breadcrumb">
+                            <Link to={`/`}>
+                                <div className="section">Home</div>
+                            </Link>
+                            <i className="right chevron icon divider"></i>
+                            <Link to={`/goals`}>
+                                <div className="active section">My Goals</div>
+                            </Link>
+                            <i className="right chevron icon divider"></i>
+                            <Link to={`/goals/${this.props.params.goal_id}/plans/`}>
+                                <div className="active section">Goal Detail</div>
+                            </Link>
+                        </div>*/}
+                        <div>&nbsp;</div>
+                        <GoalViewEditDeleteItem key={this.props.params.goal_id}
+                                                showCloseButton={false}
+                                                apiUrl="api/goals/"
+                                                id={this.props.params.goal_id}
+                                                data={this.state.data}
+                                                currentView="Basic"/>
+                        <div>&nbsp;</div>
+                        <div>&nbsp;</div>
+                <FormHeaderWithActionButton actionClick={this.handleActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
+        <div ref="id_whichPlanForm">
+            <PlanForm onSubmit={this.handlePlanSubmit} serverErrors={this.state.serverErrors} />
+            </div>
+                        <PlanList parentId={this.props.params.goal_id} />
+
+
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            )
+    }
+}
+
+
+
+GoalList.propTypes = {
+    data: React.PropTypes.array.isRequired
+
+}
+
+
+export class GoalNode extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+
+    }
+    componentDidMount() {
+
+    }
+
+    clearPage = () => {
+
+        hashHistory.push('/goals/' + this.props.goal.id + '/plans')
+
+
+    }
+
+    render () {
+
+        if (this.props.goal.image) {
+            var theImage =  <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3ImageUrl + this.props.goal.image} text={this.props.goal.title} /></Link>
+
 
         } else {
-            var goalImage = <div className="image" style={placeholderImageStyle}>{goal.title}</div>
+            var theImage = <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3ImageUrl + "icons/goalItem.svg"} text={this.props.goal.title} /></Link>
         }
-      return (
+        return(
+            <div key={this.props.goal.id} className="column">
+                {theImage}
+
+                </div>
+
+        )
+    }
+
+}
 
 
-                        <div key={goal.id} className="column">
-                            <div className="ui fluid card overlayedImageContainer">
-                                <div className="image overlayedImage"><img src='http://semantic-ui.com/images/avatar2/large/kristy.png'></img>
-                                    <div className="overlayText">{goal.title}</div>
+
+export class GoalStepsHeader extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+    }
+
+    showGoalEntryForm() {
+        console.log("showGoalEntryForm")
+        this.props.goalEntryFormClicked()
+
+    }
+
+    render() {
+        return(
+        <div>
+
+        <div className="centered hugeType">Achieving a goal is hard work</div>
+
+                <div className="ui page container">
+                    <div className="ui center aligned three column grid">
+                                                <div className="ui row">&nbsp;</div>
+                        <div className="ui largeType row">
+                            <div className="column">Step 1
+
                                 </div>
-
-                              <div className="extra content">
-                                <a>
-                                  <i className="user icon"></i>
-                                  22 Friends
-                                </a>
-                              </div>
-                                    <div className="ui bottom attached green button" onClick={this.clearPage.bind(this, goal.id)}>
-
-                                  Plans
+                            <div className="column">Step 2
                                 </div>
-                                <div className="ui bottom attached red button" >
-                                  Angels
+                            <div className="column">Step 3
+
                                 </div>
 
                             </div>
 
+                        <div className="ui row">
+                            <div className="column">
+                                <img width="50%" src="/static/images/goal.svg" />
+                                </div>
+                            <div className="column">
+                                <img width="50%" src="/static/images/strategy.svg" />
+                                </div>
+                            <div className="column">
+                                <img width="50%" src="/static/images/bar-chart.svg" />
+                                </div>
+
+                            </div>
+
+                                                    <div className="ui row">
+
+                        <div className="column">Create a goal that is SMART
+                        </div>
+                        <div className="column">Follow a detailed and realistic plan designed to achieve that goal
+                        </div>
+                        <div className="column">Measure your progress and revise your plan to meet your specific needs
+                        </div>
+                                                        </div>
+                                                         <div className="ui row">
+
+                        <div className="column"><div className="ui fluid purple large button" onClick={this.showGoalEntryForm}>Let's do it</div>
+                        </div>
+                        <div className="column">&nbsp;
+                        </div>
+                        <div className="column">&nbsp;
+                        </div>
+</div>
+                    </div>
+                        </div>
+            </div>
+        )
+
+    }
+}
+
+
+
+export class GoalForm extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            title: "",
+            deadline: moment(),
+            description: "",
+            metric: "",
+            why: "",
+            image: "",
+            viewableBy: "ONLY_ME",
+            user: null,
+            coaches: [],
+            updates: [],
+            wasAchieved: false,
+            plans: [],
+            editable:true,
+            data:"",
+            serverErrors:""
+        }
+    }
+
+
+    componentDidMount () {
+        $(this.refs['id_whichGoalForm']).hide()
+        this.checkIfUser()
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            if (nextProps.data != undefined) {
+            this.setState({
+                id: nextProps.data.id,
+                title: nextProps.data.title,
+                deadline: moment(nextProps.data.deadline, "YYYY-MM-DD"),
+                description: nextProps.data.description,
+                metric: nextProps.data.metric,
+                why: nextProps.data.why,
+                image: nextProps.data.image,
+                viewableBy: nextProps.data.viewableBy,
+                wasAchieved: nextProps.data.wasAchieved,
+            })
+            }
+
+
+
+        }
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors:nextProps.serverErrors
+            })
+        }
+
+    }
+
+
+
+    handleTitleChange(value) {
+        this.setState({title: value});
+    }
+
+    handleDeadlineChange = (value)  => {
+        this.setState({deadline: value});
+    }
+
+    handleDescriptionChange(e) {
+        this.setState({description: e});
+    }
+
+
+    handleMetricChange(value) {
+        this.setState({metric: value});
+    }
+
+    handleWhyChange(value) {
+        this.setState({why: value});
+    }
+
+    handleImageChange = (callbackData) => {
+        this.setState({
+            image: callbackData.image
+        })
+    }
+    handleViewableByChange(e) {
+        this.setState({viewableBy: e.value});
+    }
+
+
+    checkIfUser() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/users/i/',
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(res) {
+                this.setState({
+                    'user': res
+                })
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error("this is bad", status, err.toString());
+        }
+        })
+    }
+
+
+    handleCancelClicked() {
+        this.props.cancelClicked()
+    }
+
+
+    handleSubmit(e) {
+
+
+            e.preventDefault();
+        this.checkIfUser()
+
+        if (this.state.user) {
+
+            var title = this.state.title;
+            var deadline = moment(this.state.deadline).format("YYYY-MM-DD")
+            var image = this.state.image
+            var description = this.state.description;
+            var metric = this.state.metric
+
+
+            var why = this.state.why;
+            var viewableBy = this.state.viewableBy;
+            var goalData = {
+                title: title,
+                deadline: deadline,
+                description: description,
+                metric: metric,
+                why: why,
+                image: image,
+                viewableBy: viewableBy,
+                coaches: [],
+                updates: [],
+                wasAchieved: false,
+                plans: []
+            }
+
+            if (this.state.id != "") {
+                goalData.id = this.state.id
+            }
+            this.props.onGoalSubmit(goalData, this.resetForm);
+        }
+    else {
+            this.setState({
+                    signInOrSignUpModalFormIsOpen: true,
+                }
+            )
+
+            }
+        }
+
+        resetForm = () => {
+            this.setState({
+                title: "",
+                deadline: moment(),
+                description: "",
+                metric: "",
+                why: "",
+                image: null,
+                viewableBy: "ONLY_ME",
+                user: null,
+                coaches: [],
+                updates: [],
+                wasAchieved: false,
+                plans: []
+            });
+        }
+
+        getForm = () => {
+            if (this.state.id) {
+                var buttonText = "Save Goal"
+
+            } else
+            {
+                var buttonText = "Create Goal"
+            }
+            var wideColumnWidth = "sixteen wide column"
+            var mediumColumnWidth = "sixteen wide column"
+            var smallColumnWidth = "eight wide column"
+
+            if (this.state.image) {
+                var imageUrl = this.state.image
+
+
+            } else {
+                var imageUrl = "goalItem.svg"
+            }
+        return (
+            <div className="ui page container">
+                <div className="ui grid">
+
+                    <div className="ui row">
+                        <div className="ten wide column">
+                            <ValidatedInput
+                                type="text"
+                                name="title"
+                                label="What is your goal? (Required)"
+                                id="id_title"
+                                placeholder="I will run a five minute mile, I will learn to speak Chinese fluently"
+                                value={this.state.title}
+                                initialValue={this.state.title}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleTitleChange}
+                                isDisabled={!this.state.editable}
+                                serverErrors={this.state.serverErrors.title}
+                            />
+
+                        </div>
+                    </div>
+                    <div className="ui row">
+                        <div className="ten wide column">
+
+                            <ValidatedInput
+                                type="textarea"
+                                name="why"
+                                label="Why do you want to achieve this goal? (Required)"
+                                id="id_why"
+                                placeholder="I want to make something of myself, I want to be around to see my daughter graduate from college."
+                                value={this.state.why}
+                                initialValue={this.state.why}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleWhyChange}
+                                rows={3}
+                                isDisabled={!this.state.editable}
+                                serverErrors={this.state.serverErrors.why}
+
+
+                            />
+                        </div>
+
+
+                    </div>
+                    <div className="ui row">
+                        <div className="ten wide column">
+
+                            <ValidatedInput
+                                type="textarea"
+                                name="description"
+                                label="Tell us a little more about this goal."
+                                id="id_description"
+                                placeholder=""
+                                value={this.state.description}
+                                initialValue={this.state.description}
+                                validators=''
+                                onChange={this.validate}
+                                stateCallback={this.handleDescriptionChange}
+                                rows={3}
+                                isDisabled={!this.state.editable}
+                                serverErrors={this.state.serverErrors.description}
+
+
+                            />
+                        </div>
+
+
+                    </div>
+                    <div className="ui row">
+                                                      <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
+
+                        <div className={smallColumnWidth}>
+
+                        <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                       label="Select an image that will help motivate you." defaultImage={imageUrl}/>
+                    </div></Measure></div>
+                    <div className="ui row">
+
+
+                        <div className="six wide column field">
+
+                            <label htmlFor="id_deadline">What is your deadline for achieving this goal? (Required)</label>
+
+                            <DatePicker selected={this.state.deadline} onChange={this.handleDeadlineChange}/>
+
+                        </div>
+
+
+                    </div>
+
+
+
+
+                    <div className="ui row">
+                        <div className="ten wide column">
+
+                            <ValidatedInput
+                                type="text"
+                                name="metric"
+                                label="How will you measure your progress? (Required)"
+                                id="id_title"
+                                placeholder="time per mile, judgments of third party observers"
+                                value={this.state.metric}
+                                initialValue={this.state.metric}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleMetricChange}
+                                isDisabled={!this.state.editable}
+                                serverErrors={this.state.serverErrors.metric}
+
+
+                            />
+                        </div>
+
+
+                    </div>
+                    <div className="ui  row">
+                        <div className="ten wide column field">
+                    <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
+                    <Select value={this.state.viewableBy} clearable={false}
+                                              onChange={this.handleViewableByChange} name="viewingOptions"
+                                              options={userSharingOptions}/>
+                            </div>
+                        </div>
+
+
+
+
+
+    <div className="ui row">&nbsp;</div>
                 </div>
-      );
-    }.bind(this));
-    return (
-          <div className='ui three column grid'>
 
-        {goalNodes}
-      </div>
-    );
-  }
-});
+                <div className="ui three column stackable grid">
+                    <div className="column">&nbsp;</div>
+                    <div className="column">
+                        <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                    </div>
+                    <div className="column">
+                        <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
+                    </div>
+                </div>
+            </div>
 
-export class UpdatedGoalForm extends React.Component {
+        )}
+
+
+
+    render() {
+    var theForm = this.getForm()
+
+        if (this.state.editable) {
+            return(
+                <div >
+                    <form className="ui form" onSubmit={this.handleSubmit}>
+                        {theForm}
+                    </form>
+                </div>
+
+            )
+        }
+
+        else {
+            return (
+                <div >
+                    <div className="ui form disabledForm">
+                        {theForm}
+                    </div>
+                </div>
+)
+        }
+
+    }
+
+}
+
+export class GoalSMARTForm extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
@@ -235,19 +1117,50 @@ export class UpdatedGoalForm extends React.Component {
             updates: [],
             wasAchieved: false,
             plans: [],
+            editable:false,
+            data:"",
         }
     }
 
 
     componentDidMount () {
         $(this.refs['id_whichGoalForm']).hide()
+        this.checkIfUser()
     }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            if (nextProps.data != undefined) {
+            this.setState({
+                id: nextProps.data.id,
+                title: nextProps.data.title,
+                deadline: moment(nextProps.data.deadline, "YYYY-MM-DD"),
+                description: nextProps.data.description,
+                coreValues: nextProps.data.coreValues,
+                goalInAlignmentWithCoreValues: nextProps.data.goalInAlignmentWithCoreValues,
+                obstacles: nextProps.data.obstacles,
+                isThisReasonable: nextProps.data.isThisReasonable,
+                metric: nextProps.data.metric,
+                why: nextProps.data.why,
+                image: nextProps.data.image,
+                viewableBy: nextProps.data.viewableBy,
+                wasAchieved: nextProps.data.wasAchieved,
+            })
+            }
+
+
+
+        }
+
+    }
+
+
 
     handleTitleChange(value) {
         this.setState({title: value});
     }
 
-    handleDeadlineChange(value) {
+    handleDeadlineChange = (value)  => {
         this.setState({deadline: value});
     }
 
@@ -279,8 +1192,10 @@ export class UpdatedGoalForm extends React.Component {
         this.setState({why: value});
     }
 
-    handleImageChange(e) {
-        console.log("check handleImageChange method")
+    handleImageChange = (callbackData) => {
+        this.setState({
+            image: callbackData.image
+        })
     }
     handleViewableByChange(e) {
         this.setState({viewableBy: e.target.value});
@@ -292,146 +1207,120 @@ export class UpdatedGoalForm extends React.Component {
     }
 
 
+    checkIfUser() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/users/i/',
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(res) {
+                this.setState({
+                    'user': res
+                })
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error("this is bad", status, err.toString());
+        }
+        })
+    }
 
 
+    handleCancelClicked() {
+        this.props.cancelClicked()
+    }
 
 
     handleSubmit(e) {
 
-        e.preventDefault();
-        var title = this.state.title;
-        var deadline = moment(this.state.deadline).format("YYYY-MM-DD");
 
-        var description = this.state.description;
-        var coreValues = this.state.coreValues;
-        var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
-        var obstacles = this.state.obstacles
-        var isThisReasonable = this.state.isThisReasonable
-        var metric = this.state.metric
+            e.preventDefault();
+        this.checkIfUser()
+
+        if (this.state.user) {
+
+            var title = this.state.title;
+            var deadline = moment(this.state.deadline).format("MMM DD, YYYY")
+            var image = this.state.image
+
+            var description = this.state.description;
+            var coreValues = this.state.coreValues;
+            var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
+            var obstacles = this.state.obstacles
+            var isThisReasonable = this.state.isThisReasonable
+            var metric = this.state.metric
 
 
-        var why = this.state.why;
-        var image = this.state.image;
-        var viewableBy = this.state.viewableBy;
+            var why = this.state.why;
+            var image = this.state.image;
+            var viewableBy = this.state.viewableBy;
+            var goalData = {
+                title: title,
+                deadline: deadline,
+                description: description,
+                coreValues: coreValues,
+                goalInAlignmentWithCoreValues: goalInAlignmentWithCoreValues,
+                obstacles: obstacles,
+                isThisReasonable: isThisReasonable,
+                metric: metric,
+                why: why,
+                image: image,
+                viewableBy: "ONLY_ME",
+                coaches: [],
+                updates: [],
+                wasAchieved: false,
+                plans: []
+            }
 
-        this.props.onGoalSubmit({
-            title: title,
-            deadline: deadline,
-            description: description,
-            coreValues: coreValues,
-            goalInAlignmentWithCoreValues:goalInAlignmentWithCoreValues,
-            obstacles:obstacles,
-            isThisReasonable: isThisReasonable,
-            metric: metric,
-            why: why,
-            image: null,
-            viewableBy: "ONLY_ME",
-            coaches: [],
-            updates: [],
-            wasAchieved: false,
-            plans: []});
+            if (this.state.id != "") {
+                goalData.id = this.state.id
+            }
+            this.props.onGoalSubmit(goalData);
 
-        //this.props.onGoalSubmit({title: title, viewableBy:viewableBy, description: description});
-        this.setState({
-            title: "",
-            deadline: "",
-            description: "",
-            coreValues: "",
-            goalInAlignmentWithCoreValues:false,
-            obstacles:"",
-            isThisReasonable: false,
-            metric: "",
-            why: "",
-            image: null,
-            viewableBy: "ONLY_ME",
-            user: null,
-            coaches: [],
-            updates: [],
-            wasAchieved: false,
-            plans: []});
+            //this.props.onGoalSubmit({title: title, viewableBy:viewableBy, description: description});
+            this.setState({
+                title: "",
+                deadline: moment(),
+                description: "",
+                coreValues: "",
+                goalInAlignmentWithCoreValues: false,
+                obstacles: "",
+                isThisReasonable: false,
+                metric: "",
+                why: "",
+                image: null,
+                viewableBy: "ONLY_ME",
+                user: null,
+                coaches: [],
+                updates: [],
+                wasAchieved: false,
+                plans: []
+            });
 
-        this.toggle();
-    }
+        }
+    else {
+            this.setState({
+                    signInOrSignUpModalFormIsOpen: true,
+                }
+            )
 
-    render() {
-        return(
-            <div className="fullPageDiv">
-                <div className="ui page container">
-                    <div className="spacer">&nbsp;</div>
-                    <div className="ui alert"></div>
-                    <div className="ui three column stackable grid">
-                                    <div className="column">&nbsp;</div>
-                                    <div className="column">&nbsp;</div>
-                                    <div className="column">
-                                        <div className="ui row">
-                                            <div className="">Not your first time creating a goal at Kiterope?</div>
-                                        </div>
-                                        <div className="ui row">
+            }
+        }
 
-                                    <div className="ui large fluid purple button">Use Advanced Goal Entry</div></div>
-                    </div>
+        getForm = () => {
+            if (this.state.id) {
+                var buttonText = "Save Goal"
 
-                    </div>
-                </div>
+            } else
+            {
+                var buttonText = "Create Goal"
+            }
 
-            <div>
-                <div className="centered hugeType topPadding">Achieving a goal is hard work</div>
-
-                <div className="ui page container">
-                    <div className="ui center aligned three column grid">
-                                                <div className="ui row">&nbsp;</div>
-                        <div className="ui largeType row">
-                            <div className="column">Step 1
-
-                                </div>
-                            <div className="column">Step 2
-                                </div>
-                            <div className="column">Step 3
-
-                                </div>
-
-                            </div>
-
-                        <div className="ui row">
-                            <div className="column">
-                                <img width="50%" src="/static/images/goal.svg"></img>
-                                </div>
-                            <div className="column">
-                                <img width="50%" src="/static/images/strategy.svg"></img>
-                                </div>
-                            <div className="column">
-                                <img width="50%" src="/static/images/bar-chart.svg"></img>
-                                </div>
-
-                            </div>
-
-                                                    <div className="ui row">
-
-                        <div className="column">Create a goal that is SMART
-                        </div>
-                        <div className="column">Follow a detailed and realistic plan designed to achieve that goal
-                        </div>
-                        <div className="column">Measure your progress and revise your plan to meet your specific needs
-                        </div>
-                                                        </div>
-                                                         <div className="ui row">
-
-                        <div className="column"><div className="ui fluid purple large button">Let's do it</div>
-                        </div>
-                        <div className="column">&nbsp;
-                        </div>
-                        <div className="column">&nbsp;
-                        </div>
-</div>
-                    </div>
-                        </div>
-                        <form className="ui form" onSubmit={this.handleSubmit} >
-
-                            <div className="ui page container">
-                                <div className="ui row">
-                                    <div className="centered hugeType topPadding">Create a goal that is SMART</div>
-                                </div>
+            var imageUrl = s3ImageUrl + this.state.image
+        return ( <div className="ui page container">
                                 <div className="ui row">&nbsp;</div>
+
                                 <div className="ui segment">
                                     <div className="ui grid">
                                         <div className="center aligned five wide column blue ">
@@ -444,7 +1333,7 @@ export class UpdatedGoalForm extends React.Component {
                                             </div>
                                         </div>
                                         <div className="eleven wide column">
-                                            <div className="ui row">
+                                            <div className="ui row bold">
                                                 <ValidatedInput
                                                     type="text"
                                                     name="title"
@@ -456,11 +1345,14 @@ export class UpdatedGoalForm extends React.Component {
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
                                                     stateCallback={this.handleTitleChange}
+                                                    isDisabled={!this.state.editable}
                                             />
 
                                             </div>
+                                                                                        <div className="ui row">&nbsp;</div>
+
                                             <div className="ui row">
-                                            <ImageUploader label="Select an image that will help motivate you." defaultImage="" />
+                                            <ImageUploader imageReturned={this.handleImageChange} label="Select an image that will help motivate you." defaultImage={imageUrl} />
                                                 </div>
 
                                         </div>
@@ -489,6 +1381,8 @@ export class UpdatedGoalForm extends React.Component {
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
                                                     stateCallback={this.handleMetricChange}
+                                                    isDisabled={!this.state.editable}
+
                                             />
                                             </div>
 
@@ -524,6 +1418,9 @@ export class UpdatedGoalForm extends React.Component {
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
                                                     stateCallback={this.handleObstaclesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+
                                             />
                                             </div>
 
@@ -557,6 +1454,9 @@ export class UpdatedGoalForm extends React.Component {
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
                                                     stateCallback={this.handleCoreValuesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+
                                             />
                                             </div>
                                             <div className="ui row">&nbsp;</div>
@@ -576,6 +1476,9 @@ export class UpdatedGoalForm extends React.Component {
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
                                                     stateCallback={this.handleWhyChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+
                                             />
                                             </div>
 
@@ -611,300 +1514,233 @@ export class UpdatedGoalForm extends React.Component {
                                 </div>
                                 <div className="ui three column stackable grid">
                                     <div className="column">&nbsp;</div>
-                                    <div className="column"><div className="ui large fluid button">Cancel</div></div>
-                                    <div className="column"><div className="ui large fluid blue button" onClick={this.handleSubmit} >Create Goal</div></div>
+                                    <div className="column"><div className="ui large fluid button" onClick={this.handleCancelClicked} >Cancel</div></div>
+                                    <div className="column"><div className="ui large fluid blue button" onClick={this.handleSubmit} >{buttonText}</div></div>
                                     </div>
                             </div>
-                        </form>
-            </div>
-                <div className="splashPageSection"></div>
-</div>
+
+        )}
 
 
 
+    render() {
+    var theForm = this.getForm()
 
+        if (this.state.editable) {
+            return(
+                <div >
+                    <form className="ui form" onSubmit={this.handleSubmit}>
+                        {theForm}
+                    </form>
+                </div>
 
+            )
+        }
 
+        else {
+            return (
+                <div >
+                    <div className="ui form disabledForm">
+                        {theForm}
+                    </div>
+                </div>
+)
+        }
 
-                    )
     }
 
 }
 
-// tutorial19.js
-var GoalForm = React.createClass({
-    componentDidMount: function() {
-        var self = this;
-        $(this.refs['id_whichGoalForm']).hide()
-    },
-
-    getInitialState: function() {
-        return {
+export class SimpleGoalForm extends GoalForm {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
             title: "",
-            deadline: "",
+            deadline: moment(),
             description: "",
+            coreValues: "",
+            goalInAlignmentWithCoreValues: null,
+            obstacles: "",
+            isThisReasonable: null,
+            metric: "",
             why: "",
             image: null,
-            votes: null,
             viewableBy: "ONLY_ME",
-            priority: null,
             user: null,
             coaches: [],
             updates: [],
             wasAchieved: false,
-            hasMetric: false,
             plans: [],
-        };
-    },
-
-    toggle: function() {
-        $(this.refs['id_whichGoalForm']).slideToggle()
-    },
-
-    handleTitleChange: function(e) {
-        this.setState({title: e.target.value});
-    },
-
-    handleDeadlineChange: function(e) {
-        this.setState({deadline: e.target.value});
-    },
-
-    handleWhyChange: function(e) {
-        this.setState({why: e.target.value});
-    },
-
-    handleVotesChange: function(e) {
-        this.setState({votes: e.target.value});
-    },
-
-    handleViewableByChange: function(e) {
-        this.setState({viewableBy: e.target.value});
-    },
-
-    handleDescriptionChange: function(e) {
-        this.setState({description: e.target.value});
-    },
-
-    handleSubmit: function(e) {
-
-        e.preventDefault();
-        var title = this.state.title;
-        var description = this.state.description;
-
-        var deadline = this.state.deadline;
-        var why = this.state.why;
-        var image = this.state.image;
-        var viewableBy = this.state.viewableBy;
-        var priority = this.state.priority;
-
-        //var image = this.state.image;
-
-
-
-        if (!description || !title ) {
-        return;
+            editable:false,
+            data:"",
         }
-        this.props.onGoalSubmit({
-            title: title,
-            description: description,
-            deadline: deadline,
-            why: why,
-            image: null,
-            votes: null,
-            viewableBy: "ONLY_ME",
-            priority: null,
-            user: null,
-            coaches: [],
-            updates: [],
-            wasAchieved: false,
-            hasMetric: false,
-            plans: []});
-
-        //this.props.onGoalSubmit({title: title, viewableBy:viewableBy, description: description});
-        this.setState({
-            title: "",
-            deadline: "",
-            description: "",
-            why: "",
-            image: null,
-            votes: null,
-            viewableBy: "ONLY_ME",
-            priority: null,
-            user: null,
-            coaches: [],
-            updates: [],
-            wasAchieved: false,
-            hasMetric: false,
-            plans: []});
-
-        this.toggle();
-    },
-
-  render: function() {
-    return (
-        <div>
-    <div className="ui three column grid">
-
-        <div className="ui column header"><h1>Goals</h1></div>
-                    <div className="ui right floated column">
-                        <button className="ui right floated primary large fluid button" onClick={this.toggle}>Create Goal</button>
-                    </div>
-                        </div>
-        <div ref="id_whichGoalForm">
-        <div className='ui form'>
-            <form className="goalForm" onSubmit={this.handleSubmit}>
-                <div className='field'>
-                  <label>Title</label>
-
-                    <input
-                      type="text"
-                      placeholder="Title"
-                      value={this.state.title}
-                      onChange={this.handleTitleChange}
-                    />
-                  </div>
-                <div className='field'>
-                  <label>Description</label>
-
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      value={this.state.description}
-                      onChange={this.handleDescriptionChange}
-                    />
-                  </div>
-                <div className='field'>
-                  <label>Deadline</label>
-                    <Datetime placeholder="Deadline" onChange={this.handleDeadlineChange} value={this.state.deadline} viewMode='days' className="ui small input" name="deadline" id="id_deadline"/>
-
-                  </div>
-                <div className='field'>
-                  <label>Why</label>
-
-                    <input
-                      type="text"
-                      placeholder="Why"
-                      value={this.state.why}
-                      onChange={this.handleWhyChange}
-                    />
-                  </div>
-                <div className='field'>
-                    <label>Image</label>
-
-                    <input
-                      type="text"
-                      placeholder="Image"
-                      value={this.state.image}
-                      onChange={this.handleImageChange}
-                    />
-                  </div>
-                <div className='field'>
-                    <label>ViewableBy</label>
-
-                    <select name="viewableBy" id="id_viewableBy" value={this.state.viewableBy} onChange={this.handleViewableByChange}>
-                                                <option value="ONLY_ME">ONLY_ME</option>
-                                                <option value="SHARED">Just people I've shared this goal with</option>
-                                                <option value="MY_COACHES">Just my coaches</option>
-                                                <option value="ALL_COACHES">All coaches</option>
-                                                <option value="ANYONE">Anyone</option>
-
-                                            </select>
-
-
-                  </div>
-
-              <div className="ui three column grid">
-                                        <div className="ui row">&nbsp;</div>
-
-                    <div className="ui row">
-                        <div className="ui column">&nbsp;</div>
-
-
-                                <div className="ui  column"><button className="ui fluid button" onClick={this.toggle}>Cancel</button></div>
-                                <div className="ui  column"><button type="submit" className="ui primary fluid button">Save</button></div>
-
-
-                    </div></div>
-      </form>
-                    <div className="ui row">&nbsp;</div>
-
-                          </div>
-            </div>
-      </div>
-
-    );
-  },
-
-});
-
-var HelloModal = React.createClass({
-  getInitialState: function() {
-    return {
-      visible: false
-    };
-  },
-  componentDidMount: function() {
-    var self = this;
-    $(window).on('modal.visible', function(ev){
-      self.setState({visible: true});
-    });
-    $(window).on('modal.hidden', function(ev){
-      self.setState(self.getInitialState());
-    });
-  },
-  render: function() {
-    var modal_classes = (this.state.visible)? 'ui small modal transition visible active' : 'ui small modal transition hidden';
-    return (
-      <div className={modal_classes}>
-          <div className="ui container">
-              <div className="header"><h1>Create Goal</h1></div>
-              <div className="ui grid">
-                  <div className="ui eight wide column">
-                      <GoalForm onGoalSubmit={this.handleSubmit}/>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-    );
-  }
-});
-
-var ModalPage = React.createClass({
-  getInitialState: function() {
-    return {
-      visible: false
-    };
-  },
-  componentDidMount: function() {
-    var self = this;
-    $(window).on('modal.visible', function(ev){
-      self.setState({visible: true});
-    });
-    $(window).on('modal.hidden', function(ev){
-      self.setState(self.getInitialState());
-    });
-  },
-  handleClick: function(ev){
-    if (ev.target == ReactDOM.findDOMNode(this)){
-      $(window).trigger('modal.hidden');
     }
-  },
-  render: function() {
-    var modal_classes = (this.state.visible)? 'ui dimmer modals page transition visible active' : 'ui dimmer modals page transition hidden';
-    return (
-      <div className={modal_classes} onClick={this.handleClick}>
-        <HelloModal />
-      </div>
-    );
-  }
-});
 
-var showModal = function(){
-  $(window).trigger('modal.visible');
-};
+    getForm = () => {
+
+            var imageUrl = s3ImageUrl + this.state.image
+        var theDeadline = moment(this.state.deadline).format("MMM DD, YYYY")
+        return (
+            <div className="ui page container">
+                <div className="ui grid">
+                    <div className="two wide column">
+                        <img className="ui small image" src={s3ImageUrl + this.state.image}/></div>
+
+                    <div className="eleven wide column">
+                        <div className="ui row">
+                            <div className="header">
+                                <h1>{this.state.title}</h1>
+                                </div>
 
 
+                        </div>
+                        <div className="ui row">&nbsp;</div>
+                        <div className="ui row">
+                            <div className="field">
+                                <label htmlFor="id_metric">Metric</label>
+                                <div>{this.state.metric}</div>
+                                </div>
+
+
+                        </div>
+
+
+
+
+
+                            <div className="ui row">&nbsp;</div>
+                        <div className="ui row">
+                            <div className="field">
+                                <label htmlFor="id_metric">Obstacles</label>
+                                <div>{this.state.obstacles}</div>
+                                </div>
+
+
+                        </div>
+                        <div className="ui row">&nbsp;</div>
+                        <div className="ui row">
+                            <div className="field">
+                                <label htmlFor="id_metric">Core Values</label>
+                                <div>{this.state.coreValues}</div>
+                                </div>
+
+
+                        </div>
+
+
+                            <div className="ui row">&nbsp;</div>
+                        <div className="ui row">
+                            <div className="field">
+                                <label htmlFor="id_why">Why is this your goal?</label>
+                                <div>{this.state.why}</div>
+                                </div>
+
+
+                        </div>
+                        <div className="ui row">&nbsp;</div>
+
+
+
+
+
+
+
+
+
+                            <div className="ui row field">
+                                <label htmlFor="id_deadline">Deadline</label>
+
+                                <div>{theDeadline}</div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+        )}
+
+    render() {
+    var theForm = this.getForm()
+
+        if (this.state.editable) {
+            return(
+                <div >
+                    <form className="ui form" onSubmit={this.handleSubmit}>
+                        {theForm}
+                    </form>
+                </div>
+
+            )
+        }
+
+        else {
+            return (
+                <div >
+                    <div className="ui form disabledForm">
+                        {theForm}
+                    </div>
+                </div>
+)
+        }
+
+    }
+
+
+}
+export class GoalBasicView extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:"",
+
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            data:this.props.data,
+        })
+    }
+    componentWillReceiveProps (nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({
+                data:nextProps.data
+            })
+        }
+    }
+    render() {
+        var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY")
+        if (this.state.data.image == "") {
+            var theImage = "icons/goalItem.svg"
+        } else {
+            var theImage = this.state.data.image
+        }
+        return(
+            <div className="ui grid">
+                <div className="two wide column">
+                    <img className="ui image" src={s3ImageUrl + theImage}></img>
+                    </div>
+                <div className="eight wide column">
+                    <div className="fluid row">
+                        <h1>{this.state.data.title}</h1>
+                    </div>
+                    <div className="fluid row">
+                        {this.state.data.coreValues}
+                    </div>
+                </div>
+                <div className="right aligned six wide column">
+                    <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline" background="Light" link="/goalEntry" />
+                    <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric} icon="metric" background="Light" link="/goalEntry" />
+</div>
+                    </div>
+
+        )
+
+    }
+}
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -923,4 +1759,4 @@ function getCookie(name) {
 
 
 
-module.exports = UpdatedGoalForm, GoalBox;
+module.exports = { GoalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView, SimpleGoalForm, };

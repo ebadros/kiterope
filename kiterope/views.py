@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Plan, Step, Coach, SearchQuery, Participant, Notification, Student, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -23,8 +23,13 @@ from rest_framework.decorators import list_route
 
 from datetime import date
 from dateutil.rrule import rrule, DAILY
+from rest_framework.authtoken.models import Token
+from rest_framework_extensions.mixins import PaginateByMaxMixin
+from django.db.models import Q
 
-from kiterope.permissions import IsAuthorOrReadOnly, AllAccessPostingOrAdminAll, IsOwnerOrReadOnly
+from rest_framework.permissions import AllowAny
+
+from kiterope.permissions import UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 
 
 import requests
@@ -41,13 +46,12 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, PlanSerializer, StepSerializer2, CoachSerializer, QuestionSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
-from kiterope.serializers import StudentSerializer, SessionSerializer, ReviewSerializer, UpdateSerializer, PlanSearchSerializer, RateSerializer, AnswerSerializer, InterestSerializer
-from kiterope.forms import UserForm, ProfileForm, GoalForm, PlanForm, InterestForm
+from kiterope.serializers import UserSerializer, ContactSerializer,  KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
 
-from kiterope.search_indexes import PlanIndex
+from kiterope.search_indexes import ProgramIndex
 
 
 from rest_framework import status
@@ -64,9 +68,10 @@ from rest_framework.permissions import IsAuthenticated
 
 # OpenTok is the protocol for Video and Voice chat that Kiterope uses
 from opentok import OpenTok, MediaModes, OpenTokException, __version__
+from rest_framework.pagination import PageNumberPagination
+from copy import deepcopy
 
-
-
+from sendsms import api
 
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
 OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
@@ -74,6 +79,13 @@ OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
 class ApiEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
         return HttpResponse('Hello, OAuth2!')
+
+
+def create_missing_profiles(request):
+    users = User.objects.filter(profile=None)
+    for u in users:
+        Profile.objects.create(user=u)
+
 
 @api_view()
 @renderer_classes([OpenAPIRenderer, SwaggerUIRenderer])
@@ -84,24 +96,270 @@ def schema_view(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
 
+
+    def retrieve(self, request, pk=None):
+        def handle(self, *args, **options):
+            users = User.objects.filter(profile=None)
+            for u in users:
+                Profile.objects.create(user=u, firstName=u.first_name, lastName=u.lastName)
+                print("Created profile for {u}".format(u=u))
+
+        if pk == 'i':
+            return Response(UserSerializer(request.user,
+                                           context={'request': request}).data)
+        return super(UserViewSet, self).retrieve(request, pk)
+
+
+
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 9
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+class LabelViewSet(viewsets.ModelViewSet):
+    model = Label
+    queryset = Label.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = LabelSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+            typeOfLabel = self.kwargs['typeOfLabel']
+            print("this is type of message %s" % typeOfLabel)
+            #aQueryset = Label.objects.filter(Q(user=self.request.user) | Q(type=typeOfLabel))
+
+            aQueryset = Label.objects.all()
+        except:
+            aQueryset = Label.objects.none()
+
+        return aQueryset
+
+class MessageThreadMessageViewSet(viewsets.ModelViewSet):
+    model = Message
+    queryset = Message.objects.all()
+    permission_classes = [IsReceiverSenderOrReadOnly]
+    required_scopes = ['groups']
+    serializer_class = MessageSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+            thread_id = self.kwargs['thread_id']
+
+            aQueryset = Message.objects.filter(thread=thread_id)
+        except:
+            aQueryset = Message.objects.none()
+
+        return aQueryset
+
+
+class KChannelViewSet(viewsets.ModelViewSet):
+    model = KChannel
+    queryset = KChannel.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = KChannelSerializer
+
+class ReceiverKChannelViewSet(viewsets.ModelViewSet):
+    model = KChannel
+    queryset = KChannel.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = KChannelSerializer
+
+
+
+
+
+    def get_queryset(self):
+        try:
+            receiver_id = self.kwargs['receiver_id']
+            print("receiverId %s" % receiver_id)
+            currentUser = self.request.user.id
+            print("currentUser %s" % currentUser)
+
+            usersChannelsIds = KChannelUser.objects.filter(user_id=currentUser).values_list('channel_id', flat=True)
+            usersChannelsIds = usersChannelsIds[::1]
+            receiversChannelsIds = KChannelUser.objects.filter(user_id=receiver_id).values_list('channel_id', flat=True)
+            receiversChannelsIds = receiversChannelsIds[::1]
+
+            channelWithBothUserAndReceiver =  [val for val in usersChannelsIds if val in receiversChannelsIds]
+            print("inside receiverKChannel", channelWithBothUserAndReceiver)
+
+            if channelWithBothUserAndReceiver == []:
+                try:
+                    theUsersWithPermission = [receiver_id, currentUser]
+                    print("try to create_channel")
+                    print(theUsersWithPermission)
+
+
+                    theChannel = KChannel.objects.create_channel([receiver_id, currentUser], "ONLYRECEIVER_ONLYSENDER")
+                    print("try to get channel query")
+                    aQueryset = KChannel.objects.filter(id=theChannel.id)
+                except:
+                    aQueryset = KChannel.objects.none()
+
+
+            #print(roomWithBothUserAndReceiver.keys())
+            else:
+                try:
+                    aQueryset = KChannel.objects.filter(id=channelWithBothUserAndReceiver[0])
+                except:
+                    aQueryset = KChannel.objects.none()
+
+        except:
+
+            aQueryset = KChannel.objects.none()
+
+        return aQueryset
+
+    def intersect(a, b):
+        print("inside intersect")
+        print(usersChannelsIds)
+        print(receiversChannelsIds)
+        return set(a) & set(b)
+
+class MessageThreadChannelViewSet(viewsets.ModelViewSet):
+    model = MessageThread
+    queryset = MessageThread.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = MessageThreadSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        try:
+            channel_id = self.kwargs['channel_id']
+
+            aQueryset = MessageThread.objects.filter(channel=channel_id)
+        except:
+            aQueryset = MessageThread.objects.none()
+
+        return aQueryset
+
+
+
+
+
+
+class MessageThreadViewSet(viewsets.ModelViewSet):
+    model = MessageThread
+    queryset = MessageThread.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = MessageThreadSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        print(request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def post(self, request, *args, **kwargs):
+        self.create(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+            label_id = self.kwargs['label_id']
+            currentUser = self.request.user.id
+            #aQueryset = MessageThread.objects.filter(labels=label_id)
+
+            aQueryset = MessageThread.objects.filter((Q(sender=currentUser) | Q(receiver=currentUser)) & Q(labels=label_id))
+        except:
+            try:
+                currentUser = self.request.user.id
+                aQueryset = MessageThread.objects.filter(Q(sender=currentUser) | Q(receiver=currentUser))
+
+            except:
+                aQueryset = MessageThread.objects.none()
+
+        return aQueryset
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    model = Message
+    queryset = Message.objects.all()
+    permission_classes = [IsReceiverSenderOrReadOnly]
+    required_scopes = ['groups']
+    serializer_class = MessageSerializer
+    pagination_class = LargeResultsSetPagination
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def post(self, request, *args, **kwargs):
+        self.create(request, *args, **kwargs)
+
+
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+
+        try:
+            sender_id = self.kwargs['sender_id']
+            receiver_id = self.kwargs['receiver_id']
+            aQueryset = Message.objects.filter(sender=sender_id, receiver=receiver_id)
+        except:
+            aQueryset = Message.objects.all()
+
+        return aQueryset
 
 
 class GoalViewSet(viewsets.ModelViewSet):
     model = Goal
-
     queryset = Goal.objects.all()
-
-    #permission_classes = [permissions.IsAuthenticated, TokenScope]
-    #authentication_classes = []
-
+    permission_classes = [IsOwnerOrReadOnly]
     required_scopes = ['groups']
-
-    #parser_classes = (JSONParser, )
-
     serializer_class = GoalSerializer
+    pagination_class = StandardResultsSetPagination
 
     def create(self, request, *args, **kwargs):
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -110,7 +368,6 @@ class GoalViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -119,41 +376,8 @@ class GoalViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    def post(self, request, *args, **kwargs):
-        self.create(request, *args, **kwargs)
-        return self.list(request, *args, **kwargs)
-
-
-class StepViewSet(viewsets.ModelViewSet):
-    #permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    #required_scopes = ['groups']
-
-    serializer_class = StepSerializer2
-    queryset = Step.objects.all()
-    required_scopes = ['groups']
-
-    def get_queryset(self):
-
-        try:
-            plan_id = self.kwargs['plan_id']
-            print(plan_id)
-            aQueryset = Step.objects.filter(plan=plan_id)
-        except:
-            aQueryset = Step.objects.all()
-
-        return aQueryset
-
-    def create(self, request, *args, **kwargs):
-        print(request.data)
-        serializer = self.get_serializer(data=request.data)
-
-        serializer.is_valid(raise_exception=True)
-
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     def update(self, request, *args, **kwargs):
+        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
@@ -162,6 +386,84 @@ class StepViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def post(self, request, *args, **kwargs):
+        self.create(request, *args, **kwargs)
+
+
+        print(self.request.errors)
+        return self.list(request, *args, **kwargs)
+
+    def get_serializer_context(self):
+        """
+        pass request attribute to serializer
+        """
+        context = super(GoalViewSet, self).get_serializer_context()
+        return context
+
+
+
+
+class StepViewSet(viewsets.ModelViewSet):
+    #permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    #required_scopes = ['groups']
+
+    serializer_class = StepSerializer
+    queryset = Step.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [IsProgramOwnerOrReadOnly]
+
+    pagination_class = LargeResultsSetPagination
+
+
+    def get_queryset(self):
+
+        try:
+            program_id = self.kwargs['program_id']
+            aQueryset = Step.objects.filter(program=program_id)
+        except:
+            aQueryset = Step.objects.all()
+
+        return aQueryset
+
+    def create(self, request, *args, **kwargs):
+        print(self.request.data)
+
+
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        try:
+
+            theUpdates = request.POST.getlist('updatesIds[]')
+            theStepId = serializer.data['id']
+
+
+            for anUpdate in theUpdates:
+                theUpdate = Update.objects.get(id=anUpdate)
+                theUpdate.step_id = theStepId
+                theUpdate.save()
+        except:
+            pass
+
+
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        print("update")
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        api.send_sms(body='I can haz txt', from_phone='+3107703042', to=['+3107703042'])
+
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -176,8 +478,6 @@ class StepViewSet(viewsets.ModelViewSet):
 
 
     def post(self, request, *args, **kwargs):
-        print(request)
-
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
 
@@ -186,8 +486,62 @@ class StepViewSet(viewsets.ModelViewSet):
         print("inside")
 
 class PlanOccurrenceViewSet(viewsets.ModelViewSet):
-
+    queryset = PlanOccurrence.objects.all()
     serializer_class = PlanOccurrenceSerializer
+    permission_classes = [IsOwnerOrNone]
+    required_scopes = ['groups']
+    pagination_class = StandardResultsSetPagination
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+
+
+
+
+
+
+
+
+class GoalPlanOccurrenceViewSet(viewsets.ModelViewSet):
+    queryset = PlanOccurrence.objects.all()
+    serializer_class = PlanOccurrenceSerializer
+    permission_classes = [IsOwnerOrNone]
+    required_scopes = ['groups']
+    pagination_class = StandardResultsSetPagination
+
+    def create(self, request, *args, **kwargs):
+        print(self.request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+
+        try:
+            goal_id = self.kwargs['goal_id']
+            aQueryset = PlanOccurrence.objects.filter(goal=goal_id)
+        except:
+            aQueryset = PlanOccurrence.objects.none()
+
+        return aQueryset
+
+class StepOccurrenceViewSet(viewsets.ModelViewSet):
+    queryset = StepOccurrence.objects.all()
+    serializer_class = StepOccurrenceSerializer
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    pagination_class = StandardResultsSetPagination
+
+
+
 
 
 class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
@@ -274,9 +628,11 @@ class UpdateViewSet(viewsets.ModelViewSet):
 
 
 
-class StepOccurrenceViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    #required_scopes = ['groups']
+class PeriodViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrNone]
+    #permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+
+    required_scopes = ['groups']
     stepStart = -999
     stepEnd = -999
     serializer_class = StepOccurrenceSerializer
@@ -284,9 +640,9 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         try:
-
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
+            print("periodRangeStart %s" % periodRangeStart)
 
             #print("inside list2")
             periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
@@ -307,7 +663,7 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
 
 
         self.updateOccurrences(currentUser, periodRangeStart, periodRangeEnd)
-        print("occurrencesUpdated")
+        #print("occurrencesUpdated")
 
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -329,17 +685,17 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
         return self.list(request, *args, **kwargs)
 
     def updateOccurrences(self, currentUser, periodRangeStart, periodRangeEnd):
-        print("updateOccurrences called")
+        #print("updateOccurrences called")
         try:
-            print("currentUser %s" % currentUser)
+            #print("currentUser %s" % currentUser)
             userPlanOccurrences = PlanOccurrence.objects.filter(user=currentUser.id)
-            print("userPlanOccurrences %d" % userPlanOccurrences.count())
+            #print("userPlanOccurrences %d" % userPlanOccurrences.count())
 
-            print("before persisted occurrences")
+            #print("before persisted occurrences")
 
             persistedOccurrences = StepOccurrence.objects.filter(user=currentUser.id)
 
-            print("persistedOccurrences %d" % persistedOccurrences.count())
+            #print("persistedOccurrences %d" % persistedOccurrences.count())
 
 
 
@@ -353,31 +709,31 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
                 periodStart = periodRangeStart - aPlanOccurrence.startDate
 
                 periodStart = periodStart.days
-                print("periodStart %s" % periodStart)
+                #print("periodStart %s" % periodStart)
 
 
                 periodEnd = periodRangeEnd - aPlanOccurrence.startDate
                 periodEnd = periodEnd.days
-                print("periodEnd %s" % periodEnd)
+                #print("periodEnd %s" % periodEnd)
 
 
 
 
                 #print("aPlanOccurrence.plan %d" % aPlanOccurrence.plan.id)
 
-                thePlan = Plan.objects.filter(id=aPlanOccurrence.plan.id)
-                print("thePlan %d" % thePlan.count())
+                theProgram = Program.objects.filter(id=aPlanOccurrence.program.id)
+                #print("theProgram %d" % theProgram.count())
 
                 #print("beforePlansSteps")
-                thePlansSteps = Step.objects.filter(plan=thePlan[0].id)
-                print("thePlansSteps %d" % thePlansSteps.count())
+                theProgramsSteps = Step.objects.filter(program=theProgram[0].id)
+                #print("theProgramsSteps %d" % theProgramsSteps.count())
 
-                for aStep in thePlansSteps:
-                    print("inside thePlansSteps loop")
+                for aStep in theProgramsSteps:
+                    #print("inside theProgramsSteps loop")
 
                     #print("inside comparePeriodToStep")
-                    print("aStep.frequency %s" % aStep.frequency)
-                    print("aStep.id %d" % aStep.id)
+                    #print("aStep.frequency %s" % aStep.frequency)
+                    #print("aStep.id %d" % aStep.id)
 
                     if (aStep.frequency == "ONCE"):
                         #print("aStep.startDate %s" % aStep.startDate)
@@ -419,16 +775,16 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
                     #print("stepEnd %d" % stepEnd)
                     #print("periodStart %d" % periodStart)
                     #print("periodEnd %d" % periodEnd)
-                    print("aPlanOccurence startDate %s" % aPlanOccurrence.startDate)
+                    #print("aPlanOccurence startDate %s" % aPlanOccurrence.startDate)
 
                     if (stepStart <= periodStart & stepEnd >= periodEnd):
-                        print("periodStart to periodEnd")
+                        #print("periodStart to periodEnd")
 
                         iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=periodStart)
                         iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
 
                     elif (stepStart <= periodStart & stepEnd <= periodEnd):
-                        print("periodStart to StepEnd")
+                        #print("periodStart to StepEnd")
 
                         iterationStart =  aPlanOccurrence.startDate + datetime.timedelta(days=periodStart)
                         iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=stepEnd)
@@ -436,7 +792,7 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
 
 
                     elif (stepStart >= periodStart & stepEnd <= periodEnd):
-                        print("stepStart to stepEnd")
+                        #print("stepStart to stepEnd")
 
                         #print("inside comparison =2")
 
@@ -447,17 +803,17 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
                         #print("iterationEnd %s" % iterationEnd)
 
                     elif (stepStart <= periodStart & stepEnd > periodEnd):
-                        print("stepStart to periodEnd")
+                        #print("stepStart to periodEnd")
 
                         iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=stepStart)
                         iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
                     else:
                         pass
-                    print("periodStart %s" % periodStart)
-                    print("periodEnd %s" % periodEnd)
+                    #print("periodStart %s" % periodStart)
+                    #print("periodEnd %s" % periodEnd)
 
-                    print("stepStart %s" % stepStart)
-                    print("stepStart %s" % stepEnd)
+                    #print("stepStart %s" % stepStart)
+                    #print("stepStart %s" % stepEnd)
 
 
                     stepOccurrenceExists = False
@@ -465,11 +821,11 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
                     #iterationStart = datetime.datetime.strptime(iterationStart, '%Y-%m-%d')
                     #iterationEnd = datetime.datetime.strptime(iterationEnd, '%Y-%m-%d')
 
-                    print("before DateIterator loop")
+                    #print("before DateIterator loop")
 
                     for dateIterator in rrule(DAILY, dtstart=iterationStart, until=iterationEnd):
                     #for dateIterator in range(iterationStart, iterationEnd):
-                        print("inside dateIteration")
+                        #print("inside dateIteration")
 
 
                         #print("inside false stepOccurrence loop")
@@ -484,38 +840,38 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
                             #print("aStep.id %s" % aStep.id)
 
                             if aStep.id == persistentOccurrence.step.id:
-                                print("dateIterator is %s" % type(dateIterator))
-                                print("persistentOccurrence.date is %s" % type(persistentOccurrence.date))
-                                print("persistentOccurrence.date %s" % persistentOccurrence.date)
-                                print("dateIterator %s" % dateIterator)
-                                print("inside aStep.id == persistentOccurrence.step.id")
+                                #print("dateIterator is %s" % type(dateIterator))
+                                #print("persistentOccurrence.date is %s" % type(persistentOccurrence.date))
+                                #print("persistentOccurrence.date %s" % persistentOccurrence.date)
+                                #print("dateIterator %s" % dateIterator)
+                                #print("inside aStep.id == persistentOccurrence.step.id")
 
                                 if dateIterator.date() == persistentOccurrence.date.date():
-                                    print("inside dateIterator == persistentOccurrence.date")
+                                    #print("inside dateIterator == persistentOccurrence.date")
 
-                                    print("persistentOccurrence.planOccurrence.id %d" % persistentOccurrence.planOccurrence.id)
-                                    print("aPlanOccurrence.id %s" % aPlanOccurrence.id)
+                                    #print("persistentOccurrence.planOccurrence.id %d" % persistentOccurrence.planOccurrence.id)
+                                    #print("aPlanOccurrence.id %s" % aPlanOccurrence.id)
                                     if aPlanOccurrence.id == persistentOccurrence.planOccurrence.id:
-                                        print("inside aPlanOccurrence.id == persistentOccurrent.id")
+                                        #print("inside aPlanOccurrence.id == persistentOccurrent.id")
                                         stepOccurrenceExists=True
-                                        print("stepOccurrenceExists %s" % stepOccurrenceExists)
+                                        #print("stepOccurrenceExists %s" % stepOccurrenceExists)
 
                                         break
-                        print("stepOccurrenceExists %s" % stepOccurrenceExists)
+                        #print("stepOccurrenceExists %s" % stepOccurrenceExists)
                         if (stepOccurrenceExists == False):
                             aStepOccurrence = StepOccurrence.objects.create_occurrence(aStep.id, dateIterator,
                                                                                        aPlanOccurrence.id,
                                                                                        currentUser.id)
-                            print("aStep.id = %s" % aStep.id )
+                            #print("aStep.id = %s" % aStep.id )
                             currentStepUpdates = Update.objects.filter(step=aStep.id)
 
                             for currentStepUpdate in currentStepUpdates:
-                                print("inside currentStepUpdates")
+                                #print("inside currentStepUpdates")
                                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
 
-                                print("Update create Occurrence finished")
+                                #print("Update create Occurrence finished")
 
-                            print("stepOccurrence Doesn't Exist")
+                            #print("stepOccurrence Doesn't Exist")
 
                             #aStepOccurrence.save()
 
@@ -538,8 +894,14 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
             #periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
             #periodRangeEnd = datetime.date.strptime(periodRangeEnd, "%Y-%m-%d")
 
-            print("getQueryset periodRangeStart %s periodRangeEnd" % (periodRangeStart, periodRangeEnd))
+            print("getQueryset periodRangeStart %s periodRangeEnd %s" % (periodRangeStart, periodRangeEnd))
+            #querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
+            #theQueryset = StepOccurrence.objects.filter(Q(date__lte=periodRangeEnd))
+            dateLessThanEnd = Q(date__lte=periodRangeEnd)
+            dateLaterThanStart = Q(date__gte=periodRangeStart)
 
+
+            theQueryset = StepOccurrence.objects.filter(dateLessThanEnd & dateLaterThanStart)
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -548,7 +910,7 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
             periodRangeEnd = periodRangeStart
 
 
-        theQueryset = StepOccurrence.objects.all()
+            theQueryset = StepOccurrence.objects.all()
 
         return theQueryset
 
@@ -569,10 +931,63 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 
 
-class PlanViewSet(viewsets.ModelViewSet):
-    serializer_class = PlanSerializer
-    queryset = Plan.objects.all()
-    permission_classes = [IsAuthorOrReadOnly]
+class ProgramViewSet(viewsets.ModelViewSet):
+    serializer_class = ProgramSerializer
+    queryset = Program.objects.all()
+    permission_classes = [PostPutAuthorOrNone]
+
+    required_scopes = ['groups']
+    pagination_class = StandardResultsSetPagination
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+
+class ContactViewSet(viewsets.ModelViewSet):
+    serializer_class = ContactSerializer
+    queryset = Contact.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = StandardResultsSetPagination
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+        theUser = self.request.user
+        #querySet = Contact.objects.all()
+        querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
+        return querySet
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = StandardResultsSetPagination
 
     required_scopes = ['groups']
 
@@ -585,15 +1000,20 @@ class PlanViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-class ProfileViewSet(viewsets.ModelViewSet):
+
+
+
+
+class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
+
     required_scopes = ['groups']
 
-
-
-
+    def get_queryset(self):
+        theUser = self.request.user
+        return Profile.objects.filter(coach=theUser.id)
 
 
 
@@ -625,10 +1045,8 @@ class SessionViewSet(viewsets.ModelViewSet):
 
             theSession = Session.objects.create_session(theTokBoxSessionId, theTokBoxToken)
 
-            print("theSession")
 
 
-            print("theSession.id %s" % theSession.id)
             primaryParticipant = Participant.objects.create_participant(request.user.id, True, theSession.id)
 
             theUserBeingCalled = Profile.objects.filter(id=userProfileBeingCalledId).first()
@@ -661,231 +1079,46 @@ class SearchQueryViewSet(viewsets.ModelViewSet):
 
 
 
-class PlanSearchViewSet(HaystackViewSet):
-    index_models = [Plan]
-    serializer_class = PlanSearchSerializer
+class ProgramSearchViewSet(HaystackViewSet):
+    index_models = [Program]
+    serializer_class = ProgramSearchSerializer
     permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = StandardResultsSetPagination
 
 
 
-
-
-
-
-class PersonalProfileViewSet(viewsets.ModelViewSet):
-    serializer_class = ProfileSerializer
-    required_scopes = ['groups']
-    permission_classes = [IsOwnerOrReadOnly]
-    queryset = Profile.objects.all()
-
+class StepDuplicatorViewSet(viewsets.ModelViewSet):
+    serializer_class = StepSerializer
+    queryset = Step.objects.all()
+    permission_classes = [AllAccessPostingOrAdminAll]
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
         return Response(serializer.data)
 
 
     def get_queryset(self):
+        try:
+            step_id = self.kwargs['step_id']
+            theStep = Step.objects.get(id=step_id)
+            theNewStep = deepcopy(theStep)
+            theNewStep.id = None
+            theNewStep.title = theNewStep.title + " Copy"
+            theNewStep.save()
+            theUpdates = Update.objects.filter(step=theStep)
+            for theUpdate in theUpdates:
+                theNewUpdate = deepcopy(theUpdate)
+                theNewUpdate.id = None
+                theNewUpdate.step_id = theNewStep.id
+                theNewUpdate.save()
+            aQuerySet = Step.objects.get(id=theNewStep.id)
+            return aQueryset
+
+        except:
+            aQueryset = Step.objects.none()
+            return aQueryset
 
-
-
-        """
-        This view should return a list of all the purchases
-        for the currently authenticated user.
-        """
-        theUser = self.request.user
-
-        return Profile.objects.filter(user_id=theUser.id)
-
-
-
-class UserList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-
-'''class GoalList(generics.ListCreateAPIView):
-    queryset = Goal.objects.all()
-    serializer_class = GoalSerializer
-
-    def create(self, request, *args, **kwargs):
-        logging.info("post called")
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-        console.log("post called")
-        return self.create(request, *args, **kwargs)
-'''
-
-class InterestList(generics.ListCreateAPIView):
-    queryset = Interest.objects.all()
-    serializer_class = InterestSerializer
-
-
-class InterestDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Interest.objects.all()
-    serializer_class = InterestSerializer
-
-class GoalDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Goal.objects.all()
-    serializer_class = GoalSerializer
-
-
-
-class PlanList(generics.ListCreateAPIView):
-    queryset = Plan.objects.all()
-    serializer_class = PlanSerializer
-
-
-class PlanDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Plan.objects.all()
-    serializer_class = PlanSerializer
-
-
-
-
-
-class CoachList(generics.ListCreateAPIView):
-    queryset = Coach.objects.all()
-    serializer_class = CoachSerializer
-
-
-class CoachDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Coach.objects.all()
-    serializer_class = CoachSerializer
-
-
-class StudentList(generics.ListAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
-class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
-
-class RateList(generics.ListCreateAPIView):
-    queryset = Rate.objects.all()
-    serializer_class = RateSerializer
-
-
-class RateDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Rate.objects.all()
-    serializer_class = RateSerializer
-
-
-class UpdateList(generics.ListCreateAPIView):
-    queryset = Update.objects.all()
-    serializer_class = UpdateSerializer
-
-class UpdateDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Update.objects.all()
-    serializer_class = UpdateSerializer
-
-
-
-class ReviewList(generics.ListAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-
-
-
-
-
-class QuestionList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = QuestionSerializer
-
-
-class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-
-class AnswerList(generics.ListCreateAPIView):
-    queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
-
-class AnswerDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
-
-
-
-def interest(request):
-    interestForm = InterestForm()
-    displaySuccessMessage = False
-
-    if request.method == 'POST':
-        interestForm = InterestForm(request.POST)
-
-        if interestForm.is_valid():
-            interest = interestForm.save()
-            interest.save()
-            displaySuccessMessage = True
-
-            headers = {'Content-Type': 'application/json'}
-
-            helpdeskTicket = {
-                "helpdesk_ticket":{
-                "description":"Their dream is to: %s" % interest.goal,
-                "subject":"New Potential Customer: %s" % interest.name,
-                "name": interest.name,
-                "email":interest.email,
-                "priority":1,
-                "status":2
-                  },
-                }
-
-            r = requests.post("https://kiterope.freshdesk.com/helpdesk/tickets.json", auth=("HrB9zJ9AYJaBEivf0s","x" ),
-                              headers=headers, data=json.dumps(helpdeskTicket))
-
-            return render(request, "interest2.html", {'interestForm': interestForm, 'displaySuccessMessage': displaySuccessMessage})
-
-    return render(request, "interest2.html", {'interestForm': interestForm, 'displaySuccessMessage':displaySuccessMessage})
 
 def splash(request):
     hasGoals = None
@@ -921,226 +1154,7 @@ def splash(request):
 def secret_page(request, *args, **kwargs):
     return HttpResponse('Secret contents!', status=200)
 
-@csrf_exempt
-@api_view(['GET', 'PUT', 'DELETE'])
-def goals_list(request, format=None):
-    try:
-        goal= Goal.objects.get(pk=pk)
-    except Goal.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = GoalSerializer(goal, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = GoalSerializer(goal, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
-
-    elif request.method == 'DELETE':
-        goal.delete()
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-
-@csrf_exempt
-@api_view(['GET', 'PUT', 'DELETE'])
-def goal_detail(request, pk, format=None):
-    """
-    Retrieve, update or delete a snippet instance.
-    """
-    try:
-        goal = Goal.objects.get(pk=pk)
-    except Goal.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = GoalSerializer(goal, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = GoalSerializer(goal, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        goal.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def plans_list(request, format=None):
-    try:
-        plan= Plan.objects.get(pk=pk)
-    except Plan.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = PlanSerializer(plan, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = PlanSerializer(plan, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
-
-    elif request.method == 'DELETE':
-        plan.delete()
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def plan_detail(request, pk, format=None):
-    """
-    Retrieve, update or delete a snippet instance.
-    """
-    try:
-        plan = Plan.objects.get(pk=pk)
-    except Plan.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = PlanSerializer(plan, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = PlanSerializer(plan, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        plan.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-'''
-@api_view(['GET', 'PUT', 'DELETE'])
-def steps_list(request, format=None):
-    try:
-        step= Step.objects.get(pk=pk)
-    except Step.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = StepSerializer(step, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = StepSerializer(step, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
-
-    elif request.method == 'DELETE':
-        step.delete()
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def step_detail(request, pk, format=None):
-    """
-    Retrieve, update or delete a snippet instance.
-    """
-    try:
-        step = Step.objects.get(pk=pk)
-    except Step.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = StepSerializer(step, context={'request': request})
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = StepSerializer(step, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        step.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-'''
-@login_required  
-def goals_add(request):    
-    if request.method=='POST':
-        goalForm = GoalForm(request.POST, request.FILES)
-        
-        if goalForm.is_valid():
-            #handle_uploaded_file(request.FILES['file'])
-            
-            goal = goalForm.save()
-            goal.user_id = request.user.id
-            goal.save()
-            
-            return HttpResponseRedirect('/')
-        else:
-            
-            return render(request, 'goals_add.html', {'goalForm':goalForm})
-        
-    else:
-        goalForm = GoalForm()
-        return render(request, 'goals_add.html', {'goalForm':goalForm})
-
-@login_required  
-def goals_plans(request, goal_id=None):
-    user = request.user
-    goal = Goal.objects.get(pk=goal_id)
-    plans = Plan.objects.filter(goal=goal_id)
-    
-    if request.method=='POST':
-        planForm = PlanForm(request.POST)
-        
-        if planForm.is_valid():
-            plan = planForm.save()
-            plan.goal_id = goal_id
-            plan.save()
-            goal.plans.add(plan)
-            goal.save()
-            return HttpResponseRedirect('/')
-        else:
-            return render(request, 'goals_plans.html', {'plans': plans, 'goal': goal, 'planForm':planForm})
-            
-            
-                    
-    else:
-        planForm = PlanForm()
-        return render(request, 'goals_plans.html', {'plans': plans, 'goal': goal, 'planForm':planForm})
-        
-@login_required
-def plan_edit(request, plan_id=None):
-    
-    try:
-        user = request.user
-        plan = Plan.objects.get(pk=plan_id)
-        startTime =  time.strptime(plan.startDate, "%m-%d-%Y %H:%M")
-        endTime =  time.strptime(plan.endDate, "%m-%d-%Y %H:%M")
-        startDateTime = datetime.fromtimestamp(mktime(startTime))
-        endDateTime = datetime.fromtimestamp(mktime(endTime))
-        durationDelta = startDateTime - endDateTime
-        durationInWeeks = divmod(durationDelta.days, 7)
-        durationInDays = divmod(durationDelta.days, 1)
-                    
-        
-    except:
-        pass
-    if request.method=='POST':
-        pass
-    else:
-        planForm = PlanForm()
-        return render(request, 'plan_edit.html', {'plan': plan,'planForm':planForm, 'durationInWeeks':durationInWeeks[0], 'durationInDays':durationInDays[0]})    
-    
-    
-    
 
     
     

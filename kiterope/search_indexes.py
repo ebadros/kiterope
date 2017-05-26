@@ -1,8 +1,8 @@
 import datetime
 from haystack import indexes
-from kiterope.models import Plan
+from kiterope.models import Program
 
-class PlanIndex(indexes.SearchIndex, indexes.Indexable):
+class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     id = indexes.CharField(model_attr="id")
     title = indexes.CharField(model_attr="title")
@@ -29,7 +29,7 @@ class PlanIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.get_author_id()
 
     def get_model(self):
-        return Plan
+        return Program
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""

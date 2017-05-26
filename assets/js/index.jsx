@@ -1,73 +1,108 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var App = require('./app');
-var Goal = require('./goal');
-var $  = require('jquery');
+
+var $ = require('jquery');
 var $ui = require('jquery-ui');
-import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
+
 var ObjectCreationPage = require('./plan');
-var ObjectPage = require('./step');
 var DailyList = require('./daily');
-var UpdatesPage = require('./update');
-
-import { ProfileViewPage, ProfileViewAndEditPage  } from './profile'
-
-
-
-
-var SearchPage = require('./search');
-var SplashPage = require('./splash');
-var UpdatedGoalForm = require('./goal');
-
-var theServer = 'https://192.168.1.156:8000/';
+import {LoginPage, JoinPage, PasswordResetPage, PasswordConfirmPage, PasswordConfirmForm} from './accounts'
+import {App} from './app'
+import {ProfileViewPage, ProfileViewAndEditPage, ProfileListPage, ProfileDetailPage} from './profile'
+import {ClientListPage, ClientDetailPage} from './client'
+import {Test} from './elements'
+import {MessagePage} from './message'
+import {Provider, connect, dispatch} from 'react-redux'
+import  {store} from "./redux/store";
+import {SearchPage} from './search'
+import {SplashPage} from './splash'
 
 
+import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
+import {PlanDetailPage} from './plan'
+import {ProgramListPage, ProgramDetailPage} from'./program'
+
+import {Router, Route, Link, hashHistory} from 'react-router'
+import {createStore, combineReducers, applyMiddleware} from "redux";
 
 
+var auth = require('./auth')
+
+import {
+    theServer,
+    s3IconUrl,
+    formats,
+    s3ImageUrl,
+    customModalStyles,
+    dropzoneS3Style,
+    uploaderProps,
+    frequencyOptions,
+    planScheduleLengths,
+    timeCommitmentOptions,
+    costFrequencyMetricOptions
+} from './constants'
 
 
+function requireAuth(nextState, replace) {
+    if (!auth.loggedIn()) {
+        replace({
+            pathname: '/account/login',
+            state: {
+                nextPathname: nextState.location.pathname
+            }
+        });
+    }
+}
 
-{/*
-ReactDOM.render(<App url="http://127.0.0.1:8000/api/goals/"
-                       pollInterval={2000}/>, document.getElementById('react-app'))
-*/}
 
 ReactDOM.render((
-
-    <Router history={hashHistory}>
-        <Route path="/" component={SplashPage} />
-            <Route path="/goalEntry" component={UpdatedGoalForm} />
-            <Route path="/period/:periodRangeStart/:periodRangeEnd" component={() => (<DailyList />)} />
+    <Provider store={store}>
 
 
+        <Router history={hashHistory}>
+            <div>
+                <Route path="/" component={SplashPage}/>
+
+                <Route path="/goalEntry" component={ GoalEntryPage }/>
+                <Route path="/account/login" component={ LoginPage }/>
+                <Route path="/joinKiterope" component={ JoinPage }/>
+                <Route path="/account/password/reset" component={ PasswordResetPage }/>
+                <Route path="/account/password/reset/confirm/:uid/:token/" component={PasswordConfirmPage}/>
 
 
-          <Route path="/goals" component={Goal} url={`${theServer}api/goals/`} />
-          <Route path="/goals/:goal_id/plans" component={ObjectCreationPage} />
-
-          <Route path="/plans" component={ObjectCreationPage}/>
-          <Route path="/plans/:plan_id" component={ObjectCreationPage} />
-            <Route path="/plans/:plan_id/steps" component={ObjectPage} />
-                <Route path="/myProfile" component={ProfileViewAndEditPage} />
+                <Route path="/app" component={ App } onEnter={requireAuth}/>
 
 
-                    <Route path="/profiles" component={ProfileViewPage} />
-        <Route path="/profiles/:profile_id" component={ProfileViewPage} />
-            <Route path="/steps/:step_id/updates" component={UpdatesPage} />
-                        <Route path="search/:search_query/" component={SearchPage} />
-
-                <Route path="search" component={SearchPage} />
+                <Route path="/period/:periodRangeStart/:periodRangeEnd" component={() => (<DailyList />)}
+                       onEnter={requireAuth}/>
+                <Route path="/messages" component={MessagePage} onEnter={requireAuth}/>
+                <Route path="/messages/:sender_id" component={MessagePage} onEnter={requireAuth}/>
 
 
+                <Route path="/goals" component={GoalListPage} onEnter={requireAuth}/>
+                <Route path="/programs/:program_id/steps" component={ProgramDetailPage} onEnter={requireAuth}/>
+
+                <Route path="/programs" component={ProgramListPage} onEnter={requireAuth}/>
+
+                <Route path="/goals/:goal_id/plans" component={GoalDetailPage} onEnter={requireAuth}/>
+
+                <Route path="/plans/:plan_id/steps" component={PlanDetailPage} onEnter={requireAuth}/>
 
 
+                <Route path="/profiles/:profile_id" component={ProfileDetailPage}/>
+                <Route path="/clients" component={ClientListPage} onEnter={requireAuth}/>
+                <Route path="/contacts" component={() => (<ProfileListPage myContacts={true}/>)} onEnter={requireAuth}/>
 
 
-      </Router>), document.getElementById('react-app')
+                <Route path="/profiles" component={() => (<ProfileListPage myContacts={false}/>)}
+                       onEnter={requireAuth}/>
+
+                <Route path="search/:search_query/" component={SearchPage}/>
+
+                <Route path="search" component={SearchPage}/>
+
+
+            </div>
+        </Router></Provider>), document.getElementById('react-app')
 );
 
-//<Route path="steps" component={() => (<ObjectPage url="https://127.0.0.1:8000/api/steps/"
-//                                                               pageHeadingLabel="Steps"
-//                                                               actionButtonLabel="Add Step"
-//                                                               actionFormRef="stepForm"
-//                                                               modelForm="StepForm"/>)} />

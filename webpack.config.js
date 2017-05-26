@@ -14,6 +14,7 @@ module.exports = {
       filename: "[name]-[hash].js",
   },
 
+
   plugins: [
     new BundleTracker({filename: './webpack-stats.json'}),
     new webpack.ProvidePlugin({
@@ -38,6 +39,9 @@ module.exports = {
       { test: /\.css$/, loader: "style-loader!css-loader" }
 // to transform JSX into JS
     ],
+  },
+
+  externals: {
   },
 
   resolve: {

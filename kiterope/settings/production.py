@@ -21,3 +21,5 @@ DATABASES = {
 }
 ROOT_URLCONF = 'kiterope.urls_production'
 
+#This is the id of the site within the database that we should be using as our base site
+SITE_ID=1

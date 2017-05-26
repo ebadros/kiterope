@@ -5,31 +5,89 @@ var DailyList = require('./daily');
 var SearchPage = require('./search')
 import autobind from 'class-autobind'
 import moment from 'moment';
+import { Menubar } from './accounts'
 
-var theServer = 'https://192.168.1.156:8000/'
 
 
+
+import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions } from './constants'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
+
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
+
+
+import { Provider, connect, dispatch } from 'react-redux'
+
+import  {store} from "./redux/store";
+
+
+@connect(mapStateToProps, mapDispatchToProps)
 export class SplashPage extends React.Component {
     constructor (props) {
         super(props)
         autobind(this)
         this.state  = {
             authenticated:false,
+            user:true
         }
 
     }
 
     componentDidMount () {
-        this.loadObjectsFromServer()
+        this.checkIfUser()
+
+       //this.loadObjectsFromServer()
     }
+
+
+
+    checkIfUser() {
+        var theUrl = theServer + 'api/users/i/'
+        $.ajax({
+            method: 'GET',
+            url: theUrl,
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(theUser) {
+                this.setState({
+                    user:theUser
+                })
+                this.props.setCurrentUser(theUser)
+            }.bind(this),
+            error: function(xhr, status, err) {
+                //store.dispatch(push('/search/'))
+                hashHistory.push("/search/")
+                //history.push('/search/')
+
+
+
+                console.error(theUrl, status, err.toString());
+        }
+        })
+    }
+
+
 
     loadObjectsFromServer () {
         var periodRangeStart = new Date();
         var periodRangeEnd = new Date();
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+
+        var tempUrl = theServer + "api/period/2016-11-16/2017-05-01/"
+        var theUrl = theServer + "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
         $.ajax({
-            url: theServer + "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/",
+            url: tempUrl,
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -44,23 +102,23 @@ export class SplashPage extends React.Component {
                     authenticated:false
                 })
                 hashHistory.push("/search/")
-                console.error(this.props.url, status, err.toString());
+                console.error(tempUrl, status, err.toString());
             }.bind(this)
         });
     }
 
     render () {
-        if (this.state.authenticated) {
+        if (this.state.user) {
             return (
                 <DailyList />
                 )
             }
         else {
-            return(<div></div>)
+            return(<div>asdfasdfasdf</div>)
         }
 
     }
 
 }
 
-module.exports = SplashPage
+module.exports =  { SplashPage}
