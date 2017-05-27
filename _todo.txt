@@ -1,7 +1,7 @@
 -- Fix Linkedin django-allauth integration
--- Get goal image working with S3
--- Save the datetime in the goal correctly, right now it's saving as a text file, may need the text that comes from the form converted into a date time
---Figure out how a rest framework works Django-rest-framework
+-- fix the confirm email so it has been skinned
+--rewrite the goal email so it's better
+
 
 
 
@@ -47,3 +47,10 @@ Step
 
 Change Searchkit/Searchbox code line 101 to:
             React.createElement("div", {type: "submit", value: "search", className: "ui two column wide purple button", "data-qa": "submit"},"Search"),
+
+
+
+                            <Textfit max={30} className="planTitle" mode="multi">{this.state.data.title}</Textfit>
+
+
+Change react-panels/addons.js to var React = require('./node_modules/react/addons');
