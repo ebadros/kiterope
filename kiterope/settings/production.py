@@ -28,9 +28,9 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'iotd',
-            'USER': 'iotd',
-            'PASSWORD': 'iotd',
+            'NAME': 'kiterope',
+            'USER': 'kiteropeAdmin',
+            'PASSWORD': 'regul8or1',
             'HOST': 'localhost',
             'PORT': '5432',
         }
