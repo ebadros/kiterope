@@ -11,7 +11,6 @@ ALLOWED_HOSTS = ['localhost', 'kiterope.com']
 STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
 STATIC_URL = '/static/'
 
-SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
 DATABASES = {
