@@ -17,8 +17,14 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
-
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com',
+        'INDEX_NAME': 'haystack',
+        'TIMEOUT': 60
+    },
+}
 
 if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
