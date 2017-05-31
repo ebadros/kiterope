@@ -49,7 +49,10 @@ var Searchkit = require('searchkit')
 var imageDirectory = "https://kiterope.s3.amazonaws.com/"
 
 const host = "http://127.0.0.1:8000/api/plan/search"
-const searchkit = new Searchkit.SearchkitManager("http://127.0.0.1:9200/")
+//const searchkit = new Searchkit.SearchkitManager("http://127.0.0.1:9200/")
+const searchkit = new Searchkit.SearchkitManager("https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com")
+
+
 
 
 import CallManager from './call'
