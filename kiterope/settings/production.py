@@ -12,7 +12,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    os.path.join("/opt/python/app/ondeck/kiterope/assets"),
+    os.path.join("/opt/python/current/app/kiterope/assets"),
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
