@@ -40,7 +40,7 @@ HAYSTACK_CONNECTIONS = {
             'http_auth': awsauth,
             'use_ssl': True,
             'verify_certs': True,
-            'connection_class': elasticsearch.RequestsHttpConnection,
+            'connection_class': RequestsHttpConnection,
         }
     },
 }
