@@ -66,7 +66,7 @@ export class PlanDetailPage extends React.Component {
 
     loadStepsFromServer = () => {
         $.ajax({
-          url: theServer + "api/plans/" + this.props.params.plan_id + "/steps" ,
+          url: "api/plans/" + this.props.params.plan_id + "/steps" ,
           dataType: 'json',
           cache: false,
           success: function(data) {
@@ -81,7 +81,7 @@ export class PlanDetailPage extends React.Component {
 
     loadFromServer = () => {
     $.ajax({
-      url: theServer + "api/plans/" + this.props.params.plan_id + "/",
+      url: "api/plans/" + this.props.params.plan_id + "/",
       dataType: 'json',
       cache: false,
         headers: {
@@ -92,7 +92,7 @@ export class PlanDetailPage extends React.Component {
             data: planData});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + "api/plans/" + this.props.params.plan_id + "/", status, err.toString());
+        console.error("api/plans/" + this.props.params.plan_id + "/", status, err.toString());
       }.bind(this),
 
     });
@@ -101,7 +101,7 @@ export class PlanDetailPage extends React.Component {
   handleStepSubmit (step, callback) {
 
              $.ajax({
-                 url: theServer + "api/steps/",
+                 url: "api/steps/",
                  dataType: 'json',
                  type: 'POST',
                  data: step,
@@ -114,7 +114,7 @@ export class PlanDetailPage extends React.Component {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(theServer + "api/steps/", status, err.toString());
+                     console.error("api/steps/", status, err.toString());
                      this.setState({
                          error: err,
                      })
@@ -132,7 +132,7 @@ export class PlanDetailPage extends React.Component {
               //var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
 
       $.ajax({
-      url: theServer + "api/plans/" + this.props.params.plan_id + "/",
+      url: "api/plans/" + this.props.params.plan_id + "/",
       dataType: 'json',
       cache: false,
           type: 'OPTIONS',
@@ -150,7 +150,7 @@ export class PlanDetailPage extends React.Component {
           }
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + "api/plans/" + this.props.params.plan_id + "/", status, err.toString());
+        console.error("api/plans/" + this.props.params.plan_id + "/", status, err.toString());
       }.bind(this),
 
 
@@ -161,7 +161,7 @@ export class PlanDetailPage extends React.Component {
 
     handleFormSubmit = (step, callback) => {
     $.ajax({
-        url: (theServer + "api/steps/"),
+        url: ("api/steps/"),
         dataType: 'json',
         type: 'POST',
         data: step,
@@ -751,7 +751,7 @@ export class PlanList extends React.Component {
     }
 
     loadFromServer = () => {
-        var theURL = theServer + "api/goals/" + this.props.parentId + "/planOccurrences"
+        var theURL = "api/goals/" + this.props.parentId + "/planOccurrences"
 
       $.ajax({
       url: theURL,

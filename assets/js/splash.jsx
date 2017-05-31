@@ -50,7 +50,7 @@ export class SplashPage extends React.Component {
 
 
     checkIfUser() {
-        var theUrl = theServer + 'api/users/i/'
+        var theUrl = 'api/users/i/'
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -84,8 +84,8 @@ export class SplashPage extends React.Component {
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
 
-        var tempUrl = theServer + "api/period/2016-11-16/2017-05-01/"
-        var theUrl = theServer + "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+        var tempUrl = "api/period/2016-11-16/2017-05-01/"
+        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
         $.ajax({
             url: tempUrl,
             dataType: 'json',

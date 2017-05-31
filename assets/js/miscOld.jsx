@@ -2,7 +2,7 @@
 var GoalBox = React.createClass({
   loadCommentsFromServer: function() {
     $.ajax({
-      url: theServer + "api/goals/",
+      url: "api/goals/",
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -16,7 +16,7 @@ var GoalBox = React.createClass({
 
   handleGoalSubmit: function(goal) {
     $.ajax({
-        url: theServer + "api/goals/",
+        url: "api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -120,7 +120,7 @@ var StepObjectListAndUpdate = React.createClass({
 
     handleFormSubmit: function(step, callback) {
     $.ajax({
-        url: (theServer + "api/steps/"),
+        url: ("api/steps/"),
         dataType: 'json',
         type: 'POST',
         data: step,
@@ -250,10 +250,10 @@ export class ObjectCreationPage extends React.Component {
                             <Link to={`/plans/${this.props.params.plan_id}/`}><div className="active section">Plan Detail</div></Link>
                     </div>
             <div>&nbsp;</div>
-                    <PlanHeader url={`${theServer}api/plans/${this.props.params.plan_id}`} />
+                    <PlanHeader url={`api/plans/${this.props.params.plan_id}`} />
                     <div>&nbsp;</div>
 
-                    <ObjectPage url={`${theServer}api/steps/`}
+                    <ObjectPage url={`api/steps/`}
                                                                pageHeadingLabel="Steps"
                                                                actionButtonLabel="Add Step"
                                                                actionFormRef="stepForm"

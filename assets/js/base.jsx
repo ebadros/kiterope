@@ -527,7 +527,7 @@ export class ViewEditDeleteItem extends React.Component {
     }
 
     duplicateItem = () => {
-        var theUrl = theServer + this.props.apiUrl + this.props.id + "/duplicate";
+        var theUrl = this.props.apiUrl + this.props.id + "/duplicate";
         $.ajax({
             url: theUrl,
             dataType: 'json',
@@ -551,7 +551,7 @@ export class ViewEditDeleteItem extends React.Component {
 
     determineOptions = () => {
 
-        var theURL = theServer + this.props.apiUrl + this.props.id +"/";
+        var theURL = this.props.apiUrl + this.props.id +"/";
       $.ajax({
       url: theURL,
       dataType: 'json',
@@ -691,7 +691,7 @@ export class ViewEditDeleteItem extends React.Component {
 
     deleteItem = () => {
         var apiUrl = this.props.apiUrl
-        var theUrl = theServer + apiUrl + this.props.id + "/"
+        var theUrl = apiUrl + this.props.id + "/"
 
             $.ajax({
                 url: theUrl,
@@ -788,7 +788,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          if (goal.id != "") {
 
              $.ajax({
-                 url: theServer + "api/goals/" + goal.id +"/",
+                 url: "api/goals/" + goal.id +"/",
                  dataType: 'json',
                  type: 'PUT',
                  data: goal,
@@ -819,7 +819,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          }
          else {
              $.ajax({
-                 url: theServer + "api/goals/",
+                 url: "api/goals/",
                  dataType: 'json',
                  type: 'POST',
                  data: goal,
@@ -967,7 +967,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
     handleProgramSubmit (program, callback) {
          if (program.id != "") {
-             var theUrl = theServer + "api/programs/" + program.id +"/"
+             var theUrl = "api/programs/" + program.id +"/"
 
              $.ajax({
                  url: theUrl,
@@ -998,7 +998,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              });
          }
          else {
-             var theUrl = theServer + "api/programs/" + program.id +"/"
+             var theUrl = "api/programs/" + program.id +"/"
 
              $.ajax({
                  url: theUrl,
@@ -1116,7 +1116,7 @@ hideComponent = () => {
     }
 
     handleUnsubscribeClick = () => {
-        var theUrl = theServer + "api/planOccurrences/" + this.state.data.userPlanOccurrenceId + "/"
+        var theUrl = "api/planOccurrences/" + this.state.data.userPlanOccurrenceId + "/"
         var planOccurrence = {
             isSubscribed: false,
 
@@ -1239,7 +1239,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          if (plan.id != "") {
 
              $.ajax({
-                 url: theServer + "api/planOccurrences/" + planOccurrence.id +"/",
+                 url: "api/planOccurrences/" + planOccurrence.id +"/",
                  dataType: 'json',
                  type: 'PUT',
                  data: plan,
@@ -1271,7 +1271,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          }
          else {
              $.ajax({
-                 url: theServer + "api/plans/",
+                 url: "api/plans/",
                  dataType: 'json',
                  type: 'POST',
                  data: plan,
@@ -1425,7 +1425,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
      handleProfileSubmit (profile, callback) {
 
-            var theURL = theServer + "api/profiles/" + profile.id +"/"
+            var theURL =  "api/profiles/" + profile.id +"/"
              $.ajax({
                  url: theURL ,
                  dataType: 'json',
@@ -1499,7 +1499,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     }
 
     addAsCoach = () => {
-        var theUrl = theServer + "api/contacts/"
+        var theUrl = "api/contacts/"
         var theContact = {
             sender:this.state.user.id,
             receiver: this.state.data.user,
@@ -1521,7 +1521,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(theServer + "api/steps/", status, err.toString());
+                     console.error("api/steps/", status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -1688,7 +1688,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
     handleStepSubmit = (step, callback) => {
         if (step.id != undefined) {
 
-            var theUrl = theServer + "api/steps/" + step.id + "/"
+            var theUrl = "api/steps/" + step.id + "/"
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -1722,7 +1722,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         else {
 
             $.ajax({
-                url: theServer + "api/steps/",
+                url: "api/steps/",
                 dataType: 'json',
                 type: 'POST',
                 data: step,
@@ -1740,7 +1740,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    console.error(theServer + "api/steps/", status, err.toString());
+                    console.error("api/steps/", status, err.toString());
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,

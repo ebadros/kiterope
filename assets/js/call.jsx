@@ -55,7 +55,7 @@ export class Caller extends React.Component {
 
     handleCallSubmit (call, callback)  {
     $.ajax({
-        url: theServer + "api/sessions/",
+        url: "api/sessions/",
         dataType: 'json',
         type: 'POST',
         data: call,
@@ -89,7 +89,7 @@ export class CallButton extends React.Component {
 
     componentDidMount() {
         $.ajax({
-        url: theServer + "api/sessions/",
+        url: "api/sessions/",
         dataType: 'json',
         type: 'GET',
         success: this.setState({
@@ -231,7 +231,7 @@ export class CallManager extends React.Component {
 
     removeNotification(notificationId) {
         $.ajax({
-        url: (theServer + "api/notifications/" + notificationId + "/"),
+        url: ("api/notifications/" + notificationId + "/"),
         dataType: 'json',
         type: 'DELETE',
         //data: step,
@@ -248,7 +248,7 @@ export class CallManager extends React.Component {
 
     removeSessionForCall(sessionId) {
         $.ajax({
-        url: (theServer + "api/sessions/" + sessionId + "/"),
+        url: ("api/sessions/" + sessionId + "/"),
         dataType: 'json',
         type: 'DELETE',
         //data: step,
@@ -264,7 +264,7 @@ export class CallManager extends React.Component {
     acceptCall(notificationId,sessionId) {
         event.preventDefault()
         $.ajax({
-            url: theServer + "api/sessions/" + sessionId + "/",
+            url: "api/sessions/" + sessionId + "/",
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -333,7 +333,7 @@ export class CallManager extends React.Component {
 
     loadObjectsFromServer = () => {
         $.ajax({
-          url: theServer + "api/notifications/",
+          url: "api/notifications/",
           dataType: 'json',
           cache: false,
           success: function(data) {

@@ -85,7 +85,7 @@ export class DailyList extends React.Component{
         var periodRangeEnd = new Date();
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = theServer + "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
         console.log("checking this url " + theUrl)
 
         $.ajax({
@@ -296,7 +296,7 @@ export class UpdateOccurrenceList extends React.Component {
         //periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         //periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
         $.ajax({
-            url: theServer + "api/stepOccurrences/" + this.state.stepOccurrenceId + "/updateOccurrences/",
+            url: "api/stepOccurrences/" + this.state.stepOccurrenceId + "/updateOccurrences/",
             dataType: 'json',
             cache: false,
             success: function (data) {

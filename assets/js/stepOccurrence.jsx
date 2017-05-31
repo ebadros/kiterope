@@ -194,7 +194,7 @@ export class StepOccurrenceItem extends React.Component {
             wasCompleted: this.state.wasCompleted
         }
 
-        var theUrl = theServer + "api/stepOccurrences/" + this.state.id + "/"
+        var theUrl = "api/stepOccurrences/" + this.state.id + "/"
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -217,7 +217,7 @@ export class StepOccurrenceItem extends React.Component {
 
                 }.bind(this)
             });
-        var theUrl = theServer + "api/updateOccurrences/" + updateOccurrence.id + "/"
+        var theUrl = "api/updateOccurrences/" + updateOccurrence.id + "/"
             $.ajax({
                 url: theUrl,
                 dataType: 'json',

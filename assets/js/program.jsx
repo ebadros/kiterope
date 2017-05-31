@@ -87,7 +87,7 @@ export class ProgramListPage extends React.Component {
 
     handleProgramSubmit (program, callback) {
 
-             var theUrl = theServer + "api/programs/"
+             var theUrl = "api/programs/"
 
              $.ajax({
                  url: theUrl,
@@ -121,11 +121,10 @@ export class ProgramListPage extends React.Component {
 
 
   loadProgramsFromServer = () => {
-      console.log("loadProgramsFromServer")
       if (this.state.activePage != 1) {
-                var theUrl = theServer + "api/programs/?page=" + this.state.activePage
+                var theUrl = "api/programs/?page=" + this.state.activePage
       }  else {
-          var theUrl = theServer + "api/programs/"
+          var theUrl = "api/programs/"
       }
       console.log(theUrl)
     $.ajax({
@@ -308,7 +307,7 @@ export class ProgramDetailPage extends React.Component {
     }
 
     loadStepsFromServer = () => {
-        var theUrl = theServer + "api/programs/" + this.props.params.program_id + "/steps"
+        var theUrl = "api/programs/" + this.props.params.program_id + "/steps"
         $.ajax({
           url: theUrl ,
           dataType: 'json',
@@ -326,7 +325,7 @@ export class ProgramDetailPage extends React.Component {
 
     loadProgramsFromServer = () => {
     $.ajax({
-      url: theServer + "api/programs/" + this.props.params.program_id + "/",
+      url: "api/programs/" + this.props.params.program_id + "/",
       dataType: 'json',
       cache: false,
         headers: {
@@ -337,7 +336,7 @@ export class ProgramDetailPage extends React.Component {
             data: programData});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + "api/programs/" + this.props.params.program_id + "/", status, err.toString());
+        console.error( "api/programs/" + this.props.params.program_id + "/", status, err.toString());
       }.bind(this),
 
     });
@@ -346,7 +345,7 @@ export class ProgramDetailPage extends React.Component {
   handleStepSubmit (step, callback) {
 
              $.ajax({
-                 url: theServer + "api/steps/",
+                 url: "api/steps/",
                  dataType: 'json',
                  type: 'POST',
                  data: step,
@@ -359,7 +358,7 @@ export class ProgramDetailPage extends React.Component {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(theServer + "api/steps/", status, err.toString());
+                     console.error("api/steps/", status, err.toString());
                      this.setState({
                          error: err,
                      })
@@ -379,7 +378,7 @@ export class ProgramDetailPage extends React.Component {
               //var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
 
       $.ajax({
-      url: theServer + "api/programs/" + this.props.params.program_id + "/",
+      url:  "api/programs/" + this.props.params.program_id + "/",
       dataType: 'json',
       cache: false,
           type: 'OPTIONS',
@@ -397,7 +396,7 @@ export class ProgramDetailPage extends React.Component {
           }
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + "api/programs/" + this.props.params.program_id + "/", status, err.toString());
+        console.error( "api/programs/" + this.props.params.program_id + "/", status, err.toString());
       }.bind(this),
 
 
@@ -407,7 +406,7 @@ export class ProgramDetailPage extends React.Component {
 
 
     handleFormSubmit = (step, callback) => {
-        var theUrl = theServer + "api/steps/"
+        var theUrl =  "api/steps/"
     $.ajax({
         url: theUrl,
         dataType: 'json',
@@ -758,7 +757,7 @@ export class ProgramSubscriptionForm extends React.Component {
 
     getGoals = () => {
         console.log("geGoals")
-        var theUrl = theServer + 'api/goals/'
+        var theUrl = 'api/goals/'
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -789,7 +788,7 @@ export class ProgramSubscriptionForm extends React.Component {
     }
 
     handleSubscribeClicked = () => {
-        var theUrl = theServer + "api/planOccurrences/"
+        var theUrl = "api/planOccurrences/"
         var planOccurrence = {
             program: this.state.program.id,
             goal: this.state.goal,
@@ -1564,7 +1563,7 @@ export class ProgramList extends React.Component {
     }
 
     loadProgramsFromServer = () => {
-        var theURL = theServer + "api/goals/" + this.props.parentId + "/programs"
+        var theURL = "api/goals/" + this.props.parentId + "/programs"
 
       $.ajax({
       url: theURL,

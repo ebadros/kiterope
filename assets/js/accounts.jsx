@@ -155,11 +155,7 @@ export class StandardSetOfComponents extends React.Component {
         return (
 
             <div>
-                <Global values={{
-                theServer: theServer,
-                s3ImageUrl: s3ImageUrl,
-                s3IconUrl: s3IconUrl,
-            }} />
+
                                 <div ref="ref_messageWindowContainer"></div>
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
@@ -737,7 +733,7 @@ export class LoginForm extends React.Component {
   actionAfterLogin = () => {
       console.log("login form action after login")
 
-      var theUrl = theServer + '/api/users/i'
+      var theUrl = '/api/users/i'
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',
@@ -900,7 +896,7 @@ export class PasswordConfirmForm extends React.Component {
 
 
         $.ajax({
-            url: (theServer + "rest-auth/password/reset/confirm/"),
+            url: ("rest-auth/password/reset/confirm/"),
             dataType: 'json',
             type: 'POST',
             data: {
@@ -999,7 +995,7 @@ export class PasswordResetForm extends React.Component {
         var email = this.state.email
 
         $.ajax({
-            url: (theServer + "rest-auth/password/reset/"),
+            url: ("rest-auth/password/reset/"),
             dataType: 'json',
             type: 'POST',
             data: {
@@ -1102,7 +1098,7 @@ export class JoinForm extends React.Component {
 
 
 
-      var theUrl = theServer + "rest-auth/registration/"
+      var theUrl = "rest-auth/registration/"
       $.ajax({
         url: theUrl,
         dataType: 'json',
@@ -1409,7 +1405,7 @@ export class ModalLoginForm extends React.Component {
   }
 
   actionAfterLogin = () => {
-      var theUrl = theServer + 'api/users/i/'
+      var theUrl = 'api/users/i/'
       $.ajax({
             method: 'GET',
             url: theUrl,
