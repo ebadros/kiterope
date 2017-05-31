@@ -194,7 +194,7 @@ export class MessageWindowContainer extends React.Component {
     }
 
     connectToThread = (channelId) => {
-        var theUrl = theServer + "api/channels/" + channelId + "/messageThread"
+        var theUrl = "api/channels/" + channelId + "/messageThread"
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -279,7 +279,7 @@ export class MessageWindowContainer extends React.Component {
 
     createNewMessageThread(){
     $.ajax({
-        url: theServer + "api/messageThreads/",
+        url: "api/messageThreads/",
         dataType: 'json',
         headers: {
             'Authorization': 'Token ' + localStorage.token
@@ -335,7 +335,7 @@ export class MessageWindowContainer extends React.Component {
     }
     getReceiverNotificationChannelLabel = (receiverId) => {
 
-        var theUrl = theServer + 'api/users/' + receiverId
+        var theUrl = 'api/users/' + receiverId
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -361,7 +361,7 @@ export class MessageWindowContainer extends React.Component {
     }
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = theServer + 'api/channelUsers/' + receiverId
+        var theUrl = 'api/channelUsers/' + receiverId
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -544,7 +544,7 @@ export class MessagePage extends React.Component {
     }
 
     connectToThread = (channelId) => {
-        var theUrl = theServer + "api/channels/" + channelId + "/messageThread"
+        var theUrl = "api/channels/" + channelId + "/messageThread"
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -628,7 +628,7 @@ export class MessagePage extends React.Component {
 
     createNewMessageThread(){
     $.ajax({
-        url: theServer + "api/messageThreads/",
+        url: "api/messageThreads/",
         dataType: 'json',
         headers: {
             'Authorization': 'Token ' + localStorage.token
@@ -682,7 +682,7 @@ export class MessagePage extends React.Component {
     }
     getReceiverNotificationChannelLabel = (receiverId) => {
 
-        var theUrl = theServer + 'api/users/' + receiverId
+        var theUrl = 'api/users/' + receiverId
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -708,7 +708,7 @@ export class MessagePage extends React.Component {
     }
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = theServer + 'api/channelUsers/' + receiverId
+        var theUrl = 'api/channelUsers/' + receiverId
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -930,7 +930,7 @@ export class MessageThreadLabelMenu extends React.Component {
      loadLabelsFromServer = () => {
 
     $.ajax({
-      url: theServer + 'api/labels/message',
+      url: 'api/labels/message',
       dataType: 'json',
       cache: false,
         headers: {
@@ -942,7 +942,7 @@ export class MessageThreadLabelMenu extends React.Component {
         });
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + 'api/labels/message', status, err.toString());
+        console.error('api/labels/message', status, err.toString());
       }.bind(this),
 
     })
@@ -1044,7 +1044,7 @@ export class MessagePageLabelsList extends React.Component {
     loadMessageLabelsFromServer = () => {
 
     $.ajax({
-      url: theServer + 'api/labels/message',
+      url: 'api/labels/message',
       dataType: 'json',
       cache: false,
         headers: {
@@ -1056,7 +1056,7 @@ export class MessagePageLabelsList extends React.Component {
         });
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(theServer + 'api/labels/message', status, err.toString());
+        console.error('api/labels/message', status, err.toString());
       }.bind(this),
 
     });
@@ -1253,7 +1253,7 @@ export class MessageWindow extends React.Component {
           typeOfMessage: "chat-messages"
       }
 
-          var theUrl = theServer + "api/messages/"
+          var theUrl = "api/messages/"
 
       $.ajax({
         url: theUrl,
@@ -1921,10 +1921,10 @@ export class MessageThreadList extends React.Component {
             }
 
     if (this.state.selectedLabelId) {
-        var theUrl = theServer + 'api/messageThreads/labels/' + this.state.selectedLabelId + includePage
+        var theUrl = 'api/messageThreads/labels/' + this.state.selectedLabelId + includePage
     }
     else {
-        var theUrl = theServer + 'api/messageThreads' + includePage
+        var theUrl = 'api/messageThreads' + includePage
     }
     $.ajax({
       url: theUrl ,
@@ -2095,7 +2095,7 @@ export class MessageThreadListItem extends React.Component {
                     }
                     $.ajax({
                         traditional: true,
-                        url: theServer + "api/messageThreads/" + this.state.thread.id + "/",
+                        url: "api/messageThreads/" + this.state.thread.id + "/",
                         dataType: 'json',
                         headers: {
                             'Authorization': 'Token ' + localStorage.token
@@ -2129,10 +2129,10 @@ export class MessageThreadListItem extends React.Component {
 
                 }
 
-                console.log(theServer + "api/messageThreads/" + this.state.thread.id + "/")
+                console.log("api/messageThreads/" + this.state.thread.id + "/")
                 $.ajax({
                     traditional:true,
-                    url: theServer + "api/messageThreads/" + this.state.thread.id + "/",
+                    url: "api/messageThreads/" + this.state.thread.id + "/",
                     dataType: 'json',
                     headers: {
                         'Authorization': 'Token ' + localStorage.token
@@ -2263,7 +2263,7 @@ export class ContactListPane extends React.Component {
         if (this.state.data[0] == null)  {
             if (this.state.isVisible) {
                 $.ajax({
-                    url: theServer + 'api/users/',
+                    url: 'api/users/',
                     dataType: 'json',
                     cache: false,
                     headers: {
@@ -2427,7 +2427,7 @@ export class MessageThreadPane extends React.Component {
     loadMessagesFromServer = () => {
 
             $.ajax({
-                url: theServer + "api/messageThreads/" + this.state.thread.id + "/messages",
+                url: "api/messageThreads/" + this.state.thread.id + "/messages",
                 dataType: 'json',
                 cache: false,
                 headers: {
@@ -2461,7 +2461,7 @@ export class MessageThreadPane extends React.Component {
     }
 
   handleMessageSubmit (theMessageData) {
-      var theUrl = theServer + "api/messages/"
+      var theUrl = "api/messages/"
       $.ajax({
         url: theUrl,
         dataType: 'json',

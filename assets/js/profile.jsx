@@ -71,15 +71,15 @@ export class ProfileListPage extends React.Component {
       if (this.props.myContacts) {
 
           if (this.state.activePage != 1) {
-              var theUrl = theServer + "api/contacts/?page=" + this.state.activePage
+              var theUrl = "api/contacts/?page=" + this.state.activePage
           } else {
-              var theUrl = theServer + "api/contacts/"
+              var theUrl = "api/contacts/"
           }
       } else {
           if (this.state.activePage != 1) {
-              var theUrl = theServer + "api/profiles/?page=" + this.state.activePage
+              var theUrl = "api/profiles/?page=" + this.state.activePage
           } else {
-              var theUrl = theServer + "api/profiles/"
+              var theUrl = "api/profiles/"
           }
       }
     $.ajax({
@@ -107,7 +107,7 @@ export class ProfileListPage extends React.Component {
 
   handleGoalSubmit (goal) {
     $.ajax({
-        url: theServer + "api/profiles/",
+        url: "api/profiles/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -656,10 +656,10 @@ export class ProfileViewAndEditPage extends React.Component {
     }
 
     loadObjectsFromServer = () => {
-        var theUrl = theServer + "api/myProfile"
+        var theUrl = "api/myProfile"
         console.log(theUrl)
         $.ajax({
-          url: theServer + "api/myProfile",
+          url: "api/myProfile",
           dataType: 'json',
           cache: false,
           success: function(data) {
@@ -720,8 +720,7 @@ export class ProfileViewPage extends React.Component {
 
     loadObjectsFromServer = () => {
 
-        console.log("inside loadObjectsFromServer")
-        var myUrl = theServer + "api/profiles/" + this.props.params.profile_id + "/"
+        var myUrl = "api/profiles/" + this.props.params.profile_id + "/"
         $.ajax({
           url: myUrl,
           dataType: 'json',
@@ -787,7 +786,7 @@ export class ProfileDetailPage extends React.Component {
 
     loadDetailFromServer = () => {
 
-        var theURL = theServer + "api/profiles/" + this.props.params.profile_id + "/"
+        var theURL = "api/profiles/" + this.props.params.profile_id + "/"
 
 
     $.ajax({
@@ -849,7 +848,7 @@ export class ProfileDetailPage extends React.Component {
     }
 
   determineOptions = () => {
-            var theUrl = theServer + "api/profiles/" + this.props.params.profile_id + "/"
+            var theUrl = "api/profiles/" + this.props.params.profile_id + "/"
       $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -1164,7 +1163,7 @@ export class ProfileList extends React.Component {
     }
 
     loadFromServer = () => {
-        var theURL = theServer + "api/profiles"
+        var theURL = "api/profiles"
 
       $.ajax({
       url: theURL,

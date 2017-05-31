@@ -84,7 +84,7 @@ export class SearchPage extends React.Component {
 
     handleFormSubmit(query) {
         $.ajax({
-        url: (theServer + "api/searchQuery/"),
+        url: ("api/searchQuery/"),
         dataType: 'json',
         type: 'POST',
         data: query,
@@ -337,9 +337,9 @@ export class SearchHitsGrid extends React.Component {
     loadObjectsFromServer = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
-                var theUrl = theServer + "api/program/search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
+                var theUrl = "api/program/search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
             } else {
-                var theUrl = theServer + "api/program/search/?text__contains=" + this.state.url
+                var theUrl = "api/program/search/?text__contains=" + this.state.url
             }
             $.ajax({
                 url: theUrl,
@@ -720,7 +720,7 @@ export class PlanHit2 extends React.Component {
 
     render () {
         const result = this.props.result;
-        let url = theServer + "/plans/" + result.id + "/steps"
+        let url = "/plans/" + result.id + "/steps"
         return (
                 <div className="column" key={result.id}>
 
@@ -765,7 +765,7 @@ export class PlanHit2 extends React.Component {
 var PlanHit = React.createClass({
     render: function() {
         const result = this.props.result;
-        let url = theServer + "/plans/" + result.id + "/steps"
+        let url = "/plans/" + result.id + "/steps"
         return (
                 <div className="column" key={result.id}>
 
@@ -829,7 +829,7 @@ export class UserLink extends React.Component {
 
     loadObjectsFromServer = () => {
         $.ajax({
-          url: theServer + "api/profiles/" + this.props.userId + "/",
+          url: "api/profiles/" + this.props.userId + "/",
           dataType: 'json',
           cache: false,
           success: function(data) {

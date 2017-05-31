@@ -78,7 +78,7 @@ export class GoalEntryPage extends React.Component {
 
      handleGoalSubmit (goal) {
     $.ajax({
-        url: theServer + "api/goals/",
+        url: "api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -157,9 +157,9 @@ export class GoalListPage extends React.Component {
 
   loadCommentsFromServer = () => {
       if (this.state.activePage != 1) {
-                var theUrl = theServer + "api/goals/?page=" + this.state.activePage
+                var theUrl = "api/goals/?page=" + this.state.activePage
       }  else {
-          var theUrl = theServer + "api/goals/"
+          var theUrl = "api/goals/"
       }
     $.ajax({
       url: theUrl,
@@ -185,7 +185,7 @@ export class GoalListPage extends React.Component {
 
   handleGoalSubmit (goal) {
     $.ajax({
-        url: theServer + "api/goals/",
+        url: "api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -404,7 +404,7 @@ export class GoalDetailPage extends React.Component {
 
     handleGoalSubmit (goal) {
         $.ajax({
-                url: theServer + "api/goals/" + goal.id +"/",
+                url: "api/goals/" + goal.id +"/",
                 dataType: 'json',
                 type: 'PUT',
                 data: goal,
@@ -426,7 +426,7 @@ export class GoalDetailPage extends React.Component {
   }
 
     loadDetailFromServer = () => {
-        var theURL = theServer + "api/goals/" + this.props.params.goal_id + "/"
+        var theURL = "api/goals/" + this.props.params.goal_id + "/"
 
     $.ajax({
       url: theURL,
@@ -490,7 +490,7 @@ export class GoalDetailPage extends React.Component {
     }
 
   determineOptions = () => {
-      var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
+      var theUrl = "api/goals/" + this.props.params.goal_id + "/"
 
       $.ajax({
       url: theUrl,
