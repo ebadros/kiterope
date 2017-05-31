@@ -26,7 +26,7 @@ INSTALLED_APPS += [
     'sslserver',
 ]
 
-DATABASES = {
+'''DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'kiterope',
@@ -36,6 +36,6 @@ DATABASES = {
             'PORT': '',
         }
     }
-
+'''
 
 SITE_ID=3

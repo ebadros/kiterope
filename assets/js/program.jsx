@@ -1281,7 +1281,6 @@ export class ProgramForm extends React.Component {
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleTitleChange}
-                                      serverErrors={this.state.serverErrors.title}
 
                                   />
  </div>
@@ -1323,7 +1322,6 @@ export class ProgramForm extends React.Component {
                                             isClearable={false}
                                             name="timeCommitment"
                                             options={timeCommitmentOptions}
-                                            serverErrors={this.state.serverErrors.timeCommitment}
                                             />
                                   </div>
                               </div>
