@@ -20,15 +20,22 @@ THUMBNAIL_DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
 
 
-'''VP STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
-)'''
+''
 
 INSTALLED_APPS += [
     'sslserver',
 ]
 
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'kiterope',
+            'USER': 'kiteropeadmin',
+            'PASSWORD': 'regul8or1',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
 
 
 SITE_ID=3

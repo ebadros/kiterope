@@ -242,9 +242,10 @@ export class Menubar extends React.Component {
     }
 
     loadUserData() {
+        var theUrl = 'api/users/i/'
         $.ajax({
             method: 'GET',
-            url: '/api/users/i/',
+            url: theUrl,
             datatype: 'json',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
@@ -261,7 +262,7 @@ export class Menubar extends React.Component {
 
             }.bind(this),
             error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
+                console.error(theUrl, status, err.toString());
         }
         })
     }

@@ -34,7 +34,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'kiterope',
-            'USER': 'kiteropeAdmin',
+            'USER': 'kiteropeadmin',
             'PASSWORD': 'regul8or1',
             'HOST': 'localhost',
             'PORT': '5432',
