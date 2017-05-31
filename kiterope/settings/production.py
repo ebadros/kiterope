@@ -1,8 +1,6 @@
 #
 from kiterope.settings.common import *
-from requests_aws4auth import AWS4Auth
-from elasticsearch import Elasticsearch, RequestsHttpConnection
-import elasticsearch
+
 
 DEBUG = True
 IN_PRODUCTION = True
@@ -19,21 +17,6 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
-awsauth = AWS4Auth('AKIAJ5YZL4QGGT7IUJRA', 'GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX', 'REGION', 'es')
-
-HAYSTACK_CONNECTIONS = (
-    'default': {
-     'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-     'URL': host,
-     'INDEX_NAME': 'haystack',
-     'KWARGS': {
-         'port':443,
-         'http_auth': awsauth,
-         'use_ssl': True,
-         'verify_certs': True,
-         'connection_class': elasticsearch.RequestsHttpConnection,
-     },
-)
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
