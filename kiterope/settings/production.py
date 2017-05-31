@@ -16,7 +16,7 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
-
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
