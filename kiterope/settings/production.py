@@ -1,6 +1,5 @@
 #
 from kiterope.settings.common import *
-import certifi
 
 DEBUG = True
 IN_PRODUCTION = True
@@ -30,7 +29,21 @@ es = Elasticsearch(
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
-print(es.info())
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com',
+        'INDEX_NAME': 'haystack',
+        'KWARGS': {
+            'port': 443,
+            'http_auth': awsauth,
+            'use_ssl': True,
+            'verify_certs': True,
+            'connection_class': elasticsearch.RequestsHttpConnection,
+        }
+    },
+}
 
 if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
