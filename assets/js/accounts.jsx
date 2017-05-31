@@ -160,7 +160,7 @@ export class StandardSetOfComponents extends React.Component {
                 s3ImageUrl: s3ImageUrl,
                 s3IconUrl: s3IconUrl,
             }} />
-                                <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
+                                <div ref="ref_messageWindowContainer"></div>
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
             <Menubar shouldRefresh={this.state.refreshUser} /></div>
