@@ -11,7 +11,10 @@ ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev.us-west-1.elasticbea
 STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
 STATIC_URL = '/static/'
 
-
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "assets"),
+#    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
+)
 
 
 
