@@ -5,7 +5,7 @@ DEBUG = True
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
-ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev.us-west-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev-1.us-west-1.elasticbeanstalk.com']
 
 #STATIC_ROOT ='/opt/python/current/app/kiterope/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
