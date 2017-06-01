@@ -25,7 +25,7 @@ host = 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com
 awsauth = AWS4Auth('AKIAJ5YZL4QGGT7IUJRA', 'GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX', 'us-west-1', 'es')
 
 es = Elasticsearch(
-    hosts=[{'host': host, 'port': 9200}],
+    hosts=[{'host': host, 'port': 443}],
     http_auth=awsauth,
     use_ssl=True,
     verify_certs=True,
