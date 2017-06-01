@@ -29,7 +29,7 @@ es = elasticsearch.Elasticsearch(
     http_auth=awsauth,
     use_ssl=True,
     verify_certs=True,
-    connection_class=RequestsHttpConnection
+    connection_class=elasticsearch.RequestsHttpConnection
 )
 parsed = urlparse('https://user:pass@host:port')
 HAYSTACK_CONNECTIONS = {
