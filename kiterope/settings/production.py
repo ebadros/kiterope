@@ -63,7 +63,7 @@ else:
             'NAME': 'kiterope',
             'USER': 'kiteropeadmin',
             'PASSWORD': 'regul8or1',
-            'HOST': 'localhost',
+            'HOST': 'aasprfhxks9uh7.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
             'PORT': '5432',
         }
     }
