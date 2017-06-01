@@ -1,5 +1,7 @@
 #
 from kiterope.settings.common import *
+from urlparse import urlparse
+
 
 DEBUG = True
 IN_PRODUCTION = True
@@ -29,7 +31,7 @@ es = Elasticsearch(
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
-
+parsed = urlparse('https://user:pass@host:port')
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
