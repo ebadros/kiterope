@@ -66,7 +66,22 @@ import CallManager from './call'
 import { Menubar, StandardSetOfComponents } from './accounts'
 
 
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Connection', 'keep-alive');
+        xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+        xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PUT');
+        xhr.setRequestHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+        xhr.setRequestHeader('Access-Control-Allow-Credentials', 'true');
 
+
+
+    }
+});
 
 
 
@@ -354,6 +369,13 @@ export class SearchHitsGrid extends React.Component {
                 url: theUrl,
                 dataType: 'json',
                 cache: false,
+                headers: {
+                'Authorization': 'Token ' + localStorage.token,
+                    "Access-Control-Allow-Origin": "*",
+                    'Access-Control-Allow-Methods': 'GET, POST',
+                    "Access-Control-Allow-Headers": "Content-Type, X-Requested-With"
+
+                },
                 success: function (data) {
                     this.setState({
 
@@ -931,7 +953,21 @@ function printObject(o) {
   alert(out);
 }
 
-
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 
 module.exports = { SearchPage }

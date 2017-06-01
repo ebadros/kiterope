@@ -242,7 +242,7 @@ export class Menubar extends React.Component {
     }
 
     loadUserData() {
-        var theUrl = 'api/users/i/'
+        var theUrl = theServer + 'api/users/i'
         $.ajax({
             method: 'GET',
             url: theUrl,
