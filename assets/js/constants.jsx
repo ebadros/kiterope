@@ -35,7 +35,7 @@ import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceMo
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent } from './calendar'
 var UpdatesList = require('./update');
 
-
+export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
 export const theServer = 'http://127.0.0.1:8000/';
 export const s3IconUrl = "https://kiterope.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope.s3.amazonaws.com:443/";
@@ -288,4 +288,4 @@ module.exports = { React, ReactDOM, $, forms, ImageUploader, PlanForm2,
     frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     Datetime, Dropzone, DropzoneS3Uploader, BigCalendar, ViewEditDeleteItem, StepViewEditDeleteItem,
-    TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions }
+    TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain }

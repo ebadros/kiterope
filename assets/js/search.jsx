@@ -43,7 +43,7 @@ import {
 InitialLoader,
     } from "searchkit";
 
-import { theServer } from './constants'
+import { theServer, elasticSearchDomain } from './constants'
 
 var Searchkit = require('searchkit')
 var imageDirectory = "https://kiterope.s3.amazonaws.com/"
@@ -340,9 +340,9 @@ export class SearchHitsGrid extends React.Component {
     loadObjectsFromServer = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
-                var theUrl = "api/program/search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
+                var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
             } else {
-                var theUrl = "api/program/search/?text__contains=" + this.state.url
+                var theUrl = elasticSearchDomain + "haystack/_search/?q=" + this.state.url
             }
             $.ajax({
                 url: theUrl,
