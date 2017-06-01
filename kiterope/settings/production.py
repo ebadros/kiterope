@@ -1,6 +1,6 @@
 #
 from kiterope.settings.common import *
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 DEBUG = True
