@@ -60,7 +60,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'kiterope',
+            'NAME': 'aasprfhxks9uh7',
             'USER': 'kiteropeadmin',
             'PASSWORD': 'regul8or1',
             'HOST': 'aasprfhxks9uh7.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
