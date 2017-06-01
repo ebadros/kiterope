@@ -53,7 +53,13 @@ const host = "http://127.0.0.1:8000/api/plan/search"
 const searchkit = new Searchkit.SearchkitManager("https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com")
 
 
-
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
 
 import CallManager from './call'
 
@@ -338,6 +344,34 @@ export class SearchHitsGrid extends React.Component {
     }
 
     loadObjectsFromServer = () =>  {
+        if (this.state.url != "") {
+            if (this.state.activePage != 1) {
+                var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
+            } else {
+                var theUrl = elasticSearchDomain + "haystack/_search/?q=" + this.state.url
+            }
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    this.setState({
+
+                        data: data.hits.hits,
+
+                    }, this.showSearchHits)
+                    printObject(data.hits.hits)
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this)
+            });
+
+        }
+      }
+
+      loadObjectsFromServer2 = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
                 var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
