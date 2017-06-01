@@ -63,8 +63,8 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'aasprfhxks9uh7',
-            'USER': 'kiteropeadmin',
-            'PASSWORD': 'regul8or1',
+            'USER': 'kiterope-rds-user',
+            'PASSWORD': 'eporetik4',
             'HOST': 'aasprfhxks9uh7.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
             'PORT': '5432',
         }
