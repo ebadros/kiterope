@@ -67,20 +67,40 @@ import { Menubar, StandardSetOfComponents } from './accounts'
 
 
 $.ajaxSetup({
-    beforeSend: function(xhr) {
-        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('Connection', 'keep-alive');
-        xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
-        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-        xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PUT');
-        xhr.setRequestHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
-        xhr.setRequestHeader('Access-Control-Allow-Credentials', 'true');
 
+crossDomain: true,
 
+// Helps in setting cookie
+xhrFields: {
+    withCredentials: false
+},
+
+beforeSend: function (xhr, type) {
+    // Set the CSRF Token in the header for security
+    if (type.type !== "GET") {
+        //var token = Cookies.get("X-CSRFToken");
+        //xhr.setRequestHeader('X-CSRFToken', token);
+                //xhr.setRequestHeader('Access-Control-Request-Headers', 'x-csrftoken');
 
     }
+}
+
+
+        //xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        //xhr.setRequestHeader('Accept', 'application/json');
+        //xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        //xhr.setRequestHeader('Host', 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com');
+
+        //xhr.setRequestHeader('X-Amz-Date', '20170601T235905Z');
+        //xhr.setRequestHeader('Authorization', 'AWS4-HMAC-SHA256 Credential=AKIAJ5YZL4QGGT7IUJRA/20170601/us-west-1/es/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=09f01b9bddb51e1781470b41ecf647416bcece793a140c0967f983b5929422d9');
+//xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+    //xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
+    //xhr.setRequestHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+
+
+
+
+
 });
 
 
@@ -358,7 +378,7 @@ export class SearchHitsGrid extends React.Component {
         }
     }
 
-    loadObjectsFromServer = () =>  {
+    loadObjectsFromServerHaystack = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
                 var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
@@ -369,13 +389,12 @@ export class SearchHitsGrid extends React.Component {
                 url: theUrl,
                 dataType: 'json',
                 cache: false,
+                xhrFields: {
+        },
                 headers: {
-                'Authorization': 'Token ' + localStorage.token,
-                    "Access-Control-Allow-Origin": "*",
-                    'Access-Control-Allow-Methods': 'GET, POST',
-                    "Access-Control-Allow-Headers": "Content-Type, X-Requested-With"
-
+                    'Access-Control-Allow-Origin': 'http://localhost:8000'
                 },
+                crossDomain: true,
                 success: function (data) {
                     this.setState({
 
@@ -393,12 +412,40 @@ export class SearchHitsGrid extends React.Component {
         }
       }
 
-      loadObjectsFromServer2 = () =>  {
+      loadObjectsFromServer = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
                 var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
             } else {
-                var theUrl = elasticSearchDomain + "haystack/_search/?q=" + this.state.url
+                var theUrl = "https://hyjeadr7z5.execute-api.us-west-1.amazonaws.com/beta/?q=" + this.state.url
+            }
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    this.setState({
+                        count:data.hits.total,
+
+                        data: data.hits.hits,
+
+                    }, this.showSearchHits)
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this)
+            });
+
+        }
+      }
+
+      loadObjectsFromServerLocal = () =>  {
+        if (this.state.url != "") {
+            if (this.state.activePage != 1) {
+                var theUrl = "/api/program/search?page=" + this.state.activePage + "&text__contains=" + this.state.url
+            } else {
+                var theUrl = "/api/program/search/?text__contains=" + this.state.url
             }
             $.ajax({
                 url: theUrl,
@@ -428,6 +475,8 @@ export class SearchHitsGrid extends React.Component {
           })
 
             $(this.refs["ref_searchHits"]).slideDown();
+                    clearInterval(this.state.intervalID)
+
     }
 
       componentDidMount = () => {
@@ -518,8 +567,8 @@ export class SearchHitsGrid extends React.Component {
                                         showCloseButton={false}
                                         hideControlBar={true}
                                         apiUrl="api/programs/"
-                                        id={objectData.id}
-                                        data={objectData}
+                                        id={objectData._source.id}
+                                        data={objectData._source}
                                         editable={false}
                                            needsLogin={this.handleNeedsLogin}
                 />

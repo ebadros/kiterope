@@ -25,7 +25,6 @@ var classNames = require('classnames');
 import validator from 'validator';
 require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
-//var MaskedInput = require('react-maskedinput');
 
 import {ImageUploader,PlanForm2,ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { PlanHeader, StepList , SimpleStepForm} from './step';

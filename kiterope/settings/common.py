@@ -113,9 +113,24 @@ MIDDLEWARE = [
 
 ]
 
+#CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ('kiterope.com', 'localhost')
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ORIGIN_WHITELIST = ('kiterope.com', 'localhost:8000','http://localhost:8000', 'localhost', 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com')
 CORS_REPLACE_HTTPS_REFERER = True
+
+'''CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)'''
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
