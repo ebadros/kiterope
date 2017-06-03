@@ -7,7 +7,7 @@ DEBUG = True
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
-ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev.us-west-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev-01.us-west-1.elasticbeanstalk.com']
 
 #STATIC_ROOT ='/opt/python/current/app/kiterope/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
@@ -62,10 +62,10 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'aasprfhxks9uh7',
-            'USER': 'kiterope-rds-user',
-            'PASSWORD': 'eporetik4',
-            'HOST': 'aasprfhxks9uh7.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
+            'NAME': 'aa1dtcykkt3zfby',
+            'USER': 'kiteropeadmin',
+            'PASSWORD': 'regul8or1',
+            'HOST': 'aa1dtcykkt3zfby.carvp3y5yq9m.us-west-1.rds.amazonaws.com:5432',
             'PORT': '5432',
         }
     }

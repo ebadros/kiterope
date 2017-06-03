@@ -12,7 +12,7 @@ WWW_ROOT = '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope'
 IS_DEV = True
 IS_PROD = False
 
-ALLOWED_HOSTS = ['192.168.1.156', '*', 'kiterope-dev.us-west-1.elasticbeanstalk.com', 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com']
+ALLOWED_HOSTS = ['192.168.1.156', '*', 'kiterope-dev-01.us-west-1.elasticbeanstalk.com', 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com']
 ROOT_URLCONF = 'kiterope.urls_development'
 
 #ALLOWED_HOSTS = ['*']
