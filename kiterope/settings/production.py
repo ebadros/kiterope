@@ -62,10 +62,10 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'aa1dtcykkt3zfby',
+            'NAME': 'aa1arj4p56yj6vl',
             'USER': 'kiteropeadmin',
             'PASSWORD': 'regul8or1',
-            'HOST': 'aa1dtcykkt3zfby.carvp3y5yq9m.us-west-1.rds.amazonaws.com:5432',
+            'HOST': 'aa1arj4p56yj6vl.carvp3y5yq9m.us-west-1.rds.amazonaws.com:5432',
             'PORT': '5432',
         }
     }
