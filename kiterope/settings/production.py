@@ -59,16 +59,16 @@ if 'RDS_DB_NAME' in os.environ:
         }
     }
 else:'''
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'ebdb',
-            'USER': 'kiteropeAdmin',
-            'PASSWORD': 'regul8or1',
-            'HOST': 'aa1arj4p56yj6vl.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
-            'PORT': '5432',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ebdb',
+        'USER': 'kiteropeAdmin',
+        'PASSWORD': 'regul8or1',
+        'HOST': 'aa1arj4p56yj6vl.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
+        'PORT': '5432',
     }
+}
 
 CHANNEL_LAYERS = {
     "default": {
