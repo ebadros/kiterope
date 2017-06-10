@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
-from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.decorators import detail_route
