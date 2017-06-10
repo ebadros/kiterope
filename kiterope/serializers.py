@@ -68,6 +68,9 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
         return obj.sender.profile.get_fullName()
 
     def get_permissions(self,obj):
+        #return obj.get_permissions()
+        #serializer = self.request.user
+        #if serializer == obj.program.author:
         if self.context['request'].user == obj.program.author:
             return True
 
@@ -280,7 +283,9 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     cost = serializers.CharField(max_length=20)
     startDate = serializers.DateField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
-    steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
+    #steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
+    steps = serializers.SerializerMethodField(required=False, read_only=True)
+
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
 
@@ -291,7 +296,13 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         except:
             return ""
 
+    def get_steps(self, obj):
+        serializer_context = {'request': self.context.get('request') }
 
+        serializer = StepSerializer(obj.get_steps(), many=True, context=serializer_context)
+        data = {i['id']: i for i in serializer.data}
+
+        return data
 
 
     def get_isSubscribed(self, obj):

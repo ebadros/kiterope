@@ -726,6 +726,16 @@ img.listNodeImage {
     overflow:hidden;
 }
 
+.profileTitle {
+    height: 50px;
+    width:100%;
+    font-weight:bold;
+    font-size:2em;
+    line-height:1.5em;
+    overflow:hidden;
+    text-align:center
+}
+
 .stepTitle {
     height: 50px;
     width:100%;
@@ -824,6 +834,7 @@ img.listNodeImage {
     width:calc(100% - 1px);
     top:70px;
     height:100% ;
+    z-index:1;
 
 }
 

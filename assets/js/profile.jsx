@@ -19,7 +19,7 @@ import TinyMCE from 'react-tinymce';
 import { ValidatedInput}  from './app'
 import autobind from 'class-autobind'
 import { ClippedImage, ChoiceModal , IconLabelCombo } from './elements'
-import { ImageUploader, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'
+import { ImageUploader, Header, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'
 import { StandardSetOfComponents, ErrorReporter } from './accounts'
 
 import { PlanForm, PlanList } from './plan'
@@ -31,6 +31,13 @@ import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS
 
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';
 
+import { Provider, connect, dispatch } from 'react-redux'
+
+import  {store} from "./redux/store";
+
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
+import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 
 function printObject(o) {
@@ -41,7 +48,7 @@ function printObject(o) {
   alert(out);
 }
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class ProfileListPage extends React.Component {
     constructor(props) {
         super(props)
@@ -70,17 +77,17 @@ export class ProfileListPage extends React.Component {
 
       if (this.props.myContacts) {
 
-          if (this.state.activePage != 1) {
-              var theUrl = "api/contacts/?page=" + this.state.activePage
-          } else {
+          //if (this.state.activePage != 1) {
+            //  var theUrl = "api/contacts/?page=" + this.state.activePage
+          //} else {
               var theUrl = "api/contacts/"
-          }
+          //}
       } else {
-          if (this.state.activePage != 1) {
-              var theUrl = "api/profiles/?page=" + this.state.activePage
-          } else {
+         // if (this.state.activePage != 1) {
+           //   var theUrl = "api/profiles/?page=" + this.state.activePage
+          //} else {
               var theUrl = "api/profiles/"
-          }
+          //}
       }
     $.ajax({
       url: theUrl,
@@ -90,12 +97,9 @@ export class ProfileListPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
-        this.setState({
-            count: data.count,
-            next:data.next,
-            previous:data.previous,
-            data: data.results});
-          console.log(data.results)
+          store.dispatch(setContacts(data))
+
+
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(theUrl, status, err.toString());
@@ -138,10 +142,9 @@ handleToggleForm = () => {
     }
 
     componentDidMount() {
-        this.loadProfilesFromServer();
+        //this.loadProfilesFromServer();
         //var intervalID = setInterval(this.loadCommentsFromServer, 2000);
         //this.setState({intervalID: intervalID});
-        var self = this;
         $(this.refs['ref_whichProfileForm']).hide();
 
 
@@ -240,7 +243,7 @@ componentWillUnmount() {
 
 
         <div className="fullPageDiv">
-            <div className="ui page container">
+            <div className="ui page container footerAtBottom">
 
 
             <div className="spacer">&nbsp;</div>
@@ -248,15 +251,15 @@ componentWillUnmount() {
                 <Link to={`/#`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">Users</div></Link>
+                  <Link to={`/#`}><div className="active section">My Contacts</div></Link>
             </div>
             <div>&nbsp;</div>
-                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Users" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
+                        <Header headerLabel="My Contacts"/>
         <div ref="ref_whichProfileForm">
             <ProfileForm cancelClicked={this.handleCancelClicked} onProfileSubmit={this.handleProgileSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
-                    <ProfileList data={this.state.data} />
+                    <ProfileList data={this.props.storeRoot.contacts} />
                 <div className="spacer">&nbsp;</div>
                 {pagination}
             </div>
@@ -526,7 +529,7 @@ if (this.state.user) {
             var smallColumnWidth = "three wide column"
         }
           return (
-              <div className="ui page container">
+              <div className="ui page container footerAtBottom">
                   <div>{this.props.planHeaderErrors}</div>
                   <div className="ui row">&nbsp;</div>
 
@@ -679,7 +682,7 @@ export class ProfileViewAndEditPage extends React.Component {
     render() {
             return (
                 <div className="fullPageDiv">
-                    <div className="ui page container">
+                    <div className="ui page container footerAtBottom">
                     <div className="spacer">&nbsp;</div>
                     <div className="ui alert"></div>
                     <div className="ui large breadcrumb">
@@ -745,7 +748,7 @@ export class ProfileViewPage extends React.Component {
             return (
 
                 <div className="fullPageDiv">
-                    <div className="ui page container">
+                    <div className="ui page container footerAtBottom">
                         <div className="spacer">&nbsp;</div>
                         <div className="ui alert"></div>
                         <div className="ui large breadcrumb">
@@ -768,7 +771,7 @@ export class ProfileViewPage extends React.Component {
 }
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class ProfileDetailPage extends React.Component {
     constructor(props) {
         super(props)
@@ -979,10 +982,7 @@ export class ProfileBasicView extends React.Component {
                     <div className="sixteen wide column">
 
                         <div className="row">&nbsp;</div>
-                        <div className="planTitle"> {this.state.data.firstName} {this.state.data.lastName} </div>
-
-
-
+                        <div className="profileTitle">{this.state.data.firstName} {this.state.data.lastName} </div>
 
                     </div>
                     </div></div>
@@ -1143,6 +1143,15 @@ export class ProfileList extends React.Component {
         this.loadFromServer()
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data && nextProps.data != null) {
+
+            this.setState({
+                data:nextProps.data
+            })
+        }
+    }
+
     checkIfUser() {
         $.ajax({
             method: 'GET',
@@ -1186,14 +1195,7 @@ export class ProfileList extends React.Component {
     });
   }
 
-    componentWillReceiveProps(nextProps) {
-        if (this.state.data != nextProps.data && nextProps.data != null) {
 
-            this.setState({
-                data:nextProps.data
-            })
-        }
-    }
 
     render () {
         var placeholderImageStyle = {
@@ -1202,22 +1204,37 @@ export class ProfileList extends React.Component {
             height: '300px',
         }
 
-        if (this.state.data && this.state.user) {
+        if (this.state.data) {
+             var theData = this.state.data
+        var values = Object.keys(theData).map(function(key){
+        return theData[key];
+        });
 
-        var profileList = this.state.data.map((profile) => {
+        var profileList = values.map((profile) => {
 
-            if (profile.id != this.state.user.profileId) {
+            if (profile.sender.id != this.state.user.profileId) {
             return (
-                    <ProfileViewEditDeleteItem key={profile.id}
+                    <ProfileViewEditDeleteItem key={profile.sender.id}
                                             isListNode={true}
                                             showCloseButton={false}
                                             apiUrl="api/profiles/"
-                                            id={profile.id}
-                                            data={profile}
+                                            id={profile.sender.id}
+                                            data={profile.sender}
                                             currentView="Basic"/>
 
 
-)}
+)} else {
+                return (
+                    <ProfileViewEditDeleteItem key={profile.receiver.id}
+                                            isListNode={true}
+                                            showCloseButton={false}
+                                            apiUrl="api/profiles/"
+                                            id={profile.receiver.id}
+                                            data={profile.receiver}
+                                            currentView="Basic"/>
+                )
+
+            }
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })

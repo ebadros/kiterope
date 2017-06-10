@@ -86,7 +86,6 @@ export class DailyList extends React.Component{
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
         var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
-        console.log("checking this url " + theUrl)
 
         $.ajax({
             url: theUrl,

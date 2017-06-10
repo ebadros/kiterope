@@ -5,7 +5,7 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import {ImageUploader, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, PlanOccurrenceViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
-import {PlanCalendar } from './calendar'
+import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import autobind from 'class-autobind'
@@ -294,7 +294,7 @@ export class PlanDetailPage extends React.Component {
                         </div>
                         <div ref="ref_calendarView">
 
-                            <PlanCalendar planId={this.props.params.plan_id} events={this.state.stepData} reloadItem={this.handleReloadItem}/>
+                            <ProgramCalendar planId={this.props.params.plan_id} events={this.state.stepData} reloadItem={this.handleReloadItem}/>
                             <div className="ui row">&nbsp;</div>
 
                         </div>

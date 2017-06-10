@@ -34,10 +34,8 @@ import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, P
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, PlanCalendar } from './calendar'
+import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
-import { Provider, connect, store, dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 
 import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
@@ -54,6 +52,12 @@ function printObject(o) {
   alert(out);
 }
 
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
+import { addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 
 
@@ -81,12 +85,13 @@ function printObject(o) {
   alert(out);
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class StepList extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
         this.state = {
-            data:[],
+            data:{},
             programId:"",
             activePage:1,
         }
@@ -97,7 +102,10 @@ export class StepList extends React.Component {
     }
 
     componentDidMount () {
-        this.loadFromServer()
+        this.setState({
+            data:this.props.data
+        })
+        //this.loadFromServer()
     }
 
      handlePageChange = (pageNumber) => {
@@ -151,10 +159,16 @@ export class StepList extends React.Component {
   }
 
     componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({
+                data:nextProps.data
+            })
+        }
         if (this.state.programId != nextProps.programId) {
-            this.loadFromServer()
+            this.setState({programId: nextProps.programId})
 
         }
+
     }
     handleCurrentViewChanged = (currentView) => {
 
@@ -166,16 +180,13 @@ export class StepList extends React.Component {
 
     render () {
                       //var pagination = this.getPagination()
-
-        var placeholderImageStyle = {
-            backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
-            width: '300px',
-            height: '300px',
-        }
-
         if (this.state.data) {
+             var theData = this.state.data
+        var values = Object.keys(theData).map(function(key){
+        return theData[key];
+        });
 
-        var stepList = this.state.data.map((step) => {
+        var stepList = values.map((step) => {
             return (
                     <StepViewEditDeleteItem closeClicked={this.handleCloseClicked}
                                             parentId={this.props.programId}
@@ -252,6 +263,7 @@ var TimeInput = React.createClass({
     )
   }
 });
+
 
 export class StepDetailView extends React.Component {
     constructor(props) {
@@ -518,9 +530,6 @@ export class StepBasicView extends React.Component {
                 break;
 
             case("DAILY"):
-                console.log("inside frequency " + theData.title)
-
-
                 this.setState({
                     dateInfo: "Daily, " +  theAbsoluteStartDate + " to " + theAbsoluteEndDate,
                 })
@@ -535,6 +544,9 @@ export class StepBasicView extends React.Component {
                     dateInfo:  this.state.data.monthlyDates + " Monthly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
                 })
                 break;
+
+
+
         }
 
 
@@ -569,8 +581,9 @@ export class StepBasicView extends React.Component {
             if (this.props.isListNode) {
                 return (
                                     <div onClick={this.goToDetail}>
-
                                         <ClippedImage item="plan" src={s3ImageUrl + this.state.data.image} />
+
+
 
                     <div className="ui grid">
                         <div className="sixteen wide column">
@@ -628,7 +641,7 @@ export class StepForm extends React.Component {
         this.state = {
            files:[],
             id:"",
-            image:"images/stepDefaultImage.svg",
+            image:"icons/stepDefaultImage.svg",
             title: "",
             description:" ",
             frequency:"ONCE",
@@ -642,7 +655,6 @@ export class StepForm extends React.Component {
             monthlyDates:"",
             absoluteStartDate:moment(),
             absoluteEndDate:moment(),
-
             startDate:0,
             endDate:0,
             startTime:"",
@@ -933,8 +945,17 @@ export class StepForm extends React.Component {
         this.props.cancelClicked()
     }
 
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
     handleSubmit(e) {
         e.preventDefault();
+
 
     if (this.props.storeRoot.user) {
 
@@ -1111,8 +1132,7 @@ export class StepForm extends React.Component {
             {
                 var buttonText = "Create"
             }
-                        var imageUrl = s3ImageUrl + this.state.image
-
+                        var imageUrl = this.state.image
 
 
         var descriptionEditor = this.getDescriptionEditor()
@@ -1126,7 +1146,7 @@ export class StepForm extends React.Component {
 
 
             var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+            var mediumColumnWidth = "eight wide column"
             var smallColumnWidth = "eight wide column"
         }
           return (
@@ -1139,7 +1159,7 @@ export class StepForm extends React.Component {
                           <div className="ui row">
                               <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-<div className={wideColumnWidth}>
+<div className={mediumColumnWidth}>
 
 
 <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
@@ -1158,6 +1178,7 @@ export class StepForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleTitleChange}
+                                        serverErrors={this.getServerErrors("title")}
 
 
                                     />

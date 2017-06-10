@@ -22,10 +22,10 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, reduxLogout, showSidebar } from './redux/actions'
+import { setCurrentUser, reduxLogout, showSidebar, setContacts, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
-import  {store} from "./redux/store";
 
 
 function printObject(o) {
@@ -104,8 +104,190 @@ function getCookie(name) {
     return cookieValue;
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class ReduxDataGetter extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
 
 
+        }
+    }
+
+    componentDidMount = () => {
+        this.loadUserData()
+
+    }
+
+    loadUserData() {
+        console.log("loadUserData")
+        var theUrl =  'api/users/i'
+        $.ajax({
+            method: 'GET',
+            url: theUrl,
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(userData) {
+                store.dispatch(setCurrentUser(userData))
+                this.loadUniversalData()
+
+                if (userData.isCoach) {
+                    this.loadCoachSpecificData()
+
+                }
+
+
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+        }
+        })
+    }
+
+    loadUniversalData() {
+        this.loadMessageThreadData()
+        this.loadContactData()
+        this.loadGoalData()
+        this.loadStepOccurrenceData()
+    }
+
+
+
+    loadCoachSpecificData() {
+        this.loadProgramData()
+
+    }
+
+    loadGoalData() {
+                console.log("loadGoalData")
+
+        var theUrl = "api/goals/"
+        $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+                  store.dispatch(setGoals(data))
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+
+      }.bind(this),
+
+    });
+
+    }
+
+    loadProgramData() {
+        var theUrl = "api/programs/"
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(setPrograms(data))
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+
+            }.bind(this),
+
+        });
+    }
+
+    loadMessageThreadData ()  {
+
+        var theUrl = 'api/messageThreads/'
+
+    $.ajax({
+      url: theUrl ,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+          store.dispatch(setMessageThreads(data))
+          store.dispatch(setOpenThreads({}))
+
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+      }.bind(this),
+
+    });
+  }
+
+
+
+    loadStepOccurrenceData() {
+        var periodRangeStart = new Date();
+        var periodRangeEnd = new Date();
+        periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
+        periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+          store.dispatch(setStepOccurrences(data.results))
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }.bind(this)
+        });
+    }
+
+
+    loadContactData() {
+        var theUrl = "api/contacts/"
+        $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+          store.dispatch(setContacts(data))
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+
+      }.bind(this),
+
+    });
+
+    }
+
+    render() {
+        return (<div></div>)
+    }
+
+
+
+
+}
 
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -150,19 +332,21 @@ export class StandardSetOfComponents extends React.Component {
 
     render() {
         if (!this.props.storeRoot.isMessageWindowVisible) {
-            $(this.refs["ref_messageWindowContainer"]).hide()
+            //$(this.refs["ref_messageWindowContainer"]).hide()
         }
         return (
 
             <div>
+                <ReduxDataGetter />
 
-                                <div ref="ref_messageWindowContainer"></div>
+                <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
             <Menubar shouldRefresh={this.state.refreshUser} /></div>
         )
     }
 }
+
 
 export class NotificationManager extends React.Component {
     constructor(props) {
@@ -311,7 +495,7 @@ export class Menubar extends React.Component {
 
     }
     handleSidebarClick (e) {
-        if(this.props.storeRoot.isSidebarVisible)  {
+        if(this.props.storeRoot.gui.isSidebarVisible)  {
                     store.dispatch(showSidebar(false))
 
 
@@ -357,7 +541,7 @@ export class Menubar extends React.Component {
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}
-                 <SidebarWithoutClickingOutside sidebarVisibilityChange={this.handleSidebarVisibilityChange} visible={this.props.storeRoot.isSidebarVisible} user={this.props.storeRoot.user} />
+                 <SidebarWithoutClickingOutside sidebarVisibilityChange={this.handleSidebarVisibilityChange} visible={this.props.storeRoot.gui.isSidebarVisible} user={this.props.storeRoot.user} />
 
       </div>
         )

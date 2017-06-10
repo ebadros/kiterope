@@ -396,6 +396,9 @@ class Step(models.Model):
 
 
 
+
+
+
 class StepOccurrenceManager(models.Manager):
     def create_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUser):
         #print("inside create_occurrence")

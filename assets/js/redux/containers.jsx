@@ -11,11 +11,19 @@ import { setCurrentUser, showSidebar, setOpenThreads, setCurrentThreads, reduxLo
 const mapStateToProps = (state) => {
   return {
       storeRoot:{
-          user:state.user,
-        isSidebarVisible:state.isSidebarVisible,
-        currentThread: state.currentThread,
+        user:state.user,
+        goals:state.goals,
+        contacts:state.contacts,
+        programs:state.programs,
+        stepOccurrences:state.stepOccurrences,
         openThreads: state.openThreads,
-        isMessageWindowVisible: state.isMessageWindowVisible,
+        gui: {
+          isSidebarVisible:state.isSidebarVisible,
+          isMessageWindowVisible: state.isMessageWindowVisible,
+          currentThread: state.currentThread,
+
+        }
+
 
 }
   }
@@ -27,14 +35,66 @@ const mapDispatchToProps = (dispatch) => {
     setCurrentUser: (theUser) => {
       dispatch(setCurrentUser(theUser))
     },
+    setGoals: (theGoals) => {
+      dispatch(setGoals(theGoals))
+    },
+      addGoal: (theGoal) => {
+      dispatch(addGoal(theGoal))
+    },
+      updateGoal: (theGoal) => {
+      dispatch(updateGoal(theGoal))
+    },
+      deleteGoal: (theGoalId) => {
+      dispatch(deleteGoal(theGoalId))
+    },
+    setContacts: (theContacts) => {
+      dispatch(setContacts(theContacts))
+    },
+
+    setPrograms: (thePrograms) => {
+      dispatch(setPrograms(thePrograms))
+    },
+      addProgram: (theProgram) => {
+      dispatch(addProgram(theProgram))
+    },
+    updateProgram: (theProgram) => {
+      dispatch(updateProgram(theProgram))
+    },
+      deleteProgram: (theProgramId) => {
+      dispatch(deleteProgram(theProgramId))
+    },
+    addStep: (theProgramId, theStep) => {
+      dispatch(addStep(theProgramId, theStep))
+    },
+    updateStep: (theProgramId, theStep) => {
+      dispatch(updateStep(theProgramId, theStep))
+    },
+      deleteStep: (theProgramId, theStepId) => {
+      dispatch(deleteStep(theProgramId, theStepId))
+    },
+
+
+    setStepOccurrences: (theStepOccurrences) => {
+      dispatch(setStepOccurrences(theStepOccurrences))
+    },
       reduxLogout: () => {
       dispatch(reduxLogout())
     },
     showSidebar: (isSidebarVisible) => {
       dispatch(showSidebar(isSidebarVisible))
     },
+
+
+    setMessageThreads: (theMessageThreads) => {
+      dispatch(setMessageThreads(theMessageThreads))
+    },
+
     setOpenThreads: (theOpenThreads) => {
       dispatch(setOpenThreads(theOpenThreads))
+    },
+
+    addThread: (theThread) => {
+      dispatch(addThread(theThread))
     },
     setCurrentThread: (theCurrentThread) => {
       dispatch(setCurrentThread(theCurrentThread))

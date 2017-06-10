@@ -29,6 +29,27 @@ INSTALLED_APPS += [
     'sslserver',
 ]
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "kiterope.routing.channel_routing",
+    },
+}
+
+DATABASES = {
+'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'ebdb',
+            'USER': 'kiteropeAdmin',
+            'PASSWORD': 'regul8or1',
+            'HOST': 'aa1arj4p56yj6vl.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
+            'PORT': '5432',
+        }
+}
+'''
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -39,7 +60,7 @@ DATABASES = {
             'PORT': '',
         }
     }
-
+'''
 '''
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -76,4 +97,4 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-SITE_ID=3
+SITE_ID=1

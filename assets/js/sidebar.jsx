@@ -31,7 +31,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            visible: this.props.storeRoot.isSidebarVisible,
+            visible: this.props.storeRoot.gui.isSidebarVisible,
             user:"",
             view: "Switch to User View"
 
@@ -79,7 +79,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
     componentDidMount () {
                 //$(document).bind('click', this.clickDocument);
 
-        if (this.props.storeRoot.isSidebarVisible) {
+        if (this.props.storeRoot.gui.isSidebarVisible) {
             $(this.refs["ref_sidebar"]).show()
         } else {
             $(this.refs["ref_sidebar"]).hide()
@@ -93,8 +93,8 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     }
     componentWillReceiveProps (nextProps) {
-        if (this.state.visible != nextProps.storeRoot.isSidebarVisible) {
-            this.state.visible = nextProps.storeRoot.isSidebarVisible
+        if (this.state.visible != nextProps.storeRoot.gui.isSidebarVisible) {
+            this.state.visible = nextProps.storeRoot.gui.isSidebarVisible
         }
         if (this.state.user != nextProps.user) {
             this.setState({
@@ -128,12 +128,12 @@ export class SidebarWithoutClickingOutside extends React.Component {
         }
 
         if ($(this.refs["ref_sidebar"]).is(":visible")) {
-            if (!this.props.storeRoot.isSidebarVisible) {
+            if (!this.props.storeRoot.gui.isSidebarVisible) {
                 $(this.refs["ref_sidebar"]).hide("slide")
 
             }
         } else {
-            if (this.props.storeRoot.isSidebarVisible) {
+            if (this.props.storeRoot.gui.isSidebarVisible) {
                 $(this.refs["ref_sidebar"]).show("slide")
 
             }
@@ -151,33 +151,33 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     <div ref="ref_sidebar"
                          className="ui right vertical inverted labeled visible icon large sidebar menu"
                          style={style}>
-                        <a className="item"  onClick={this.handleClose}>
+                        <a className="item"  style={style} onClick={this.handleClose}>
                             <i className="large close icon"></i>
                         </a>
 
-                        <a className="item" href="/">
+                        <a className="item" style={style} href="/">
                             <i className="large home icon"></i>
                             Home
                         </a>
                         {viewSwitcher}
 
-                        <a className="item" href="/#/programs">
+                        <a className="item" style={style} href="/#/programs">
                             <i className="large cubes icon"/>
                             My Programs
                         </a>
-                        <a className="item" href="/#/contacts">
+                        <a className="item" style={style} href="/#/contacts">
                             <i className="large users icon"/>
                             My Contacts
                         </a>
 
                                 { this.props.user ?
-                                    <a className="item" href={`/#/profiles/${this.props.user.profileId}`}>
+                                    <a className="item" style={style} href={`/#/profiles/${this.props.user.profileId}`}>
                                         <i className="large user icon"/>
                                         My Profile
                                     </a> : <div></div>}
 
 
-                        <a className="item" href="/#/search">
+                        <a className="item"  style={style} href="/#/search">
                             <i className="large search icon"/>
                             Search
                         </a>

@@ -34,7 +34,7 @@ import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, P
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, PlanCalendar } from './calendar'
+import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
 import { Provider, connect, store, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -89,7 +89,6 @@ export class StepOccurrenceList extends React.Component {
                 )
             }.bind(this));
         } else {
-            console.log("no steps")
             var objectNodes = <div><div className="largeItalic">You don't have any steps to accomplish today.<Link to={"/search/"}> Find a program that fits your needs.</Link></div>
                 </div>
         }

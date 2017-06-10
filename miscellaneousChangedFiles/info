@@ -1,1 +1,7 @@
 /site-packages/rest-auth/registration/serializers.py
+
+Changed the runsslserver.py file in sslserver to sslchannels's
+/Users/eric/kr-env/lib/python3.4/site-packages/sslchannels/management/commands/runsslserver.py
+
+The one that came with the sslserver package is here
+/Users/eric/kr-env/lib/python3.4/site-packages/sslserver/management/commands/runsslserver copy.py

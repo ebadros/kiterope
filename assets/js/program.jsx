@@ -5,7 +5,7 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import {ImageUploader, Breadcrumb, PlanForm2, ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
-import {PlanCalendar } from './calendar'
+import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import autobind from 'class-autobind'
@@ -29,10 +29,12 @@ import Modal from 'react-modal';
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
 import { MessageWindowContainer } from './message'
 
-import { Provider, connect, store, dispatch } from 'react-redux'
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
-
+import { addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
@@ -56,6 +58,16 @@ function printObject(o) {
   alert(out);
 }
 
+function getArrayObjectById(theArray, theId) {
+    var returnObject = ""
+    for (var i = 0; i < theArray.length; i += 1) {
+        var theArrayObject = theArray[i];
+        if (theArrayObject.id == theId) {
+            returnObject = theArrayObject;
+        }
+    }
+    return returnObject
+}
 
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -99,13 +111,13 @@ export class ProgramListPage extends React.Component {
                  },
                  success: function (data) {
                      this.handleCloseForm()
-                                          this.loadProgramsFromServer()
+                     store.dispatch(addProgram(data))
 
+                                          //this.loadProgramsFromServer()
                      callback
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(theUrl, status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -120,13 +132,16 @@ export class ProgramListPage extends React.Component {
 
 
 
+
+
+
+
   loadProgramsFromServer = () => {
-      if (this.state.activePage != 1) {
-                var theUrl = "api/programs/?page=" + this.state.activePage
-      }  else {
-          var theUrl = "api/programs/"
-      }
-      console.log(theUrl)
+      //if (this.state.activePage != 1) {
+        //        var theUrl = "api/programs/?page=" + this.state.activePage
+      //}  else {
+         var theUrl = "api/programs/"
+      //}
     $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -135,11 +150,8 @@ export class ProgramListPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
-        this.setState({
-            count: data.count,
-            next:data.next,
-            previous:data.previous,
-            data: data.results});
+            store.dispatch(setPrograms(data.results))
+
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -155,10 +167,10 @@ handleToggleForm = () => {
     }
 
     componentDidMount() {
-        this.loadProgramsFromServer();
+        //this.loadProgramsFromServer();
         //var intervalID = setInterval(this.loadCommentsFromServer, 2000);
         //this.setState({intervalID: intervalID});
-        var self = this;
+        //var self = this;
         $(this.refs['ref_whichProgramForm']).hide();
 
 
@@ -206,7 +218,7 @@ handleToggleForm = () => {
 
     }
     handleReloadItem = () => {
-        this.loadProgramsFromServer()
+        //this.loadProgramsFromServer()
     }
 handleCancelClicked = () => {
       $(this.refs['ref_whichProgramForm']).slideUp()
@@ -257,13 +269,8 @@ componentWillUnmount() {
 
 <div>
     <StandardSetOfComponents  modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
-
-
-
-
-
         <div className="fullPageDiv">
-            <div className="ui page container">
+            <div className="ui page container footerAtBottom">
 
 
             <div className="spacer">&nbsp;</div>
@@ -279,7 +286,7 @@ componentWillUnmount() {
             <ProgramForm cancelClicked={this.handleCancelClicked} onProgramSubmit={this.handleProgramSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
-                    <ProgramList data={this.state.data} needsLogin={this.handleNeedsLogin} reloadItem={this.handleReloadItem}/>
+                    <ProgramList data={this.props.storeRoot.programs} needsLogin={this.handleNeedsLogin} reloadItem={this.handleReloadItem}/>
                 <div className="spacer">&nbsp;</div>
                 {pagination}
             </div>
@@ -302,7 +309,8 @@ export class ProgramDetailPage extends React.Component {
             stepData:[],
             activePage:1,
             selectedView:"list",
-            headerActionButtonLabel:"Add Step"
+            headerActionButtonLabel:"Add Step",
+            stepArray:[]
         }
     }
 
@@ -353,14 +361,16 @@ export class ProgramDetailPage extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     store.dispatch(addStep(data.program, data))
+
                      callback
                      this.handleCancelClicked()
 
                  }.bind(this),
-                 error: function (xhr, status, err) {
-                     console.error("api/steps/", status, err.toString());
+                 error: function (xhr, status, errors) {
+                    var serverErrors = xhr.responseJSON
                      this.setState({
-                         error: err,
+                         serverErrors: errors,
                      })
 
                  }.bind(this)
@@ -448,11 +458,21 @@ export class ProgramDetailPage extends React.Component {
     }
 
   componentDidMount() {
+          var thePrograms = this.props.storeRoot.programs
+      if (thePrograms != undefined) {
+
+          //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
+          this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray()
+)
+
+      }
+
+
       this.determineOptions()
-      this.loadProgramsFromServer()
+      //this.loadProgramsFromServer()
       //var stepsIntervalId = setInterval(this.loadStepsFromServer, 800)
       //this.setState({stepsIntervalId:stepsIntervalId})
-      this.loadStepsFromServer()
+      //this.loadStepsFromServer()
       $(this.refs['ref_whichStepForm']).hide()
     this.selectView(this.state.selectedView)
 
@@ -460,6 +480,20 @@ export class ProgramDetailPage extends React.Component {
         $(".fullPageDiv").slideToggle();
 
   }
+
+  componentWillReceiveProps(nextProps) {
+       if (this.state.data != nextProps.storeRoot.programs) {
+           if (nextProps.storeRoot.programs != undefined) {
+               var thePrograms = nextProps.storeRoot.programs
+               //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
+                         this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray(thePrograms[this.props.params.program_id].steps))
+
+           }
+       }
+
+
+        }
+
 
   handleCancelClicked = () => {
       $(this.refs['ref_whichStepForm']).slideUp()
@@ -479,7 +513,7 @@ export class ProgramDetailPage extends React.Component {
 
     }
     handleReloadItem = () => {
-        this.loadStepsFromServer()
+        //this.loadStepsFromServer()
     }
 
 
@@ -502,7 +536,21 @@ export class ProgramDetailPage extends React.Component {
       }
     }
 
+    convertStepsIntoArray(theSteps) {
+        console.log("convertStepsIntoArray")
+        var stepArray = []
+        for (var key in theSteps) {
+            var theStep = theSteps[key]
+            stepArray.push(theStep)
+        }
+        this.setState({
+            stepArray: stepArray
+        })
+
+}
+
     render() {
+
 
         return (
             <div>
@@ -543,7 +591,7 @@ export class ProgramDetailPage extends React.Component {
                         </div>
                         <div ref="ref_calendarView">
 
-                            <PlanCalendar planId={this.props.params.program_id} events={this.state.stepData} reloadItem={this.handleReloadItem}/>
+                            <ProgramCalendar planId={this.props.params.program_id} events={this.state.stepArray} reloadItem={this.handleReloadItem}/>
                             <div className="ui row">&nbsp;</div>
 
                         </div>
@@ -565,7 +613,7 @@ export class ProgramDetailPage extends React.Component {
                             <div>&nbsp;</div>
                             <div>&nbsp;</div>
 
-                            <StepList programId={this.props.params.program_id} reloadItem={this.handleReloadItem} />
+                            <StepList programId={this.props.params.program_id} data={this.state.data.steps} reloadItem={this.handleReloadItem} />
 
                         </div>
 
@@ -605,6 +653,8 @@ export class ViewSelector extends React.Component {
                 selectedView: nextProps.selectedView
             })
         }
+
+
     }
 
     render = () => {
@@ -928,7 +978,7 @@ export class ProgramForm extends React.Component {
             costFrequencyMetric: "MONTH",
             editable:false,
             data:"",
-            serverErrors:""
+            serverErrors:{}
         }
 
 
@@ -940,6 +990,10 @@ export class ProgramForm extends React.Component {
     componentDidMount () {
 
         $(this.refs['ref_whichProgramForm']).hide()
+        this.setState({
+            serverErrors: this.props.serverErrors
+            })
+
 
     }
 
@@ -1139,6 +1193,14 @@ export class ProgramForm extends React.Component {
         })
     }
 
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
 
     handleCancelClicked() {
         this.props.cancelClicked()
@@ -1281,6 +1343,7 @@ export class ProgramForm extends React.Component {
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleTitleChange}
+                                      serverErrors={this.getServerErrors("title")}
 
                                   />
  </div>
@@ -1553,11 +1616,14 @@ export class ProgramList extends React.Component {
     }
 
     componentDidMount () {
-        this.loadProgramsFromServer()
+        //this.loadProgramsFromServer()
+        this.setState({
+                data:this.props.data
+            })
     }
 
     handleReloadItem = () => {
-        this.loadProgramsFromServer
+        //this.loadProgramsFromServer
     }
 
     loadProgramsFromServer = () => {
@@ -1606,8 +1672,11 @@ export class ProgramList extends React.Component {
         }
 
         if (this.state.data) {
-
-        var programList = this.state.data.map((program) => {
+            var theData = this.state.data
+        var values = Object.keys(theData).map(function(key){
+        return theData[key];
+        });
+        var programList = values.map((program) => {
             return (
                     <ProgramViewEditDeleteItem key={program.id}
                                             isListNode={true}
@@ -1721,87 +1790,108 @@ export class ProgramBasicView extends React.Component {
 
 }
     render() {
-
-        if (this.state.data.image) {
-            var imageUrl = s3ImageUrl + this.state.data.image
-        } else {
-            var imageUrl = s3ImageUrl + "images/goalItem.svg"
-        }
+        var imageUrl = s3ImageUrl + "images/goalItem.svg"
         var theCost
+
+
+        if (this.state.data) {
+            if (this.state.data.image) {
+                var imageUrl = s3ImageUrl + this.state.data.image
+            }
             if (this.state.data.cost == 0.00 || this.state.data.costFrequencyMetric == "FREE") {
                 theCost = "Free"
             }
             else {
-                theCost =  this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
+                theCost = this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
             }
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths)
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions)
 
-        if (this.props.isListNode) {
+            if (this.props.isListNode) {
 
-            return (
-                <div onClick={this.goToDetail}>
-                    <ClippedImage item="plan" src={imageUrl} />
+                return (
+                    <div onClick={this.goToDetail}>
+                        <ClippedImage item="plan" src={imageUrl}/>
 
 
-                <div className="ui grid" >
-                    <div className="sixteen wide column">
+                        <div className="ui grid">
+                            <div className="sixteen wide column">
 
-                        <div className="planTitle">                {this.state.data.title}
+                                <div className="planTitle"> {this.state.data.title}
 
-                        </div>
-                        <div className="row">&nbsp;</div>
+                                </div>
+                                <div className="row">&nbsp;</div>
 
-                        <div className="row" >
-                            <div className="ui two column grid">
-                                <div className="ui left aligned column">
-                                    <IconLabelCombo size="extramini" orientation="left" text="100% Success" icon="success" background="Light" link="/goalEntry" />
-</div>
-                                <div className="ui right aligned column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light" link="/goalEntry" />
-</div></div>
+                                <div className="row">
+                                    <div className="ui two column grid">
+                                        <div className="ui left aligned column">
+                                            <IconLabelCombo size="extramini" orientation="left" text="100% Success"
+                                                            icon="success" background="Light" link="/goalEntry"/>
+                                        </div>
+                                        <div className="ui right aligned column">
+                                            <IconLabelCombo size="extramini" orientation="right"
+                                                            text={theScheduleLength} icon="deadline" background="Light"
+                                                            link="/goalEntry"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+
+                                    <div className="ui two column grid">
+                                        <div className="ui left aligned column">
+                                            <IconLabelCombo size="extramini" orientation="left" text={theCost}
+                                                            icon="cost" background="Light" link="/goalEntry"/>
+                                        </div>
+                                        <div className="ui right aligned column">
+                                            <IconLabelCombo size="extramini" orientation="right"
+                                                            text={theTimeCommitment} icon="timeCommitment"
+                                                            background="Light" link="/goalEntry"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+
                             </div>
-                        <div className="row" >
-
-                            <div className="ui two column grid">
-                                <div className="ui left aligned column">
-                                    <IconLabelCombo size="extramini" orientation="left" text={theCost} icon="cost" background="Light" link="/goalEntry" />
-</div>
-                                <div className="ui right aligned column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
-</div></div>
-</div>
-
-
-                    </div>
-                    </div></div>
-
-            )
-        }
-        else {
-
-            return (
-                <div className="ui grid">
-                    <div className="two wide column">
-                        <img className="ui image" src={imageUrl}></img>
-                    </div>
-                    <div className="eight wide column">
-                        <div className="fluid row">
-                            <h3>{this.state.data.title}</h3>
                         </div>
-                        <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
                     </div>
-                    <div className="right aligned six wide column">
-                        <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
-</div>
 
-                </div>
+                )
+            }
+            else {
 
-            )
+                return (
+                    <div className="ui grid">
+                        <div className="two wide column">
+                            <img className="ui image" src={imageUrl}></img>
+                        </div>
+                        <div className="eight wide column">
+                            <div className="fluid row">
+                                <h3>{this.state.data.title}</h3>
+                            </div>
+                            <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
+                        </div>
+                        <div className="right aligned six wide column">
+                            <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success"
+                                            background="Light" link="/goalEntry"/>
+                            <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
+                                            icon="deadline" background="Light" link="/goalEntry"/>
+                            <IconLabelCombo size="extramini" orientation="right" text={theCost} icon="cost"
+                                            background="Light" link="/goalEntry"/>
+                            <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment}
+                                            icon="timeCommitment" background="Light" link="/goalEntry"/>
+                        </div>
+
+                    </div>
+
+                )
+            }
+        } else {
+            return (<div></div>)
         }
+
+
+
+
 
     }
 }

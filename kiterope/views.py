@@ -270,14 +270,15 @@ class MessageThreadViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        #page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
 
-        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -364,17 +365,20 @@ class GoalViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        #page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
 
     def update(self, request, *args, **kwargs):
         print(self.request.data)
@@ -469,17 +473,20 @@ class StepViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        data = {i['id']: i for i in serializer.data}
+
+        return Response(data)
 
 
     def post(self, request, *args, **kwargs):
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
+
 
     @list_route(methods=['get'], permission_classes=[permissions.IsAuthenticated], url_path='daily')
     def dailyList(self, request, *args, **kwargs):
@@ -939,6 +946,14 @@ class ProgramViewSet(viewsets.ModelViewSet):
     required_scopes = ['groups']
     pagination_class = StandardResultsSetPagination
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        # This is the line that allows us to get at the object without iterating over an array
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
+
     def create(self, request, *args, **kwargs):
         print(request.data)
         serializer = self.get_serializer(data=request.data)
@@ -966,6 +981,15 @@ class ContactViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrReadOnly]
     pagination_class = StandardResultsSetPagination
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        # This is the line that allows us to get at the object without iterating over an array
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
+
+
     def create(self, request, *args, **kwargs):
         print(request.data)
         serializer = self.get_serializer(data=request.data)
@@ -979,7 +1003,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         theUser = self.request.user
         #querySet = Contact.objects.all()
-        querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
+        querySet = Contact.objects.filter((Q(sender=theUser.profile) | Q(receiver=theUser.profile)))
         return querySet
 
 
@@ -990,6 +1014,15 @@ class ProfileViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     required_scopes = ['groups']
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        # This is the line that allows us to get at the object without iterating over an array
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
+
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1161,6 +1194,8 @@ def secret_page(request, *args, **kwargs):
 conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
+    print("sign s3 upload")
+    print("%s , %s" % (settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY))
     object_name = request.GET['objectName']
     content_type = mimetypes.guess_type(object_name)[0]
 

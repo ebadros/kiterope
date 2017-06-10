@@ -10,8 +10,6 @@ import Measure from 'react-measure'
 var Modal = require('react-modal');
 import moment from 'moment';
 import { ValidatedInput, KSSelect } from './app'
-
-
 import DatePicker  from 'react-datepicker';
 
 
@@ -297,6 +295,7 @@ export class ClippedImage extends React.Component {
 
          } else if (this.props.item =='profile') {
              var width = width - 40
+             var left = 20
              var height = width
              var containerHeight = width
              var classDescriptor = "center aligned"
@@ -321,6 +320,7 @@ export class ClippedImage extends React.Component {
                      width: width,
                      height: "auto",
                      clip: rectString,
+                     left:left
 
                  }
 
@@ -344,6 +344,7 @@ export class ClippedImage extends React.Component {
                          width: width,
                          position: position,
                          clip: rectString,
+                         left:left,
 
 
                          height: containerHeight,

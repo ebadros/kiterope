@@ -29,6 +29,14 @@ import Measure from 'react-measure'
 
 import Pagination from "react-js-pagination";
 
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
+import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+
+
 export const isThisReasonableOptions = [
         {value:null, label: ""},
 
@@ -131,12 +139,12 @@ export class GoalEntryPage extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalListPage extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
         this.state = {
-            data: [],
             activePage:1,
             serverErrors:"",
             formIsOpen:false,
@@ -154,7 +162,7 @@ export class GoalListPage extends React.Component {
     }
 
 
-
+/*
   loadCommentsFromServer = () => {
       if (this.state.activePage != 1) {
                 var theUrl = "api/goals/?page=" + this.state.activePage
@@ -181,9 +189,9 @@ export class GoalListPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  }*/
 
-  handleGoalSubmit (goal) {
+  handleGoalSubmit (goal, callback) {
     $.ajax({
         url: "api/goals/",
         dataType: 'json',
@@ -193,7 +201,11 @@ export class GoalListPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
         success: function(data) {
-            this.loadCommentsFromServer()
+                                 this.handleCloseForm()
+
+                                 store.dispatch(addGoal(data))
+
+                                     //this.loadCommentsFromServer()
         }.bind(this),
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
@@ -206,6 +218,7 @@ export class GoalListPage extends React.Component {
         complete: function (jqXHR, textStatus){
                 if (textStatus == "success"){
                     $(this.refs['ref_whichGoalForm']).slideUp();
+                    callback
 
                 }
             }.bind(this)
@@ -216,10 +229,9 @@ handleToggleForm = () => {
     }
 
     componentDidMount() {
-        this.loadCommentsFromServer();
+        //this.loadCommentsFromServer();
         //var intervalID = setInterval(this.loadCommentsFromServer, 2000);
         //this.setState({intervalID: intervalID});
-        var self = this;
         $(this.refs['ref_whichGoalForm']).hide();
 
 
@@ -318,7 +330,7 @@ componentWillUnmount() {
 
 
         <div className="fullPageDiv">
-            <div className="ui page container">
+            <div className="ui page container footerAtBottom">
 
 
             <div className="spacer">&nbsp;</div>
@@ -334,7 +346,7 @@ componentWillUnmount() {
             <GoalForm cancelClicked={this.handleCancelClicked} onGoalSubmit={this.handleGoalSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
-                    <GoalList data={this.state.data} />
+                    <GoalList data={this.props.storeRoot.goals} />
                 <div className="spacer">&nbsp;</div>
                 {pagination}
             </div>
@@ -344,7 +356,7 @@ componentWillUnmount() {
   }
 }
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalList extends React.Component {
     constructor(props) {
         super(props)
@@ -368,25 +380,48 @@ export class GoalList extends React.Component {
         width: '300px',
         height: '300px',
     }
-                console.log("props data length " + this.state.data.length)
 
+    var goalNodes = () => { return(<div></div>)}
+    if (this.state.data != undefined) {
 
-            var goalNodes2 = this.state.data.map((goal) => {
-                return (<GoalNode key={goal.id} goal={goal}/>)
-            })
-
+        var theData = this.state.data
+        var values = Object.keys(theData).map(function(key){
+        return theData[key];
+        });
+        var goalNodes = values.map((goal) => {
+            return (<GoalNode key={goal.id} goal={goal}/>)
+        })
+    }
 
     return (
           <div className='ui three column doubling stackable grid'>
-        {goalNodes2}
+        {goalNodes}
       </div>
     );
   }
 
 }
 
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
 
+function getArrayObjectById(theArray, theId) {
+    var returnObject = ""
+    for (var i = 0; i < theArray.length; i += 1) {
+        var theArrayObject = theArray[i];
+        if (theArrayObject.id == theId) {
+            returnObject = theArrayObject;
+        }
+    }
+    return returnObject
+}
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalDetailPage extends React.Component {
     constructor(props) {
         super(props)
@@ -402,7 +437,21 @@ export class GoalDetailPage extends React.Component {
         }
     }
 
-    handleGoalSubmit (goal) {
+    componentWillReceiveProps(nextProps) {
+       if (this.state.data != nextProps.storeRoot.goals) {
+           if (nextProps.storeRoot.goals != undefined) {
+               var theGoals = nextProps.storeRoot.goals
+                         this.setState({data: theGoals[this.props.params.goal_id]})
+
+               //var theGoal = getArrayObjectById(theGoals, nextProps.params.goal_id)
+               //this.setState({data: theGoal })
+           }
+       }
+
+
+        }
+
+    handleGoalSubmit (goal, callback) {
         $.ajax({
                 url: "api/goals/" + goal.id +"/",
                 dataType: 'json',
@@ -412,7 +461,8 @@ export class GoalDetailPage extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({data: data});
+                    store.dispatch(updateGoal(data))
+                    //this.setState({data: data});
                 }.bind(this),
                 error: function (xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -517,9 +567,16 @@ export class GoalDetailPage extends React.Component {
   }
 
   componentDidMount() {
+           if (this.props.storeRoot.goals != undefined) {
+               console.log("inside goal componentDidMount")
+               var theGoals = this.props.storeRoot.goals
+                         this.setState({data: theGoals[this.props.params.goal_id]})
+
+               //this.setState({data: getArrayObjectById(theGoals, this.props.params.goal_id)})
+           }
+
       this.determineOptions()
-      this.loadDetailFromServer()
-      this.determineOptions()
+      //this.loadDetailFromServer()
               $(this.refs['id_whichPlanForm']).hide()
 
 
@@ -552,7 +609,7 @@ export class GoalDetailPage extends React.Component {
 
 
                 <div className="fullPageDiv">
-                    <div className="ui page container">
+                    <div className="ui page container footerAtBottom">
                         <div className="spacer">&nbsp;</div>
                         <div className="ui alert"></div>
                         <Breadcrumb values={[
@@ -667,7 +724,7 @@ export class GoalStepsHeader extends React.Component {
 
         <div className="centered hugeType">Achieving a goal is hard work</div>
 
-                <div className="ui page container">
+                <div className="ui page container footerAtBottom">
                     <div className="ui center aligned three column grid">
                                                 <div className="ui row">&nbsp;</div>
                         <div className="ui largeType row">
@@ -919,7 +976,7 @@ export class GoalForm extends React.Component {
                 var imageUrl = "goalItem.svg"
             }
         return (
-            <div className="ui page container">
+            <div className="ui page container footerAtBottom">
                 <div className="ui grid">
 
                     <div className="ui row">
@@ -1231,6 +1288,27 @@ export class GoalSMARTForm extends React.Component {
         this.props.cancelClicked()
     }
 
+    resetForm() {
+        this.setState({
+                title: "",
+                deadline: moment(),
+                description: "",
+                coreValues: "",
+                goalInAlignmentWithCoreValues: false,
+                obstacles: "",
+                isThisReasonable: false,
+                metric: "",
+                why: "",
+                image: null,
+                viewableBy: "ONLY_ME",
+                user: null,
+                coaches: [],
+                updates: [],
+                wasAchieved: false,
+                plans: []
+            });
+    }
+
 
     handleSubmit(e) {
 
@@ -1276,27 +1354,10 @@ export class GoalSMARTForm extends React.Component {
             if (this.state.id != "") {
                 goalData.id = this.state.id
             }
-            this.props.onGoalSubmit(goalData);
+            this.props.onGoalSubmit(goalData, this.resetForm);
 
             //this.props.onGoalSubmit({title: title, viewableBy:viewableBy, description: description});
-            this.setState({
-                title: "",
-                deadline: moment(),
-                description: "",
-                coreValues: "",
-                goalInAlignmentWithCoreValues: false,
-                obstacles: "",
-                isThisReasonable: false,
-                metric: "",
-                why: "",
-                image: null,
-                viewableBy: "ONLY_ME",
-                user: null,
-                coaches: [],
-                updates: [],
-                wasAchieved: false,
-                plans: []
-            });
+
 
         }
     else {
@@ -1318,7 +1379,7 @@ export class GoalSMARTForm extends React.Component {
             }
 
             var imageUrl = s3ImageUrl + this.state.image
-        return ( <div className="ui page container">
+        return ( <div className="ui page container footerAtBottom">
                                 <div className="ui row">&nbsp;</div>
 
                                 <div className="ui segment">
@@ -1582,7 +1643,7 @@ export class SimpleGoalForm extends GoalForm {
             var imageUrl = s3ImageUrl + this.state.image
         var theDeadline = moment(this.state.deadline).format("MMM DD, YYYY")
         return (
-            <div className="ui page container">
+            <div className="ui page container footerAtBottom">
                 <div className="ui grid">
                     <div className="two wide column">
                         <img className="ui small image" src={s3ImageUrl + this.state.image}/></div>
@@ -1694,51 +1755,59 @@ export class GoalBasicView extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            data:"",
+            data: "",
 
         }
     }
 
     componentDidMount() {
         this.setState({
-            data:this.props.data,
+            data: this.props.data,
         })
     }
-    componentWillReceiveProps (nextProps) {
+
+    componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data) {
             this.setState({
-                data:nextProps.data
+                data: nextProps.data
             })
         }
     }
+
     render() {
-        var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY")
-        if (this.state.data.image == "") {
-            var theImage = "icons/goalItem.svg"
-        } else {
-            var theImage = this.state.data.image
-        }
-        return(
-            <div className="ui grid">
-                <div className="two wide column">
-                    <img className="ui image" src={s3ImageUrl + theImage}></img>
+        if (this.state.data) {
+            var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY")
+            if (this.state.data.image == "") {
+                var theImage = "icons/goalItem.svg"
+            } else {
+                var theImage = this.state.data.image
+            }
+            return (
+                <div className="ui grid">
+                    <div className="two wide column">
+                        <img className="ui image" src={s3ImageUrl + theImage}></img>
                     </div>
-                <div className="eight wide column">
-                    <div className="fluid row">
-                        <h1>{this.state.data.title}</h1>
+                    <div className="eight wide column">
+                        <div className="fluid row">
+                            <h1>{this.state.data.title}</h1>
+                        </div>
+                        <div className="fluid row">
+                            {this.state.data.coreValues}
+                        </div>
                     </div>
-                    <div className="fluid row">
-                        {this.state.data.coreValues}
+                    <div className="right aligned six wide column">
+                        <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
+                                        background="Light" link="/goalEntry"/>
+                        <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric} icon="metric"
+                                        background="Light" link="/goalEntry"/>
                     </div>
                 </div>
-                <div className="right aligned six wide column">
-                    <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline" background="Light" link="/goalEntry" />
-                    <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric} icon="metric" background="Light" link="/goalEntry" />
-</div>
-                    </div>
 
-        )
+            )
 
+        } else {
+            return (<div></div>)
+        }
     }
 }
 function getCookie(name) {

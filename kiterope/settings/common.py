@@ -25,13 +25,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
 ALLOWED_HOSTS = ['192.168.1.156', '*']
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
+
 
 
 # Application definition
@@ -73,15 +73,7 @@ INSTALLED_APPS = [
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
-        },
-        "ROUTING": "kiterope.routing.channel_routing",
-    },
-}
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -295,17 +287,16 @@ USE_S3 = False
 AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-AWS_ACCESS_KEY_ID = 'AKIAIHACGECWLNX6K5NQ'
+AWS_ACCESS_KEY_ID = 'AKIAJ5YZL4QGGT7IUJRA'
+AWS_SECRET_ACCESS_KEY = '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'
 
-AWS_SECRET_ACCESS_KEY = 'IPehJQaITvjmxh3rcoGGQisFvUfLe1JyHtsSIDiv'
-
-AWS_STORAGE_BUCKET_NAME = 'kiterope'
+AWS_STORAGE_BUCKET_NAME = 'kiterope-static'
 MEDIA_ROOT = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 if USE_S3:
-    DEFAULT_FILE_STORAGE = 'kiterope.s3utils.MediaRootS3BotoStorage'
-    THUMBNAIL_DEFAULT_STORAGE = 'kiterope.s3utils.MediaRootS3BotoStorage'
+    DEFAULT_FILE_STORAGE = 'kiterope-static.s3utils.MediaRootS3BotoStorage'
+    THUMBNAIL_DEFAULT_STORAGE = 'kiterope-static.s3utils.MediaRootS3BotoStorage'
     MEDIA_URL = S3_URL + '/media/'
 
 #MEDIA_ROOT = os.path.join(PROJECT_ROOT, '../..',  'media')

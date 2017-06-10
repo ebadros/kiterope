@@ -69,6 +69,16 @@ else:
             'PORT': '5432',
         }
     }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
+        "ROUTING": "kiterope.routing.channel_routing",
+    },
+}
 ROOT_URLCONF = 'kiterope.urls_production'
 
 #This is the id of the site within the database that we should be using as our base site

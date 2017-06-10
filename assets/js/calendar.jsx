@@ -53,7 +53,7 @@ function printObject(o) {
   alert(out);
 }
 
-export class PlanCalendar extends React.Component{
+export class ProgramCalendar extends React.Component{
     constructor(props) {
         super(props)
         autobind(this)
@@ -218,7 +218,10 @@ export class PlanCalendar extends React.Component{
                 data: step,
                 success: callback,
                 error: function (xhr, status, err) {
-                    console.error(this.props.url, status, err.toString());
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                    })
                 }.bind(this)
             });
         }
@@ -230,7 +233,10 @@ export class PlanCalendar extends React.Component{
                 data: step,
                 success: callback,
                 error: function (xhr, status, err) {
-                    console.error(this.props.url, status, err.toString());
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                    })
                 }.bind(this)
             });
 
@@ -261,6 +267,7 @@ export class PlanCalendar extends React.Component{
                                             currentViewChanged={this.handleCurrentViewChanged}
                                             closeClicked={this.handleStepEditCloseWindowClick}
                                             reloadItem={this.handleReloadItem}
+                                            serverErrors={this.state.serverErrors}
 
                                             />
 
@@ -280,6 +287,8 @@ export class PlanCalendar extends React.Component{
                                              currentViewChanged={this.handleCurrentViewChanged}
                                             closeClicked={this.handleStepCloseClick}
                                             reloadItem={this.handleReloadItem}
+                                             serverErrors={this.state.serverErrors}
+
 
                                             />
 
@@ -1229,4 +1238,4 @@ export class TimeInput extends React.Component{
   }
 };
 
-module.exports = { StepCalendarComponent, StepEditCalendarComponent, PlanCalendar }
+module.exports = { StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar }

@@ -46,7 +46,7 @@ InitialLoader,
 import { theServer, elasticSearchDomain } from './constants'
 
 var Searchkit = require('searchkit')
-var imageDirectory = "https://kiterope.s3.amazonaws.com/"
+var imageDirectory = "https://kiterope-static.s3.amazonaws.com/"
 
 const host = "http://127.0.0.1:8000/api/plan/search"
 //const searchkit = new Searchkit.SearchkitManager("http://127.0.0.1:9200/")

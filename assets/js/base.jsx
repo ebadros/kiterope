@@ -17,7 +17,12 @@ import { StepForm, StepBasicView, StepDetailView, SimpleStepForm, StepItemMenu }
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
 
 import { ItemMenu } from './elements'
-import { Provider, connect, store, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
+
+import { updateStep, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+
+import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import Measure from 'react-measure'
 
@@ -356,8 +361,8 @@ export class ImageUploader extends React.Component {
 
     componentDidMount() {
         this.setState({
-            defaultImage: this.props.defaultImage,
-                            dimensions:this.props.dimensions
+            image: this.props.defaultImage,
+            dimensions:this.props.dimensions
 
         })
     }
@@ -422,7 +427,7 @@ export class ImageUploader extends React.Component {
             imageStyle,
             maxFileSize: 1024 * 1024 * 50,
             server: theServer,
-            s3Url: 'https://kiterope.s3.amazonaws.com/images',
+            s3Url: 'https://kiterope-static.s3.amazonaws.com/images',
             signingUrlQueryParams: {uploadType: 'avatar'},
             uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
             signingUrl: "signS3Upload",
@@ -592,6 +597,12 @@ export class ViewEditDeleteItem extends React.Component {
             this.showHideUIElements(nextProps.currentView)
         }
 
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors:nextProps.serverErrors
+            })
+        }
+
 
 
 
@@ -689,7 +700,8 @@ export class ViewEditDeleteItem extends React.Component {
 
     }
 
-    deleteItem = () => {
+
+deleteItem = () => {
         var apiUrl = this.props.apiUrl
         var theUrl = apiUrl + this.props.id + "/"
 
@@ -702,7 +714,8 @@ export class ViewEditDeleteItem extends React.Component {
                 },
                 success: () => {
                     this.hideComponent()
-                    this.reload()
+                    this.callDeleteReducer()
+                    //this.reload()
                 },
                 error: function (xhr, status, err) {
                     console.error(theUrl, status, err.toString());
@@ -781,6 +794,12 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          }
      }
 
+     callDeleteReducer() {
+      store.dispatch(deleteGoal(this.props.id))
+
+  }
+
+
 
 
      handleGoalSubmit (goal, callback) {
@@ -796,8 +815,10 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     store.dispatch(updateGoal(data))
+
                      this.setState({
-                         data: data,
+
                      currentView:"Basic",
                          serverErrors:""
                      });
@@ -827,6 +848,8 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                                          store.dispatch(addGoal(data))
+
                      this.setState({
                          data: data,
                      currentView:"Basic",
@@ -944,6 +967,20 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
          }
      }
 
+     callDeleteReducer() {
+      store.dispatch(deleteProgram(this.props.id))
+
+  }
+
+     componentDidMount () {
+         if (this.state.data != this.props.data) {
+          this.setState({
+              data: this.props.data
+          })
+      }
+
+     }
+
      reload = () => {
          this.props.reloadItem()
      }
@@ -959,6 +996,14 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
           case ("kiterope"):
               hashHistory.push("/goalEntry")
               break;
+      }
+  }
+
+  componentWillReceiveProps (nextProps) {
+      if (this.state.data != nextProps.data) {
+          this.setState({
+              data: nextProps.data
+          })
       }
   }
 
@@ -978,17 +1023,18 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     this.switchToBasicView()
+
+                     store.dispatch(updateProgram(data))
+
                      this.setState({
-                         data: data,
                         serverErrors:"",
                          currentView:"Basic"
                      });
-                     this.switchToBasicView()
                      callback
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(theUrl, status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -1155,18 +1201,23 @@ hideComponent = () => {
         var detailView = this.getDetailView()
         var basicView = this.getBasicView()
         var editView = this.getEditView()
-        if (this.state.data.isSubscribed) {
-            var subscribeButton = <div className="ui purple bottom attached large button" onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
+        if (this.state.data) {
+            if (this.state.data.isSubscribed) {
+                var subscribeButton = <div className="ui purple bottom attached large button"
+                                           onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
 
-        } else {
+            } else {
 
-        var subscribeButton = <div className="ui purple bottom attached large button" onClick={this.handleSubscribeClick}>Subscribe</div>
-        }
-
-        if (this.props.storeRoot.user) {
-         if (this.state.data.author == this.props.storeRoot.user.id) {
+                var subscribeButton = <div className="ui purple bottom attached large button"
+                                           onClick={this.handleSubscribeClick}>Subscribe</div>
+            }
+             if (this.props.storeRoot.user) {
+                if (this.state.data.author == this.props.storeRoot.user.id) {
              subscribeButton = null
         }}
+        }
+
+
 
 
 
@@ -1639,6 +1690,11 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         }
     }
 
+    callDeleteReducer() {
+        console.log("stepDeleteReducer")
+        store.dispatch(deleteStep(this.props.parentId, this.props.id))
+    }
+
     switchToEditView = () => {
         $(this.refs["ref_basic"]).hide()
         $(this.refs["ref_form"]).slideDown()
@@ -1671,6 +1727,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
             this.setState({
                 data: this.props.data,
                 currentView: "Basic",
+                serverErrors: this.props.serverErrors
 
             })
 
@@ -1698,8 +1755,9 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
+                    store.dispatch(updateStep(data.program, data))
+
                     this.setState({
-                        data: data,
                         updates:[],
                     });
 
@@ -1710,7 +1768,6 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,
@@ -1730,17 +1787,14 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({
-                        data: data
-                    });
+                    store.dispatch(addStep(data.program, data))
                     this.switchToBasicView()
                     callback
-                    this.reload()
+                    //this.reload()
 
 
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    console.error("api/steps/", status, err.toString());
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,

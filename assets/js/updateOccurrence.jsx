@@ -34,7 +34,7 @@ import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, P
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, PlanCalendar } from './calendar'
+import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
 import { Provider, connect, store, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'

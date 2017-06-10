@@ -27,7 +27,7 @@ require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
 //var MaskedInput = require('react-maskedinput');
 
-import { setCurrentUser, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
+import { addThread, setCurrentUser, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import  {store} from "./redux/store";
@@ -43,6 +43,8 @@ var ReconnectingWebSocket = require('reconnecting-websocket');
 import Websocket from 'react-websocket';
 
 var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+//var ws_scheme =  "ws";
+
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
@@ -97,8 +99,8 @@ export class MessageWindowContainer extends React.Component {
 
         this.state = {
             data:[],
-            threads:[],
-            openThreads:[],
+            threads:{},
+            openThreads:{},
             currentThread:"",
             selectedLabelId:"",
             currentMessageThreadChannel:"",
@@ -107,14 +109,40 @@ export class MessageWindowContainer extends React.Component {
             notificationWebsocket:""
 
         }
-        store.dispatch(setOpenThreads())
-            store.dispatch(setCurrentThread(""))
 
     }
 
-    connectToNotificationChannel = (notificationChannelLabel) => {
-        console.log("receiverNotificationChannelLabel " + notificationChannelLabel)
+    componentDidMount () {
+        store.dispatch(showMessageWindow(false))
 
+        this.setState({
+            user: this.props.storeRoot.user,
+            threads: this.props.storeRoot.messageThreads,
+            currentThread: this.props.storeRoot.currentThread
+        })
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.user != nextProps.storeRoot.user) {
+            this.setState({
+                user: nextProps.storeRoot.user
+            })
+        }
+
+        if (this.state.openThreads != nextProps.storeRoot.openThreads) {
+            this.setState({
+                openThreads: nextProps.storeRoot.openThreads
+            })
+        }
+
+        if (this.state.currentThread != nextProps.storeRoot.currentThread) {
+            this.setState({
+                currentThread: nextProps.storeRoot.currentThread
+            })
+        }
+    }
+
+    connectToNotificationChannel = (notificationChannelLabel) => {
         var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
         notificationWebsocket.onmessage = (message) => {
             var messageData = JSON.parse(message.data);
@@ -129,28 +157,7 @@ export class MessageWindowContainer extends React.Component {
         })
     }
 
-    checkIfUser = () => {
 
-        var theUrl = '/api/users/i/'
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(userData) {
-                this.setState({
-                    'user': userData
-                })
-                this.connectToNotificationChannel(userData.notificationChannelLabel)
-
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-        }
-        })
-    }
 
 
 
@@ -207,17 +214,20 @@ export class MessageWindowContainer extends React.Component {
                         var theMessageThreadData = messageThreadData.results[0]
                         //printObject(theMessageThreadData)
                         theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
-
+                        store.dispatch(addThread(theMessageThreadData))
+                        store.dispatch(setCurrentThread(theMessageThreadData))
 
                         //printObject(messageThreadData.results[0])
                         this.setState({
-                            openThreads: this.state.openThreads.concat(theMessageThreadData),
+                            //openThreads: this.state.openThreads.concat(theMessageThreadData),
                             currentThread: theMessageThreadData,
                             currentReceiverNotificationChannelLabel: "",
                             currentMessageThreadChannel: "",
                             currentReceiver: "",
-                        },  store.dispatch(setOpenThreads(this.state.openThreads))
-)
+                        })
+
+
+
 
 
 
@@ -248,7 +258,7 @@ export class MessageWindowContainer extends React.Component {
     }
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
-        console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
+        //console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
         var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
@@ -295,16 +305,17 @@ export class MessageWindowContainer extends React.Component {
 
         success: function (messageThreadData) {
             messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
-
+            store.dispatch(addMessageThread(messageThreadData))
+            store.dispatch(setCurrentThread(messageThreadData))
 
             this.setState({
-                openThreads: this.state.openThreads.concat({messageThreadData}),
+                //openThreads: this.state.openThreads.concat({messageThreadData}),
                 currentThread: messageThreadData,
                 currentReceiverNotificationChannelLabel: "",
                 currentMessageThreadChannel: "",
                 currentReceiver: "",
             })
-                                                            store.dispatch(setOpenThreads(this.state.openThreads))
+                                                            //store.dispatch(setOpenThreads(this.state.openThreads))
 
         }.bind(this),
         error: function (xhr, status, err) {
@@ -390,10 +401,7 @@ export class MessageWindowContainer extends React.Component {
         })
 
     }
-    componentDidMount () {
-        store.dispatch(showMessageWindow(false))
-        this.checkIfUser()
-    }
+
 
 
 
@@ -810,7 +818,7 @@ export class MessagePage extends React.Component {
                             </Link>
                         </div>
                         <div>&nbsp;</div>
-                        <Header headerLabel="Messages"/>
+                        <Header headerLabel="My Messages"/>
                         <div className="ui grid">
                             <MessagePageLabelsList click={this.handleLabelClick}/>
 
@@ -1137,6 +1145,7 @@ export class MessageLabelMenuItem extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindow extends React.Component {
     constructor(props) {
         super(props)
@@ -1159,7 +1168,12 @@ export class MessageWindow extends React.Component {
 
     componentDidMount = () => {
 
-        this.setState({user: this.props.user})
+        this.setState({
+            user: this.props.user,
+            openThreads:this.props.openThreads,
+            threads:this.props.threads,
+            currentThread:this.props.currentThread
+        })
     }
 
     handleCurrentThreadChosen = (messageThread) => {
@@ -1289,6 +1303,14 @@ export class MessageWindow extends React.Component {
     return false;
   }
 
+  getUserId () {
+      if (this.props.storeRoot.user != undefined) {
+          return this.props.storeRoot.user.id
+      } else {
+          return ""
+      }
+  }
+
 
     render() {
 
@@ -1326,7 +1348,7 @@ export class MessageWindow extends React.Component {
             </Rnd>
             <MessageInput width={this.state.width} xPos={this.state.x} yPos={this.state.y + this.state.height}
                           onSubmit={this.handleMessageSubmit} thread={this.state.currentThread}
-                          sender={this.state.user.id} />
+                          sender={this.getUserId} />
 
         </div>
 
@@ -1387,15 +1409,23 @@ export class WindowPane extends React.Component {
 
 
     render() {
+         if (this.state.openThreads != undefined) {
 
-        var theOpenThreadsPanes = this.state.openThreads.map((openThread) => {
+             var theData = this.state.openThreads
+             var values = Object.keys(theData).map(function (key) {
+                 printObject(theData[key])
+                 return theData[key];
+             });
+             var theOpenThreadsPanes = values.map((openThread) => {
 
-            return (
-                <MessageThreadPane  key={`key_messageThreadPane_${openThread.id}`} user={this.state.user} isVisible={true} thread={openThread}  />
+                 return (
+                     <MessageThreadPane key={`key_messageThreadPane_${openThread.id}`} user={this.state.user}
+                                        isVisible={true} thread={openThread}/>
 
-            )
+                 )
 
-        })
+             })
+         }
 
         if (!this.state.currentThread) {
             return (
@@ -1617,17 +1647,36 @@ export class MessageWindowMenuBar extends React.Component {
 
 
     render() {
-        var threadItems = this.state.openThreads.map((thread) => {
+        if (this.state.openThreads != undefined) {
+
+            var theData = this.state.openThreads
+            var values = Object.keys(theData).map(function (key) {
+                return theData[key];
+            });
+
+            var threadItems = values.map((thread) => {
                 return (
-                    <MessageWindowMenuBarItem user={this.state.user} key={`key_messageWindowMenuBarItem_${thread.id}`} thread={thread} currentThreadChosen={this.handleCurrentThreadChosen} threadCloseClick={this.handleThreadCloseClick} />
+                    <MessageWindowMenuBarItem user={this.state.user} key={`key_messageWindowMenuBarItem_${thread.id}`}
+                                              thread={thread} currentThreadChosen={this.handleCurrentThreadChosen}
+                                              threadCloseClick={this.handleThreadCloseClick}/>
                 )
             })
 
-        var menuThreadItems = this.state.openThreads.map((thread) => {
+
+            var menuThreadItems = values.map((thread)  => {
                 return (
-                    <MessageWindowMenuBarAdditionalItemsMenuItem user={this.state.user} key={`key_messageWindowMenuBarItem_${thread.id}`} thread={thread} currentThreadChosen={this.handleCurrentThreadChosen} threadCloseClick={this.handleThreadCloseClick} />
+                    <MessageWindowMenuBarAdditionalItemsMenuItem user={this.state.user}
+                                                                 key={`key_messageWindowMenuBarItem_${thread.id}`}
+                                                                 thread={thread}
+                                                                 currentThreadChosen={this.handleCurrentThreadChosen}
+                                                                 threadCloseClick={this.handleThreadCloseClick}/>
                 )
             })
+        } else {
+            var threadItems = () =>  { return (<div></div>)}
+                        var menuThreadItems = () => { return (<div></div>)}
+
+        }
 
 
 
@@ -1825,7 +1874,8 @@ export class MessageInput extends React.Component {
             top: this.props.yPos + "px",
             left: this.props.xPos + "px",
             zIndex:1000,
-            borderTop:'1px #000 double'
+            borderTop:'1px #000 double',
+            position: "relative"
 
 
         }
@@ -2129,7 +2179,6 @@ export class MessageThreadListItem extends React.Component {
 
                 }
 
-                console.log("api/messageThreads/" + this.state.thread.id + "/")
                 $.ajax({
                     traditional:true,
                     url: "api/messageThreads/" + this.state.thread.id + "/",
@@ -2390,9 +2439,13 @@ export class MessageThreadPane extends React.Component {
         if (this.state.thread != nextProps.thread) {
             this.setState({
                 thread: nextProps.thread,
-                websocket:this.props.thread.websocket
             },                     this.loadMessagesFromServer()
 )
+            if (this.state.thread.websocket != undefined) {
+                this.setState({
+                    websocket: nextProps.thread.websocket
+                })
+            }
 
 
         }
@@ -2481,13 +2534,14 @@ export class MessageThreadPane extends React.Component {
 
   }
   render() {
+            if (this.state.thread != undefined) {
+                if (this.state.thread.channelLabel != undefined) {
 
-            if (this.state.thread.channelLabel != undefined) {
-
-                var websocketUrl = ws_scheme + '://' + window.location.host + "/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token
-                var theWebsocket = <Websocket url={websocketUrl} onMessage={this.handleData.bind(this)}/>
+                    var websocketUrl = ws_scheme + '://' + window.location.host + "/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token
+                    var theWebsocket = <Websocket url={websocketUrl} onMessage={this.handleData.bind(this)}/>
 
 
+                }
             }
 
 
