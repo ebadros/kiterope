@@ -46,7 +46,7 @@ HAYSTACK_CONNECTIONS = {
         }
     },
 }
-
+'''
 if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
@@ -58,7 +58,7 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-else:
+else:'''
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
