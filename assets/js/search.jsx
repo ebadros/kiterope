@@ -365,6 +365,7 @@ handleChangeQuery = (e) => {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class SearchHitsGrid extends React.Component {
     constructor(props) {
         super(props)
@@ -375,9 +376,11 @@ export class SearchHitsGrid extends React.Component {
             visible:"false",
             activePage: 1,
             count:"",
+            plans:{}
         }
     }
 
+/*
     loadObjectsFromServerHaystack = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
@@ -401,7 +404,6 @@ export class SearchHitsGrid extends React.Component {
                         data: data.hits.hits,
 
                     }, this.showSearchHits)
-                    printObject(data.hits.hits)
 
                 }.bind(this),
                 error: function (xhr, status, err) {
@@ -411,7 +413,7 @@ export class SearchHitsGrid extends React.Component {
 
         }
       }
-
+*/
       loadObjectsFromServer = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
@@ -439,7 +441,7 @@ export class SearchHitsGrid extends React.Component {
 
         }
       }
-
+/*
       loadObjectsFromServerLocal = () =>  {
         if (this.state.url != "") {
             if (this.state.activePage != 1) {
@@ -467,7 +469,7 @@ export class SearchHitsGrid extends React.Component {
             });
 
         }
-      }
+      }*/
 
       showSearchHits = () => {
           this.setState({
@@ -475,15 +477,15 @@ export class SearchHitsGrid extends React.Component {
           })
 
             $(this.refs["ref_searchHits"]).slideDown();
-                    clearInterval(this.state.intervalID)
+                    //clearInterval(this.state.intervalID)
 
     }
 
       componentDidMount = () => {
           $(this.refs["ref_searchHits"]).hide();
-          this.loadObjectsFromServer
-          var intervalID = setInterval(this.loadObjectsFromServer, 2000);
-        this.setState({intervalID:intervalID});
+         // this.loadObjectsFromServer
+          //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
+        //this.setState({intervalID:intervalID});
 
 
       }
@@ -499,7 +501,7 @@ export class SearchHitsGrid extends React.Component {
                     url: nextProps.url,
                     visible: nextProps.visible,
 
-                })
+                }, this.loadObjectsFromServer)
 
             }
 
@@ -509,6 +511,14 @@ export class SearchHitsGrid extends React.Component {
                     count:"",
                 })
 
+            }
+
+            if (nextProps.storeRoot != undefined) {
+                if (nextProps.storeRoot.plans) {
+                    if (this.state.plans != this.props.storeRoot.plans) {
+                        this.setState({plans: nextProps.storeRoot.plans})
+                    }
+                }
             }
 
       }
@@ -558,20 +568,43 @@ export class SearchHitsGrid extends React.Component {
 
         }
 
+
          if (this.state.data ) {
             var objectNodes = this.state.data.map(function (objectData) {
+                        var theUserPlanOccurrenceId = ""
+
+                if (this.props.storeRoot) {
+                    if (this.props.storeRoot.plans) {
+                        for (var key in this.props.storeRoot.plans) {
+                            console.log("key is " + key + " objectDasta source id " +  objectData._source.id)
+                            if ((this.props.storeRoot.plans[key].program == objectData._source.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
+                                console.log("this.props.storeRoot.plans[key].program is " + this.props.storeRoot.plans[key].program + " objectDasta source id " +  objectData._source.id)
+
+                                objectData._source.isSubscribed = this.props.storeRoot.plans[key].isSubscribed
+                                 theUserPlanOccurrenceId = key
+
+                            }
+                        }
+
+                    }
+                }
+
+
+
+
 
                 return (
-                <ProgramViewEditDeleteItem isListNode={true}
-                                        currentView="Basic"
-                                        showCloseButton={false}
-                                        hideControlBar={true}
-                                        apiUrl="api/programs/"
-                                        id={objectData._source.id}
-                                        data={objectData._source}
-                                        editable={false}
+                <ProgramViewEditDeleteItem key={objectData._source.id}
+                                           isListNode={true}
+                                           currentView="Basic"
+                                           showCloseButton={false}
+                                           hideControlBar={true}
+                                           apiUrl="api/programs/"
+                                           id={objectData._source.id}
+                                           data={objectData._source}
+                                           editable={false}
                                            needsLogin={this.handleNeedsLogin}
-                />
+                                           userPlanOccurrenceId = {theUserPlanOccurrenceId} />
 
                       //  <PlanHit key={objectData.id} result={objectData} />
 

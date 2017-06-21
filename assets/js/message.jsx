@@ -27,7 +27,7 @@ require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
 //var MaskedInput = require('react-maskedinput');
 
-import { addThread, setCurrentUser, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
+import { addThread, addOpenThread, closeOpenThread, addMessage, setMessageWindowVisibility, setCurrentUser, setCurrentContact, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import  {store} from "./redux/store";
@@ -42,8 +42,8 @@ var UpdatesList = require('./update');
 var ReconnectingWebSocket = require('reconnecting-websocket');
 import Websocket from 'react-websocket';
 
-var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-//var ws_scheme =  "ws";
+//var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var ws_scheme =  "ws";
 
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
@@ -98,10 +98,9 @@ export class MessageWindowContainer extends React.Component {
         autobind(this)
 
         this.state = {
-            data:[],
             threads:{},
             openThreads:{},
-            currentThread:"",
+            currentThread:{},
             selectedLabelId:"",
             currentMessageThreadChannel:"",
             user:"",
@@ -113,62 +112,82 @@ export class MessageWindowContainer extends React.Component {
     }
 
     componentDidMount () {
-        store.dispatch(showMessageWindow(false))
 
-        this.setState({
-            user: this.props.storeRoot.user,
-            threads: this.props.storeRoot.messageThreads,
-            currentThread: this.props.storeRoot.currentThread
-        })
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            })
+        }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.state.user != nextProps.storeRoot.user) {
-            this.setState({
-                user: nextProps.storeRoot.user
-            })
-        }
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        }, this.connectToNotificationChannel())
+                            //if (nextProps.storeRoot.user.notificationChannelLabel != undefined) {
+                                //this.connectToNotificationChannel(nextProps.storeRoot.user.notificationChannelLabel)
 
-        if (this.state.openThreads != nextProps.storeRoot.openThreads) {
-            this.setState({
-                openThreads: nextProps.storeRoot.openThreads
-            })
-        }
+                            //}
+                    }
 
-        if (this.state.currentThread != nextProps.storeRoot.currentThread) {
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+    connectToNotificationChannel = () => {
+        if (this.state.user) {
+            var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + this.state.user.notificationChannelLabel + "/?token=" + localStorage.token)
+            notificationWebsocket.onmessage = (message) => {
+                var messageData = JSON.parse(message.data);
+                if (messageData.text == "openPrivateTextChannel") {
+                    this.connectToThread(messageData.privateChannelId)
+
+                }
+            };
+
             this.setState({
-                currentThread: nextProps.storeRoot.currentThread
+                notificationWebsocket: notificationWebsocket
             })
         }
     }
 
-    connectToNotificationChannel = (notificationChannelLabel) => {
-        var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
-        notificationWebsocket.onmessage = (message) => {
-            var messageData = JSON.parse(message.data);
-            if (messageData.text == "openPrivateTextChannel") {
-                this.connectToThread(messageData.privateChannelId)
-
-            }
-        };
-
-        this.setState({
-            notificationWebsocket:notificationWebsocket
-        })
-    }
 
 
 
-
-
-    removeThread = (e) =>{
-        var array = this.state.openThreads.filter(function(item) {
+/*
+    removeThread = (id) => {
+        /*var array = this.state.openThreads.filter(function(item) {
             return item.id !== e
         })
         this.setState({
             openThreads: array
         }, this.updateCurrentThread)
-                        store.dispatch(setOpenThreads(array))
+
+
+        store.dispatch(closeOpenThread(id))
+        this.updateCurrentThread
+                        //store.dispatch(setOpenThreads(array))
 
     }
 
@@ -191,7 +210,7 @@ export class MessageWindowContainer extends React.Component {
     handleCurrentThreadChosen = (messageThread) => {
         if (messageThread.threadId) {
             this.setState({currentThread: messageThread.threadId})
-                                                store.dispatch(setCurrentThread(messageThread.threadId))
+            store.dispatch(setCurrentThread(messageThread.threadId))
 
         } else {
             this.setState({currentThread:""})
@@ -199,6 +218,7 @@ export class MessageWindowContainer extends React.Component {
 
         }
     }
+    */
 
     connectToThread = (channelId) => {
         var theUrl = "api/channels/" + channelId + "/messageThread"
@@ -212,12 +232,10 @@ export class MessageWindowContainer extends React.Component {
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
                         var theMessageThreadData = messageThreadData.results[0]
-                        //printObject(theMessageThreadData)
                         theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
                         store.dispatch(addThread(theMessageThreadData))
                         store.dispatch(setCurrentThread(theMessageThreadData))
 
-                        //printObject(messageThreadData.results[0])
                         this.setState({
                             //openThreads: this.state.openThreads.concat(theMessageThreadData),
                             currentThread: theMessageThreadData,
@@ -247,38 +265,9 @@ export class MessageWindowContainer extends React.Component {
     }
 
 
-    createAndOrConnectToThread = () => {
-        if (this.state.currentReceiverNotificationChannelLabel != "" & this.state.currentMessageThreadChannel != "") {
-            this.sendNotificationToWakeupPrivateChannel(this.state.currentReceiverNotificationChannelLabel, this.state.currentMessageThreadChannel)
-
-            this.connectToThread(this.state.currentMessageThreadChannel.id)
 
 
-        }
-    }
 
-    sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
-        //console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
-        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
-        var notificationPrivateChannelWakeupMessage = {
-            text: "openPrivateTextChannel",
-            privateChannel: privateChannel.label,
-            privateChannelId: privateChannel.id,
-            typeOfMessage: "notifications",
-            channel: receiverNotificationChannelLabel,
-            token: localStorage.token,
-
-
-        }
-
-        receiverNotificationWebsocket.addEventListener('open', () => {
-                                     receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
-                    console.log("messageWasSent")
-
-
-        });
-
-}
 
 
 
@@ -326,11 +315,6 @@ export class MessageWindowContainer extends React.Component {
 }
 
 
-
-
-
-
-
     connectToWebsocket = (websocketType, websocketLabel) => {
         var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
         theSocket.onmessage = (message) => {
@@ -339,14 +323,18 @@ export class MessageWindowContainer extends React.Component {
 
     }
 
+    /*
     handleThreadCloseClick = (messageThread) => {
         this.removeThread(messageThread.threadId)
 
 
-    }
+    }*/
     getReceiverNotificationChannelLabel = (receiverId) => {
+        if (this.state.contacts) {
+            this.setState({currentReceiverNotificationChannelLabel: this.state.contacts[receiverId].notificationChannelLabel})
+        }
 
-        var theUrl = 'api/users/' + receiverId
+        /*var theUrl = 'api/users/' + receiverId
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -366,7 +354,7 @@ export class MessageWindowContainer extends React.Component {
                 console.error(theUrl, status, err.toString());
                 return null
             }
-        })
+        })*/
 
 
     }
@@ -430,7 +418,6 @@ export class MessageWindowContainer extends React.Component {
     }
 
       handleMessageThreadClick = (messageThread) => {
-                    //printObject(messageThread)
 
 
           this.getReceiverNotificationChannelLabel(messageThread.receiver)
@@ -482,7 +469,6 @@ export class MessagePage extends React.Component {
     }
 
     connectToNotificationChannel = (notificationChannelLabel) => {
-        console.log("receiverNotificationChannelLabel " + notificationChannelLabel)
 
         var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
         notificationWebsocket.onmessage = (message) => {
@@ -499,26 +485,18 @@ export class MessagePage extends React.Component {
     }
 
     checkIfUser = () => {
+        if (this.props.storeRoot) {
+        if (this.props.storeRoot.user) {
+            this.setState({
+                user: this.props.storeRoot.user
+            })
+            this.connectToNotificationChannel(userData.notificationChannelLabel)
 
-        var theUrl = '/api/users/i/'
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(userData) {
-                this.setState({
-                    'user': userData
-                })
-                this.connectToNotificationChannel(userData.notificationChannelLabel)
 
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
         }
-        })
+    }
+
+
     }
 
 
@@ -563,11 +541,9 @@ export class MessagePage extends React.Component {
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
                         var theMessageThreadData = messageThreadData.results[0]
-                        //printObject(theMessageThreadData)
                         theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
 
 
-                        //printObject(messageThreadData.results[0])
                         this.setState({
                             openThreads: this.state.openThreads.concat(theMessageThreadData),
                             currentThread: theMessageThreadData,
@@ -594,15 +570,7 @@ export class MessagePage extends React.Component {
     }
 
 
-    createAndOrConnectToThread = () => {
-        if (this.state.currentReceiverNotificationChannelLabel != "" & this.state.currentMessageThreadChannel != "") {
-            this.sendNotificationToWakeupPrivateChannel(this.state.currentReceiverNotificationChannelLabel, this.state.currentMessageThreadChannel)
 
-            this.connectToThread(this.state.currentMessageThreadChannel.id)
-
-
-        }
-    }
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
         console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
@@ -715,6 +683,8 @@ export class MessagePage extends React.Component {
 
     }
 
+
+
     getOrCreateThreadChannel = (receiverId) => {
         var theUrl = 'api/channelUsers/' + receiverId
         $.ajax({
@@ -746,6 +716,7 @@ export class MessagePage extends React.Component {
 
     }
     componentDidMount () {
+
         this.checkIfUser()
     }
 
@@ -776,7 +747,6 @@ export class MessagePage extends React.Component {
     }
 
       handleMessageThreadClick = (messageThread) => {
-                    //printObject(messageThread)
 
 
           this.getReceiverNotificationChannelLabel(messageThread.receiver)
@@ -796,7 +766,7 @@ export class MessagePage extends React.Component {
     render() {
         return (
             <div>
-                <MessageWindow user={this.state.user} currentThreadChosen={this.handleCurrentThreadChosen}
+                <MessageWindow user={this.state.user}
                                newThread={this.handleNewThread} threadCloseClick={this.handleThreadCloseClick}
                                openThreads={this.state.openThreads} threads={this.state.threads}
                                currentThread={this.state.currentThread}/>
@@ -1015,10 +985,6 @@ export class MessageThreadItemLabel extends React.Component {
 }
 
 
-
-
-
-
 export class MessagePageLabelsList extends React.Component {
     constructor(props) {
 
@@ -1166,17 +1132,47 @@ export class MessageWindow extends React.Component {
         setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
     }
 
-    componentDidMount = () => {
+    componentDidMount () {
 
-        this.setState({
-            user: this.props.user,
-            openThreads:this.props.openThreads,
-            threads:this.props.threads,
-            currentThread:this.props.currentThread
-        })
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            })
+        }
     }
 
-    handleCurrentThreadChosen = (messageThread) => {
+    componentWillReceiveProps(nextProps) {
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        })
+                    }
+
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+    /*handleCurrentThreadChosen = (messageThread) => {
 
         this.props.currentThreadChosen({threadId: messageThread.threadId})
     }
@@ -1186,7 +1182,7 @@ export class MessageWindow extends React.Component {
         this.props.threadCloseClick({threadId: messageThread.threadId})
 
 
-}
+}*/
 
     resizing(direction, styleSize, clientSize, delta, newPos) {
 
@@ -1213,28 +1209,10 @@ export class MessageWindow extends React.Component {
         console.log("doubleClick called")
     }
 
-    componentWillReceiveProps = (nextProps ) => {
-
-        if (this.state.openThreads != nextProps.openThreads) {
-            this.setState({openThreads: nextProps.openThreads})
-        }
-
-        if (this.state.threads != nextProps.threads) {
-            this.setState({threads: nextProps.threads})
-        }
-
-        if (this.state.currentThread != nextProps.currentThread) {
-            this.setState({currentThread: nextProps.currentThread})
-        }
-
-        if (this.state.user != nextProps.user) {
-            this.setState({user: nextProps.user})
-        }
-
-    }
 
 
 
+/*
 
     handleNewThread(contact) {
 
@@ -1242,7 +1220,7 @@ export class MessageWindow extends React.Component {
   }
 
 
-
+*/
 
 
   handleMessageSubmit (theMessageData) {
@@ -1259,7 +1237,6 @@ export class MessageWindow extends React.Component {
     var theWebsocket = theMessageData.thread.websocket
       theWebsocket.send(JSON.stringify(channelMessage));
 
-      //printObject(theMessageData)
       var theMessage =  {
           text: theMessageData.text,
           thread: theMessageData.thread.id,
@@ -1279,7 +1256,10 @@ export class MessageWindow extends React.Component {
         type: 'POST',
         data: theMessage,
 
-        success: function() {
+
+        success: function(theSubmittedMessage) {
+                             //store.dispatch(addMessage(this.state.currentThread.id, theSubmittedMessage))
+
         }.bind(this),
         error: function(xhr, status, err) {
             console.error(theUrl, status, err.toString());
@@ -1311,6 +1291,11 @@ export class MessageWindow extends React.Component {
       }
   }
 
+  handleMenuItemCloseClick() {
+      store.dispatch(setMessageWindowVisibility(false))
+  }
+
+
 
     render() {
 
@@ -1336,19 +1321,26 @@ export class MessageWindow extends React.Component {
                 onResize={this.resizing}
                 onDrag={this.moving}
                 bounds={'parent'}
-            ><span className="no-cursor"><div id="messageWindowControlBar"
-                                              className="cursor ui fluid top attached blue button">Messages</div>
-               <MessageWindowMenuBar user={this.state.user} currentThreadChosen={this.handleCurrentThreadChosen}
+            ><span className="no-cursor"><div
+                                              className="cursor ui fluid top attached right aligned blue button" >
+                <div className="ui grid">
+                    <div id="messageWindowControlBar" className="ui fourteen wide column">Messages</div>
+
+                <div onClick={this.handleMenuItemCloseClick} className="ui right aligned column"><i  className="messageWindowCloseIcon large close icon" ></i></div>
+
+                </div>
+                </div>
+               <MessageWindowMenuBar /*user={this.state.user}
                                      threadCloseClick={this.handleThreadCloseClick}
-                                     openThreads={this.state.openThreads}/>
-        <WindowPane newThread={this.handleNewThread} currentThread={this.state.currentThread} openThreads={this.state.openThreads}
-                    user={this.state.user} />
+                                     openThreads={this.state.openThreads} */ />
+        <WindowPane /*newThread={this.handleNewThread} currentThread={this.state.currentThread} openThreads={this.state.openThreads}
+                    user={this.state.user} *//>
         </span>
 
             </Rnd>
             <MessageInput width={this.state.width} xPos={this.state.x} yPos={this.state.y + this.state.height}
                           onSubmit={this.handleMessageSubmit} thread={this.state.currentThread}
-                          sender={this.getUserId} />
+                          sender={this.getUserId()} />
 
         </div>
 
@@ -1358,7 +1350,7 @@ export class MessageWindow extends React.Component {
 }
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class WindowPane extends React.Component {
     constructor(props) {
         super(props)
@@ -1367,19 +1359,54 @@ export class WindowPane extends React.Component {
             tabs: [
                 {label: "Contacts",}
             ],
-            currentThread: "",
+            currentThread: null,
             openThreads:[],
             user:""
 
         }
     }
 
-    componentDidMount() {
-                    this.setState({user: this.props.user})
+    componentDidMount () {
 
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            })
+        }
     }
 
-    handleNewThread = (contact) => {
+    componentWillReceiveProps(nextProps) {
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        })
+                    }
+
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+    /*handleNewThread = (contact) => {
         //this.setState({
           //  receiver: contact.id,
         //})
@@ -1390,22 +1417,10 @@ export class WindowPane extends React.Component {
 
         this.props.newThread(contact)
         //this.sendOutNotificationToReceiverNotificationRoom(receiverInfo.receiverId)
-    }
+    }*/
 
 
-    componentWillReceiveProps = (nextProps) => {
-        if (this.state.currentThread != nextProps.currentThread) {
-            this.setState({currentThread: nextProps.currentThread})
-        }
 
-        if (this.state.openThreads != nextProps.openThreads) {
-            this.setState({openThreads: nextProps.openThreads})
-        }
-
-        if (this.state.user != nextProps.user) {
-            this.setState({user: nextProps.user})
-        }
-    }
 
 
     render() {
@@ -1413,13 +1428,12 @@ export class WindowPane extends React.Component {
 
              var theData = this.state.openThreads
              var values = Object.keys(theData).map(function (key) {
-                 printObject(theData[key])
                  return theData[key];
              });
              var theOpenThreadsPanes = values.map((openThread) => {
 
                  return (
-                     <MessageThreadPane key={`key_messageThreadPane_${openThread.id}`} user={this.state.user}
+                     <MessageThreadPane key={`key_messageThreadPane_${openThread.id}`}
                                         isVisible={true} thread={openThread}/>
 
                  )
@@ -1427,19 +1441,8 @@ export class WindowPane extends React.Component {
              })
          }
 
-        if (!this.state.currentThread) {
-            return (
-
-<div className="windowPane">
-                <ContactListPane user={this.state.user} isVisible={true} newThread={this.handleNewThread} />
-                 <MessageThreadPane key='key_messageThreadPane_contacts' user={this.state.user} isVisible={false} thread={this.state.currentThread} />
-
-</div>
-            )
-
-        }
-        else {
-            return (
+        if (this.state.currentThread != undefined) {
+             return (
 <div className="windowPane">
 
                 <ContactListPane isVisible={false} newThread={this.createNewMessageThread} />
@@ -1449,6 +1452,18 @@ export class WindowPane extends React.Component {
 
 
 )
+
+        }
+        else {
+            return (
+
+<div className="windowPane">
+                <ContactListPane isVisible={true} newThread={this.handleNewThread} />
+    {/*<MessageThreadPane key='key_messageThreadPane_contacts' user={this.state.user} isVisible={false} thread={this.state.currentThread} />*/}
+
+</div>
+            )
+
             }
 
 
@@ -1459,7 +1474,7 @@ export class WindowPane extends React.Component {
 
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowMenuBarItem extends React.Component {
     constructor(props) {
         super(props)
@@ -1473,39 +1488,89 @@ export class MessageWindowMenuBarItem extends React.Component {
         }
     }
 
-    componentDidMount() {
-    this.setState({
-        user: this.props.user,
-        thread: this.props.thread,
-    })
-        this.updateOtherPartyInfo()
+    componentDidMount () {
+        this.setState({thread: this.props.thread})
+
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            }, this.updateOtherPartyInfo)
+        }
     }
 
-    handleMenuItemCloseClick = () => {
-        this.props.threadCloseClick({threadId: this.props.thread.id})
-
-
-    }
-
-    componentWillReceiveProps = (nextProps ) => {
+    componentWillReceiveProps(nextProps) {
         if (this.state.thread != nextProps.thread) {
             this.setState({thread: nextProps.thread}, this.updateOtherPartyInfo)
         }
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        }, this.updateOtherPartyInfo)
+                    }
 
-        if (this.state.user != nextProps.user) {
-            this.setState({user: nextProps.user}, this.updateOtherPartyInfo)
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.currentContact != nextProps.storeRoot.gui.currentContact) {
+                        this.setState({
+                            currentContact: nextProps.storeRoot.gui.currentContact
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+    handleMenuItemCloseClick = () => {
+        console.log("clsing thread " + this.state.thread.id)
+                    store.dispatch(closeOpenThread(this.state.thread.id))
+
+        this.updateCurrentThread()
+
+
+    }
+
+    updateCurrentThread = () => {
+        console.log("update currentThread")
+        if (this.state.openThreads.length > 0) {
+            var last = this.state.openThreads[this.state.openThreads.length - 1]
+            store.dispatch(setCurrentThread(last))
+        }
+        else {
+            store.dispatch(setCurrentThread(null))
+
+            //this.setState()
         }
 
     }
 
+
+
     handleMenuItemClick = () => {
-        this.props.currentThreadChosen({threadId:this.props.threadId})
+        store.dispatch(setCurrentThread(this.props.thread))
+
 
     }
 
     updateOtherPartyInfo () {
         if (this.state.thread) {
-            console.log("thread sender " + this.state.thread.sender + "userId" + this.state.user.id)
             if (this.state.thread.sender == this.state.user.id) {
                 var otherPartyName = this.state.thread.receiverName
                 var otherPartyPhoto = s3ImageUrl + this.state.thread.receiverPhoto
@@ -1525,25 +1590,7 @@ export class MessageWindowMenuBarItem extends React.Component {
 
 
 
-    checkIfUser() {
-        $.ajax({
-            method: 'GET',
-            url: '/api/users/i/',
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function (res) {
-                this.setState({
-                    'user': res
-                },this.updateOtherPartyInfo)
 
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-            }
-        })
-    }
 
     render() {
         if (this.state.otherParty == "") {
@@ -1571,12 +1618,91 @@ export class MessageWindowMenuBarItem extends React.Component {
     }
 }
 
-export class MessageWindowMenuBarAdditionalItemsMenuItem extends MessageWindowMenuBarItem {
+@connect(mapStateToProps, mapDispatchToProps)
+export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
         this.state = {
             data:[],
+
+        }
+    }
+
+    componentDidMount () {
+        this.setState({thread: this.props.thread})
+
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            }, this.updateOtherPartyInfo)
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.thread != nextProps.thread) {
+            this.setState({thread: nextProps.thread}, this.updateOtherPartyInfo)
+        }
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        }, this.updateOtherPartyInfo)
+                    }
+
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.currentContact != nextProps.storeRoot.gui.currentContact) {
+                        this.setState({
+                            currentContact: nextProps.storeRoot.gui.currentContact
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+
+
+
+    handleMenuItemClick = () => {
+        store.dispatch(setCurrentThread(this.props.thread))
+
+
+    }
+
+    updateOtherPartyInfo () {
+        if (this.state.thread) {
+            if (this.state.thread.sender == this.state.user.id) {
+                var otherPartyName = this.state.thread.receiverName
+                var otherPartyPhoto = s3ImageUrl + this.state.thread.receiverPhoto
+            } else {
+                var otherPartyName = this.state.thread.senderName
+                var otherPartyPhoto = s3ImageUrl + this.state.thread.senderPhoto
+            }
+            this.setState({
+                otherParty: {
+                    name: otherPartyName,
+                    image: otherPartyPhoto
+                }
+            })
 
         }
     }
@@ -1603,6 +1729,7 @@ export class MessageWindowMenuBarAdditionalItemsMenuItem extends MessageWindowMe
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowMenuBar extends React.Component {
     constructor(props) {
         super(props)
@@ -1616,32 +1743,51 @@ export class MessageWindowMenuBar extends React.Component {
         }
     }
 
-    componentDidMount() {
-        this.setState({user: this.props.user})
-
-    }
-
-
-    handleThreadCloseClick = (messageThread) => {
-        this.props.threadCloseClick({threadId: messageThread.threadId})
-
-
-    }
-
-    handleCurrentThreadChosen = (messageThread) => {
-        this.props.currentThreadChosen({threadId: messageThread.threadId})
-}
-
-
-    componentWillReceiveProps = (nextProps ) => {
-        if (this.state.openThreads != nextProps.openThreads) {
-            this.setState({openThreads: nextProps.openThreads})
-        }
-
-        if (this.state.user != nextProps.user) {
-            this.setState({user: nextProps.user})
+    componentDidMount () {
+        if (this.props.storeRoot) {
+            this.setState({
+                user: this.props.storeRoot.user,
+                threads: this.props.storeRoot.messageThreads,
+                currentThread: this.props.storeRoot.gui.currentThread,
+                openThreads: this.props.storeRoot.gui.openThreads
+            })
         }
     }
+
+    componentWillReceiveProps(nextProps) {
+                if (nextProps.storeRoot) {
+                    if (this.state.user != nextProps.storeRoot.user) {
+                        this.setState({
+                            user: nextProps.storeRoot.user
+                        })
+                    }
+
+                    if (this.state.threads != nextProps.storeRoot.messageThreads) {
+                        this.setState({
+                            threads: nextProps.storeRoot.messageThreads
+                        })
+                    }
+
+                    if (this.state.currentThread != nextProps.storeRoot.gui.currentThread) {
+                        this.setState({
+                            currentThread: nextProps.storeRoot.gui.currentThread
+                        })
+                    }
+
+                    if (this.state.openThreads != nextProps.storeRoot.gui.openThreads) {
+                        this.setState({
+                            openThreads: nextProps.storeRoot.gui.openThreads
+                        })
+                    }
+                }
+    }
+
+
+
+
+
+
+
 
 
 
@@ -1656,9 +1802,9 @@ export class MessageWindowMenuBar extends React.Component {
 
             var threadItems = values.map((thread) => {
                 return (
-                    <MessageWindowMenuBarItem user={this.state.user} key={`key_messageWindowMenuBarItem_${thread.id}`}
-                                              thread={thread} currentThreadChosen={this.handleCurrentThreadChosen}
-                                              threadCloseClick={this.handleThreadCloseClick}/>
+                    <MessageWindowMenuBarItem key={`key_messageWindowMenuBarItem_${thread.id}`}
+                                              thread={thread} /*currentThreadChosen={this.handleCurrentThreadChosen}
+                                              threadCloseClick={this.handleThreadCloseClick} */ />
                 )
             })
 
@@ -1668,8 +1814,8 @@ export class MessageWindowMenuBar extends React.Component {
                     <MessageWindowMenuBarAdditionalItemsMenuItem user={this.state.user}
                                                                  key={`key_messageWindowMenuBarItem_${thread.id}`}
                                                                  thread={thread}
-                                                                 currentThreadChosen={this.handleCurrentThreadChosen}
-                                                                 threadCloseClick={this.handleThreadCloseClick}/>
+                                                                 /* currentThreadChosen={this.handleCurrentThreadChosen}
+                                                                 threadCloseClick={this.handleThreadCloseClick} *//>
                 )
             })
         } else {
@@ -1685,7 +1831,7 @@ export class MessageWindowMenuBar extends React.Component {
                         <div className="ui absolutelyNoMargin noRadius mini menu hidingOverflow noBorder noBoxShadow">
 
 
-            <MessageWindowMenuBarItem user={this.state.user} key="contacts" label="Contacts" currentThreadChosen={this.handleCurrentThreadChosen}/>
+            <MessageWindowMenuBarItem key="contacts" label="Contacts" /* currentThreadChosen={this.handleCurrentThreadChosen} *//>
             {threadItems}</div>
             { threadItems.length ?
                     <div className="ui absolutelyNoMargin noRadius right mini menu noBoxShadow noBorder">
@@ -1733,16 +1879,14 @@ export class MessageWindowThreadItemsMenu extends React.Component {
         autobind(this);
      }
 
-     handleClick = (callbackData) => {
-         this.props.click(callbackData)
-     }
+
 
      render () {
          var myStyle = { display: "block"}
          return(
 
                   <div className="ui simple dropdown item messageWindowMenubarItem messageWindowMenuBarAdditionalItems" >
-                      <div onClick={this.handleClick}>
+                      <div >
                       >></div>
                       <div className="menu">
 
@@ -1828,6 +1972,7 @@ export class Message extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageInput extends React.Component {
     constructor(props) {
         super(props)
@@ -1879,28 +2024,35 @@ export class MessageInput extends React.Component {
 
 
         }
+            if (this.props.thread) {
 
-        return (
-            <div className="messageInput" style={style}>
-                <div className="ui grid">
-                    <div className="one wide column">&nbsp;</div>
-                    <div className="ten wide column">
-                        <div className="fluid field">
-            <textarea ref="ref_textarea" onKeyPress={this._handleKeyPress} value={this.state.message} style={{width:"100%"}} type="textarea" rows="3" onChange={this.handleMessageChange} />
-                        </div></div>
-                    <div className="center aligned middle aligned four wide column ">
-                        <div className="ui primary fluid button" onClick={this.sendMessage}>Send</div>
-                        <div className="one wide column">&nbsp;</div>
+                return (
+                    <div className="messageInput" style={style}>
+                        <div className="ui grid">
+                            <div className="one wide column">&nbsp;</div>
+                            <div className="ten wide column">
+                                <div className="fluid field">
+                                    <textarea ref="ref_textarea" onKeyPress={this._handleKeyPress}
+                                              value={this.state.message} style={{width: "100%"}} type="textarea"
+                                              rows="3" onChange={this.handleMessageChange}/>
+                                </div>
+                            </div>
+                            <div className="center aligned middle aligned four wide column ">
 
+                                <div className="ui primary fluid button" onClick={this.sendMessage}>Send</div>
+                                <div className="one wide column">&nbsp;</div>
+
+                            </div>
+                        </div>
                     </div>
-                    </div>
-                </div>
-        )
+                )
+            }
+            else {return(<div className="messageInput" style={style}></div>)}
     }
 }
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadList extends React.Component {
     constructor(props) {
         super(props)
@@ -2047,6 +2199,7 @@ export class MessageThreadList extends React.Component {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadListItem extends React.Component {
     constructor(props) {
         super(props)
@@ -2100,27 +2253,24 @@ export class MessageThreadListItem extends React.Component {
 
     }
 
+    checkIfUser = () => {
+        if (this.props.storeRoot) {
+        if (this.props.storeRoot.user) {
+            this.setState({
+                user: this.props.storeRoot.user
+            })
+            this.updateOtherPartyInfo
 
 
-    checkIfUser() {
-        $.ajax({
-            method: 'GET',
-            url: '/api/users/i/',
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function (res) {
-                this.setState({
-                    'user': res
-                },this.updateOtherPartyInfo)
-
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-            }
-        })
+        }
     }
+
+
+    }
+
+
+
+
 
     handleClick = () => {
         this.props.click(this.state.thread)
@@ -2240,34 +2390,80 @@ export class MessageThreadListItem extends React.Component {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class ContactListPane extends React.Component {
-     constructor(props) {
+    constructor(props) {
         super(props)
         autobind(this)
         this.state = {
-            data:[],
+            user:"",
+            contacts: {},
             isVisible: true,
+            currentContact:"",
+            currentMessageThreadChannel:""
 
         }
     }
 
     componentDidMount() {
-        this.checkIfUser()
+         if (this.props.storeRoot) {
+            if (this.props.storeRoot.user) {
+
+                this.setState({
+                    user: this.props.storeRoot.user
+                })
+                this.setupMessageLoading
+
+            }
+            if (this.props.storeRoot.contacts) {
+                this.setState({
+                    contacts: this.props.storeRoot.contacts
+                })
+            }
+
+            if (this.props.storeRoot.gui.currentContact != undefined) {
+                        this.setState({
+                            currentContact: this.props.storeRoot.gui.currentContact
+                        })
+                    }
+        }
         this.setState({
             isVisible: this.props.isVisible
         })
         if (this.props.isVisible) {
-                $(this.refs['ref_contactListPane']).show();
+            $(this.refs['ref_contactListPane']).show();
 
-            } else {
-                $(this.refs['ref_contactListPane']).hide();
-            }
-            this.setupMessageLoading
+        } else {
+            $(this.refs['ref_contactListPane']).hide();
+        }
     }
 
-    componentWillReceiveProps = (nextProps ) => {
+
+
+
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.storeRoot) {
+            if (nextProps.storeRoot.user) {
+                this.setState({
+                    user: nextProps.storeRoot.user
+                })
+                this.setupMessageLoading
+
+            }
+
+            if (nextProps.storeRoot.contacts) {
+                this.setState({
+                    contacts: nextProps.storeRoot.contacts
+                })
+            }
+            if (nextProps.storeRoot.gui.currentContact) {
+                this.setState({
+                    currentContact: nextProps.storeRoot.gui.currentContact
+                })
+            }
+        }
         if (this.state.isVisible != nextProps.isVisible) {
-            this.setState({isVisible:nextProps.isVisible})
+            this.setState({isVisible: nextProps.isVisible})
             if (nextProps.isVisible) {
                 $(this.refs['ref_contactListPane']).show();
 
@@ -2275,95 +2471,195 @@ export class ContactListPane extends React.Component {
                 $(this.refs['ref_contactListPane']).hide();
             }
         }
+
     }
 
-    checkIfUser() {
+    getOrCreateThreadChannel = (receiverId) => {
+        var theUrl = 'api/channelUsers/' + receiverId
         $.ajax({
             method: 'GET',
-            url: '/api/users/i/',
+            url: theUrl,
             datatype: 'json',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
-            success: function(res) {
-                this.setState({
-                    'user': res
-                }, this.setupMessageLoading)
+            success: function(data) {
+                var theMessageThreadChannelLabel = data[0].label
+                var theCurrentMessageThreadChannel = {
+                    label: theMessageThreadChannelLabel,
+                    id: data[0].id,
+                    type: "chat-messages",
+
+                }
+                this.setState({ currentMessageThreadChannel: theCurrentMessageThreadChannel},
+                    this.createAndOrConnectToThread)
+                //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
+
             }.bind(this),
             error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-        }
-        })
-    }
-
-    setupMessageLoading = () => {
-        var intervalID = setInterval(this.loadContactsFromServer, 800)
-        this.setState({intervalID:intervalID})
-    }
-
-    componentWillUnmount = () => {
-
-        clearInterval(this.state.intervalId);
-    }
-
-
-
-    loadContactsFromServer = () => {
-        if (this.state.data[0] == null)  {
-            if (this.state.isVisible) {
-                $.ajax({
-                    url: 'api/users/',
-                    dataType: 'json',
-                    cache: false,
-                    headers: {
-                        'Authorization': 'Token ' + localStorage.token
-                    },
-                    success: function (data) {
-                        this.setState({
-                            data: data
-                        });
-                    }.bind(this),
-                    error: function (xhr, status, err) {
-                        console.error(this.props.url, status, err.toString());
-                    }.bind(this),
-
-                });
+                console.error(theUrl, status, err.toString());
+                return null
             }
-        }
-        else {
-            clearInterval(this.state.intervalId)
-        }
-  }
-
-  newThreadClicked = (contact) => {
-      this.props.newThread(contact)
-  }
-
-    render() {
-      if (this.state.data != null) {
-
-
-        var contactList = this.state.data.map((contact) => {
-            if (contact.id != this.state.user.id)
-            {
-            return (
-                    <ContactItem key={`key_contactItem_${contact.id}`} contact={contact}  newThread={this.newThreadClicked} />
-)}
-
         })
+
     }
 
-    return (
+     createAndOrConnectToThread = () => {
+        if (this.state.currentContact != "" & this.state.currentMessageThreadChannel != "") {
+            this.sendNotificationToWakeupPrivateChannel(this.state.currentContact.notificationChannelLabel, this.state.currentMessageThreadChannel)
 
-          <div ref="ref_contactListPane" className="contactListPane">
-                <ScrollArea className="contactListScrollArea"><Content autoScroll={false} messageList={contactList} />
-        </ScrollArea>
+            this.connectToThread(this.state.currentMessageThreadChannel.id)
 
-      </div>
-    );
-  }
+
+        }
+    }
+
+    sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
+        //console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
+        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
+        var notificationPrivateChannelWakeupMessage = {
+            text: "openPrivateTextChannel",
+            privateChannel: privateChannel.label,
+            privateChannelId: privateChannel.id,
+            typeOfMessage: "notifications",
+            channel: receiverNotificationChannelLabel,
+            token: localStorage.token,
+
+
+        }
+
+        receiverNotificationWebsocket.addEventListener('open', () => {
+            receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
+
+
+        });
+
 }
 
+
+
+
+
+
+    setContacts = () => {
+        if (this.props.storeRoot) {
+            if (this.props.storeRoot.contacts) {
+                this.setState({contacts: this.props.storeRoot.contacts})
+            }
+        }
+        /*if (this.state.data[0] == null)  {
+         if (this.state.isVisible) {
+         $.ajax({
+         url: 'api/users/',
+         dataType: 'json',
+         cache: false,
+         headers: {
+         'Authorization': 'Token ' + localStorage.token
+         },
+         success: function (data) {
+         this.setState({
+         data: data
+         });
+         }.bind(this),
+         error: function (xhr, status, err) {
+         console.error(this.props.url, status, err.toString());
+         }.bind(this),
+
+         });
+         }
+         }
+         else {
+         clearInterval(this.state.intervalId)
+         }*/
+    }
+
+    contactItemClicked = (contact) => {
+        //store.dispatch()
+        this.getOrCreateThreadChannel(contact.id)
+        //this.props.newThread(contact)
+    }
+
+    connectToThread = (channelId) => {
+        var theUrl = "api/channels/" + channelId + "/messageThread"
+            $.ajax({
+                method: 'GET',
+                url: theUrl,
+                datatype: 'json',
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (messageThreadData) {
+                    if (messageThreadData.results[0]) {
+                        var theMessageThreadData = messageThreadData.results[0]
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
+                        store.dispatch(addThread(theMessageThreadData))
+                        store.dispatch(setCurrentThread(theMessageThreadData))
+                        store.dispatch(addOpenThread(theMessageThreadData))
+                        store.dispatch(setCurrentContact({}))
+
+                        this.setState({
+                            //openThreads: this.state.openThreads.concat(theMessageThreadData),
+                            //currentThread: theMessageThreadData,
+                            //currentContac: "",
+                            currentMessageThreadChannel: "",
+                            currentReceiver: "",
+                        })
+
+
+
+
+
+
+                    } else {
+                        this.createNewMessageThread()
+
+                    }
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }
+            })
+
+
+    }
+
+    render() {
+        if (this.state.contacts != undefined) {
+
+            var theData = this.state.contacts
+            var values = Object.keys(theData).map(function (key) {
+                return theData[key];
+            });
+            var contactList = values.map((contact) => {
+                if (contact.id != this.state.user.id) {
+                    return (
+                        <ContactItem key={`key_contactItem_${contact.id}`} contact={contact}
+                                     contactItemClicked={this.contactItemClicked}/>
+                    )
+                }
+
+            })
+
+
+            return (
+
+                <div ref="ref_contactListPane" className="contactListPane">
+                    <ScrollArea className="contactListScrollArea"><Content autoScroll={false}
+                                                                           messageList={contactList}/>
+                    </ScrollArea>
+
+                </div>
+            );
+        } else {
+            return (<div></div>)
+
+        }
+    }
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
 export class ContactItem extends React.Component {
     constructor(props) {
         super(props)
@@ -2372,7 +2668,8 @@ export class ContactItem extends React.Component {
     }
 
     handleClick() {
-        this.props.newThread(this.props.contact)
+        store.dispatch(setCurrentContact(this.props.contact))
+        this.props.contactItemClicked(this.props.contact)
     }
 
 
@@ -2391,7 +2688,7 @@ export class ContactItem extends React.Component {
             <div>
            <div className="contactItem" onClick={this.handleClick}>
 
-               <img className="ui avatar image" src={imageUrl} /><span>{this.props.contact.name}</span></div>
+               <img className="ui avatar image" src={imageUrl} /><span>{this.props.contact.firstName} {this.props.contact.lastName}</span></div>
                <div className="ui divider absolutelyNoMargin"></div>
             </div>
         )
@@ -2399,13 +2696,13 @@ export class ContactItem extends React.Component {
 }
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadPane extends React.Component {
     constructor(props) {
         super(props)
         autobind(this)
         this.state = {
-            messagesData:[],
+            messagesData:{},
             channelMessages:[],
             messages: [],
             user: "",
@@ -2419,11 +2716,20 @@ export class MessageThreadPane extends React.Component {
 
 
     componentDidMount() {
+
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.user != undefined) {
+                this.setState({user: this.props.storeRoot.user})
+            }
+        }
+
         this.setState({
             thread:this.props.thread,
             websocket: this.props.thread.websocket,
-            user:this.props.user,
+            messages:this.props.thread.messages
         })
+
+
 
         if (this.props.isVisible) {
                 $(this.refs['ref_messageThreadPane']).show();
@@ -2431,23 +2737,30 @@ export class MessageThreadPane extends React.Component {
             } else {
                 $(this.refs['ref_messageThreadPane']).hide();
             }
-        this.setupMessageLoading()
+        //this.setupMessageLoading()
 
     }
 
     componentWillReceiveProps = (nextProps ) => {
-        if (this.state.thread != nextProps.thread) {
-            this.setState({
-                thread: nextProps.thread,
-            },                     this.loadMessagesFromServer()
-)
-            if (this.state.thread.websocket != undefined) {
+        if (nextProps.thread != undefined) {
+            if (this.state.thread != nextProps.thread) {
                 this.setState({
-                    websocket: nextProps.thread.websocket
+                    thread: nextProps.thread,
                 })
+
+                if (this.state.thread.websocket != undefined) {
+                    this.setState({
+                        websocket: nextProps.thread.websocket
+                    })
+                }
+                if (nextProps.thread.messages != undefined) {
+                    this.setState({
+                        messages: nextProps.thread.messages
+                    })
+                }
+
+
             }
-
-
         }
         if (this.state.isVisible != nextProps.isVisible) {
             this.setState({isVisible:nextProps.isVisible})
@@ -2459,25 +2772,30 @@ export class MessageThreadPane extends React.Component {
             }
         }
 
-        if (this.state.user != nextProps.user) {
-            this.setState({
-                user: nextProps.user,
-            })
-
+        if (nextProps.storeRoot != undefined) {
+            if (this.state.user != nextProps.storeRoot.user) {
+                this.setState({user: this.props.storeRoot.user})
+            }
         }
 
 
+
+
+
+
     }
 
 
 
 
-    setupMessageLoading = () => {
+    /*setupMessageLoading = () => {
         var loadMessagesIntervalID = setInterval(this.loadMessagesFromServer, 800)
         this.setState({loadMessagesIntervalID:loadMessagesIntervalID})
-    }
+    }*/
 
+    /*
     loadMessagesFromServer = () => {
+
 
             $.ajax({
                 url: "api/messageThreads/" + this.state.thread.id + "/messages",
@@ -2500,16 +2818,19 @@ export class MessageThreadPane extends React.Component {
             });
 
 
-  }
+  }*/
 
    handleData(newMessageData) {
       let newMessage = JSON.parse(newMessageData);
+       store.dispatch(addMessage(this.props.thread.id, newMessage))
 
-       this.setState({
+
+
+       /*this.setState({
            channelMessages: this.state.channelMessages.concat(newMessage),
            messages:this.state.messages.concat(newMessage)
 
-       })
+       })*/
       //this.setState({count: this.state.count + result.movement});
     }
 
@@ -2545,9 +2866,13 @@ export class MessageThreadPane extends React.Component {
             }
 
 
-      if (this.state.messages != null) {
+      if (this.state.messages != undefined) {
 
-          var messageList = this.state.messages.map((message) => {
+        //var theData = this.state.messages
+        //var values = Object.keys(theData).map(function(key){
+        //return theData[key];
+        //});
+        var messageList = this.state.messages.map((message) => {
             if (message.sender == this.state.user.id) {
                 var theOrientation = "right"
 
@@ -2586,23 +2911,19 @@ export class MessageList extends React.Component {
         }
     }
 
-    checkIfUser() {
-        $.ajax({
-            method: 'GET',
-            url: '/api/users/i/',
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function (res) {
-                this.setState({
-                    'user': res
-                }, this.setupMessageLoading)
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-            }
-        })
+    checkIfUser = () => {
+        if (this.props.storeRoot) {
+        if (this.props.storeRoot.user) {
+            this.setState({
+                user: this.props.storeRoot.user
+            })
+            this.setupMessageLoading
+
+
+        }
+    }
+
+
     }
 
     componentDidMount() {
@@ -2707,13 +3028,16 @@ class Content extends React.Component {
 
     }
     shouldScrollToBottom() {
-        if (this.state.messageList.length != this.state.messageListCount) {
-            this.setState({messageListCount: this.state.messageList.length
-        })
+        if (this.state.messageList != undefined) {
+            if (this.state.messageList.length != this.state.messageListCount) {
+                this.setState({
+                    messageListCount: this.state.messageList.length
+                })
 
-            if (this.props.autoScroll) {
-        this.context.scrollArea.scrollBottom()
-    }
+                if (this.props.autoScroll) {
+                    this.context.scrollArea.scrollBottom()
+                }
+            }
         }
     }
 

@@ -32,6 +32,11 @@ SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 ALLOWED_HOSTS = ['192.168.1.156', '*']
 
 
+TWILIO_ACCOUNT_SID = 'AC8d2c5238f8d12bb1b382e57428af3c90'
+TWILIO_AUTH_TOKEN = 'b60fb541d009c43132260367a4f84d56'
+TWILIO_DEFAULT_CALLERID = 'Kiterope'
+TWILIO_PHONE_NUMBER = 'Kiterope'
+SENDSMS_BACKEND = 'sendsms.backends.twiliorest.SmsBackend'
 
 
 # Application definition
@@ -67,6 +72,8 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     #'debug_toolbar',
     'channels',
+    'django_twilio',
+    'phonenumber_field'
 
 ]
 

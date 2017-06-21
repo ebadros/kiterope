@@ -22,7 +22,7 @@ from django.utils.crypto import get_random_string
 import json
 import ast
 from django.db.models import Q
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 
@@ -226,6 +226,12 @@ START_TIME_CHOICES = [
     ]
 
 
+NOTIFICATION_METHOD_CHOICES = [
+    ('EMAIL_AND_TEXT',"Email and Text"),
+    ('EMAIL',  "Email Only"),
+    ('TEXT',"Text Only"),
+    ('NO_NOTIFICATIONS',  "I don't want any notifications")
+]
 
 class NotificationManager(models.Manager):
 
@@ -475,9 +481,18 @@ class PlanOccurrence(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     isSubscribed = models.BooleanField(default=True)
 
+    notificationEmail = models.EmailField(max_length=70, blank=True)
+    notificationPhone = PhoneNumberField(blank=True)
+    notificationMethod = models.CharField(max_length=20, blank=False, default='NO_NOTIFICATIONS', choices=NOTIFICATION_METHOD_CHOICES)
+    notificationSendTime = models.CharField(max_length=10, blank=True, choices=START_TIME_CHOICES)
+
+
+
     def __str__(self):
         return "Program: %s, User: %s" % (self.program,  self.user)
 
+    def get_theProgram(self):
+        return Program.objects.get(id=self.program.id)
 
 
 
@@ -498,6 +513,8 @@ class Profile(models.Model):
     notificationChannel = models.OneToOneField('KChannel', null=True, blank=True)
 
 
+
+
     def get_profilePhoto(self):
         return self.profilePhoto
 
@@ -511,6 +528,15 @@ class Profile(models.Model):
             theNotificationChannel = self.createNotificationChannel()
 
         return theNotificationChannel
+
+    def get_notificationChannelLabel(self):
+        try:
+            #theNotificationChannel = KChannel.objects.get(id=self.notificationChannel)
+            return self.notificationChannel.label
+        except:
+            return ""
+
+
 
     def createNotificationChannel(self):
         self.notificationChannel = KChannel.objects.create_channel([self.user.id], "ONLYRECEIVER_ANYSENDER")

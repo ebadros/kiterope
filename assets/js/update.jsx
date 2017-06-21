@@ -16,7 +16,10 @@ import Modal from 'react-modal'
 import autobind from 'class-autobind'
 import Select from 'react-select'
 
-
+import { addThread, addOpenThread, closeOpenThread, addMessage, setMessageWindowVisibility, setCurrentUser, setCurrentContact, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
+import { Provider, connect, dispatch } from 'react-redux'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import  {store} from "./redux/store";
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customStepModalStyles, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, metricFormatOptions} from './constants'
@@ -35,6 +38,7 @@ function printObject(o) {
   alert(out);
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class UpdatesList extends React.Component {
 
     constructor(props) {
@@ -47,7 +51,7 @@ export class UpdatesList extends React.Component {
         }
     }
     componentDidMount = () => {
-        this.loadObjectsFromServer(this.props.stepId)
+        //this.loadObjectsFromServer(this.props.stepId)
         this.setState({stepId: this.props.stepId})
 
       //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
@@ -63,10 +67,12 @@ export class UpdatesList extends React.Component {
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.stepId != nextProps.stepId) {
-            this.setState({ stepId: nextProps.stepId}, this.loadObjectsFromServer(nextProps.stepId))
+            this.setState({ stepId: nextProps.stepId})
+
+           // this.setState({ stepId: nextProps.stepId}, this.loadObjectsFromServer(nextProps.stepId))
 
         }
-        if ((this.state.data != nextProps.updates) && (nextProps.updates != undefined) && (this.state.stepId === undefined)) {
+        if ((this.state.data != nextProps.updates) && (nextProps.updates != undefined)) {
             this.setState({data: nextProps.updates})
         }
     }
@@ -105,7 +111,7 @@ export class UpdatesList extends React.Component {
 
     loadObjectsFromServer = (theStepId) => {
 
-        if (theStepId !== undefined) {
+        if (theStepId != undefined) {
             var theUrl = "api/steps/" + theStepId + "/updates/"
 
             $.ajax({
@@ -130,7 +136,7 @@ export class UpdatesList extends React.Component {
 
 
     handleReloadItem = () => {
-        this.loadObjectsFromServer(this.state.stepId)
+        //this.loadObjectsFromServer(this.state.stepId)
     }
 
 

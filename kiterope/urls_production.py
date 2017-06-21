@@ -55,7 +55,7 @@ router.register(r'messageThreads/labels/(?P<label_id>\w+)', views.MessageThreadV
 
 router.register(r'messageThreads', views.MessageThreadViewSet, base_name='MessageThread')
 
-
+router.register(r'sms', view.SMSViewSet, base_name='MessageThread')
 router.register(r'planOccurrences', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
 
 router.register(r'messages/(?P<sender_id>\w+)/(?P<receiver_id>\w+)', views.MessageViewSet, base_name='Message')
@@ -149,6 +149,7 @@ urlpatterns = [
       url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

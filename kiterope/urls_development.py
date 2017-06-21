@@ -150,6 +150,7 @@ urlpatterns = [
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
 
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

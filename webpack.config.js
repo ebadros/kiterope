@@ -36,7 +36,8 @@ module.exports = {
         plugins: ["transform-decorators-legacy", "transform-class-properties", ]
 
       }},
-      { test: /\.css$/, loader: "style-loader!css-loader" }
+      { test: /\.css$/, loader: "style-loader!css-loader" },
+        {test: /\.json$/, loader: 'json-loader'}
 // to transform JSX into JS
     ],
   },

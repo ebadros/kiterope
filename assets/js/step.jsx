@@ -573,6 +573,12 @@ export class StepBasicView extends React.Component {
             timeInfo: timeInfo
         })
     }
+
+    goToDetail() {
+         if (this.state.data.id) {
+             hashHistory.push("/steps/" + this.state.data.id + "/updates")
+         }
+     }
     render() {
 
             var theTitle = this.state.data.title
@@ -801,6 +807,7 @@ export class StepForm extends React.Component {
                     duration: nextProps.data.duration,
                     monthlyDates: nextProps.data.monthlyDates,
                     programStartDate: nextProps.data.programStartDate,
+                    updates:nextProps.data.updates,
                 })
 
                 if (nextProps.data.description == undefined) {
@@ -1030,6 +1037,7 @@ export class StepForm extends React.Component {
         }
 
         resetForm = () => {
+            console.log("reset form called")
             this.setState({
                 id:"",
             title: "",
@@ -1561,7 +1569,7 @@ export class SimpleStepForm extends StepForm {
                         </div>
                             <div className="ui row">&nbsp;</div>
 
-<UpdatesList stepId={this.props.data.id}/>
+<UpdatesList stepId={this.props.data.id} updates={this.state.updates} />
 
 
               </div>
@@ -1720,9 +1728,6 @@ export class StepItemMenu extends React.Component {
                               <IconLabelCombo size="extramini" orientation="left" text="Duplicate" icon="duplicate" background="Light" click={this.handleClick} />
                               </div>
 
-                          <div className="ui item">
-                              <IconLabelCombo size="extramini" orientation="left" text="Author" icon="author" background="Light" click={this.handleClick} />
-                              </div>
                           <div className="ui item">
                             <IconLabelCombo size="extramini" orientation="left" text="Delete" icon="trash" background="Light" click={this.handleClick} />
                             </div>

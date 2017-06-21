@@ -24,6 +24,10 @@ import { Test , IconLabelCombo , ItemMenu, ClippedImage, ChoiceModal, ChoiceModa
 import { Textfit } from 'react-textfit';
 import ShowMore from 'react-show-more';
 import Modal from 'react-modal';
+import Phone from 'react-phone-number-input'
+import rrui from 'react-phone-number-input/rrui.css'
+import rpni from 'react-phone-number-input/style.css'
+
 
 
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
@@ -34,9 +38,9 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
-import { addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, times, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
@@ -557,7 +561,7 @@ export class ProgramDetailPage extends React.Component {
                 <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
 
                 <div className="fullPageDiv">
-                    <div className="ui page container">
+                    <div className="ui page container footerAtBottom">
                         <div className="spacer">&nbsp;</div>
                         <div className="ui alert"></div>
                          <Breadcrumb values={[
@@ -778,13 +782,14 @@ export class ProgramSubscriptionModal extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class ProgramSubscriptionForm extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
         this.state = {
             program:"",
-            notificationSendMethod:"",
+            notificationMethod:"",
             goalsData:"",
             goal:"",
             planOccurrenceStartDate:moment(),
@@ -793,20 +798,39 @@ export class ProgramSubscriptionForm extends React.Component {
     }
 
     componentDidMount = () => {
-        this.getGoals()
+
+        //this.getGoals()
         this.setState({
             program: this.props.program
         })
+
+        if (this.props.storeRoot) {
+
+            if (this.props.storeRoot.goals) {
+                this.setState({
+            goalsData: this.props.storeRoot.goals
+        },     this.convertGoalDataToGoalOptions )
+            }
+        }
     }
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.program != nextProps.program) {
             this.setState({program: nextProps.program})
         }
+
+        if (this.props.storeRoot) {
+            if (this.state.goalsData != this.props.storeRoot.goals) {
+                console.log("inside the componetWill receive props")
+                this.setState({
+            goalsData: this.props.storeRoot.goals
+        },     this.convertGoalDataToGoalOptions
+)
+            }
+        }
     }
 
     getGoals = () => {
-        console.log("geGoals")
         var theUrl = 'api/goals/'
         $.ajax({
             method: 'GET',
@@ -816,7 +840,6 @@ export class ProgramSubscriptionForm extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(goalsData) {
-                console.log("succes")
                 this.setState({
                     goalsData: goalsData.results
                 }, () => this.convertGoalDataToGoalOptions())
@@ -842,8 +865,13 @@ export class ProgramSubscriptionForm extends React.Component {
         var planOccurrence = {
             program: this.state.program.id,
             goal: this.state.goal,
+            user: this.props.storeRoot.user.id,
             startDate: moment(this.state.planOccurrenceStartDate).format("YYYY-MM-DD"),
             isSubscribed:true,
+            notificationSendTime: this.state.notificationSendTime,
+            notificationEmail: this.state.notificationEmail,
+            notificationPhone: this.state.notificationPhone,
+            notificationMethod: this.state.notificationMethod
         }
         $.ajax({
                  url: theUrl,
@@ -854,7 +882,11 @@ export class ProgramSubscriptionForm extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     console.log("handleSubscribeClicked")
                      this.setState({data: data});
+
+
+                     store.dispatch(addPlan(data))
 
                      this.props.formSubmitted()
 
@@ -873,16 +905,20 @@ export class ProgramSubscriptionForm extends React.Component {
     }
 
     convertGoalDataToGoalOptions () {
-        console.log("convertGoalData")
         var i
         var goalsData = this.state.goalsData
         var goalOptions = []
-        for (i=0; i < goalsData.length; i++) {
-            console.log(goalsData[i].id + " " + goalsData[i].title)
-            var aGoalOption = {value: goalsData[i].id, label: goalsData[i].title}
+
+        for (var key in goalsData) {
+            var aGoalOption = {value: goalsData[key].id, label: goalsData[key].title}
             goalOptions.push(aGoalOption)
 
         }
+        /*for (i=0; i < goalsData.length; i++) {
+            var aGoalOption = {value: goalsData[i].id, label: goalsData[i].title}
+            goalOptions.push(aGoalOption)
+
+        }*/
         this.setState({
             goalOptions: goalOptions
         })
@@ -898,8 +934,28 @@ export class ProgramSubscriptionForm extends React.Component {
       console.log(option.value)
     }
 
-    handleNotificationSendMethodChange(option){
-        this.setState({notificationSendMethod: option.value});
+    handleNotificationMethodChange(option){
+        this.setState({notificationMethod: option.value});
+    }
+
+    handleNotificationPhoneChange(value){
+        this.setState({notificationPhone: value});
+    }
+
+    handleNotificationEmailChange(value){
+        this.setState({notificationEmail: value});
+    }
+
+    handleNotificationSendTimeChange(option){
+        this.setState({notificationSendTime: option.value});
+    }
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
     }
 
     render () {
@@ -934,12 +990,58 @@ export class ProgramSubscriptionForm extends React.Component {
                         <div className="ui sixteen wide column">
 
                 <div className="fluid field">
-                <KSSelect value={this.state.notificationSendMethod}
-                                            valueChange={this.handleNotificationSendMethodChange}
+                <KSSelect value={this.state.notificationMethod}
+                                            valueChange={this.handleNotificationMethodChange}
                                             label="How would you like your notifications sent?"
                                             isClearable={false}
                                             name="notificationSendMethod"
                                             options={notificationSendMethodOptions}
+                                            />
+
+                    </div></div>
+                    </div>
+
+
+                                { this.state.notificationMethod == "EMAIL" || this.state.notificationMethod == "EMAIL_AND_TEXT" ?
+
+                <div className="ui row">
+                            <div className="sixteen wide column">
+                <ValidatedInput
+                                      type="text"
+                                      name="title"
+                                      label="At what email would you like to receive notifications?"
+                                      id="id_title"
+                                      placeholder="Email Address"
+                                      value={this.state.notificationEmail}
+                                      initialValue={this.state.notificationEmail}
+                                      validators='"!isEmpty(str)"'
+                                      onChange={this.validate}
+                                      stateCallback={this.handleNotificationEmailChange}
+                                      serverErrors={this.getServerErrors("notificationEmail")}
+
+                                  />
+                                </div>
+                    </div>:<div></div>}
+
+                                                { this.state.notificationMethod == "TEXT" || this.state.notificationMethod == "EMAIL_AND_TEXT" ?
+
+                                <div className="ui row">
+                            <div className="sixteen wide column">
+                <Phone placeholder="At what mobile phone number would like to receive notification texts?"
+                       value={ this.state.notificationPhone }
+                       onChange={this.handleNotificationPhoneChange} />
+                                </div>
+                                    </div>:<div></div>}
+                <div className="ui row">
+                        <div className="ui sixteen wide column">
+
+                <div className="fluid field">
+                <KSSelect value={this.state.notificationSendTimeChange}
+                                            valueChange={this.handleNotificationSendTimeChange}
+                                            label="At what time would you like your notifications sent?"
+                                            isClearable={false}
+                                            name="notificationSendTime"
+                                            options={times}
                                             />
 
                     </div></div>
@@ -1103,57 +1205,7 @@ export class ProgramForm extends React.Component {
 
 
 
-    getImageEditSection() {
-        console.log(this.state.width)
 
-        if (this.props.isListNode) {
-            var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
-            var smallColumnWidth = "eight wide column"
-            }
-
-        else if (this.state.width > 800) {
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
-            var smallColumnWidth = "three wide column"
-        }
-
-        if (false) {
-            var theImage = this.state.image
-            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/images/", "");
-
-            return (
-                <div className="ui row">
-
-                    <div className={mediumColumnWidth}>
-                        <div className="field">
-                            <label htmlFor="id_image">Program's Poster Image:</label>
-                            <DropzoneS3Uploader filename={theFilename}
-                                                onFinish={this.handleFinishedUpload} {...uploaderProps} />
-
-
-                        </div>
-                    </div>
-                </div>
-            )
-
-        } else {
-            return (
-                <div className="ui row">
-
-                    <div className={mediumColumnWidth}>
-                        <div className="field">
-                            <label htmlFor="id_image">Program's Poster Image:</label>
-                            <DropzoneS3Uploader
-                                                onFinish={this.handleFinishedUpload} {...uploaderProps} />
-
-
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-    }
 
     handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;

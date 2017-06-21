@@ -20,6 +20,9 @@ export const rootReducer = (state = {}, action) => {
     return Object.assign({}, state, { user: action.user });
     break;
 
+    case 'SET_CURRENT_CONTACT':
+    return Object.assign({}, state, { currentContact: action.contact });
+    break;
   case 'SET_GOALS':
     return Object.assign({}, state, { goals: action.goals });
     break;
@@ -80,6 +83,13 @@ export const rootReducer = (state = {}, action) => {
       return Object.assign({}, state, { programs: thePrograms })
       break;
 
+    case 'ADD_MESSAGE':
+
+        var theThreads = state.messageThreads
+        theThreads[action.threadId].messages.push(action.message)
+      return Object.assign({}, state, { messageThreads: theThreads })
+      break;
+
     case 'UPDATE_STEP':
 
         var thePrograms = state.programs
@@ -100,8 +110,26 @@ export const rootReducer = (state = {}, action) => {
   case 'SET_CONTACTS':
     return Object.assign({}, state, { contacts: action.contacts });
     break;
+
+    case 'SET_PLANS':
+    return Object.assign({}, state, { plans: action.plans });
+    break;
+    case 'ADD_PLAN':
+       var thePlans = state.plans
+        thePlans[action.plan.id] = action.plan
+    return Object.assign({}, state, { plans: thePlans });
+    break;
+
+
+    case 'REMOVE_PLAN':
+      var initialPlans = state.plans
+
+       initialPlans[action.planId].isSubscribed = false
+
+    return Object.assign({}, state, { plans: initialPlans });
+    break;
   case 'SHOW_SIDEBAR':
-    return Object.assign({}, state, { isSidebarVisible: action.isSidebarVisible });
+    return Object.assign({}, state, { isSidebarVisible: action.visibility });
     break;
 
     case 'SET_MESSAGE_THREADS':
@@ -111,6 +139,22 @@ export const rootReducer = (state = {}, action) => {
     case 'SET_OPEN_THREADS':
     return Object.assign({}, state, { openThreads: action.threads });
     break;
+
+    case 'ADD_OPEN_THREAD':
+
+      var theOpenThreads = state.openThreads
+        theOpenThreads[action.thread.id] = action.thread
+      return Object.assign({}, state, { openThreads: theOpenThreads , })
+    break;
+
+    case 'CLOSE_OPEN_THREAD':
+      var theOpenThreads = state.openThreads
+       delete theOpenThreads[action.threadId]
+
+      return Object.assign({}, state,  {openThreads : theOpenThreads});
+      break;
+
+
 
     case 'ADD_THREAD':
 
@@ -126,18 +170,22 @@ export const rootReducer = (state = {}, action) => {
     return Object.assign({}, state, { currentThread: action.thread });
     break;
 
-    case 'SHOW_MESSAGE_WINDOW':
-    return Object.assign({}, state, { isMessageWindowVisible: action.isMessageWindowVisible });
+    case 'SET_MESSAGE_WINDOW_VISIBILITY':
+    return Object.assign({}, state, { isMessageWindowVisible: action.visibility });
     break;
 
 
 
 
+case 'LOGIN':
+    return Object.assign({}, state, { user: action.user });
+    break;
 
 
 
   case 'LOGOUT':
-    return Object.assign({}, state, { user: action.user });
+    state = undefined
+    return state;
     break;
   }
   return state;

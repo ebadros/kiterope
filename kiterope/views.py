@@ -29,6 +29,8 @@ from django.db.models import Q
 
 from rest_framework.permissions import AllowAny
 
+from kiterope.send_sms import sendMessage
+
 from kiterope.permissions import UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 
 
@@ -71,7 +73,6 @@ from opentok import OpenTok, MediaModes, OpenTokException, __version__
 from rest_framework.pagination import PageNumberPagination
 from copy import deepcopy
 
-from sendsms import api
 
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
 OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
@@ -111,6 +112,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(UserSerializer(request.user,
                                            context={'request': request}).data)
         return super(UserViewSet, self).retrieve(request, pk)
+
+
 
 
 
@@ -259,7 +262,6 @@ class MessageThreadChannelViewSet(viewsets.ModelViewSet):
 
 
 
-
 class MessageThreadViewSet(viewsets.ModelViewSet):
     model = MessageThread
     queryset = MessageThread.objects.all()
@@ -310,6 +312,7 @@ class MessageThreadViewSet(viewsets.ModelViewSet):
         except:
             try:
                 currentUser = self.request.user.id
+                print("currentUser is %s" % currentUser)
                 aQueryset = MessageThread.objects.filter(Q(sender=currentUser) | Q(receiver=currentUser))
 
             except:
@@ -360,6 +363,7 @@ class GoalViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def create(self, request, *args, **kwargs):
+        sendMessage('+13107703042','You have tasks that you need to achieve today...check them out here: http://127.0.0.1.8000/' )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -391,6 +395,7 @@ class GoalViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+
         self.create(request, *args, **kwargs)
 
 
@@ -495,11 +500,26 @@ class StepViewSet(viewsets.ModelViewSet):
 class PlanOccurrenceViewSet(viewsets.ModelViewSet):
     queryset = PlanOccurrence.objects.all()
     serializer_class = PlanOccurrenceSerializer
-    permission_classes = [IsOwnerOrNone]
+    permission_classes = [AllowAny]
     required_scopes = ['groups']
-    pagination_class = StandardResultsSetPagination
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        data = {i['id']: i for i in serializer.data}
+
+        return Response(data)
+
+
 
     def create(self, request, *args, **kwargs):
+        #print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

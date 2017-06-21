@@ -11,7 +11,6 @@ import json
 import datetime
 
 
-
 def makeSerializer(serializerName, source, many,read_only):
     return {
         'User': lambda: UserSerializer(source, many, read_only),
@@ -47,6 +46,7 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
     absoluteStartDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
     absoluteEndDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
+    updates = serializers.SerializerMethodField(required=False, read_only=True)
 
     def get_absoluteStartDateForCalendar(self,obj):
         #date_1 = datetime.datetime.strptime(obj.absoluteStartDate, "%y-%m-%d")
@@ -64,6 +64,12 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
     def get_programStartDate(self, obj):
         return obj.get_programStartDate()
 
+    def get_updates(self,obj):
+        serializer = UpdateSerializer(obj.get_updates(), many=True)
+        return serializer.data
+
+
+
     def get_senderName(self, obj):
         return obj.sender.profile.get_fullName()
 
@@ -76,7 +82,7 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Step
-        fields = ('id', 'program', 'image', 'absoluteStartDate', 'absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
+        fields = ('id', 'program', 'image', 'updates','absoluteStartDate', 'absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
 
 class KChannelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -241,12 +247,20 @@ class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'user',  )
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user',  )
 
 
     bio = serializers.CharField(max_length=2000, required=False)
     notificationChannel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    notificationChannelLabel = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_notificationChannelLabel(self, obj):
+        try:
+            return obj.get_notificationChannelLabel()
+        except:
+            return ""
+
 
 
 class ContactSerializer(serializers.HyperlinkedModelSerializer):
@@ -273,7 +287,7 @@ class KRMessageSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description', 'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -283,6 +297,8 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     cost = serializers.CharField(max_length=20)
     startDate = serializers.DateField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     #steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
     steps = serializers.SerializerMethodField(required=False, read_only=True)
 
@@ -356,13 +372,17 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = PlanOccurrence
-        fields=('id', 'program', 'goal', 'startDate', 'user', 'isSubscribed', )
+        fields=('id', 'program', 'goal', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
     #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
-    program = ProgramSerializer()
+    program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
+
     goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     isSubscribed = serializers.BooleanField()
+
+
+
 
 
 
@@ -452,7 +472,7 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
 class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MessageThread
-        fields = ('id', 'sender', 'latestMessage', 'receiver', 'senderName', 'senderPhoto','receiverName', 'receiverPhoto', 'labels', 'labelsList', 'channel', 'channelLabel')
+        fields = ('id', 'sender', 'latestMessage', 'receiver', 'senderName', 'messages','senderPhoto','receiverName', 'receiverPhoto', 'labels', 'labelsList', 'channel', 'channelLabel')
 
     receiver = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     sender = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
@@ -460,7 +480,7 @@ class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
     senderPhoto = serializers.SerializerMethodField()
     receiverName = serializers.SerializerMethodField()
     receiverPhoto = serializers.SerializerMethodField()
-    #messages = serializers.SerializerMethodField()
+    messages = serializers.SerializerMethodField()
 
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all())
     labelsList = serializers.SerializerMethodField(required=False,read_only=True)
@@ -498,6 +518,10 @@ class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_receiverPhoto(self, obj):
         return obj.receiver.profile.get_profilePhoto()
+
+    def get_messages(self,obj):
+        serializer = MessageSerializer(obj.get_messages(), many=True)
+        return serializer.data
 
 
 

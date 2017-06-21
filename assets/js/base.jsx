@@ -20,7 +20,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, removePlan, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -486,8 +486,13 @@ export class ViewEditDeleteItem extends React.Component {
 
 
              }
-                         this.showHideUIElements(this.props.currentView)
+         this.handleComponentDidMountSpecificActions()
 
+         this.showHideUIElements(this.props.currentView)
+
+
+         }
+         handleComponentDidMountSpecificActions() {
 
          }
 
@@ -526,10 +531,19 @@ export class ViewEditDeleteItem extends React.Component {
                 this.duplicateItem()
                 break;
 
+            case "Author":
+                this.goToAuthorPage()
+                break;
+
+            default:
+                break;
+
 
         }
 
     }
+
+
 
     duplicateItem = () => {
         var theUrl = this.props.apiUrl + this.props.id + "/duplicate";
@@ -603,9 +617,13 @@ export class ViewEditDeleteItem extends React.Component {
             })
         }
 
+    this.handleComponentWillReceivePropsSpecificActions(nextProps)
 
 
 
+    }
+
+    handleComponentWillReceivePropsSpecificActions = (nextProps) => {
 
     }
 
@@ -776,9 +794,6 @@ deleteItem = () => {
 
         )
     }
-
-
-
 
 }
 
@@ -963,8 +978,15 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              serverErrors:"",
              openModal:false,
              modalShouldClose:false,
+             userPlanOccurrenceId:"",
 
          }
+     }
+
+     goToAuthorPage() {
+
+         hashHistory.push("/profiles/" + this.state.id)
+
      }
 
      callDeleteReducer() {
@@ -972,14 +994,15 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
   }
 
-     componentDidMount () {
-         if (this.state.data != this.props.data) {
-          this.setState({
-              data: this.props.data
-          })
-      }
 
-     }
+
+     handleComponentDidMountSpecificActions() {
+         if (this.props.userPlanOccurrenceId) {
+             this.setState({userPlanOccurrenceId: this.props.userPlanOccurrenceId})
+         }
+
+         }
+
 
      reload = () => {
          this.props.reloadItem()
@@ -999,13 +1022,15 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
       }
   }
 
-  componentWillReceiveProps (nextProps) {
-      if (this.state.data != nextProps.data) {
-          this.setState({
-              data: nextProps.data
-          })
+
+
+  handleComponentWillReceivePropsSpecificActions = (nextProps) => {
+       if (this.state.userPlanOccurrenceId != nextProps.userPlanOccurrenceId) {
+          console.log("updating userPlanOccurrenceId")
+          this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
       }
-  }
+
+    }
 
 
 
@@ -1130,7 +1155,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
     handleModalClosed = () =>  {
         this.setState({
             signInOrSignUpModalFormIsOpen:false,
-        }, this.checkIfUser())
+        })
     }
 
     handleSubscribeClick = () => {
@@ -1162,37 +1187,41 @@ hideComponent = () => {
     }
 
     handleUnsubscribeClick = () => {
-        var theUrl = "api/planOccurrences/" + this.state.data.userPlanOccurrenceId + "/"
-        var planOccurrence = {
-            isSubscribed: false,
+        if (this.state.userPlanOccurrenceId) {
+            var theUrl = "api/planOccurrences/" + this.state.userPlanOccurrenceId + "/"
+            var planOccurrence = {
+                isSubscribed: false,
 
-        }
-        $.ajax({
-                 url: theUrl,
-                 dataType: 'json',
-                 type: 'PATCH',
-                 data: planOccurrence,
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
-                 },
-                 success: function (data) {
-                     console.log("success")
-                     this.state.data.isSubscribed = false
+            }
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: planOccurrence,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    console.log("success")
+                    this.state.data.isSubscribed = false
+                    store.dispatch(removePlan(this.state.userPlanOccurrenceId))
 
 
-                 }.bind(this),
-                 error: function (xhr, status, err) {
-                     console.error(theUrl, status, err.toString());
-                     //var serverErrors = xhr.responseJSON;
-                     //   this.setState({
-                     //       serverErrors:serverErrors,
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    //var serverErrors = xhr.responseJSON;
+                    //   this.setState({
+                    //       serverErrors:serverErrors,
                     //})
 
-                 }.bind(this)
-             });
-
+                }.bind(this)
+            });
+        }
 
     }
+
+
 
 
     render() {
@@ -1201,27 +1230,35 @@ hideComponent = () => {
         var detailView = this.getDetailView()
         var basicView = this.getBasicView()
         var editView = this.getEditView()
+
+
         if (this.state.data) {
             if (this.state.data.isSubscribed) {
                 var subscribeButton = <div className="ui purple bottom attached large button"
                                            onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
 
-            } else {
+            } else if (!this.state.data.isSubscribed) {
 
                 var subscribeButton = <div className="ui purple bottom attached large button"
                                            onClick={this.handleSubscribeClick}>Subscribe</div>
             }
-             if (this.props.storeRoot.user) {
-                if (this.state.data.author == this.props.storeRoot.user.id) {
-             subscribeButton = null
-        }}
+
+        }
+        if (this.props.storeRoot.user) {
+            if (this.state.data.author == this.props.storeRoot.user.id) {
+                subscribeButton = null
+            }
         }
 
 
 
 
 
+
+
+
         return (
+
             <div ref={`ref_programItem_${this.props.id}`} className="column">
                 <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
 
@@ -1232,7 +1269,8 @@ hideComponent = () => {
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
-              program={this.state.data} />
+              program={this.state.data}
+/>
 
                 <div className="ui segment noBottomMargin noTopMargin">
                     <div>{basicView}</div>
@@ -1426,6 +1464,7 @@ hideComponent = () => {
     }
 
 
+
     render() {
 
         var controlBar = this.getControlBar()
@@ -1443,7 +1482,8 @@ hideComponent = () => {
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
-              program={this.state.data} />
+              program={this.state.data}
+/>
 
                 <div className="ui segment noBottomMargin noTopMargin">
                     <div>{basicView}</div>
@@ -1524,7 +1564,6 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         }
 
         if (this.state.id != nextProps.id) {
-            console.log("updating id " + nextProps.id)
             this.setState({
                 id:nextProps.id,
             })
@@ -1538,16 +1577,22 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     handleClick = (callbackData) => {
-        switch(callbackData) {
+        switch (callbackData) {
             case("Add as Coach"):
                 this.addAsCoach()
                 break;
             case("Add as Client"):
                 this.addAsClient()
                 break;
+            default:
+                this.setState({
+                    currentView: callbackData
+                }, this.showHideUIElements(callbackData))
+                break;
 
         }
     }
+
 
     addAsCoach = () => {
         var theUrl = "api/contacts/"
@@ -1557,7 +1602,6 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             relationship: "coach",
             wasConfirmed:"sender",
         }
-        printObject(theContact)
         $.ajax({
                  url: theUrl,
                  dataType: 'json',
@@ -1572,7 +1616,6 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error("api/steps/", status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -1838,7 +1881,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
     getBasicView = () => {
         return (
-            <div ref="ref_basic">
+            <div ref="ref_basic" >
 
                 <StepBasicView data={this.state.data}
                                isListNode={this.props.isListNode}/>
@@ -1878,11 +1921,11 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
     }
 
-    // handleClick() {
-    //     if (this.props.id) {
-    //         hashHistory.push("/steps/" + this.props.id + "/updates")
-    //     }
-    // }
+     /*handleClick() {
+         if (this.props.id) {
+             hashHistory.push("/steps/" + this.props.id + "/updates")
+         }
+     }*/
 
     render() {
         var controlBar = this.getControlBar()
@@ -1897,7 +1940,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
 
                 <div className="ui segment noBottomMargin noTopMargin">
-                    <div onClick={this.handleClick}>{basicView}</div>
+                    <div >{basicView}</div>
                     {detailView}
 
                     <div className="sixteen wide row">

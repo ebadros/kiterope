@@ -31,7 +31,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            visible: this.props.storeRoot.gui.isSidebarVisible,
+            visible: false,
             user:"",
             view: "Switch to User View"
 

@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, reduxLogout, showSidebar, setContacts, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  reduxLogout, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -116,12 +116,12 @@ export class ReduxDataGetter extends React.Component {
     }
 
     componentDidMount = () => {
+        store.dispatch(setMessageWindowVisibility(false))
         this.loadUserData()
 
     }
 
     loadUserData() {
-        console.log("loadUserData")
         var theUrl =  'api/users/i'
         $.ajax({
             method: 'GET',
@@ -153,6 +153,7 @@ export class ReduxDataGetter extends React.Component {
         this.loadContactData()
         this.loadGoalData()
         this.loadStepOccurrenceData()
+        this.loadPlanData()
     }
 
 
@@ -163,7 +164,6 @@ export class ReduxDataGetter extends React.Component {
     }
 
     loadGoalData() {
-                console.log("loadGoalData")
 
         var theUrl = "api/goals/"
         $.ajax({
@@ -175,6 +175,29 @@ export class ReduxDataGetter extends React.Component {
             },
       success: function(data) {
                   store.dispatch(setGoals(data))
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+
+      }.bind(this),
+
+    });
+
+    }
+
+    loadPlanData() {
+
+        var theUrl = "api/planOccurrences/"
+        $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+                  store.dispatch(setPlans(data))
 
       }.bind(this),
       error: function(xhr, status, err) {
@@ -268,7 +291,7 @@ export class ReduxDataGetter extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
-          store.dispatch(setContacts(data))
+          this.organizeContacts(data)
 
       }.bind(this),
       error: function(xhr, status, err) {
@@ -277,6 +300,36 @@ export class ReduxDataGetter extends React.Component {
       }.bind(this),
 
     });
+
+
+
+    }
+
+    organizeContacts(theContactData) {
+        var theContacts = {}
+        if (this.props.storeRoot) {
+            if (this.props.storeRoot.user) {
+                for (var key in theContactData) {
+                    if (theContactData[key].receiver.id == this.props.storeRoot.user.id) {
+                        var theSender = theContactData[key].sender
+                        var theContactId = theSender.id
+                        theContacts[theContactId] = theSender
+
+                        //theContacts.push({theContactId: theContactData[key].sender})
+
+                    } else {
+                        var theReceiver = theContactData[key].receiver
+                        var theContactId = theReceiver.id
+                        var theContact = { theContactId: theReceiver}
+                        theContacts[theContactId] = theReceiver
+
+                    }
+                }
+                store.dispatch(setContacts(theContacts))
+
+
+            }
+        }
 
     }
 
@@ -296,6 +349,7 @@ export class StandardSetOfComponents extends React.Component {
         super(props);
         autobind(this);
         this.state = {
+            user:"",
             modalIsOpen:false,
             form:"SignIn",
             signInOrSignUpModalFormIsOpen:false,
@@ -303,6 +357,12 @@ export class StandardSetOfComponents extends React.Component {
 
         }
     }
+
+    componentDidMount () {
+        $(this.refs["ref_messageWindowContainer"]).hide()
+    }
+
+
 
     componentWillReceiveProps (nextProps) {
         if (this.state.signInOrSignUpModalFormIsOpen != nextProps.modalIsOpen) {
@@ -330,16 +390,37 @@ export class StandardSetOfComponents extends React.Component {
 
 
 
+
+
+
+
     render() {
-        if (!this.props.storeRoot.isMessageWindowVisible) {
-            //$(this.refs["ref_messageWindowContainer"]).hide()
+        if (this.props.storeRoot.gui.isMessageWindowVisible) {
+            $(this.refs["ref_messageWindowContainer"]).show()
+            $(this.refs["ref_messageRoundButton"]).hide()
+
+        } else {
+            $(this.refs["ref_messageWindowContainer"]).hide()
+            $(this.refs["ref_messageRoundButton"]).show()
+
+        }
+        var dataGetter
+        if (this.props.storeRoot) {
+            if (this.props.storeRoot.user)
+            {
+                dataGetter = <ReduxDataGetter />
+            }   else {
+                dataGetter = <div></div>
+            }
         }
         return (
 
             <div>
-                <ReduxDataGetter />
+                {dataGetter}
 
                 <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
+                <MessageButton />
+
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
             <Menubar shouldRefresh={this.state.refreshUser} /></div>
@@ -368,6 +449,7 @@ export class NotificationManager extends React.Component {
             this.connectToRoomWebsocket(nextProps.notificationRoomLabel)
 
         }
+
     }
     connectToRoomWebsocket(theRoomLabel) {
         var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications" + "/" + theRoomLabel);
@@ -395,7 +477,8 @@ export class NotificationManager extends React.Component {
 
     render() {
         return (
-            <div className="ui button item" onClick={this.handleNotificationClick} ><i className="large notification icon" style={{margin:0}}  /></div>
+
+            <div className="ui button item" onClick={this.handleNotificationClick} ><i className="large mail outline icon" style={{margin:0}}  /></div>
 
         )
     }
@@ -414,7 +497,7 @@ export class Menubar extends React.Component {
     }
 
     componentDidMount() {
-        this.loadUserData()
+        //this.loadUserData()
     }
 
     componentWillReceiveProps = (nextProps) => {
@@ -520,7 +603,6 @@ export class Menubar extends React.Component {
 
         } else {
             var loginUI = <div className="right menu">
-                <NotificationManager notificationRoomLabel={this.props.storeRoot.user.notificationRoom} />
                 <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick} ><i className="large sidebar icon" style={{margin:0}}  /></div>
 
                   <div className="ui simple dropdown item">
@@ -536,7 +618,6 @@ export class Menubar extends React.Component {
 
         return (
 
-
              <div className="ui fixed top inverted blue menu onTop" style={{marginTop:0}}>
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
@@ -548,6 +629,40 @@ export class Menubar extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class MessageButton extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            modalIsOpen:false,
+            form:"SignIn"
+        }
+    }
+
+    showMessageWindow() {
+        store.dispatch(setMessageWindowVisibility(true))
+        $(this.refs["ref_messageRoundButton"]).hide()
+
+    }
+
+    render () {
+        if (this.props.storeRoot.user) {
+            return (
+                <div ref="ref_messageRoundButton"
+                     onClick={this.showMessageWindow}>{this.props.storeRoot.gui.openThreads ?
+                    <div className="notificationSignal"/> : <div></div>}
+                    <div className="floatingRoundButton"><i className=" big mail outline inverted icon"
+                                                            style={{marginLeft: 19, marginTop: 20}}/></div>
+                </div>
+            )
+        }
+        else {
+            return (<div></div>)
+        }
+    }
+
+}
 @connect(mapStateToProps, mapDispatchToProps)
 export class SignInOrSignUpModalForm extends React.Component {
     constructor(props) {

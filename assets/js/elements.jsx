@@ -145,12 +145,12 @@ export class ItemMenu extends React.Component {
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
                       <div className="menu">
 
-                          <div className="ui item">
+                          {/* <div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Goals" icon="goal" background="Light" click={this.handleClick} />
                               </div>
                           <div className="ui item">
                             <IconLabelCombo size="extramini" orientation="left" text="Steps" icon="step" background="Light" click={this.handleClick} />
-                            </div>
+                            </div>                    */}
                           <div className="ui item">
                             <IconLabelCombo size="extramini" orientation="left" text="Author" icon="author" background="Light" click={this.handleClick} />
                             </div>

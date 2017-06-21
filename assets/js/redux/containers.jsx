@@ -13,14 +13,18 @@ const mapStateToProps = (state) => {
       storeRoot:{
         user:state.user,
         goals:state.goals,
+        plans:state.plans,
         contacts:state.contacts,
         programs:state.programs,
         stepOccurrences:state.stepOccurrences,
-        openThreads: state.openThreads,
+        messageThreads:state.messageThreads,
         gui: {
           isSidebarVisible:state.isSidebarVisible,
           isMessageWindowVisible: state.isMessageWindowVisible,
           currentThread: state.currentThread,
+          openThreads: state.openThreads,
+          currentContact:state.currentContact
+
 
         }
 
@@ -34,6 +38,10 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setCurrentUser: (theUser) => {
       dispatch(setCurrentUser(theUser))
+    },
+
+    setCurrentContact: (theContact) => {
+      dispatch(setCurrentContact(theContact))
     },
     setGoals: (theGoals) => {
       dispatch(setGoals(theGoals))
@@ -50,6 +58,16 @@ const mapDispatchToProps = (dispatch) => {
     setContacts: (theContacts) => {
       dispatch(setContacts(theContacts))
     },
+    setPlans: (thePlans) => {
+      dispatch(setPlans(thePlans))
+    },
+    addPlan: (thePlan) => {
+      dispatch(addPlan(thePlan))
+    },
+    removePlan: (thePlanId) => {
+      dispatch(removePlan(thePlanId))
+    },
+
 
     setPrograms: (thePrograms) => {
       dispatch(setPrograms(thePrograms))
@@ -80,6 +98,11 @@ const mapDispatchToProps = (dispatch) => {
       reduxLogout: () => {
       dispatch(reduxLogout())
     },
+
+    reduxLogin: () => {
+      dispatch(reduxLogin())
+    },
+
     showSidebar: (isSidebarVisible) => {
       dispatch(showSidebar(isSidebarVisible))
     },
@@ -93,15 +116,30 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(setOpenThreads(theOpenThreads))
     },
 
+    addOpenThread: (theThread) => {
+      dispatch(addOpenThread(theThread))
+    },
+
+    closeOpenThread: (theThreadId) => {
+      dispatch(closeOpenThread(theThreadId))
+    },
+
     addThread: (theThread) => {
       dispatch(addThread(theThread))
     },
+
+    addMessage: (theThreadId, theMessage) => {
+      dispatch(addMessage(theThreadId, theMessage))
+    },
+
     setCurrentThread: (theCurrentThread) => {
       dispatch(setCurrentThread(theCurrentThread))
     },
-    showMessageWindow: (isMessageWindowVisible) => {
-      dispatch(showMessageWindow(isMessageWindowVisible))
+    setMessageWindowVisibility: (isMessageWindowVisible) => {
+      dispatch(setMessageWindowVisibility(isMessageWindowVisible))
     }
+
+
 
 
   }

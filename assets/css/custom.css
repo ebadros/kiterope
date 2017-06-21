@@ -9,7 +9,9 @@
     width:450px;
 }
 
-
+html {
+    z-index:1;
+}
 
 .google {
     color:black;
@@ -898,6 +900,18 @@ img.listNodeImage {
 
 .contactItem {
     padding:.8rem;
+    cursor:pointer;
+}
+
+
+
+.messageWindowCloseIcon {
+    cursor:pointer;
+    color: white;
+    padding-left:10px;
+
+
+
 }
 
 .messageWindowMenuBarItemIcon {
@@ -1056,9 +1070,8 @@ div.messageLabelMenuItem:hover {
 .customFooter {
     background-color: black;
     color:white;
-    height:100px;
     text-align:center;
-    margin-bottom:-20px;
+    margin-bottom:-120px;
 
 }
 
@@ -1066,7 +1079,7 @@ div.messageLabelMenuItem:hover {
     text-decoration:none;
     margin:0;
     color:white;
-    padding-top:50px;
+    padding-bottom:10px;
 
 }
 .customFooter a {
@@ -1086,4 +1099,32 @@ div.messageLabelMenuItem:hover {
     font-size:2em;
     font-style:italic;
     color:gray;
+}
+
+.floatingRoundButton{
+      display:block;
+      height: 70px;
+      width: 70px;
+        z-index:100;
+
+    background-color:#2185D0;
+      border-radius: 50%;
+      border: 0;
+    position:fixed;
+    right:40px;
+    bottom:40px;
+    box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5) ;
+    cursor:pointer;
+
+}
+
+.notificationSignal {
+    background-color: red;
+    height:10px;
+    width:10px;
+    bottom:80px;
+    right:55px;
+    border-radius:50%;
+    position:fixed;
+    z-index:101;
 }

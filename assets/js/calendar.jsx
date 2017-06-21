@@ -560,7 +560,7 @@ export class StepCalendarComponent extends React.Component {
 
 
 
-                                        <UpdatesList stepId={this.state.id}/>
+                                        <UpdatesList stepId={this.state.id} updates={this.state.updates}/>
 
                     <div className="ui three column grid">
                                             <div className="ui row">&nbsp;</div>

@@ -465,7 +465,7 @@ export class GoalDetailPage extends React.Component {
                     //this.setState({data: data});
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    console.error(this.props.url, status, err.toString());
+            var serverErrors = xhr.responseJSON;
                     this.setState({
                 serverErrors:serverErrors,
             })
@@ -799,7 +799,7 @@ export class GoalForm extends React.Component {
             plans: [],
             editable:true,
             data:"",
-            serverErrors:""
+            serverErrors: ""
         }
     }
 
@@ -891,6 +891,14 @@ export class GoalForm extends React.Component {
 
     handleCancelClicked() {
         this.props.cancelClicked()
+    }
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
     }
 
 
@@ -993,7 +1001,7 @@ export class GoalForm extends React.Component {
                                 onChange={this.validate}
                                 stateCallback={this.handleTitleChange}
                                 isDisabled={!this.state.editable}
-                                serverErrors={this.state.serverErrors.title}
+                                serverErrors={this.getServerErrors("title")}
                             />
 
                         </div>
@@ -1014,7 +1022,7 @@ export class GoalForm extends React.Component {
                                 stateCallback={this.handleWhyChange}
                                 rows={3}
                                 isDisabled={!this.state.editable}
-                                serverErrors={this.state.serverErrors.why}
+                                serverErrors={this.getServerErrors("why")}
 
 
                             />
@@ -1038,7 +1046,7 @@ export class GoalForm extends React.Component {
                                 stateCallback={this.handleDescriptionChange}
                                 rows={3}
                                 isDisabled={!this.state.editable}
-                                serverErrors={this.state.serverErrors.description}
+                                serverErrors={this.getServerErrors("description")}
 
 
                             />
@@ -1086,7 +1094,7 @@ export class GoalForm extends React.Component {
                                 onChange={this.validate}
                                 stateCallback={this.handleMetricChange}
                                 isDisabled={!this.state.editable}
-                                serverErrors={this.state.serverErrors.metric}
+                                serverErrors={this.getServerErrors("metric")}
 
 
                             />

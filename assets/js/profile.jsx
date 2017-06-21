@@ -38,6 +38,7 @@ import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import Measure from 'react-measure'
 
 
 function printObject(o) {
@@ -282,6 +283,8 @@ export class ProfileForm extends React.Component {
             notificationChannel:"",
             editable:false,
             data:"",
+            serverErrors: ""
+
         }
     }
 
@@ -308,6 +311,11 @@ export class ProfileForm extends React.Component {
 
 
 
+        }
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors:nextProps.serverErrors
+            })
         }
 
     }
@@ -347,9 +355,9 @@ export class ProfileForm extends React.Component {
             } else {
 
 
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
-            var smallColumnWidth = "three wide column"
+            var wideColumnWidth = "sixteen wide column"
+            var mediumColumnWidth = "eight wide column"
+            var smallColumnWidth = "four wide column"
         }
                 if (this.state.bio == null) {
                     return ("")
@@ -379,34 +387,7 @@ export class ProfileForm extends React.Component {
 
 
 
-    getImageEditSection() {
 
-        if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
-            var smallColumnWidth = "eight wide column"
-
-            } else {
-
-
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
-            var smallColumnWidth = "three wide column"
-        }
-            var theImage = s3ImageUrl + this.state.profilePhoto
-            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com/", "");
-
-            return (
-                <div className="ui row">
-
-                    <div className={mediumColumnWidth}>
-                       <ImageUploader imageReturned={this.handleImageChange}
-                                       label="Select an image that will help motivate you." defaultImage={imageUrl}/>
-                    </div>
-                </div>
-            )
-
-        }
 
 
     handleFinishedUpload (value) {
@@ -462,6 +443,14 @@ export class ProfileForm extends React.Component {
 
     }
 
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
     handleSubmit(e) {
         e.preventDefault();
         this.checkIfUser()
@@ -512,7 +501,13 @@ if (this.state.user) {
                 var buttonText = "Create"
             }
 
-            var imageUrl = s3ImageUrl + this.state.profilePhoto
+            if (this.state.profilePhoto) {
+                var imageUrl = this.state.profilePhoto
+
+
+            } else {
+                var imageUrl = "user.svg"
+            }
 
             var descriptionEditor = this.getDescriptionEditor()
 
@@ -524,9 +519,9 @@ if (this.state.user) {
             } else {
 
 
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
-            var smallColumnWidth = "three wide column"
+            var wideColumnWidth = "sixteen wide column"
+            var mediumColumnWidth = "eight wide column"
+            var smallColumnWidth = "four wide column"
         }
           return (
               <div className="ui page container footerAtBottom">
@@ -535,9 +530,13 @@ if (this.state.user) {
 
 
                       <div className="ui three column grid">
+                                                    <div className="ui row"> <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-                          <ImageUploader imageReturned={this.handleImageChange}
+<div className={smallColumnWidth}>
+
+                          <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
                                          label="Select an image that will help motivate you." defaultImage={imageUrl}/>
+    </div></Measure></div>
 
 
                           <div className="ui row">
@@ -554,6 +553,7 @@ if (this.state.user) {
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleFirstNameChange}
+                                      serverErrors={this.getServerErrors("firstName")}
 
                                   />
                                   <ValidatedInput
@@ -567,6 +567,8 @@ if (this.state.user) {
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleLastNameChange}
+                                      serverErrors={this.getServerErrors("lastName")}
+
 
                                   />
  </div>
@@ -589,6 +591,8 @@ if (this.state.user) {
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleZipCodeChange}
+                                      serverErrors={this.getServerErrors("zipCode")}
+
 
                                   />
 
@@ -898,14 +902,21 @@ export class ProfileDetailPage extends React.Component {
           case ("kiterope"):
               hashHistory.push("/goalEntry")
               break;
+
       }
+  }
+
+  handleCloseModalClicked () {
+      this.setState({
+          openModal:false
+      })
   }
 
     render () {
 
         return (
             <div>
-                <ChoiceModal  click={this.handleModalClick} modalIsOpen={this.state.openModal} header="Add a plan" description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you." buttons={[
+                <ChoiceModal  click={this.handleModalClick} closeModalClicked={this.handleCloseModalClicked} modalIsOpen={this.state.openModal} header="Add a plan" description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you." buttons={[
                             {text:"Use an existing plan", action:"existing", color:"purple"},
                             {text:"Create your own plan", action:"create", color:"" },
                             {text:"Have Kiterope build you a plan", action:"kiterope", color:""},
@@ -930,7 +941,7 @@ export class ProfileDetailPage extends React.Component {
                                                    currentView="Basic"/>
                         <div>&nbsp;</div>
                         <div>&nbsp;</div>
-                <FormHeaderWithActionButton formActionClick={this.handleFormActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
+                <FormHeaderWithActionButton actionClick={this.handleFormActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
         <div ref="id_whichPlanForm">
             </div>
 
@@ -1212,29 +1223,17 @@ export class ProfileList extends React.Component {
 
         var profileList = values.map((profile) => {
 
-            if (profile.sender.id != this.state.user.profileId) {
             return (
-                    <ProfileViewEditDeleteItem key={profile.sender.id}
+                    <ProfileViewEditDeleteItem key={profile.id}
                                             isListNode={true}
                                             showCloseButton={false}
                                             apiUrl="api/profiles/"
-                                            id={profile.sender.id}
-                                            data={profile.sender}
+                                            id={profile.id}
+                                            data={profile}
                                             currentView="Basic"/>
 
 
-)} else {
-                return (
-                    <ProfileViewEditDeleteItem key={profile.receiver.id}
-                                            isListNode={true}
-                                            showCloseButton={false}
-                                            apiUrl="api/profiles/"
-                                            id={profile.receiver.id}
-                                            data={profile.receiver}
-                                            currentView="Basic"/>
-                )
-
-            }
+)
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })

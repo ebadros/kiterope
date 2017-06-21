@@ -1597,7 +1597,7 @@ var StepObjectEditForm = React.createClass({
 
 
                         </div>
-                    <UpdatesList stepId={this.state.id}/>
+                    <UpdatesList stepId={this.state.id} updates={this.state.updates}/>
 
 
 
