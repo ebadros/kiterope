@@ -185,7 +185,7 @@ case 'LOGIN':
 
   case 'LOGOUT':
     state = undefined
-    return state;
+    return state
     break;
   }
   return state;

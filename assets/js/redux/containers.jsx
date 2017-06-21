@@ -9,6 +9,7 @@ import { setCurrentUser, showSidebar, setOpenThreads, setCurrentThreads, reduxLo
 
 
 const mapStateToProps = (state) => {
+  if (state != undefined) {
   return {
       storeRoot:{
         user:state.user,
@@ -30,6 +31,13 @@ const mapStateToProps = (state) => {
 
 
 }
+  }}
+  else {
+    return {
+      storeRoot:{
+        gui:{isSidebarVisible:false,
+          isMessageWindowVisible: false}}
+    }
   }
 
 }

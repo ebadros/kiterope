@@ -551,10 +551,12 @@ export class Menubar extends React.Component {
     }
 
     logoutHandler() {
-        auth.logout()
-        store.dispatch(reduxLogout({}))
-
         hashHistory.push('/search/')
+
+        store.dispatch(reduxLogout())
+                auth.logout()
+
+
 
     }
 
@@ -1031,7 +1033,6 @@ export class LoginForm extends React.Component {
   }
 
   actionAfterLogin = () => {
-      console.log("login form action after login")
 
       var theUrl = '/api/users/i'
         $.ajax({

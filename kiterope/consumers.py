@@ -44,7 +44,7 @@ def notification_consumer(message):
         message=message.content['message'],
     )
     # Broadcast to listening sockets
-    print("broadcasting to chat-%s" % theRoomLabel)
+    #print("broadcasting to chat-%s" % theRoomLabel)
     Group("chat-%s" % theRoomLabel).send({
         "text": message.content['message'],
     })
@@ -53,7 +53,6 @@ def notification_consumer(message):
 @channel_session
 @rest_token_user
 def ws_connect(message):
-    print("ws_connect")
 
 
 
@@ -64,13 +63,13 @@ def ws_connect(message):
     try:
         #
         theKChannel = KChannel.objects.get(label=roomLabel)
-        print("theKChannel %s" % theKChannel.permission)
+        #print("theKChannel %s" % theKChannel.permission)
         if theKChannel.permission == "ONLYRECEIVER_ANYSENDER":
             print("message User id is %s" % message.user.id)
 
             message.content['room'] = roomLabel
             message.channel_session['user'] = message.user.id
-            print("*******************************")
+            #print("*******************************")
 
 
             Group("chat-%s" % roomLabel).add(message.reply_channel)

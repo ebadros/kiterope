@@ -48,13 +48,15 @@ def rest_auth(func):
             for authenticator in authenticators:
                 try:
                     user_auth_tuple = authenticator.authenticate(request)
+
+                    if user_auth_tuple is not None:
+                        message._authenticator = authenticator
+                        user, auth = user_auth_tuple
+                        break
                 except AuthenticationFailed:
                     pass
 
-                if user_auth_tuple is not None:
-                    message._authenticator = authenticator
-                    user, auth = user_auth_tuple
-                    break
+
         message.user, message.auth = user, auth
         # Make sure there's a session key
         # Run the consumer
