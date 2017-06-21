@@ -55,7 +55,6 @@ router.register(r'messageThreads/labels/(?P<label_id>\w+)', views.MessageThreadV
 
 router.register(r'messageThreads', views.MessageThreadViewSet, base_name='MessageThread')
 
-router.register(r'sms', view.SMSViewSet, base_name='MessageThread')
 router.register(r'planOccurrences', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
 
 router.register(r'messages/(?P<sender_id>\w+)/(?P<receiver_id>\w+)', views.MessageViewSet, base_name='Message')

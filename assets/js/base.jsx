@@ -1026,7 +1026,6 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
   handleComponentWillReceivePropsSpecificActions = (nextProps) => {
        if (this.state.userPlanOccurrenceId != nextProps.userPlanOccurrenceId) {
-          console.log("updating userPlanOccurrenceId")
           this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
       }
 
