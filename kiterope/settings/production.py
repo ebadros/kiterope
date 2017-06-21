@@ -15,7 +15,9 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join("/opt/python/ondeck/app/assets/"),
-#    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
+    os.path.join("/opt/python/current/app/assets/"),
+
+    #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
 import elasticsearch
