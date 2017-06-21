@@ -1,4 +1,4 @@
-from celery import shared_task, periodic_task
+'''from celery import shared_task, periodic_task
 
 
 from .celery_setup import app
@@ -220,3 +220,4 @@ def updateOccurrences(currentUser, periodRangeStart, periodRangeEnd):
 
     except:
         pass
+'''
