@@ -2579,6 +2579,46 @@ export class ContactListPane extends React.Component {
         //this.props.newThread(contact)
     }
 
+    createNewMessageThread(){
+
+        var theUrl = "api/messageThreads/"
+
+    $.ajax({
+        url: theUrl ,
+        dataType: 'json',
+        headers: {
+            'Authorization': 'Token ' + localStorage.token
+        },
+
+        type: 'POST',
+        data: {
+            receiver: this.state.currentThreadContact.id,
+            sender: this.state.user.id,
+            channel: this.state.currentMessageThreadChannel.id
+
+        },
+
+        success: function (messageThreadData) {
+            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
+            store.dispatch(addMessageThread(messageThreadData))
+            store.dispatch(setCurrentThread(messageThreadData))
+
+            this.setState({
+                //openThreads: this.state.openThreads.concat({messageThreadData}),
+                currentThread: messageThreadData,
+                currentReceiverNotificationChannelLabel: "",
+                currentMessageThreadChannel: "",
+                currentReceiver: "",
+            })
+                                                            //store.dispatch(setOpenThreads(this.state.openThreads))
+
+        }.bind(this),
+        error: function (xhr, status, err) {
+            console.error(theUrl, status, err.toString());
+        }.bind(this)
+    });
+
+
     connectToThread = (channelId) => {
         var theUrl = "api/channels/" + channelId + "/messageThread"
             $.ajax({
