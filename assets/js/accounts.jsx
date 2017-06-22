@@ -395,11 +395,11 @@ export class StandardSetOfComponents extends React.Component {
 
 
     render() {
-        if (this.props.storeRoot.gui.isMessageWindowVisible) {
+        if (this.props.storeRoot.gui.isMessageWindowVisible == true) {
             $(this.refs["ref_messageWindowContainer"]).show()
             $(this.refs["ref_messageRoundButton"]).hide()
 
-        } else {
+        } else if (this.props.storeRoot.gui.isMessageWindowVisible == false) {
             $(this.refs["ref_messageWindowContainer"]).hide()
             $(this.refs["ref_messageRoundButton"]).show()
 
@@ -644,15 +644,22 @@ export class MessageButton extends React.Component {
 
     showMessageWindow() {
         store.dispatch(setMessageWindowVisibility(true))
-        $(this.refs["ref_messageRoundButton"]).hide()
 
     }
 
     render () {
-        if (this.props.storeRoot.user) {
+        if (this.props.storeRoot.gui.isMessageWindowVisible) {
+                    $(this.refs["ref_messageRoundButton"]).hide()
+
+
+        } else {
+                    $(this.refs["ref_messageRoundButton"]).show()
+
+        }
+        if (this.props.storeRoot.user){
             return (
-                <div ref="ref_messageRoundButton"
-                     onClick={this.showMessageWindow}>{this.props.storeRoot.gui.openThreads ?
+                <div ref="ref_messageRoundButton" onClick={this.showMessageWindow}>
+                    {this.props.storeRoot.gui.openThreads ?
                     <div className="notificationSignal"/> : <div></div>}
                     <div className="floatingRoundButton"><i className=" big mail outline inverted icon"
                                                             style={{marginLeft: 19, marginTop: 20}}/></div>

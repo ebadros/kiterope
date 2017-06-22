@@ -11,7 +11,9 @@ module.exports = {
 
   output: {
       path: path.resolve('./assets/bundles/'),
-      filename: "[name]-[hash].js",
+      filename: "main_bundle.js",
+
+      //filename: "[name]-[hash].js",
   },
 
 
