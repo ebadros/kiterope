@@ -1150,8 +1150,8 @@ export class ProfileList extends React.Component {
     }
 
     componentDidMount () {
-        this.checkIfUser()
-        this.loadFromServer()
+        //this.checkIfUser()
+        //this.loadFromServer()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -1163,7 +1163,9 @@ export class ProfileList extends React.Component {
         }
     }
 
-    checkIfUser() {
+/*
+checkIfUser() {
+ */
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',
@@ -1204,7 +1206,7 @@ export class ProfileList extends React.Component {
       }.bind(this),
 
     });
-  }
+  }*/
 
 
 
