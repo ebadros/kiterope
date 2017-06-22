@@ -1486,6 +1486,14 @@ export class JoinForm extends React.Component {
       hashHistory.push("/account/login/")
   }
 
+  getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
   render() {
 
       return (
@@ -1512,7 +1520,7 @@ export class JoinForm extends React.Component {
                                           validators='"!isEmpty(str)"'
                                           onChange={this.validate}
                                           stateCallback={this.handleFirstNameChange}
-                                          serverErrors={this.state.serverErrors.first_name}
+                                          serverErrors={this.getServerErrors("first_name")}
 
                                       />
                                         </div>
@@ -1530,7 +1538,7 @@ export class JoinForm extends React.Component {
                                           validators='"!isEmpty(str)"'
                                           onChange={this.validate}
                                           stateCallback={this.handleLastNameChange}
-                                          serverErrors={this.state.serverErrors.last_name}
+                                          serverErrors={this.getServerErrors("last_name")}
 
                                       />
                                         </div>
@@ -1548,7 +1556,7 @@ export class JoinForm extends React.Component {
                                           validators='"isEmail(str, { allow_display_name: false, require_display_name: false, allow_utf8_local_part: true, require_tld: false })"'
                                           onChange={this.validate}
                                           stateCallback={this.handleEmailChange}
-                                          serverErrors={this.state.serverErrors.email}
+                                          serverErrors={this.getServerErrors("email")}
 
                                       />
                                       <ValidatedInput
@@ -1562,7 +1570,7 @@ export class JoinForm extends React.Component {
                                           validators='"!isEmpty(str)"'
                                           onChange={this.validate}
                                           stateCallback={this.handlePassword1Change}
-                                          serverErrors={this.state.serverErrors.password1}
+                                          serverErrors={this.getServerErrors("password1")}
 
                                       />
 
