@@ -1165,7 +1165,7 @@ export class ProfileList extends React.Component {
 
 /*
 checkIfUser() {
- */
+
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',
