@@ -38,7 +38,7 @@ import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent } from './calendar'
-var UpdatesList = require('./update');
+import { UpdatesList } from './update'
 var ReconnectingWebSocket = require('reconnecting-websocket');
 import Websocket from 'react-websocket';
 
@@ -53,9 +53,9 @@ const websocketOptions = {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1500,
     reconnectionDelayGrowFactor: 1.3,
-    connectionTimeout: 4000,
-    maxRetries: 5,
-    debug: false,
+    connectionTimeout: 1000,
+    maxRetries: 3,
+    debug: true,
 };
 
 
@@ -505,6 +505,10 @@ export class MessagePage extends React.Component {
         var array = this.state.openThreads.filter(function(item) {
             return item.id !== e
         })
+        this.state.messageThreads[e].websocket.close(code = 1000, reason = '', {keepClosed: true, })
+        this.state.messageThreads[e].websocket = undefined;
+
+
         this.setState({
             openThreads: array
         }, this.updateCurrentThread)
@@ -573,7 +577,6 @@ export class MessagePage extends React.Component {
 
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
-        console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
         var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
@@ -587,8 +590,7 @@ export class MessagePage extends React.Component {
         }
 
         receiverNotificationWebsocket.addEventListener('open', () => {
-                                     receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
-                    console.log("messageWasSent")
+            receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
 
 
         });

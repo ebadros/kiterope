@@ -1,39 +1,3 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var $  = require('jquery');
-global.rsui = require('react-semantic-ui');
-var forms = require('newforms');
-import autobind from 'class-autobind'
-import DatePicker  from 'react-datepicker';
-import moment from 'moment';
-import Pagination from "react-js-pagination";
-import Select from 'react-select'
-import TinyMCE from 'react-tinymce';
-import TinyMCEInput from 'react-tinymce-input';
-import CurrencyInput from 'react-currency-input';
-import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
-import { Textfit } from 'react-textfit';
-import ShowMore from 'react-show-more';
-import ScrollArea from 'react-scrollbar'
-import Rnd from 'react-rnd';
-var Modal = require('react-modal');
-var Datetime = require('react-datetime');
-import Dropzone from 'react-dropzone';
-import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
-import BigCalendar from 'react-big-calendar';
-var classNames = require('classnames');
-import validator from 'validator';
-require('react-datepicker/dist/react-datepicker.css');
-import 'react-select/dist/react-select.css';
-
-import {ImageUploader,PlanForm2,ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
-import { PlanHeader, StepList , SimpleStepForm} from './step';
-import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
-import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent } from './calendar'
-var UpdatesList = require('./update');
-
 export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
 export const theServer = 'https://127.0.0.1:8000/';
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
@@ -283,15 +247,5 @@ function printObject(o) {
 
 
 
-module.exports = { React, ReactDOM, $, forms, ImageUploader, PlanForm2,
-    PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage,
-    PlanHeader, StepList , SimpleStepForm,
-    Router, Route, Link, browserHistory, hashHistory, Modal, ChoiceModal,
-    Menubar, StandardSetOfComponents, ErrorReporter, autobind, customModalStyles,
-    ValidatedInput, DatePicker, moment, Pagination, Select, TinyMCE, TinyMCEInput,
-    CurrencyInput, IconLabelCombo, ClippedImage, Textfit, ShowMore, ScrollArea, theServer,
-    s3IconUrl, s3ImageUrl, Rnd, ContextualMenuItem, ChoiceModalButtonsList,
-    frequencyOptions, programScheduleLengths, timeCommitmentOptions,
-    costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
-    Datetime, Dropzone, DropzoneS3Uploader, BigCalendar, ViewEditDeleteItem, StepViewEditDeleteItem,
+module.exports = {  theServer, s3IconUrl, s3ImageUrl, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain }

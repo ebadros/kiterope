@@ -36,8 +36,11 @@ import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
-import { Provider, connect, store, dispatch } from 'react-redux'
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
 
 
 import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
@@ -53,6 +56,7 @@ function printObject(o) {
   }
   alert(out);
 }
+
 export class StepOccurrenceList extends React.Component {
     constructor(props) {
         super(props)
@@ -64,8 +68,8 @@ export class StepOccurrenceList extends React.Component {
         }
     }
 
-
     componentDidMount() {
+        console.log("StepOccurrenceList")
         this.setState({data: this.props.data})
 
 
@@ -78,9 +82,7 @@ export class StepOccurrenceList extends React.Component {
     }
 
     render() {
-
-        if (false ) {
-                        console.log("there are steps")
+        if ((this.state.data != undefined) && (this.state.data.length != 0 )){
 
             var objectNodes = this.state.data.map(function (objectData) {
 

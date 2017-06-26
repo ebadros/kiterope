@@ -5,7 +5,7 @@ var $ = require('jquery');
 var $ui = require('jquery-ui');
 
 var ObjectCreationPage = require('./plan');
-var DailyList = require('./daily');
+import { DailyList } from './daily'
 import {LoginPage, JoinPage, PasswordResetPage, PasswordConfirmPage, PasswordConfirmForm} from './accounts'
 import {App} from './app'
 import {ProfileViewPage, ProfileViewAndEditPage, ProfileListPage, ProfileDetailPage} from './profile'
@@ -26,7 +26,7 @@ import {Router, Route, Link, hashHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 
 
-var auth = require('./auth')
+import auth from './auth'
 
 import {
     theServer,
@@ -55,13 +55,19 @@ function requireAuth(nextState, replace) {
 }
 
 
+
+
+
+
 ReactDOM.render((
     <Provider store={store}>
 
 
         <Router history={hashHistory}>
             <div>
-                <Route path="/" component={SplashPage}/>
+                <Route path="/" component={ SplashPage }  />
+                <Route path="/daily" component={DailyList}
+                       onEnter={requireAuth}/>
 
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
                 <Route path="/account/login" component={ LoginPage }/>

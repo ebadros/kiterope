@@ -225,7 +225,7 @@ class UpdateOccurrenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UpdateOccurrence
-        field = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
+        fields = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
 
 
 class ContactListingField(serializers.RelatedField):

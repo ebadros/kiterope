@@ -76,7 +76,12 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
 class IsOwnerOrNone(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        if obj.user == request.user :
+            print("user owns object")
+            return True
+        else:
+            return False
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """

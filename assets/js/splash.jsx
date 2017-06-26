@@ -1,55 +1,37 @@
 var React = require('react');
 var $  = require('jquery');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
-var DailyList = require('./daily');
-var SearchPage = require('./search')
+import {DailyList } from './daily'
+import {SearchPage} from './search'
 import autobind from 'class-autobind'
 import moment from 'moment';
 import { Menubar } from './accounts'
-
-
-
-
+import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { StandardSetOfComponents, ErrorReporter } from './accounts'
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
-
-
-function printObject(o) {
-  var out = '';
-  for (var p in o) {
-    out += p + ': ' + o[p] + '\n';
-  }
-  alert(out);
-}
-
-
 import { Provider, connect, dispatch } from 'react-redux'
-
 import  {store} from "./redux/store";
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class SplashPage extends React.Component {
-    constructor (props) {
+    constructor(props) {
         super(props)
         autobind(this)
-        this.state  = {
-            authenticated:false,
-            user:true
+        this.state = {
+            user: ""
         }
 
     }
 
-    componentDidMount () {
+    componentDidMount() {
         this.checkIfUser()
-
-       //this.loadObjectsFromServer()
     }
 
-
-
     checkIfUser() {
+        console.log("check if user")
         var theUrl = 'api/users/i/'
         $.ajax({
             method: 'GET',
@@ -58,67 +40,38 @@ export class SplashPage extends React.Component {
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
-            success: function(theUser) {
+            success: function (theUser) {
                 this.setState({
-                    user:theUser
+                    user: theUser
                 })
-                this.props.setCurrentUser(theUser)
+                store.dispatch(setCurrentUser(theUser))
+                hashHistory.push("/daily/")
+
             }.bind(this),
-            error: function(xhr, status, err) {
+            error: function (xhr, status, err) {
                 //store.dispatch(push('/search/'))
                 hashHistory.push("/search/")
                 //history.push('/search/')
 
 
-
                 console.error(theUrl, status, err.toString());
-        }
+            }
         })
     }
 
 
 
-    loadObjectsFromServer () {
-        var periodRangeStart = new Date();
-        var periodRangeEnd = new Date();
-        periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
-        periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-
-        var tempUrl = "api/period/2016-11-16/2017-05-01/"
-        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
-        $.ajax({
-            url: tempUrl,
-            dataType: 'json',
-            cache: false,
-            success: function (data) {
-                this.setState({
-                    authenticated:true
-                });
-
-
-            }.bind(this),
-            error: function (xhr, status, err) {
-                this.setState ({
-                    authenticated:false
-                })
-                hashHistory.push("/search/")
-                console.error(tempUrl, status, err.toString());
-            }.bind(this)
-        });
-    }
-
-    render () {
-        if (this.state.user) {
-            return (
-                <DailyList />
-                )
-            }
-        else {
-            return(<div>asdfasdfasdf</div>)
+    render() {
+        if (this.props.storeRoot.user) {
+            return (<DailyList />)
+        } else {
+        return (<div></div>)
         }
 
-    }
 
+
+
+    }
 }
 
-module.exports =  { SplashPage}
+module.exports =  { SplashPage }

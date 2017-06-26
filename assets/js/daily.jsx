@@ -13,12 +13,15 @@ var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
 import ValidatedInput from './app'
-import Funnybar  from './search'
+import { Funnybar, SearchPage } from './search'
 
-import { StandardSetOfComponents, ErrorReporter } from './accounts'
+import { StandardSetOfComponents, ErrorReporter, Footer} from './accounts'
 
-import { Provider, connect, store, dispatch } from 'react-redux'
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
 import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
@@ -120,38 +123,45 @@ export class DailyList extends React.Component{
         dateObject = new Date();
         readableDate = dateObject.toDateString();
 
+                if (this.state.data != undefined) {
+                return (
+                    <div>
+                        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
 
 
-        return (
-           <div>
-    <StandardSetOfComponents  modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+                        <div className="fullPageDiv">
+                            <div className="ui page container footerAtBottom">
 
 
+                                <div className="spacer">&nbsp;</div>
+                                <div className="ui large breadcrumb">
+                                    <Link to={`/#`}>
+                                        <div className="section">Home</div>
+                                    </Link>
+
+                                    <i className="right chevron icon divider"></i>
+                                    <Link to={`/#`}>
+                                        <div className="active section">Today's Work</div>
+                                    </Link>
+                                </div>
+                                <div>&nbsp;</div>
+                                <div className="ui column header">
+                                    <h1>{readableDate}</h1>
+                                </div>
+                                <StepOccurrenceList data={this.state.data}/>
+
+                            </div>
+                        </div>
+                    </div>
 
 
+                )}
+        else {
+                    return (
+                        <div></div>
+                    )
+            }
 
-        <div className="fullPageDiv">
-            <div className="ui page container footerAtBottom">
-
-
-            <div className="spacer">&nbsp;</div>
-            <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
-
-                  <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">Today's Work</div></Link>
-            </div>
-            <div>&nbsp;</div>
-<div className="ui column header">
-            <h1>{readableDate}</h1>
-        </div>                    <StepOccurrenceList data={this.state.data}/>
-
-                </div>
-            </div>
-    </div>
-
-
-        )
     }
 }
 
@@ -401,4 +411,4 @@ var UpdateOccurrenceForm = React.createClass({
 
 });
 
-module.exports = DailyList, StepOccurrenceList;
+module.exports = { DailyList}

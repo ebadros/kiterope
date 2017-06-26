@@ -669,13 +669,13 @@ class PeriodViewSet(viewsets.ModelViewSet):
         try:
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
-            print("periodRangeStart %s" % periodRangeStart)
+            #print("periodRangeStart %s" % periodRangeStart)
 
             #print("inside list2")
             periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
             periodRangeEnd = datetime.date.strptime(periodRangeEnd, "%Y-%m-%d")
-            print("periodRangeStart %s" % periodRangeStart)
-            print("periodRangeStart %s" % periodRangeEnd)
+            #print("periodRangeStart %s" % periodRangeStart)
+            #print("periodRangeStart %s" % periodRangeEnd)
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -805,7 +805,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
                     #print("aPlanOccurence startDate %s" % aPlanOccurrence.startDate)
 
                     if (stepStart <= periodStart & stepEnd >= periodEnd):
-                        #print("periodStart to periodEnd")
+                        print("periodStart to periodEnd")
 
                         iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=periodStart)
                         iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
@@ -913,15 +913,15 @@ class PeriodViewSet(viewsets.ModelViewSet):
         # user = self.request.user
         # userPlanQueryset = user.plan_set.all()
         try:
-            print("inside Get Queryset")
+            #print("inside Get Queryset")
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
-            print("inside Get Queryset2")
+            #print("inside Get Queryset2")
 
             #periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
             #periodRangeEnd = datetime.date.strptime(periodRangeEnd, "%Y-%m-%d")
 
-            print("getQueryset periodRangeStart %s periodRangeEnd %s" % (periodRangeStart, periodRangeEnd))
+            #print("getQueryset periodRangeStart %s periodRangeEnd %s" % (periodRangeStart, periodRangeEnd))
             #querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
             #theQueryset = StepOccurrence.objects.filter(Q(date__lte=periodRangeEnd))
             dateLessThanEnd = Q(date__lte=periodRangeEnd)

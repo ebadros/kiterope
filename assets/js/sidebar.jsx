@@ -201,7 +201,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large close icon"></i>
                         </a>
 
-                    <a className="item" href="/">
+                    <a className="item" onClick={() => hashHistory.push("/")}>
                         <i className="large home icon"></i>
                         Home
                     </a>

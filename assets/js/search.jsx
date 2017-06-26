@@ -63,7 +63,7 @@ function printObject(o) {
 
 import CallManager from './call'
 
-import { Menubar, StandardSetOfComponents } from './accounts'
+import { Menubar, StandardSetOfComponents, Footer } from './accounts'
 
 
 $.ajaxSetup({

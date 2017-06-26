@@ -404,19 +404,11 @@ export class StandardSetOfComponents extends React.Component {
             $(this.refs["ref_messageRoundButton"]).show()
 
         }
-        var dataGetter
-        if (this.props.storeRoot) {
-            if (this.props.storeRoot.user)
-            {
-                dataGetter = <ReduxDataGetter />
-            }   else {
-                dataGetter = <div></div>
-            }
-        }
+
         return (
 
             <div>
-                {dataGetter}
+                <ReduxDataGetter />
 
                 <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
                 <MessageButton />
@@ -425,6 +417,28 @@ export class StandardSetOfComponents extends React.Component {
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
             <Menubar shouldRefresh={this.state.refreshUser} /></div>
         )
+    }
+}
+
+export class Footer extends React.Component {
+    render() {
+        return (
+            <div>
+            <div class="footerSpacer">&nbsp;</div>
+<div class="customFooter">
+    <div class="ui center aligned grid">
+
+        <div class="ui text menu">
+            <a class="item">Contact Us</a>
+            <a class="item">Privacy</a>
+            <a class="item">Terms</a>
+            <a class="item">Copyright © 2017 Kiterope Inc.</a>
+
+        </div>
+    </div>
+</div>
+                </div>
+    )
     }
 }
 
@@ -497,7 +511,7 @@ export class Menubar extends React.Component {
     }
 
     componentDidMount() {
-        //this.loadUserData()
+
     }
 
     componentWillReceiveProps = (nextProps) => {
@@ -509,7 +523,7 @@ export class Menubar extends React.Component {
     }
 
     loadUserData() {
-        var theUrl = theServer + 'api/users/i'
+        var theUrl = 'api/users/i'
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -523,9 +537,6 @@ export class Menubar extends React.Component {
                 })
 
                 store.dispatch(setCurrentUser(res))
-
-
-
 
             }.bind(this),
             error: function(xhr, status, err) {
@@ -1023,15 +1034,17 @@ export class ErrorReporter extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class LoginForm extends React.Component {
     constructor(props) {
-      super(props);
-      autobind(this);
+        super(props);
+        autobind(this);
         this.state = {
             username: "",
             password: "",
-            email:""
-        }
+            email: "",
+            serverErrors: []
 
-  }
+
+        }
+    }
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
@@ -1084,9 +1097,10 @@ export class LoginForm extends React.Component {
         if (loggedIn) {
             this.actionAfterLogin()
         } else {
-            this.setState({
-                serverErrors:"That email/password combination is not that of a current user."
-            })
+            var theErrors = this.state.serverErrors
+            theErrors.push("That email/password combination is not that of a current user.")
+            this.setState({serverErrors:theErrors})
+
 
         }
 
@@ -1109,6 +1123,14 @@ export class LoginForm extends React.Component {
       })
 
   }
+
+  getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
 
   render() {
       return (
@@ -1820,4 +1842,4 @@ export class ModalLoginForm extends React.Component {
 
 
 
-module.exports = { NotificationManager, ErrorReporter, LoginPage, Menubar, JoinPage, PasswordResetPage , PasswordConfirmPage, PasswordConfirmForm, SignInOrSignUpModalForm, StandardSetOfComponents}
+module.exports = { NotificationManager, Footer, ErrorReporter, LoginPage, Menubar, JoinPage, PasswordResetPage , PasswordConfirmPage, PasswordConfirmForm, SignInOrSignUpModalForm, StandardSetOfComponents}
