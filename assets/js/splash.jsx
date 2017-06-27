@@ -31,7 +31,6 @@ export class SplashPage extends React.Component {
     }
 
     checkIfUser() {
-        console.log("check if user")
         var theUrl = 'api/users/i/'
         $.ajax({
             method: 'GET',
