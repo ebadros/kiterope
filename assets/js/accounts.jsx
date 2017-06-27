@@ -411,8 +411,8 @@ export class StandardSetOfComponents extends React.Component {
             <div>
                 <ReduxDataGetter />
 
-                <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
-                <MessageButton />
+                {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>*/}
+                {/*<MessageButton />*/}
 
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
