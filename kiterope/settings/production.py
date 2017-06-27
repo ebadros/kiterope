@@ -16,10 +16,17 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join("/opt/python/ondeck/app/assets/"),
-    os.path.join("/opt/python/current/app/assets/"),
 
     #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
+
+AWS_KEY='GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX'
+AWS_KEY_ID='AKIAJ5YZL4QGGT7IUJRA'
+CLUSTER_NAME='kiterope-es'
+EC2_TAG_NAME='kiterope-dev'
+MASTER_NODES=1
+PORT=9200
+SECRET_KEY='53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 import elasticsearch
 from requests_aws4auth import AWS4Auth

@@ -119,6 +119,7 @@ export class ReduxDataGetter extends React.Component {
         store.dispatch(setMessageWindowVisibility(false))
         this.loadUserData()
 
+
     }
 
     loadUserData() {

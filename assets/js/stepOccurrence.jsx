@@ -69,7 +69,6 @@ export class StepOccurrenceList extends React.Component {
     }
 
     componentDidMount() {
-        console.log("StepOccurrenceList")
         this.setState({data: this.props.data})
 
 
