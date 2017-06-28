@@ -563,10 +563,11 @@ export class Menubar extends React.Component {
     }
 
     logoutHandler() {
+        auth.logout()
+
         hashHistory.push('/search/')
 
         store.dispatch(reduxLogout())
-                auth.logout()
 
 
 
