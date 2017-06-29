@@ -413,9 +413,12 @@ export class ProfileForm extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(res) {
-                this.setState({
-                    'user': res
-                })
+                if (res.id != null) {
+
+                    this.setState({
+                        'user': res
+                    })
+                }
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error("this is bad", status, err.toString());

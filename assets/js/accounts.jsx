@@ -134,6 +134,8 @@ export class ReduxDataGetter extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(userData) {
+                if (userData.id != null) {
+
                 store.dispatch(setCurrentUser(userData))
                 this.loadUniversalData()
 
@@ -141,6 +143,7 @@ export class ReduxDataGetter extends React.Component {
                     this.loadCoachSpecificData()
 
                 }
+            }
 
 
 
@@ -1071,7 +1074,9 @@ export class LoginForm extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(res) {
-                store.dispatch(setCurrentUser(res))
+                if (res.id != null) {
+                    store.dispatch(setCurrentUser(res))
+                }
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());

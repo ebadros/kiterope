@@ -870,20 +870,23 @@ export class GoalForm extends React.Component {
 
 
     checkIfUser() {
+        var theUrl =    '/api/users/i/'
         $.ajax({
             method: 'GET',
-            url: '/api/users/i/',
+            url: theUrl,
             datatype: 'json',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(res) {
-                this.setState({
-                    'user': res
-                })
+                if (res.id != null) {
+                    this.setState({
+                        'user': res
+                    })
+                }
             }.bind(this),
             error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
+                console.error(theUrl, status, err.toString());
         }
         })
     }
@@ -1273,20 +1276,23 @@ export class GoalSMARTForm extends React.Component {
 
 
     checkIfUser() {
+
+        var theUrl = '/api/users/i/'
         $.ajax({
             method: 'GET',
-            url: '/api/users/i/',
+            url: theUrl,
             datatype: 'json',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(res) {
+                if (res.id != null)
                 this.setState({
                     'user': res
                 })
             }.bind(this),
             error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
+                console.error(theUrl, status, err.toString());
         }
         })
     }
