@@ -26,9 +26,9 @@ import { setCurrentUser, setPlans,  reduxLogout, showSidebar, setContacts, setMe
 import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
-var sb = new SendBird({
-    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7';
-});
+//var sb = new SendBird({
+//    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
+//});
 
 function printObject(o) {
   var out = '';
@@ -236,7 +236,7 @@ export class ReduxDataGetter extends React.Component {
     loadMessageThreadData ()  {
 
 
-        sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
+        //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
 
 
         var theUrl = 'api/messageThreads/'
