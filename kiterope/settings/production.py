@@ -80,6 +80,30 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+
+        #'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+
+        #'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+
+    ),
+
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
+
+    #'DEFAULT_PAGINATION_CLASS': 'kiterope.views.StandardResultsSetPagination',
+
+    #'PAGE_SIZE': 9,
+
+}
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
