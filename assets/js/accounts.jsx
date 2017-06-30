@@ -134,7 +134,11 @@ export class ReduxDataGetter extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(userData) {
+
+            printObject(userData)
                 if (userData.id != null) {
+                                console.log("theUser != null")
+
 
                 store.dispatch(setCurrentUser(userData))
                 this.loadUniversalData()
@@ -1770,8 +1774,8 @@ export class ModalLoginForm extends React.Component {
                 //console.log("this.props.setCurrentUser")
                 //this.props.setCurrentUser(res)
                 if (res.id !=null ) {
-                    store.dispatch(setCurrentUser(res))
-                }
+                store.dispatch(setCurrentUser(res))
+
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());

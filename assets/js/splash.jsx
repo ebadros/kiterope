@@ -14,6 +14,13 @@ import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class SplashPage extends React.Component {
@@ -40,13 +47,17 @@ export class SplashPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (theUser) {
+                printObject(theUser)
                 if (theUser.id != null) {
+                    console.log("theUser != null")
                     this.setState({
                         user: theUser
                     })
                     store.dispatch(setCurrentUser(theUser))
                     hashHistory.push("/daily/")
                 } else {
+                    console.log("theUser == null")
+
                     hashHistory.push("/search/")
 
                 }
