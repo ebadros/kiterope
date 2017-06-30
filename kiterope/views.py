@@ -98,7 +98,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
 
     serializer_class = UserSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [Token]
     permission_classes = [AllowAny]
     required_scopes = ['groups']
 
