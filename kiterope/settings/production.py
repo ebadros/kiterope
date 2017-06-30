@@ -3,7 +3,7 @@ from kiterope.settings.common import *
 from urllib.parse import urlparse
 
 
-DEBUG = True
+DEBUG = False
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
