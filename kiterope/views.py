@@ -109,6 +109,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
+            print(request.user)
             return Response(UserSerializer(request.user,
                                            context={'request': request}).data)
         return super(UserViewSet, self).retrieve(request, pk)
