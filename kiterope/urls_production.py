@@ -136,6 +136,7 @@ urlpatterns = [
       url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
       url(r'^rest-auth/', include('rest_auth.urls')),
       url(r'^api/obtain-auth-token/$', obtain_auth_token),
+      url(r'^api-token-auth/', views.obtain_auth_token),
       url(r'^swagger/', schema_view),
       url(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
       url(r'^api/', include(router.urls)),
