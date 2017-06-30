@@ -46,6 +46,9 @@ export class SplashPage extends React.Component {
                     })
                     store.dispatch(setCurrentUser(theUser))
                     hashHistory.push("/daily/")
+                } else {
+                    hashHistory.push("/search/")
+
                 }
 
             }.bind(this),
