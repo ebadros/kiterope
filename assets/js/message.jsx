@@ -42,8 +42,8 @@ import { UpdatesList } from './update'
 var ReconnectingWebSocket = require('reconnecting-websocket');
 import Websocket from 'react-websocket';
 
-//var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-var ws_scheme =  "ws";
+var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+//var ws_scheme =  "ws";
 
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
