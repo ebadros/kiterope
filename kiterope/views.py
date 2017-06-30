@@ -96,7 +96,9 @@ def schema_view(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
+
     serializer_class = UserSerializer
+    authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
     required_scopes = ['groups']
 
@@ -109,7 +111,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
-            print(request.user)
+
             return Response(UserSerializer(request.user,
                                            context={'request': request}).data)
         return super(UserViewSet, self).retrieve(request, pk)
