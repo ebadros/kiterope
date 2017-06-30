@@ -233,6 +233,8 @@ NOTIFICATION_METHOD_CHOICES = [
     ('NO_NOTIFICATIONS',  "I don't want any notifications")
 ]
 
+
+
 class NotificationManager(models.Manager):
 
     def create_notification(self, theUserId, sessionId, theType):

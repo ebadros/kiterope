@@ -542,11 +542,13 @@ export class Menubar extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(res) {
-                this.setState({
-                    'user': res
-                })
+                if (res.id != null) {
+                    this.setState({
+                        'user': res
+                    })
 
-                store.dispatch(setCurrentUser(res))
+                    store.dispatch(setCurrentUser(res))
+                }
 
             }.bind(this),
             error: function(xhr, status, err) {
@@ -1767,7 +1769,9 @@ export class ModalLoginForm extends React.Component {
             success: function(res) {
                 //console.log("this.props.setCurrentUser")
                 //this.props.setCurrentUser(res)
-                store.dispatch(setCurrentUser(res))
+                if (res.id !=null ) {
+                    store.dispatch(setCurrentUser(res))
+                }
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());

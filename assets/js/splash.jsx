@@ -40,11 +40,13 @@ export class SplashPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (theUser) {
-                this.setState({
-                    user: theUser
-                })
-                store.dispatch(setCurrentUser(theUser))
-                hashHistory.push("/daily/")
+                if (theUser.id != null) {
+                    this.setState({
+                        user: theUser
+                    })
+                    store.dispatch(setCurrentUser(theUser))
+                    hashHistory.push("/daily/")
+                }
 
             }.bind(this),
             error: function (xhr, status, err) {
