@@ -103,6 +103,21 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     required_scopes = ['groups']
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        print(request.data)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+
+            aQueryset = User.objects.all()
+        except:
+            aQueryset = User.objects.none()
+
+        return aQueryset
+
 
 '''
     def retrieve(self, request, pk=None):
