@@ -112,6 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
+            print(request.data)
 
             return Response(UserSerializer(request.user,
                                            context={'request': request}).data)
@@ -241,7 +242,6 @@ class ReceiverKChannelViewSet(viewsets.ModelViewSet):
         return aQueryset
 
     def intersect(a, b):
-        print("inside intersect")
         print(usersChannelsIds)
         print(receiversChannelsIds)
         return set(a) & set(b)
