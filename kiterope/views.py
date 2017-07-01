@@ -104,10 +104,19 @@ class UserViewSet(viewsets.ModelViewSet):
     required_scopes = ['groups']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        print(request.data)
-        return Response(serializer.data)
+        if True:
+            print(request.data)
+
+            return Response(UserSerializer(request.user, context={'request': request}).data)
+        else:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            print(request.data)
+            return Response(serializer.data)
+
+
+
+
 
     def get_queryset(self):
         try:
