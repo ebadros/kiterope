@@ -103,32 +103,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     required_scopes = ['groups']
 
-    def list(self, request, *args, **kwargs):
-        if True:
-            print(request.data)
-
-            return Response(UserSerializer(request.user, context={'request': request}).data)
-        else:
-            queryset = self.filter_queryset(self.get_queryset())
-            serializer = self.get_serializer(queryset, many=True)
-            print(request.data)
-            return Response(serializer.data)
-
-
-
-
-
-    def get_queryset(self):
-        try:
-
-            aQueryset = User.objects.all()
-        except:
-            aQueryset = User.objects.none()
-
-        return aQueryset
-
-
-'''
     def retrieve(self, request, pk=None):
         def handle(self, *args, **options):
             users = User.objects.filter(profile=None)
@@ -138,15 +112,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if pk == 'i':
             print(request.data)
-
-            return Response(UserSerializer(request.user,
-                                           context={'request': request}).data)
+            return Response(UserSerializer(request.user, context={'request': request}).data)
         return super(UserViewSet, self).retrieve(request, pk)
-
-
-'''
-
-
 
 
 class LargeResultsSetPagination(PageNumberPagination):
