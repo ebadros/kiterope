@@ -104,6 +104,7 @@ class UserViewSet(viewsets.ModelViewSet):
     required_scopes = ['groups']
 
 
+'''
     def retrieve(self, request, pk=None):
         def handle(self, *args, **options):
             users = User.objects.filter(profile=None)
@@ -119,7 +120,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return super(UserViewSet, self).retrieve(request, pk)
 
 
-
+'''
 
 
 
