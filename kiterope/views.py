@@ -95,6 +95,7 @@ def schema_view(request):
     return response.Response(generator.get_schema(request=request))
 
 class UserViewSet(viewsets.ModelViewSet):
+    model=User
     queryset = User.objects.all().order_by('-date_joined')
 
     serializer_class = UserSerializer
