@@ -33,8 +33,10 @@ export class App extends React.Component {
 
 
     logoutHandler(){
+        store.dispatch(reduxLogout())
         auth.logout()
         hashHistory.push('/account/login/')
+
     }
 
     loadUserData() {
