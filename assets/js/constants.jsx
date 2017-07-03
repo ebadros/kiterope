@@ -1,5 +1,12 @@
 export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
-export const theServer = 'http://127.0.0.1:8000/';
+export const getTheServer = () => {
+     if (typeof window !== 'undefined') {
+    var path = location.protocol + '//' + location.host + "/"; // (or whatever)
+  }
+  console.log("theServer is " + theServer)
+  return path
+}
+export const theServer = getTheServer()
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope-static.s3.amazonaws.com:443/";
 

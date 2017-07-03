@@ -110,7 +110,7 @@ function convertFromDateString(baseDateString, numberOfDaysDifference, returnFor
             calculatedAndConvertedInMomentFormatted: calculatedAndConvertedInMomentFormatted,
             calculatedAndConvertedInDateForm: calculatedAndConvertedInDateForm
         }
-        printObject(theObject)
+        //printObject(theObject)
     return calculatedAndConvertedInDateForm
 
 }

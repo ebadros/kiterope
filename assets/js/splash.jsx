@@ -47,7 +47,7 @@ export class SplashPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (theUser) {
-                printObject(theUser)
+                //printObject(theUser)
                 if (theUser.id != null) {
                     console.log("theUser != null")
                     this.setState({
