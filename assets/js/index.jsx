@@ -41,7 +41,7 @@ import {
     timeCommitmentOptions,
     costFrequencyMetricOptions
 } from './constants'
-
+import {TermsOfServicePage} from './tos'
 
 function requireAuth(nextState, replace) {
     if (!auth.loggedIn()) {
@@ -98,6 +98,7 @@ ReactDOM.render((
                 <Route path="/profiles/:profile_id" component={ProfileDetailPage}/>
                 <Route path="/clients" component={ClientListPage} onEnter={requireAuth}/>
                 <Route path="/contacts" component={() => (<ProfileListPage myContacts={true}/>)} onEnter={requireAuth}/>
+                <Route path="/tos" component={TermsOfServicePage} />
 
 
                 <Route path="/profiles" component={() => (<ProfileListPage myContacts={false}/>)}

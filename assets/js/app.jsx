@@ -77,6 +77,110 @@ String.prototype.replaceAll = function(str1, str2, ignore)
 {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
 };
+
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
+
+export class KRCheckBox extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            serverErrors:"",
+            errors:"",
+            value:"",
+            labelHTML:""
+        }
+    }
+
+    handleChangeValue = (event) => {
+        if (this.state.value = true) {
+            this.setState({
+                value: event.target.checked
+            })
+        } else {
+            this.setState({
+                value: event.target.checked
+
+            })
+        }
+        this.props.stateCallback(event.target.checked);
+    }
+
+    componentDidMount() {
+        this.setState({
+            value:this.props.value,
+            serverErrors: this.props.serverErrors
+        })
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.value != nextProps.value) {
+            this.setState({
+                    value: nextProps.value,
+                })
+
+        }
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors:nextProps.serverErrors
+            })
+        }
+    }
+
+    buildErrors = () => {
+        var i;
+        var errorsHTML = "";
+        if (this.state.serverErrors) {
+            for (i = 0; i < this.state.serverErrors.length; i++) {
+                errorsHTML += "<div>" + this.state.serverErrors[i] + "</div>"
+            }
+        } else {
+            if (typeof this.state.errors !== 'undefined' && this.state.errors.length > 0) {
+                for (i = 0; i < this.state.errors.length; i++) {
+                    errorsHTML += "<div>" + this.state.errors[i] + "</div>"
+                }
+            }
+        }
+        return errorsHTML
+
+    }
+
+    render () {
+        var errorsHTML = this.buildErrors()
+         if (errorsHTML != "") {
+                return (
+                    <div className="ui row">
+                 <div className="ui checkbox">
+                     <input type="checkbox" defaultChecked={this.state.value} onChange={this.handleChangeValue}/>
+                     <label>I have read and agree to Kiterope's <Link to="tos">Terms of Service.</Link></label>
+                     <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
+
+
+</div></div>
+
+
+                )
+            }
+            else {
+        return (
+             <div className="ui row">
+                 <div className="ui checkbox">
+                     <input type="checkbox" value={this.state.value} onChange={this.handleChangeValue}/>
+                     <label>I have read and agree to Kiterope's <Link to="tos">Terms of Service.</Link></label>
+
+</div></div>
+        )
+    }}
+
+}
+
 export class KSSelect extends React.Component {
     constructor(props) {
         super(props);
@@ -378,4 +482,4 @@ App.contextTypes = {
   router: React.PropTypes.object.isRequired
 };
 
-module.exports =  { App, ValidatedInput, KSSelect }
+module.exports =  { App, ValidatedInput, KSSelect, KRCheckBox }

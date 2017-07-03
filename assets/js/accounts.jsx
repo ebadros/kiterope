@@ -14,7 +14,7 @@ var validator = require('validator');
 import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
-import  { ValidatedInput } from './app'
+import  { ValidatedInput, KRCheckBox } from './app'
 var auth = require('./auth')
 var Modal = require('react-modal');
 import {MessageWindowContainer} from './message'
@@ -1409,21 +1409,23 @@ export class PasswordResetForm extends React.Component {
 
 export class JoinForm extends React.Component {
     constructor(props) {
-      super(props);
-      autobind(this);
+        super(props);
+        autobind(this);
         this.state = {
             username: "",
-            email:"",
+            email: "",
             password1: "",
             password2: "",
-            last_name:"",
-            first_name:"",
-            emailSent:true,
-            serverErrors:""
+            last_name: "",
+            first_name: "",
+            tos: false,
+            emailSent: true,
+            serverErrors: "",
+            tosErrors: []
+
 
         }
-
-  }
+    }
 
 
 
@@ -1437,41 +1439,51 @@ export class JoinForm extends React.Component {
 
   handleSubmit = (e) => {
       e.preventDefault()
-      var username = this.state.username
-      var email = this.state.email
-      var password1 = this.state.password1
-      var password2 = this.state.password2
-      var first_name = this.state.first_name
-      var last_name = this.state.last_name
+
+      if (this.state.tos == true) {
+          var username = this.state.username
+          var email = this.state.email
+          var password1 = this.state.password1
+          var password2 = this.state.password2
+          var first_name = this.state.first_name
+          var last_name = this.state.last_name
 
 
+          var theUrl = "rest-auth/registration/"
+          $.ajax({
+              url: theUrl,
+              dataType: 'json',
 
-      var theUrl = "rest-auth/registration/"
-      $.ajax({
-        url: theUrl,
-        dataType: 'json',
+              type: 'POST',
+              data: {
+                  username: username,
+                  email: email,
+                  password1: password1,
+                  password2: password2,
+                  first_name: first_name,
+                  last_name: last_name,
 
-        type: 'POST',
-        data: {
-            username: username,
-            email: email,
-            password1:password1,
-            password2:password2,
-            first_name: first_name,
-            last_name: last_name,
+              },
+              success: function (data) {
+                  this.handleSuccess()
+              }.bind(this),
+              error: function (xhr, status, err) {
+                  console.error(theUrl, status, err.toString());
+                  var serverErrors = xhr.responseJSON;
+                  this.setState({
+                      serverErrors: serverErrors,
+                  })
+              }.bind(this)
+          });
+      } else {
+          var theServerErrors = this.state.tosErrors
+              theServerErrors.push( "You must agree to the Terms of Service to join." )
 
-        },
-        success: function(data) {
-            this.handleSuccess()
-        }.bind(this),
-        error: function(xhr, status, err) {
-            console.error(theUrl, status, err.toString());
-            var serverErrors = xhr.responseJSON;
-            this.setState({
-                serverErrors:serverErrors,
-            })
-        }.bind(this)
-    });
+          this.setState({
+              tosErrors: theServerErrors
+
+          })
+      }
   }
 
   handleSuccess = () => {
@@ -1527,6 +1539,11 @@ export class JoinForm extends React.Component {
           password2:value,
       })
 
+  }
+  handleTOSChange = (value) => {
+      this.setState({
+          tos:value
+      })
   }
 
   handleSignInClick = () => {
@@ -1620,6 +1637,12 @@ export class JoinForm extends React.Component {
                                           serverErrors={this.getServerErrors("password1")}
 
                                       />
+                                      <div className="ui row">&nbsp;</div>
+                                      <KRCheckBox
+                                          value={this.state.tos}
+                                          stateCallback={this.handleTOSChange}
+                                          serverErrors={this.state.tosErrors}
+                                          />
 
 
                                       <button className="ui fluid purple button" type="submit">Join Kiterope</button>
