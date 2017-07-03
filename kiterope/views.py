@@ -99,8 +99,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
 
     serializer_class = UserSerializer
-    authentication_classes = [Token]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     required_scopes = ['groups']
 
     def retrieve(self, request, pk=None):
@@ -111,7 +110,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
-            print(request.data)
             return Response(UserSerializer(request.user, context={'request': request}).data)
         return super(UserViewSet, self).retrieve(request, pk)
 
