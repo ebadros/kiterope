@@ -111,13 +111,12 @@ REST_FRAMEWORK = {
 
 }
 
-REDIS_URL='redis://kr-cache-redis.qmj2fx.ng.0001.usw1.cache.amazonaws.com:6379'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            "hosts": [("localhost", 6379)],
         },
         "ROUTING": "kiterope.routing.channel_routing",
     },
