@@ -1207,11 +1207,11 @@ def secret_page(request, *args, **kwargs):
 
     
     
-conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
-    print("sign s3 upload")
-    print("%s , %s" % (settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY))
+    print("inside sign_se_upload")
+    print("%s , %s" % (settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY))
     object_name = request.GET['objectName']
     content_type = mimetypes.guess_type(object_name)[0]
 

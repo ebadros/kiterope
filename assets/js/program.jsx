@@ -1236,11 +1236,11 @@ export class ProgramForm extends React.Component {
             },
             success: function(res) {
                 if (res.id != null) {
-                    this.setState({
-                        'user': res
-                    })
-                }
-            }.bind(this),
+                this.setState({
+                    'user': res
+                })
+
+            }}.bind(this),
             error: function(xhr, status, err) {
                 console.error("this is bad", status, err.toString());
         }

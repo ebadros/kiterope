@@ -289,7 +289,7 @@ handleChangeQuery = (e) => {
 
                         <div className="ui grid ">
                             <div className="ui row">&nbsp;</div>
-                            <div className="ui centered row massiveType">What do you want?</div>
+                            <div className="ui centered row massiveType">What do you want to do?</div>
                                                 <div className="ui row">&nbsp;</div>
 
                             <div className="ui row noPaddingBottom">

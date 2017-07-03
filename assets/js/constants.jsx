@@ -1,5 +1,5 @@
 export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
-export const theServer = 'https://127.0.0.1:8000/';
+export const theServer = 'http://127.0.0.1:8000/';
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope-static.s3.amazonaws.com:443/";
 
