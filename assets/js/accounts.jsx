@@ -38,7 +38,8 @@ function printObject(o) {
   alert(out);
 }
 var ReconnectingWebSocket = require('reconnecting-websocket');
-var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+//var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var ws_scheme="ws"
 
 import { Provider, connect, dispatch } from 'react-redux'
 
