@@ -478,7 +478,7 @@ export class NotificationManager extends React.Component {
 
     }
     connectToRoomWebsocket(theRoomLabel) {
-        var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications" + "/" + theRoomLabel);
+        var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/notifications" + "/" + theRoomLabel);
         chat_socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
             //alert(data.test)

@@ -157,7 +157,7 @@ export class MessageWindowContainer extends React.Component {
 
     connectToNotificationChannel = () => {
         if (this.state.user) {
-            var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + this.state.user.notificationChannelLabel + "/?token=" + localStorage.token)
+            var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/notifications/" + this.state.user.notificationChannelLabel + "/?token=" + localStorage.token)
             notificationWebsocket.onmessage = (message) => {
                 var messageData = JSON.parse(message.data);
                 if (messageData.text == "openPrivateTextChannel") {
@@ -232,7 +232,7 @@ export class MessageWindowContainer extends React.Component {
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
                         var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
                         store.dispatch(addThread(theMessageThreadData))
                         store.dispatch(setCurrentThread(theMessageThreadData))
 
@@ -293,7 +293,7 @@ export class MessageWindowContainer extends React.Component {
         },
 
         success: function (messageThreadData) {
-            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
+            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
             store.dispatch(addThread(messageThreadData))
             store.dispatch(setCurrentThread(messageThreadData))
 
@@ -316,7 +316,7 @@ export class MessageWindowContainer extends React.Component {
 
 
     connectToWebsocket = (websocketType, websocketLabel) => {
-        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
+        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
         theSocket.onmessage = (message) => {
             var data = JSON.parse(message.data);
         };
@@ -470,7 +470,7 @@ export class MessagePage extends React.Component {
 
     connectToNotificationChannel = (notificationChannelLabel) => {
 
-        var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
+        var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
         notificationWebsocket.onmessage = (message) => {
             var messageData = JSON.parse(message.data);
             if (messageData.text == "openPrivateTextChannel") {
@@ -545,7 +545,7 @@ export class MessagePage extends React.Component {
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
                         var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
 
 
                         this.setState({
@@ -577,7 +577,7 @@ export class MessagePage extends React.Component {
 
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
-        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
+        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
             privateChannel: privateChannel.label,
@@ -621,7 +621,7 @@ export class MessagePage extends React.Component {
         },
 
         success: function (messageThreadData) {
-            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
+            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
 
 
             this.setState({
@@ -646,7 +646,7 @@ export class MessagePage extends React.Component {
 
 
     connectToWebsocket = (websocketType, websocketLabel) => {
-        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
+        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
         theSocket.onmessage = (message) => {
             var data = JSON.parse(message.data);
         };
@@ -2518,7 +2518,7 @@ export class ContactListPane extends React.Component {
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
         //console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
-        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
+        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
             privateChannel: privateChannel.label,
@@ -2601,7 +2601,7 @@ export class ContactListPane extends React.Component {
             },
 
             success: function (messageThreadData) {
-                messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
+                messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
                 store.dispatch(addThread(messageThreadData))
                 store.dispatch(setCurrentThread(messageThreadData))
 
@@ -2634,7 +2634,7 @@ export class ContactListPane extends React.Component {
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
                         var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + ":443/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
                         store.dispatch(addThread(theMessageThreadData))
                         store.dispatch(setCurrentThread(theMessageThreadData))
                         store.dispatch(addOpenThread(theMessageThreadData))
@@ -2899,7 +2899,7 @@ export class MessageThreadPane extends React.Component {
             if (this.state.thread != undefined) {
                 if (this.state.thread.channelLabel != undefined) {
 
-                    var websocketUrl = ws_scheme + '://' + window.location.host + "/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token
+                    var websocketUrl = ws_scheme + '://' + window.location.host + ":443/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token
                     var theWebsocket = <Websocket url={websocketUrl} onMessage={this.handleData.bind(this)}/>
 
 
