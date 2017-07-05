@@ -595,6 +595,7 @@ export class MessagePage extends React.Component {
 
         });
 
+
 }
 
 
@@ -605,6 +606,7 @@ export class MessagePage extends React.Component {
 
 
     createNewMessageThread(){
+        console.log("")
     $.ajax({
         url: "api/messageThreads/",
         dataType: 'json',
