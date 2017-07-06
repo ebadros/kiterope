@@ -202,7 +202,7 @@ class ReceiverKChannelViewSet(viewsets.ModelViewSet):
             receiversChannelsIds = receiversChannelsIds[::1]
 
             channelWithBothUserAndReceiver =  [val for val in usersChannelsIds if val in receiversChannelsIds]
-            print("inside receiverKChannel", channelWithBothUserAndReceiver)
+            #print("inside receiverKChannel", channelWithBothUserAndReceiver)
 
             if channelWithBothUserAndReceiver == []:
                 try:
@@ -264,7 +264,7 @@ class MessageThreadViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     required_scopes = ['groups']
     serializer_class = MessageThreadSerializer
-    pagination_class = StandardResultsSetPagination
+    #pagination_class = StandardResultsSetPagination
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -308,7 +308,7 @@ class MessageThreadViewSet(viewsets.ModelViewSet):
         except:
             try:
                 currentUser = self.request.user.id
-                print("currentUser is %s" % currentUser)
+                #print("currentUser is %s" % currentUser)
                 aQueryset = MessageThread.objects.filter(Q(sender=currentUser) | Q(receiver=currentUser))
 
             except:
@@ -473,7 +473,7 @@ class StepViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
+        #page = self.paginate_queryset(queryset)
         #if page is not None:
         #    serializer = self.get_serializer(page, many=True)
         #    return self.get_paginated_response(serializer.data)
@@ -502,7 +502,7 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
+        #page = self.paginate_queryset(queryset)
         #if page is not None:
         #    serializer = self.get_serializer(page, many=True)
         #    return self.get_paginated_response(serializer.data)
