@@ -7,7 +7,7 @@ import {ImageUploader, Breadcrumb, PlanForm2, ProgramViewEditDeleteItem, FormAct
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
-import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
+import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
 import autobind from 'class-autobind'
 import {StandardSetOfComponentsContainer} from './redux/containers'
 import Measure from 'react-measure'

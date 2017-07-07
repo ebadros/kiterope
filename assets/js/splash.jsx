@@ -7,7 +7,7 @@ import autobind from 'class-autobind'
 import moment from 'moment';
 import { Menubar } from './accounts'
 import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
-import { StandardSetOfComponents, ErrorReporter } from './accounts'
+import { StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
 import { Provider, connect, dispatch } from 'react-redux'

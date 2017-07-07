@@ -432,23 +432,30 @@ export class StandardSetOfComponents extends React.Component {
 }
 
 export class Footer extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+
+        }
+    }
     render() {
         return (
             <div>
-            <div class="footerSpacer">&nbsp;</div>
-<div class="customFooter">
-    <div class="ui center aligned grid">
+                <div className="footerSpacer">&nbsp;</div>
+                <div className="customFooter">
+                    <div className="ui center aligned grid">
 
-        <div class="ui text menu">
-            <a class="item">Contact Us</a>
-            <a class="item">Privacy</a>
-            <a class="item">Terms</a>
-            <a class="item">Copyright © 2017 Kiterope Inc.</a>
+                        <div className="ui text menu">
+                            <a className="item">Contact Us</a>
+                            <a className="item">Privacy</a>
+                            <a className="item">Terms</a>
+                            <a className="item">Copyright © 2017 Kiterope Inc.</a>
 
-        </div>
-    </div>
-</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
     )
     }
 }

@@ -1,9 +1,8 @@
 export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
 export const getTheServer = () => {
      if (typeof window !== 'undefined') {
-    var path = location.protocol + '//' + location.host + "/"; // (or whatever)
-  }
-  console.log("theServer is " + theServer)
+        var path = location.protocol + '//' + location.host + "/"; // (or whatever)
+    }
   return path
 }
 export const theServer = getTheServer()

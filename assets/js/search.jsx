@@ -144,11 +144,17 @@ export class SearchPage extends React.Component {
     render() {
         if (this.props.params.search_query) {
             return (
+                <div>
                 <Search query={this.props.params.search_query} onFormSubmit={this.handleFormSubmit}/>
+                                        <Footer /></div>
+
             )
         } else {
             return (
+                <div>
                 <Search onFormSubmit={this.handleFormSubmit}/>
+                                        <Footer /></div>
+
             )
         }
     }
@@ -277,7 +283,7 @@ handleChangeQuery = (e) => {
         <div>
         <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
         <div className="fullPageDiv">
-            <div className="ui page container">
+            <div className="ui container">
                 <div className="spacer">&nbsp;</div>
 
 
@@ -289,6 +295,8 @@ handleChangeQuery = (e) => {
 
                         <div className="ui grid ">
                             <div className="ui row">&nbsp;</div>
+                            <div className="ui row">&nbsp;</div>
+
                             <div className="ui centered row massiveType">What do you want to do?</div>
                                                 <div className="ui row">&nbsp;</div>
 
@@ -313,9 +321,11 @@ handleChangeQuery = (e) => {
                 <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible} needsLogin={this.handleNeedsLogin}/>
             </div>
                 <div className="spacer">&nbsp;</div>
+                            <div className="spacer">&nbsp;</div>
+
 
             <div className="blue">
-                <div className="centered hugeType topPadding">Kiterope helps you achieve your goals</div>
+                <div className="centered hugeType topPadding">Kiterope helps you get things done</div>
                 <div className="spacer">&nbsp;</div>
 
                 <div className="ui page container">
@@ -643,7 +653,7 @@ export class SearchHitsGrid extends React.Component {
 
 
         return (
-            <div ref="ref_searchHits centeredContent">
+            <div ref="ref_searchHits">
             <div className="ui container stackable three column grid">
                 {objectNodes}
                 </div>

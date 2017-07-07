@@ -152,6 +152,7 @@ export class DailyList extends React.Component{
 
                             </div>
                         </div>
+                        <Footer />
                     </div>
 
 
