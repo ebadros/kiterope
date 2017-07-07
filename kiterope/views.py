@@ -458,15 +458,15 @@ class StepViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
-        print("update")
+        #print(self.request.data)
+        #print("update")
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        api.send_sms(body='I can haz txt', from_phone='+3107703042', to=['+3107703042'])
+        #api.send_sms(body='I can haz txt', from_phone='+3107703042', to=['+3107703042'])
 
         return Response(serializer.data)
 
@@ -599,6 +599,7 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
 class UpdateViewSet(viewsets.ModelViewSet):
     queryset = Update.objects.all()
     required_scopes = ['groups']
+    permission_classes = [AllowAny]
     serializer_class = UpdateSerializer
 
     def get_queryset(self):
@@ -1139,12 +1140,17 @@ class ProgramSearchViewSet(HaystackViewSet):
 class StepDuplicatorViewSet(viewsets.ModelViewSet):
     serializer_class = StepSerializer
     queryset = Step.objects.all()
-    permission_classes = [AllAccessPostingOrAdminAll]
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=False)
+
         return Response(serializer.data)
+
+
+
 
 
     def get_queryset(self):
@@ -1161,12 +1167,28 @@ class StepDuplicatorViewSet(viewsets.ModelViewSet):
                 theNewUpdate.id = None
                 theNewUpdate.step_id = theNewStep.id
                 theNewUpdate.save()
-            aQuerySet = Step.objects.get(id=theNewStep.id)
+            aQueryset = Step.objects.get(id=theNewStep.id)
+
             return aQueryset
+            #aQuerySet = Step.objects.filter(id=theNewStep.id)
+
+
+            #serializer = StepSerializer(aQuerySet)
+
+
 
         except:
+
             aQueryset = Step.objects.none()
             return aQueryset
+
+
+
+
+
+
+
+
 
 
 def splash(request):

@@ -104,7 +104,7 @@ export class UpdatesList extends React.Component {
 
             }.bind(this),
         error: function (xhr, status, err) {
-                console.error(theURL, status, err.toString());
+                console.error(theUrl, status, err.toString());
             }.bind(this)
         });
     }

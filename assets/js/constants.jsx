@@ -254,5 +254,5 @@ function printObject(o) {
 
 
 
-module.exports = {  theServer, s3IconUrl, s3ImageUrl, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {  theServer, s3IconUrl, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain }

@@ -79,7 +79,9 @@ export const rootReducer = (state = {}, action) => {
     case 'ADD_STEP':
 
         var thePrograms = state.programs
-        thePrograms[action.programId].steps[action.step.id] = action.step
+        var theProgram = thePrograms[action.programId]
+        var theSteps = theProgram.steps
+        theSteps[action.step.id] = action.step
       return Object.assign({}, state, { programs: thePrograms })
       break;
 

@@ -1732,8 +1732,32 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         }
     }
 
+    duplicateItem = () => {
+        var theUrl = this.props.apiUrl + this.props.id + "/duplicate/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            type: 'GET',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addStep(this.props.parentId, data))
+
+                this.reload()
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }.bind(this),
+
+
+        });
+
+    }
+
     callDeleteReducer() {
-        console.log("stepDeleteReducer")
         store.dispatch(deleteStep(this.props.parentId, this.props.id))
     }
 
