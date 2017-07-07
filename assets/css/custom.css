@@ -1,4 +1,7 @@
-@mobileBreakpoint            : 420px;
+@import './site.variables';
+
+
+@mobileBreakpoint            : 900px;
 @tabletBreakpoint            : 768px;
 @computerBreakpoint          : 992px;
 @largeMonitorBreakpoint      : 1280px;
@@ -12,9 +15,11 @@
 html {
     z-index:1;
 }
-.fullPageDiv {
+
+.centeredContent {
     align:center;
 }
+
 .google {
     color:black;
     background-color:white;

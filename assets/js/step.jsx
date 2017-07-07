@@ -210,7 +210,7 @@ export class StepList extends React.Component {
 
 
     return (
-        <div>
+        <div className="centeredContent">
           <div className='ui three column doubling stackable grid'>
         {stepList}
               </div>

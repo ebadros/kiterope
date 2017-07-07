@@ -274,7 +274,7 @@ componentWillUnmount() {
 <div>
     <StandardSetOfComponents  modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
         <div className="fullPageDiv">
-            <div className="ui page container footerAtBottom">
+            <div className="ui  container footerAtBottom">
 
 
             <div className="spacer">&nbsp;</div>
@@ -559,8 +559,7 @@ export class ProgramDetailPage extends React.Component {
             <div>
                 <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
 
-                <div className="fullPageDiv">
-                    <div className="ui page container footerAtBottom">
+                    <div className="ui container footerAtBottom">
                         <div className="spacer">&nbsp;</div>
                         <div className="ui alert"></div>
                          <Breadcrumb values={[
@@ -625,7 +624,6 @@ export class ProgramDetailPage extends React.Component {
 
 
                     </div>
-                </div>
             </div>
 
         )
@@ -1750,9 +1748,11 @@ export class ProgramList extends React.Component {
 
 
     return (
+        <div className="centeredContent">
           <div className='three column stackable ui grid'>
         {programList}
       </div>
+            </div>
     );
   }
 

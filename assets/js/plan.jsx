@@ -810,9 +810,12 @@ export class PlanList extends React.Component {
 
 
     return (
+                <div className="centeredContent">
+
           <div className='ui three column doubling stackable grid'>
         {planList}
       </div>
+                    </div>
     );
   }
 

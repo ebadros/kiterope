@@ -1250,9 +1250,12 @@ checkIfUser() {
 
 
     return (
-          <div className='ui three column doubling stackable grid'>
+                <div className="centeredContent">
+
+          <div className='ui three column  stackable grid'>
         {profileList}
       </div>
+                    </div>
     );
   }
 

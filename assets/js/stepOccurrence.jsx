@@ -95,10 +95,13 @@ export class StepOccurrenceList extends React.Component {
         }
         return (
             //<div className="ui divided link items">
-                      <div className='ui three column doubling stackable grid'>
+                    <div className="centeredContent">
+
+                      <div className='ui three column  stackable grid'>
 
                 {objectNodes}
             </div>
+                        </div>
         )
     }
 }

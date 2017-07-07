@@ -643,7 +643,7 @@ export class SearchHitsGrid extends React.Component {
 
 
         return (
-            <div ref="ref_searchHits">
+            <div ref="ref_searchHits centeredContent">
             <div className="ui container stackable three column grid">
                 {objectNodes}
                 </div>
