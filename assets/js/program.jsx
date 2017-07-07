@@ -1751,7 +1751,7 @@ export class ProgramList extends React.Component {
 
 
     return (
-          <div className='ui three column doubling stackable grid'>
+          <div className='three column stackable ui grid'>
         {programList}
       </div>
     );

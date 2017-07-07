@@ -799,7 +799,7 @@ export class PlanList extends React.Component {
                                             showCloseButton={false}
                                             apiUrl="api/plans/"
                                             id={planOccurrence.id}
-                                            data={planOccurrence.program}
+                                            data={planOccurrence.programInfo}
                                             currentView="Basic"/>
 
 )

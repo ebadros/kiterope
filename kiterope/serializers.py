@@ -281,7 +281,50 @@ class KRMessageSerializer(serializers.HyperlinkedModelSerializer):
         model = KRMessage
         fields = ('id', 'room', 'message', 'handle', 'timestamp')
 
+class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Program
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', )
 
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000)
+    scheduleLength = serializers.CharField()
+    timeCommitment = serializers.CharField(max_length=20)
+    costFrequencyMetric = serializers.CharField(max_length=20)
+    cost = serializers.CharField(max_length=20)
+    startDate = serializers.DateField()
+    author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+
+
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+    userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_userPlanOccurrenceId(self,obj):
+        try:
+            return obj.get_userPlanOccurrenceId(self.context['request'].user)
+        except:
+            return ""
+
+
+    def get_isSubscribed(self, obj):
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(program=self, user=self.context['request'].user, isSubscribed=True)
+            return thePlanOccurrence.isSubscribed
+        except:
+            return False
+
+
+    def get_timeCommitment(self, obj):
+        return obj.get_timeCommitment_display()
+
+    def get_scheduleLength(self, obj):
+        return obj.get_scheduleLength_display()
+
+    def get_viewableBy(self, obj):
+        return obj.get_viewableBy_display()
+
+    def get_costFrequencyMetric(self, obj):
+        return obj.get_costFrequencyMetric_display()
 
 
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
@@ -372,14 +415,23 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = PlanOccurrence
-        fields=('id', 'program', 'goal', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
+        fields=('id', 'program', 'goal', 'programInfo', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
     #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
+    programInfo = serializers.SerializerMethodField()
+
 
     goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     isSubscribed = serializers.BooleanField()
+
+    def get_programInfo(self, obj):
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = PlanProgramSerializer(obj.program, many=False, context=serializer_context)
+        return serializer.data
+
 
 
 
@@ -442,7 +494,9 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 
     def get_planOccurrences(self, obj):
-        serializer = PlanOccurrenceSerializer(obj.get_planOccurrences(), many=True)
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = PlanOccurrenceSerializer(obj.get_planOccurrences(), many=True, context=serializer_context)
         return serializer.data
 
 

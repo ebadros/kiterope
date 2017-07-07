@@ -430,7 +430,6 @@ export class GoalDetailPage extends React.Component {
             data:[],
             editable:false,
             serverErrors:"",
-
             openModal:false,
             formIsOpen:false,
             headerActionButtonLabel: "Add Plan"
@@ -618,20 +617,7 @@ export class GoalDetailPage extends React.Component {
 
                         ]}/>
 
-                        {/*
-                        <div className="ui large breadcrumb">
-                            <Link to={`/`}>
-                                <div className="section">Home</div>
-                            </Link>
-                            <i className="right chevron icon divider"></i>
-                            <Link to={`/goals`}>
-                                <div className="active section">My Goals</div>
-                            </Link>
-                            <i className="right chevron icon divider"></i>
-                            <Link to={`/goals/${this.props.params.goal_id}/plans/`}>
-                                <div className="active section">Goal Detail</div>
-                            </Link>
-                        </div>*/}
+
                         <div>&nbsp;</div>
                         <GoalViewEditDeleteItem key={this.props.params.goal_id}
                                                 showCloseButton={false}

@@ -985,7 +985,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
      goToAuthorPage() {
 
-         hashHistory.push("/profiles/" + this.state.id)
+         hashHistory.push("/profiles/" + this.state.data.author)
 
      }
 
@@ -1305,6 +1305,12 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
          }
      }
+     goToAuthorPage() {
+
+         hashHistory.push("/profiles/" + this.state.data.author)
+
+     }
+
 
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
@@ -1498,7 +1504,7 @@ hideComponent = () => {
 
 }
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     constructor(props) {
         super(props);
@@ -1675,6 +1681,9 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     }
+    handleContactClicked =() => {
+
+    }
 
 
 hideComponent = () => {
@@ -1692,8 +1701,32 @@ hideComponent = () => {
         var basicView = this.getBasicView()
         var editView = this.getEditView()
 
-
+        if (this.props.storeRoot.user) {
         return (
+
+            <div ref={`ref_profileItem_${this.props.id}`} className="column">
+                {controlBar}
+
+
+                <div className="ui segment noBottomMargin noTopMargin">
+                    <div>{basicView}</div>
+                    {detailView}
+
+                    <div className="sixteen wide row">
+
+                        <div>
+
+                            {editView}
+                        </div>
+                    </div>
+
+                </div>{ this.props.storeRoot.user.id != this.state.data.user ? <div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>:null}
+
+            </div>
+
+        )}
+        else return (
+
             <div ref={`ref_profileItem_${this.props.id}`} className="column">
                 {controlBar}
 

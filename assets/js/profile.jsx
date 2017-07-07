@@ -280,6 +280,7 @@ export class ProfileForm extends React.Component {
             lastName: "",
             bio: "",
             zipCode: "",
+            isCoach:"",
             notificationChannel:"",
             editable:false,
             data:"",
@@ -291,7 +292,7 @@ export class ProfileForm extends React.Component {
 
     componentDidMount () {
         $(this.refs['id_whichGoalForm']).hide()
-        this.checkIfUser()
+        //this.checkIfUser()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -302,6 +303,7 @@ export class ProfileForm extends React.Component {
                 firstName: nextProps.data.firstName,
                 lastName: nextProps.data.lastName,
                 bio: nextProps.data.bio,
+                isCoach: nextProps.data.isCoach,
                 zipCode: nextProps.data.zipCode,
                 profilePhoto: nextProps.data.profilePhoto,
                 notificationChannel: nextProps.data.notificationChannel,
@@ -438,6 +440,7 @@ export class ProfileForm extends React.Component {
             bio: "",
             zipCode: "",
             editable:false,
+            isCoach:"",
             data:"",
             image:null,
             notificationChannel:""
@@ -464,7 +467,8 @@ if (this.state.user) {
         var zipCode = this.state.zipCode;
         var profilePhoto = this.state.profilePhoto;
         var bio = this.state.bio;
-    var notificationChannel = this.state.notificationChannel
+    var notificationChannel = this.state.notificationChannel;
+    var isCoach = this.state.isCoach;
 
 
 
@@ -474,6 +478,7 @@ if (this.state.user) {
             lastName: lastName,
             zipCode: zipCode,
             bio: bio,
+            isCoach: isCoach,
             profilePhoto: profilePhoto,
             notificationChannel: notificationChannel
 

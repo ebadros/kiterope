@@ -1,4 +1,4 @@
-@mobileBreakpoint            : 320px;
+@mobileBreakpoint            : 420px;
 @tabletBreakpoint            : 768px;
 @computerBreakpoint          : 992px;
 @largeMonitorBreakpoint      : 1280px;
@@ -12,7 +12,9 @@
 html {
     z-index:1;
 }
-
+.fullPageDiv {
+    align:center;
+}
 .google {
     color:black;
     background-color:white;
@@ -163,6 +165,12 @@ a.pageTitle {
     left:0;
     top:0;
     height:20vw;
+    background: black !important;
+    opacity: 0.8 !important;
+
+
+
+
 
 }
 
@@ -176,6 +184,8 @@ a.pageTitle {
 
     position:relative;
     cursor:pointer !important;
+
+
 
 
 }
@@ -670,6 +680,17 @@ img.clippedImage  {
 
 
 
+@media only screen and (min-width: 1280px)
+img.clippedImage  {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 20vw, 0% 20vw);
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 20vw, 0% 20vw);
+    overflow-y:hidden !important;
+    background: black !important;
+    opacity: 0.8 !important;
+
+}
+
+
 .disabledForm input {
     background:none !important;
     border:none !important;
@@ -772,6 +793,7 @@ img.listNodeImage {
     height:100%;
     width:100%;
     line-height:normal;
+
 }
 
 .noRadius {

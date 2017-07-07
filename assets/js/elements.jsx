@@ -219,6 +219,8 @@ export class ClippedImageOverlayedText extends React.Component {
                      width: width,
                      height: "auto",
                      clip: rectString,
+                     background: 'black',
+                     opacity: 0.6,
 
                  }
 
@@ -231,6 +233,8 @@ export class ClippedImageOverlayedText extends React.Component {
 
 
                          height: containerHeight,
+                         background: 'black' ,
+                     opacity: 0.6 ,
 
                      }
                  }
@@ -245,7 +249,7 @@ export class ClippedImageOverlayedText extends React.Component {
 
                  <div className="image overlayedImage">
                      <div className={classDescriptor} style={containerStyle} >
-                         <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad} style={myStyle} />
+                         <img className={`clippedImageOverlayed ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad} style={myStyle} />
                     </div>
 
                                     </div>
