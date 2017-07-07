@@ -541,7 +541,6 @@ export class ProgramDetailPage extends React.Component {
     }
 
     convertStepsIntoArray(theSteps) {
-        console.log("convertStepsIntoArray")
         var stepArray = []
         for (var key in theSteps) {
             var theStep = theSteps[key]

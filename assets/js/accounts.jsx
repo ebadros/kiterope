@@ -135,7 +135,6 @@ export class ReduxDataGetter extends React.Component {
             },
             success: function(userData) {
                 if (userData.id != null) {
-                                console.log("theUser != null")
 
 
                 store.dispatch(setCurrentUser(userData))

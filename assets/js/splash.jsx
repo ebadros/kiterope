@@ -49,14 +49,12 @@ export class SplashPage extends React.Component {
             success: function (theUser) {
                 //printObject(theUser)
                 if (theUser.id != null) {
-                    console.log("theUser != null")
                     this.setState({
                         user: theUser
                     })
                     store.dispatch(setCurrentUser(theUser))
                     hashHistory.push("/daily/")
                 } else {
-                    console.log("theUser == null")
 
                     hashHistory.push("/search/")
 

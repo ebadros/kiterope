@@ -1037,7 +1037,6 @@ export class StepForm extends React.Component {
         }
 
         resetForm = () => {
-            console.log("reset form called")
             this.setState({
                 id:"",
             title: "",
