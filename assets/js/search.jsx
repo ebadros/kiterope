@@ -282,7 +282,7 @@ handleChangeQuery = (e) => {
     return (
         <div>
         <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
-        <div className="fullPageDiv">
+        <div className="">
             <div className="ui container">
                 <div className="spacer">&nbsp;</div>
 
