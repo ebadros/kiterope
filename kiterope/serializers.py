@@ -10,6 +10,13 @@ from kiterope.validators import RequiredValidator
 import json
 import datetime
 
+from rest_auth.registration.serializers import RegisterSerializer
+from allauth.account import app_settings as allauth_settings
+from allauth.utils import email_address_exists
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import setup_user_email
+
+
 
 def makeSerializer(serializerName, source, many,read_only):
     return {
@@ -179,6 +186,27 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             return "User has no notification channel"
 
 
+class MyRegisterSerializer(RegisterSerializer):
+    first_name = serializers.CharField(required=True, write_only=True)
+    last_name = serializers.CharField(required=True, write_only=True)
+
+    def get_cleaned_data(self):
+        return {
+            'first_name': self.validated_data.get('first_name', ''),
+            'last_name': self.validated_data.get('last_name', ''),
+            'password1': self.validated_data.get('password1', ''),
+            'email': self.validated_data.get('email', ''),
+            'username': self.validated_data.get('email', '')
+        }
+
+    def save(self, request):
+        adapter = get_adapter()
+        user = adapter.new_user(request)
+        self.cleaned_data = self.get_cleaned_data()
+        adapter.save_user(request, user, self)
+        setup_user_email(request, user, [])
+        user.save()
+        return user
 
 class SearchQuerySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -266,12 +294,34 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 class ContactSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Contact
-        fields = ('id', 'sender', 'receiver', 'wasConfirmed', 'relationship',  )
+        fields = ('id', 'sender', 'receiver', 'senderProfile', 'receiverProfile', 'wasConfirmed', 'relationship',  )
 
-    sender = ProfileSerializer()
-    receiver = ProfileSerializer()
+    sender = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
+    receiver = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
+    senderProfile= serializers.SerializerMethodField(required=False, read_only=True)
+    receiverProfile = serializers.SerializerMethodField(required=False, read_only=True)
     wasConfirmed = serializers.CharField(max_length=20, )
     relationship = serializers.CharField(max_length=20, )
+
+    def get_senderProfile(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+        #theProfile = Profile.objects.get(id=obj.sender)
+
+        serializer = ProfileSerializer(obj.sender)
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+
+    def get_receiverProfile(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+        #theProfile = Profile.objects.get(id=obj.receiver)
+
+
+        serializer = ProfileSerializer(obj.receiver)
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+
 
 
 

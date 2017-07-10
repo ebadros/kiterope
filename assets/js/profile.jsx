@@ -1052,11 +1052,14 @@ export class ProfileItemMenu extends React.Component {
                       <div className="menu">
 
                           <div className="ui item">
-                              <IconLabelCombo size="extramini" orientation="left" text="Add as Coach" icon="goal" background="Light" click={this.handleClick} />
+                              <IconLabelCombo size="extramini" orientation="left" text="Add Contact" icon="goal" background="Light" click={this.handleClick} />
                               </div>
-                          <div className="ui item">
+                          {/*<div className="ui item">
                             <IconLabelCombo size="extramini" orientation="left" text="Add as Client" icon="step" background="Light" click={this.handleClick} />
                             </div>
+                          <div className="ui item">
+                            <IconLabelCombo size="extramini" orientation="left" text="Remove Contact" icon="trash" background="Light" click={this.handleClick} />
+                            </div>      */}
 
                       </div>
                   </div>
@@ -1226,19 +1229,18 @@ checkIfUser() {
 
         if (this.state.data) {
              var theData = this.state.data
-        var values = Object.keys(theData).map(function(key){
-        return theData[key];
-        });
+        var profileList = Object.keys(theData).map(function(key){
 
-        var profileList = values.map((profile) => {
+
 
             return (
-                    <ProfileViewEditDeleteItem key={profile.id}
+                    <ProfileViewEditDeleteItem key={theData[key].id}
                                             isListNode={true}
                                             showCloseButton={false}
                                             apiUrl="api/profiles/"
-                                            id={profile.id}
-                                            data={profile}
+                                            id={theData[key].id}
+                                            data={theData[key]}
+                                               contact={key}
                                             currentView="Basic"/>
 
 

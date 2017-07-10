@@ -20,7 +20,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, removePlan, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, removePlan, deleteContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -32,6 +32,7 @@ import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporte
 
 import {  theServer, s3IconUrl, s3ImageUrl, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
 
+import { ContactItemMenu } from './contact'
 function printObject(o) {
   var out = '';
   for (var p in o) {
@@ -1517,6 +1518,31 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
          }
      }
 
+     callDeleteReducer() {
+        store.dispatch(deleteContact(this.props.contact))
+    }
+
+     removeContact = () => {
+        var theUrl = "api/contacts/" + this.props.contact + "/"
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'DELETE',
+                headers: {
+                'Authorization': 'Token ' + localStorage.token
+                },
+                success: () => {
+                    this.hideComponent()
+                    this.callDeleteReducer()
+                    //this.reload()
+                },
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }
+            });
+        }
+
 
 
      handleProfileSubmit (profile, callback) {
@@ -1574,6 +1600,13 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             })
             this.determineOptions()
         }
+        if (nextProps.storeRoot != undefined) {
+            if (this.state.user != nextProps.storeRoot.user) {
+                this.setState({
+                    user: nextProps.storeRoot.user
+                })
+            }
+        }
 
 
 
@@ -1583,11 +1616,14 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
     handleClick = (callbackData) => {
         switch (callbackData) {
-            case("Add as Coach"):
+            case("Add Contact"):
                 this.addAsCoach()
                 break;
             case("Add as Client"):
                 this.addAsClient()
+                break;
+            case("Remove Contact"):
+                this.removeContact()
                 break;
             default:
                 this.setState({
@@ -1616,7 +1652,8 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log("requestedToBeCoach")
+                     store.dispatch(addContact(data))
+
 
 
                  }.bind(this),
@@ -1635,9 +1672,14 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     getControlBar = () => {
+        if (this.props.contact != undefined) {
+            var theLabel = "Contact"
+        } else {
+            var theLabel = "Profile"
+        }
         return(
         <ItemControlBar myRef="ref_itemControlBar"
-                        label="Profile"
+                        label={theLabel}
                         click={this.handleClick}
                         currentView={this.state.currentView}
                         editable={this.state.editable}
@@ -2043,6 +2085,8 @@ export class ItemControlBarButton extends React.Component {
                 return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="menuIcon"  src={`${s3IconUrl}hideDark.svg`} onClick={this.handleClick} /></div></div>)
             case("Menu"):
                 switch(this.props.menuType) {
+                    case("Contact"):
+                        return (<ContactItemMenu click={this.handleClick}/>)
                     case("Profile"):
                         return (<ProfileItemMenu click={this.handleClick}/>)
                     case("Goal"):

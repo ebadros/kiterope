@@ -995,7 +995,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
 class ContactViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     queryset = Contact.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [AllowAny]
     pagination_class = StandardResultsSetPagination
 
     def list(self, request, *args, **kwargs):
@@ -1019,9 +1019,13 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         theUser = self.request.user
+        print(theUser)
         #querySet = Contact.objects.all()
         querySet = Contact.objects.filter((Q(sender=theUser.profile) | Q(receiver=theUser.profile)))
         return querySet
+
+
+
 
 
 class ProfileViewSet(viewsets.ModelViewSet):

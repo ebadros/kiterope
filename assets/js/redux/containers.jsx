@@ -63,8 +63,14 @@ const mapDispatchToProps = (dispatch) => {
       deleteGoal: (theGoalId) => {
       dispatch(deleteGoal(theGoalId))
     },
+    deleteContact: (theContactId) => {
+      dispatch(deleteContact(theContactId))
+    },
     setContacts: (theContacts) => {
       dispatch(setContacts(theContacts))
+    },
+    addContact: (theContact) => {
+      dispatch(addContact(theContact))
     },
     setPlans: (thePlans) => {
       dispatch(setPlans(thePlans))

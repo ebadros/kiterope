@@ -122,6 +122,18 @@ export const rootReducer = (state = {}, action) => {
     return Object.assign({}, state, { plans: thePlans });
     break;
 
+    case 'ADD_CONTACT':
+       var theContacts = state.contacts
+        theContacts[action.contact.id] = action.contact
+    return Object.assign({}, state, { contacts: theContacts });
+    break;
+case 'DELETE_CONTACT':
+      var theContacts = state.contacts
+           delete theContacts[action.contactId]
+
+
+    return Object.assign({}, state, { contacts: theContacts });
+    break;
 
     case 'REMOVE_PLAN':
       var initialPlans = state.plans

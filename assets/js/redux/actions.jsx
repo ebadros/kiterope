@@ -87,6 +87,13 @@ export const setContacts = (theContacts) => {
     }
 }
 
+export const addContact = (theContact) => {
+    return {
+        type: 'ADD_CONTACT',
+        contact: theContact,
+    }
+}
+
 export const setOpenThreads = (theOpenThreads) => {
     return {
         type: 'SET_OPEN_THREADS',
@@ -191,6 +198,12 @@ export const deleteStep = (theProgramId, theStepId) => {
     }
 }
 
+export const deleteContact = (theContactId) => {
+    return {
+        type: 'DELETE_CONTACT',
+        contactId: theContactId,
+    }
+}
 
 
 
@@ -229,4 +242,4 @@ export const showSidebar = (isSidebarVisible) => {
 
 
 
-module.exports = { setCurrentUser, setPlans, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences }
+module.exports = { setCurrentUser, deleteContact, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences }

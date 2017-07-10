@@ -291,6 +291,9 @@ SOCIALACCOUNT_PROVIDERS = \
 }
 USE_S3 = False
 
+AUTH_PROFILE_MODULE = 'accounts.Profile'
+
+
 AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
@@ -317,6 +320,10 @@ DATETIME_INPUT_FORMATS = [
     '%Y-%m-%d %H:%i' ,
 ]
 
+REST_AUTH_REGISTER_SERIALIZERS = {
+        'REGISTER_SERIALIZER': 'kiterope.serializers.MyRegisterSerializer',
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
@@ -324,7 +331,7 @@ REST_FRAMEWORK = {
         #'oauth2_provider.ext.rest_framework.OAuth2Authentication',
 
         #'rest_framework.authentication.BasicAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
 
     ),
 

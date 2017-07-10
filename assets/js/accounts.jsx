@@ -321,21 +321,24 @@ export class ReduxDataGetter extends React.Component {
         if (this.props.storeRoot) {
             if (this.props.storeRoot.user) {
                 for (var key in theContactData) {
-                    if (theContactData[key].receiver.id == this.props.storeRoot.user.id) {
-                        var theSender = theContactData[key].sender
-                        var theContactId = theSender.id
+                    if (theContactData[key].receiverProfile.user == this.props.storeRoot.user.id) {
+                        var theSender = theContactData[key].senderProfile
+
+                        var theContactId = theContactData[key].id
                         theContacts[theContactId] = theSender
+
 
                         //theContacts.push({theContactId: theContactData[key].sender})
 
                     } else {
-                        var theReceiver = theContactData[key].receiver
-                        var theContactId = theReceiver.id
-                        var theContact = { theContactId: theReceiver}
+                        var theReceiver = theContactData[key].receiverProfile
+
+                        var theContactId = theContactData[key].id
                         theContacts[theContactId] = theReceiver
 
                     }
                 }
+
                 store.dispatch(setContacts(theContacts))
 
 
@@ -1426,13 +1429,12 @@ export class JoinForm extends React.Component {
             tos: false,
             emailSent: true,
             serverErrors: "",
-            tosErrors: []
+            tosErrors: [],
+            buttonLabel:"Join Kiterope"
 
 
         }
     }
-
-
 
 
   componentWillReceiveProps (nextProps) {
@@ -1444,6 +1446,9 @@ export class JoinForm extends React.Component {
 
   handleSubmit = (e) => {
       e.preventDefault()
+      this.setState({
+          buttonLabel:"Joining..."
+      })
 
       if (this.state.tos == true) {
           var username = this.state.username
@@ -1473,10 +1478,12 @@ export class JoinForm extends React.Component {
                   this.handleSuccess()
               }.bind(this),
               error: function (xhr, status, err) {
+
                   console.error(theUrl, status, err.toString());
                   var serverErrors = xhr.responseJSON;
                   this.setState({
                       serverErrors: serverErrors,
+                      buttonLabel:"Join Kiterope"
                   })
               }.bind(this)
           });
@@ -1485,7 +1492,9 @@ export class JoinForm extends React.Component {
               theServerErrors.push( "You must agree to the Terms of Service to join." )
 
           this.setState({
-              tosErrors: theServerErrors
+              tosErrors: theServerErrors,
+              buttonLabel:"Join Kiterope"
+
 
           })
       }
@@ -1499,7 +1508,8 @@ export class JoinForm extends React.Component {
           password2:"",
           first_name:"",
           last_name:"",
-          serverErrors:""
+          serverErrors:"",
+          buttonLabel:"Joined"
       })
       this.props.emailSent()
   }
@@ -1650,7 +1660,7 @@ export class JoinForm extends React.Component {
                                           />
 
 
-                                      <button className="ui fluid purple button" type="submit">Join Kiterope</button>
+                                      <button className="ui fluid purple button" type="submit">{this.state.buttonLabel}</button>
                                   </form>
 
                               <hr />

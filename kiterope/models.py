@@ -279,13 +279,13 @@ class Goal(models.Model):
     title = models.CharField(max_length=200, default="", blank=False, null=True,)
     deadline = models.DateField(null=True, default=datetime.date.today, blank=False)
     description = models.CharField(max_length=2000, null=True, blank=False)
-    why = models.CharField(max_length=2000, null=True, blank=False)
+    why = models.CharField(max_length=2000, null=True, blank=True)
     image = models.CharField(max_length=200, null=True, blank=True)
     votes = models.IntegerField(null=True, blank=True)
     viewableBy = models.CharField(max_length=20, choices=VIEWABLE_CHOICES, default="ONLY_ME")
     user = models.ForeignKey(User)
     wasAchieved = models.BooleanField(default=False)
-    metric = models.CharField(max_length=100, blank=False, null=True)
+    metric = models.CharField(max_length=100, blank=True, null=True)
 
 
     #plans = models.ManyToManyField("Plan", blank=True, related_name='plans')
@@ -550,8 +550,8 @@ class Profile(models.Model):
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            print("create user profile")
             Profile.objects.create(user=instance, firstName=instance.first_name, lastName = instance.last_name)
+            Goal.objects.create(user=instance, title="My first goal")
 
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):

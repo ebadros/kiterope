@@ -8,7 +8,6 @@ SAFE_ADMIN_METHODS = ['GET', 'UPDATE', 'PATCH', 'HEAD', 'OPTIONS', 'PUT', 'POST'
 class UserPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        print(view.action)
         if view.action == 'list':
             return request.user.is_authenticated() and request.user.is_admin
         elif view.action == 'create':
