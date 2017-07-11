@@ -59,14 +59,14 @@ export class IconLabelCombo extends React.Component {
 
     handleClick = () => {
         this.props.click(this.props.text)
-    }
+    };
 
     render() {
 
-        var iconName = this.props.icon
+        var iconName = this.props.icon;
 
 
-        var icon = s3IconUrl + iconName + this.props.background + ".svg"
+        var icon = s3IconUrl + iconName + this.props.background + ".svg";
 
         if (this.props.orientation == "left") {
             return (
@@ -108,7 +108,7 @@ export class ContextualMenuItem extends React.Component {
             myId:this.props.myId,
             text:this.props.text
         })
-    }
+    };
 
     render() {
         return (
@@ -130,14 +130,14 @@ export class ItemMenu extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
      getProfileMenu () {
 
      }
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          return(
 
                   <div className="ui simple dropdown item" >
@@ -190,27 +190,27 @@ export class ClippedImageOverlayedText extends React.Component {
     }
 
     render () {
-         var {width, height} = this.state.dimensions
-         var isCircular = ""
+         var {width, height} = this.state.dimensions;
+         var isCircular = "";
 
 
-             var width = width
-             var height = height
-             var containerHeight = height
-             var classDescriptor = ""
-             var position = "absolute"
+             var width = width;
+             var height = height;
+             var containerHeight = height;
+             var classDescriptor = "";
+             var position = "absolute";
 
 
-         var heightString = containerHeight + "px !important"
+         var heightString = containerHeight + "px !important";
 
          var containerStyle = {
              height: containerHeight,
 
-         }
+         };
 
-         var minWidthString = width + "px !important"
-         var minHeightString = containerHeight + "px !important"
-         var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)"
+         var minWidthString = width + "px !important";
+         var minHeightString = containerHeight + "px !important";
+         var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)";
 
          if (this.state.imageHeight) {
              if (this.state.imageHeight >= this.state.imageWidth) {
@@ -276,46 +276,48 @@ export class ClippedImage extends React.Component {
     }
 
     onImgLoad({target:img}) {
-        this.setState({imageHeight:img.height,
-                                   imageWidth:img.width});
+        this.setState({
+            imageHeight:img.height,
+            imageWidth:img.width,
+        } );
     }
      render () {
-         var {width, height} = this.state.dimensions
-         var isCircular = ""
+         var {width, height} = this.state.dimensions;
+         var isCircular = "";
 
          if (this.props.item == 'plan') {
-             var width = width + 30
-             var height = height + 15
-             var containerHeight = 9 / 16 * width
-             var classDescriptor = "reverseSegmentMargin"
+             var width = width + 30;
+             var height = height + 15;
+             var containerHeight = 9 / 16 * width;
+             var classDescriptor = "reverseSegmentMargin";
              var position = "absolute"
 
          } else if (this.props.item =='goal') {
-             var width = width
-             var height = height
-             var containerHeight = height
-             var classDescriptor = ""
+             var width = width;
+             var height = height;
+             var containerHeight = height;
+             var classDescriptor = "";
              var position = "absolute"
 
          } else if (this.props.item =='profile') {
-             var width = width - 40
-             var left = 20
-             var height = width
-             var containerHeight = width
-             var classDescriptor = "center aligned"
-             var isCircular = "ui circular image"
+             var width = width - 40;
+             var left = 20;
+             var height = width;
+             var containerHeight = width;
+             var classDescriptor = "center aligned";
+             var isCircular = "ui circular image";
              var position = "relative"
          }
-         var heightString = containerHeight + "px !important"
+         var heightString = containerHeight + "px !important";
 
          var containerStyle = {
              height: containerHeight,
 
-         }
+         };
 
-         var minWidthString = width + "px !important"
-         var minHeightString = containerHeight + "px !important"
-         var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)"
+         var minWidthString = width + "px !important";
+         var minHeightString = containerHeight + "px !important";
+         var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)";
 
          if (this.state.imageHeight) {
              if (this.state.imageHeight >= this.state.imageWidth) {
@@ -357,14 +359,17 @@ export class ClippedImage extends React.Component {
                  }
              }
          }
-
-         return(
-             <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
-                <div className={classDescriptor} style={containerStyle} >
-                <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad} style={myStyle} />
+            return (
+                <Measure onMeasure={(dimensions) => {
+                    this.setState({dimensions})
+                }}>
+                    <div className={classDescriptor} style={containerStyle}>
+                        <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad}
+                             style={myStyle}/>
                     </div>
                 </Measure>
-         )
+            )
+
 
      }
 }
@@ -401,10 +406,10 @@ export class ChoiceModalButtonsList extends React.Component {
 
     handleClick = (callbackData ) => {
         this.props.click({action:callbackData.action})
-    }
+    };
 
     render() {
-        var buttonList = ""
+        var buttonList = "";
 
         if (this.props.buttons) {
 
@@ -462,23 +467,23 @@ export class ChoiceModal extends React.Component {
     closeModal = () => {
             this.setState({
                 modalIsOpen: false,
-            })
+            });
         this.props.closeModalClicked()
 
-    }
+    };
 
     getButtons() {
-        var buttonHtml = ""
+        var buttonHtml = "";
         for (var i = 0; i < this.props.buttons.length; i++) {
-            var currentButton = this.props.buttons[i]
-            buttonHtml = buttonHtml
+            var currentButton = this.props.buttons[i];
+            buttonHtml = buttonHtml;
             return (buttonHtml)
         }
     }
 
     handleClick = (callbackData ) => {
         this.props.click({action:callbackData.action})
-    }
+    };
 
     render() {
         return (<Modal
@@ -534,4 +539,4 @@ export class Test extends React.Component {
      }
 }
 
-module.exports = { Test , IconLabelCombo , ItemMenu, ClippedImage, ChoiceModal, ContextualMenuItem, ChoiceModalButton, ChoiceModalButtonsList, ClippedImageOverlayedText }
+module.exports = { Test , IconLabelCombo , ItemMenu, ClippedImage, ChoiceModal, ContextualMenuItem, ChoiceModalButton, ChoiceModalButtonsList, ClippedImageOverlayedText };

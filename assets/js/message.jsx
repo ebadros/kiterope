@@ -44,6 +44,9 @@ import Websocket from 'react-websocket';
 
 var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 //var ws_scheme =  "ws";
+import PropTypes from 'prop-types';
+import {enableUniqueIds, nextUniqueId} from 'react-html-id'
+
 
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
@@ -86,16 +89,16 @@ const style = {
 };
 
 const verticalScrollbarStyle = {
-    color: '#2185D0;',
+    color: '#2185D0',
     borderRadius:'2px, 2px, 2px, 2px',
 
-}
+};
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowContainer extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
 
         this.state = {
             threads:{},
@@ -128,7 +131,7 @@ export class MessageWindowContainer extends React.Component {
                     if (this.state.user != nextProps.storeRoot.user) {
                         this.setState({
                             user: nextProps.storeRoot.user
-                        }, this.connectToNotificationChannel())
+                        }, this.connectToNotificationChannel());
                             //if (nextProps.storeRoot.user.notificationChannelLabel != undefined) {
                                 //this.connectToNotificationChannel(nextProps.storeRoot.user.notificationChannelLabel)
 
@@ -157,7 +160,7 @@ export class MessageWindowContainer extends React.Component {
 
     connectToNotificationChannel = () => {
         if (this.state.user) {
-            var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + this.state.user.notificationChannelLabel + "/?token=" + localStorage.token)
+            var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + this.state.user.notificationChannelLabel + "/?token=" + localStorage.token);
             notificationWebsocket.onmessage = (message) => {
                 var messageData = JSON.parse(message.data);
                 if (messageData.text == "openPrivateTextChannel") {
@@ -170,7 +173,7 @@ export class MessageWindowContainer extends React.Component {
                 notificationWebsocket: notificationWebsocket
             })
         }
-    }
+    };
 
 
 
@@ -221,7 +224,7 @@ export class MessageWindowContainer extends React.Component {
     */
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread"
+        var theUrl = "api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -231,10 +234,10 @@ export class MessageWindowContainer extends React.Component {
                 },
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
-                        var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
-                        store.dispatch(addThread(theMessageThreadData))
-                        store.dispatch(setCurrentThread(theMessageThreadData))
+                        var theMessageThreadData = messageThreadData.results[0];
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token);
+                        store.dispatch(addThread(theMessageThreadData));
+                        store.dispatch(setCurrentThread(theMessageThreadData));
 
                         this.setState({
                             //openThreads: this.state.openThreads.concat(theMessageThreadData),
@@ -262,7 +265,7 @@ export class MessageWindowContainer extends React.Component {
             })
 
 
-    }
+    };
 
 
 
@@ -293,9 +296,9 @@ export class MessageWindowContainer extends React.Component {
         },
 
         success: function (messageThreadData) {
-            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
-            store.dispatch(addThread(messageThreadData))
-            store.dispatch(setCurrentThread(messageThreadData))
+            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token);
+            store.dispatch(addThread(messageThreadData));
+            store.dispatch(setCurrentThread(messageThreadData));
 
             this.setState({
                 //openThreads: this.state.openThreads.concat({messageThreadData}),
@@ -303,7 +306,7 @@ export class MessageWindowContainer extends React.Component {
                 currentReceiverNotificationChannelLabel: "",
                 currentMessageThreadChannel: "",
                 currentReceiver: "",
-            })
+            });
                                                             //store.dispatch(setOpenThreads(this.state.openThreads))
 
         }.bind(this),
@@ -316,12 +319,12 @@ export class MessageWindowContainer extends React.Component {
 
 
     connectToWebsocket = (websocketType, websocketLabel) => {
-        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
+        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token);
         theSocket.onmessage = (message) => {
             var data = JSON.parse(message.data);
         };
 
-    }
+    };
 
     /*
     handleThreadCloseClick = (messageThread) => {
@@ -357,10 +360,10 @@ export class MessageWindowContainer extends React.Component {
         })*/
 
 
-    }
+    };
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = 'api/channelUsers/' + receiverId
+        var theUrl = 'api/channelUsers/' + receiverId;
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -369,7 +372,7 @@ export class MessageWindowContainer extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(data) {
-                var theMessageThreadChannelLabel = data[0].label
+                var theMessageThreadChannelLabel = data[0].label;
                 this.setState({ currentMessageThreadChannel: {
                     label: data[0].label,
                     id: data[0].id,
@@ -378,7 +381,7 @@ export class MessageWindowContainer extends React.Component {
                 },
 
                 },
-                )
+                );
                 //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
 
             }.bind(this),
@@ -388,25 +391,25 @@ export class MessageWindowContainer extends React.Component {
             }
         })
 
-    }
+    };
 
 
 
 
     handleLabelClick = (selectedLabelId) => {
         this.setState({selectedLabelId:selectedLabelId})
-    }
+    };
 
 
     handleNewThread = (contact) => {
 
         // Get the channel where the receiver gets their messages
-        this.getReceiverNotificationChannelLabel(contact.id)
+        this.getReceiverNotificationChannelLabel(contact.id);
 
         // Get the channel where the receiver and sender can communicate privately
-        this.getOrCreateThreadChannel(contact.id)
+        this.getOrCreateThreadChannel(contact.id);
 
-        var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000)
+        var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000);
         this.setState({
             currentThreadContact: contact,
             threadConnectionIntervalId:threadConnectionIntervalId
@@ -415,15 +418,15 @@ export class MessageWindowContainer extends React.Component {
 
 
 
-    }
+    };
 
       handleMessageThreadClick = (messageThread) => {
 
 
-          this.getReceiverNotificationChannelLabel(messageThread.receiver)
-          this.getOrCreateThreadChannel(messageThread.receiver)
+          this.getReceiverNotificationChannelLabel(messageThread.receiver);
+          this.getOrCreateThreadChannel(messageThread.receiver);
 
-          var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000)
+          var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000);
         this.setState({
             currentThreadContact: messageThread,
             threadConnectionIntervalId:threadConnectionIntervalId
@@ -431,7 +434,7 @@ export class MessageWindowContainer extends React.Component {
         )
 
 
-      }
+      };
 
 
     render() {
@@ -452,8 +455,8 @@ export class MessageWindowContainer extends React.Component {
 
 export class MessagePage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             threads:[],
@@ -470,7 +473,7 @@ export class MessagePage extends React.Component {
 
     connectToNotificationChannel = (notificationChannelLabel) => {
 
-        var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token)
+        var notificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + notificationChannelLabel + "/?token=" + localStorage.token);
         notificationWebsocket.onmessage = (message) => {
             var messageData = JSON.parse(message.data);
             if (messageData.text == "openPrivateTextChannel") {
@@ -482,14 +485,14 @@ export class MessagePage extends React.Component {
         this.setState({
             notificationWebsocket:notificationWebsocket
         })
-    }
+    };
 
     checkIfUser = () => {
         if (this.props.storeRoot) {
         if (this.props.storeRoot.user) {
             this.setState({
                 user: this.props.storeRoot.user
-            })
+            });
             this.connectToNotificationChannel(userData.notificationChannelLabel)
 
 
@@ -497,33 +500,33 @@ export class MessagePage extends React.Component {
     }
 
 
-    }
+    };
 
 
 
     removeThread = (e) =>{
         var array = this.state.openThreads.filter(function(item) {
             return item.id !== e
-        })
-        this.state.messageThreads[e].websocket.close(code = 1000, reason = '', {keepClosed: true, })
+        });
+        this.state.messageThreads[e].websocket.close(code = 1000, reason = '', {keepClosed: true, });
         this.state.messageThreads[e].websocket = undefined;
 
 
         this.setState({
             openThreads: array
         }, this.updateCurrentThread)
-    }
+    };
 
     updateCurrentThread = () => {
         if (this.state.openThreads.length != 0) {
-            var last = this.state.openThreads[this.state.openThreads.length - 1]
+            var last = this.state.openThreads[this.state.openThreads.length - 1];
             this.setState({currentThread: last})
         }
         else {
             this.setState({currentThread:""})
         }
 
-    }
+    };
 
     handleCurrentThreadChosen = (messageThread) => {
         if (messageThread.threadId) {
@@ -531,10 +534,10 @@ export class MessagePage extends React.Component {
         } else {
             this.setState({currentThread:""})
         }
-    }
+    };
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread"
+        var theUrl = "api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -544,8 +547,8 @@ export class MessagePage extends React.Component {
                 },
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
-                        var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
+                        var theMessageThreadData = messageThreadData.results[0];
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token);
 
 
                         this.setState({
@@ -571,13 +574,13 @@ export class MessagePage extends React.Component {
             })
 
 
-    }
+    };
 
 
 
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
-        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
+        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token);
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
             privateChannel: privateChannel.label,
@@ -587,7 +590,7 @@ export class MessagePage extends React.Component {
             token: localStorage.token,
 
 
-        }
+        };
 
         receiverNotificationWebsocket.addEventListener('open', () => {
             receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
@@ -596,7 +599,7 @@ export class MessagePage extends React.Component {
         });
 
 
-}
+};
 
 
 
@@ -606,7 +609,7 @@ export class MessagePage extends React.Component {
 
 
     createNewMessageThread(){
-        console.log("")
+        console.log("");
     $.ajax({
         url: "api/messageThreads/",
         dataType: 'json',
@@ -623,7 +626,7 @@ export class MessagePage extends React.Component {
         },
 
         success: function (messageThreadData) {
-            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
+            messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token);
 
 
             this.setState({
@@ -648,21 +651,21 @@ export class MessagePage extends React.Component {
 
 
     connectToWebsocket = (websocketType, websocketLabel) => {
-        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token)
+        var theSocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/" + websocketType + "/" + websocketLabel + "/?token=" + localStorage.token);
         theSocket.onmessage = (message) => {
             var data = JSON.parse(message.data);
         };
 
-    }
+    };
 
     handleThreadCloseClick = (messageThread) => {
         this.removeThread(messageThread.threadId)
 
 
-    }
+    };
     getReceiverNotificationChannelLabel = (receiverId) => {
 
-        var theUrl = 'api/users/' + receiverId
+        var theUrl = 'api/users/' + receiverId;
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -673,7 +676,7 @@ export class MessagePage extends React.Component {
             success: function(user) {
                 this.setState({
                     currentReceiverNotificationChannelLabel: user.notificationChannelLabel,
-                })
+                });
                 //this.connectToWebsocket("notifications", user.notificationChannelLabel)
 
 
@@ -685,12 +688,12 @@ export class MessagePage extends React.Component {
         })
 
 
-    }
+    };
 
 
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = 'api/channelUsers/' + receiverId
+        var theUrl = 'api/channelUsers/' + receiverId;
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -699,7 +702,7 @@ export class MessagePage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(data) {
-                var theMessageThreadChannelLabel = data[0].label
+                var theMessageThreadChannelLabel = data[0].label;
                 this.setState({ currentMessageThreadChannel: {
                     label: data[0].label,
                     id: data[0].id,
@@ -708,7 +711,7 @@ export class MessagePage extends React.Component {
                 },
 
                 },
-                )
+                );
                 //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
 
             }.bind(this),
@@ -718,7 +721,7 @@ export class MessagePage extends React.Component {
             }
         })
 
-    }
+    };
     componentDidMount () {
 
         this.checkIfUser()
@@ -728,18 +731,18 @@ export class MessagePage extends React.Component {
 
     handleLabelClick = (selectedLabelId) => {
         this.setState({selectedLabelId:selectedLabelId})
-    }
+    };
 
 
     handleNewThread = (contact) => {
 
         // Get the channel where the receiver gets their messages
-        this.getReceiverNotificationChannelLabel(contact.id)
+        this.getReceiverNotificationChannelLabel(contact.id);
 
         // Get the channel where the receiver and sender can communicate privately
-        this.getOrCreateThreadChannel(contact.id)
+        this.getOrCreateThreadChannel(contact.id);
 
-        var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000)
+        var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000);
         this.setState({
             currentThreadContact: contact,
             threadConnectionIntervalId:threadConnectionIntervalId
@@ -748,15 +751,15 @@ export class MessagePage extends React.Component {
 
 
 
-    }
+    };
 
       handleMessageThreadClick = (messageThread) => {
 
 
-          this.getReceiverNotificationChannelLabel(messageThread.receiver)
-          this.getOrCreateThreadChannel(messageThread.receiver)
+          this.getReceiverNotificationChannelLabel(messageThread.receiver);
+          this.getOrCreateThreadChannel(messageThread.receiver);
 
-          var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000)
+          var threadConnectionIntervalId = setInterval(this.createAndOrConnectToThread, 2000);
         this.setState({
             currentThreadContact: messageThread,
             threadConnectionIntervalId:threadConnectionIntervalId
@@ -764,7 +767,7 @@ export class MessagePage extends React.Component {
         )
 
 
-      }
+      };
 
 
     render() {
@@ -817,8 +820,8 @@ export class MessagePage extends React.Component {
 export class MessageThreadItemLabelsList extends React.Component {
     constructor(props) {
 
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             labelsList:[],
             openModal:false,
@@ -837,11 +840,11 @@ export class MessageThreadItemLabelsList extends React.Component {
 
     handleCloseClick = (closeLabelId) => {
         this.props.closeClick(closeLabelId)
-    }
+    };
 
     handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.labelsList != nextProps.labelsList)  {
@@ -899,11 +902,11 @@ export class MessageThreadLabelMenu extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
      handleNewLabelClick = () => {
          this.props.newLabelClick()
-     }
+     };
 
      componentDidMount() {
          this.loadLabelsFromServer()
@@ -928,12 +931,12 @@ export class MessageThreadLabelMenu extends React.Component {
       }.bind(this),
 
     })
-     }
+     };
 
 
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          if (this.state.data != null) {
 
              var labels = this.state.data.map((label) => {
@@ -964,8 +967,8 @@ export class MessageThreadLabelMenu extends React.Component {
 
 export class MessageThreadItemLabel extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             selectedLabel:""
@@ -992,8 +995,8 @@ export class MessageThreadItemLabel extends React.Component {
 export class MessagePageLabelsList extends React.Component {
     constructor(props) {
 
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             selectedLabelId:""
@@ -1011,12 +1014,12 @@ export class MessagePageLabelsList extends React.Component {
     }
 
     handleClick = (selectedLabelId) => {
-        this.setState({selectedLabelId:selectedLabelId})
+        this.setState({selectedLabelId:selectedLabelId});
         this.props.click(selectedLabelId)
 
 
 
-    }
+    };
 
 
     loadMessageLabelsFromServer = () => {
@@ -1038,7 +1041,7 @@ export class MessagePageLabelsList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
     render () {
 var labelsList = this.state.data.map((label) => {
@@ -1047,7 +1050,7 @@ var labelsList = this.state.data.map((label) => {
                 return (
                     <MessageLabelMenuItem key={`messageLabelMenuItem_${label.id}`} selectedLabelId={this.state.selectedLabelId} click={this.handleClick} labelText={label.text} myId={label.id} />
                 )
-            })
+            });
 
 
         return (
@@ -1071,8 +1074,8 @@ var labelsList = this.state.data.map((label) => {
 
 export class MessageLabelMenuItem extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             isActive:"",
             selectedLabelId:""
@@ -1089,7 +1092,7 @@ export class MessageLabelMenuItem extends React.Component {
         if (this.state.selectedLabelId != nextProps.selectedLabelId) {
             this.setState({
                 selectedLabelId:nextProps.selectedLabelId,
-            })
+            });
             if (nextProps.selectedLabelId == this.props.myId ) {
                 this.setState({
                     isActive:"activeItem"
@@ -1102,10 +1105,10 @@ export class MessageLabelMenuItem extends React.Component {
             }
 
         }
-    }
+    };
     handleClick = () => {
         this.props.click(this.props.myId)
-    }
+    };
 
     render() {
         return (
@@ -1118,8 +1121,8 @@ export class MessageLabelMenuItem extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindow extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             zIndex: 5,
             user:"",
@@ -1133,10 +1136,11 @@ export class MessageWindow extends React.Component {
             currentReceiverNotificationChannelLabel:"",
             currentMesageThreadChannelLabel:"",
         };
-        setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
+
     }
 
     componentDidMount () {
+        setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
 
         if (this.props.storeRoot) {
             this.setState({
@@ -1236,19 +1240,19 @@ export class MessageWindow extends React.Component {
           sender: theMessageData.sender,
 
 
-      }
+      };
 
-    var theWebsocket = theMessageData.thread.websocket
+    var theWebsocket = theMessageData.thread.websocket;
       theWebsocket.send(JSON.stringify(channelMessage));
 
       var theMessage =  {
           text: theMessageData.text,
           thread: theMessageData.thread.id,
-          sender: theMessageData.sender,
-          typeOfMessage: "chat-messages"
-      }
+          typeOfMessage: "chat-messages",
+          sender:theMessageData.sender
+      };
 
-          var theUrl = "api/messages/"
+          var theUrl = "api/messages/";
 
       $.ajax({
         url: theUrl,
@@ -1280,7 +1284,7 @@ export class MessageWindow extends React.Component {
       var message = {
           text: theMessageData.text,
           channel: "chat-messages"
-      }
+      };
 
 
     chat_socket.send(JSON.stringify(message));
@@ -1357,8 +1361,8 @@ export class MessageWindow extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class WindowPane extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             tabs: [
                 {label: "Contacts",}
@@ -1430,7 +1434,7 @@ export class WindowPane extends React.Component {
     render() {
          if (this.state.openThreads != undefined) {
 
-             var theData = this.state.openThreads
+             var theData = this.state.openThreads;
              var values = Object.keys(theData).map(function (key) {
                  return theData[key];
              });
@@ -1481,8 +1485,8 @@ export class WindowPane extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowMenuBarItem extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             otherParty:"",
@@ -1493,7 +1497,7 @@ export class MessageWindowMenuBarItem extends React.Component {
     }
 
     componentDidMount () {
-        this.setState({thread: this.props.thread})
+        this.setState({thread: this.props.thread});
 
         if (this.props.storeRoot) {
             this.setState({
@@ -1543,27 +1547,27 @@ export class MessageWindowMenuBarItem extends React.Component {
     }
 
     handleMenuItemCloseClick = () => {
-        console.log("clsing thread " + this.state.thread.id)
-                    store.dispatch(closeOpenThread(this.state.thread.id))
+        console.log("clsing thread " + this.state.thread.id);
+                    store.dispatch(closeOpenThread(this.state.thread.id));
 
         this.updateCurrentThread()
 
 
-    }
+    };
 
     updateCurrentThread = () => {
-        console.log("update currentThread")
+        console.log("update currentThread");
         if (this.state.openThreads.length > 0) {
-            var last = this.state.openThreads[this.state.openThreads.length - 1]
+            var last = this.state.openThreads[this.state.openThreads.length - 1];
             store.dispatch(setCurrentThread(last))
         }
         else {
-            store.dispatch(setCurrentThread(null))
+            store.dispatch(setCurrentThread(null));
 
             //this.setState()
         }
 
-    }
+    };
 
 
 
@@ -1571,15 +1575,15 @@ export class MessageWindowMenuBarItem extends React.Component {
         store.dispatch(setCurrentThread(this.props.thread))
 
 
-    }
+    };
 
     updateOtherPartyInfo () {
         if (this.state.thread) {
             if (this.state.thread.sender == this.state.user.id) {
-                var otherPartyName = this.state.thread.receiverName
+                var otherPartyName = this.state.thread.receiverName;
                 var otherPartyPhoto = s3ImageUrl + this.state.thread.receiverPhoto
             } else {
-                var otherPartyName = this.state.thread.senderName
+                var otherPartyName = this.state.thread.senderName;
                 var otherPartyPhoto = s3ImageUrl + this.state.thread.senderPhoto
             }
             this.setState({
@@ -1598,10 +1602,10 @@ export class MessageWindowMenuBarItem extends React.Component {
 
     render() {
         if (this.state.otherParty == "") {
-            this.updateOtherPartyInfo()
+            //this.updateOtherPartyInfo()
         }
         if (this.props.label != "Contacts") {
-            var theContactName = this.state.otherParty.name
+            var theContactName = this.state.otherParty.name;
             var theCloseButton =  <div>
                             <i onClick={this.handleMenuItemCloseClick} className="messageWindowMenuBarItemIcon close icon" ></i>
                         </div>
@@ -1625,8 +1629,8 @@ export class MessageWindowMenuBarItem extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
 
@@ -1634,7 +1638,7 @@ export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component
     }
 
     componentDidMount () {
-        this.setState({thread: this.props.thread})
+        this.setState({thread: this.props.thread});
 
         if (this.props.storeRoot) {
             this.setState({
@@ -1690,15 +1694,15 @@ export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component
         store.dispatch(setCurrentThread(this.props.thread))
 
 
-    }
+    };
 
     updateOtherPartyInfo () {
         if (this.state.thread) {
             if (this.state.thread.sender == this.state.user.id) {
-                var otherPartyName = this.state.thread.receiverName
+                var otherPartyName = this.state.thread.receiverName;
                 var otherPartyPhoto = s3ImageUrl + this.state.thread.receiverPhoto
             } else {
-                var otherPartyName = this.state.thread.senderName
+                var otherPartyName = this.state.thread.senderName;
                 var otherPartyPhoto = s3ImageUrl + this.state.thread.senderPhoto
             }
             this.setState({
@@ -1714,10 +1718,10 @@ export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component
     render() {
 
         if (this.props.thread.sender == this.props.user.id) {
-                 var otherPartyName = this.props.thread.receiverName
+                 var otherPartyName = this.props.thread.receiverName;
                 var otherPartyPhoto = this.props.thread.receiverPhoto
             } else {
-                var otherPartyName = this.props.thread.senderName
+                var otherPartyName = this.props.thread.senderName;
                 var otherPartyPhoto = this.props.thread.senderPhoto
             }
 
@@ -1736,8 +1740,8 @@ export class MessageWindowMenuBarAdditionalItemsMenuItem extends React.Component
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageWindowMenuBar extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             tabs: [
                 {label: "Contacts",}
@@ -1799,7 +1803,7 @@ export class MessageWindowMenuBar extends React.Component {
     render() {
         if (this.state.openThreads != undefined) {
 
-            var theData = this.state.openThreads
+            var theData = this.state.openThreads;
             var values = Object.keys(theData).map(function (key) {
                 return theData[key];
             });
@@ -1810,7 +1814,7 @@ export class MessageWindowMenuBar extends React.Component {
                                               thread={thread} /*currentThreadChosen={this.handleCurrentThreadChosen}
                                               threadCloseClick={this.handleThreadCloseClick} */ />
                 )
-            })
+            });
 
 
             var menuThreadItems = values.map((thread)  => {
@@ -1823,7 +1827,7 @@ export class MessageWindowMenuBar extends React.Component {
                 )
             })
         } else {
-            var threadItems = () =>  { return (<div></div>)}
+            var threadItems = () =>  { return (<div></div>)};
                         var menuThreadItems = () => { return (<div></div>)}
 
         }
@@ -1853,8 +1857,8 @@ export class MessageWindowMenuBar extends React.Component {
 
 export class MessageWindowMenuBarAdditionalItems extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
 
@@ -1886,7 +1890,7 @@ export class MessageWindowThreadItemsMenu extends React.Component {
 
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          return(
 
                   <div className="ui simple dropdown item messageWindowMenubarItem messageWindowMenuBarAdditionalItems" >
@@ -1905,8 +1909,8 @@ export class MessageWindowThreadItemsMenu extends React.Component {
 }
 export class MessageWithRoundedEdges extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
 
@@ -1942,8 +1946,8 @@ export class MessageWithRoundedEdges extends React.Component {
 
 export class Message extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
 
@@ -1979,12 +1983,12 @@ export class Message extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageInput extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             zIndex:1000,
             message: ""
-        }
+        };
 
         setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
 
@@ -1992,11 +1996,11 @@ export class MessageInput extends React.Component {
 
     handleMessageChange = (e) => {
         this.setState({message:e.target.value})
-    }
+    };
 
     sendMessage = () => {
         // I need to change this to a callback in MessageWindow
-        this.setState({message:""})
+        this.setState({message:""});
         this.props.onSubmit({
             thread:this.props.thread,
             text:this.state.message,
@@ -2006,7 +2010,7 @@ export class MessageInput extends React.Component {
         })
 
 
-  }
+  };
 
     _handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -2015,7 +2019,7 @@ export class MessageInput extends React.Component {
 
       this.sendMessage()
     }
-  }
+  };
 
     render() {
         var style = {
@@ -2027,7 +2031,7 @@ export class MessageInput extends React.Component {
             position: "relative"
 
 
-        }
+        };
             if (this.props.thread) {
 
                 return (
@@ -2059,8 +2063,8 @@ export class MessageInput extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             messages: [],
@@ -2073,7 +2077,7 @@ export class MessageThreadList extends React.Component {
     handlePageChange = (pageNumber) => {
         this.setState({activePage: pageNumber}, () => this.loadMessageThreadsFromServer());
 
-    }
+    };
 
     getPagination = () =>  {
           if (this.state.next != null || this.state.previous != null) {
@@ -2089,10 +2093,10 @@ export class MessageThreadList extends React.Component {
           } else {
           return ("")
           }
-      }
+      };
 
     componentDidMount() {
-        this.setupMessageLoading()
+        this.setupMessageLoading();
         this.setState({
             selectedLabelId:this.props.selectedLabelId,
             user:this.props.user
@@ -2112,12 +2116,12 @@ export class MessageThreadList extends React.Component {
                 user: nextProps.user
             })
         }
-    }
+    };
 
     setupMessageLoading = () => {
-        var messageThreadListInterval = setInterval(this.loadMessageThreadsFromServer, 2000)
+        var messageThreadListInterval = setInterval(this.loadMessageThreadsFromServer, 2000);
         this.setState({messageThreadListInterval:messageThreadListInterval})
-    }
+    };
 
     loadMessageThreadsFromServer = () => {
             if (this.state.activePage != 1) {
@@ -2153,26 +2157,26 @@ export class MessageThreadList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
     handleMessageThreadListItemClick = (messageThread) => {
         this.props.messageThreadListItemClick(messageThread)
 
-    }
+    };
 
 
 
     render () {
-        var pagination = this.getPagination()
+        var pagination = this.getPagination();
 
         if (this.state.data != null) {
 
 
         var messageThreadList = this.state.data.map((messageThread) => {
             if (messageThread.sender == this.state.user.id) {
-                 var otherPartyName = messageThread.receiverName
+                 var otherPartyName = messageThread.receiverName;
                 var otherPartyPhoto = messageThread.receiverPhoto
             } else {
-                var otherPartyName = messageThread.senderName
+                var otherPartyName = messageThread.senderName;
                 var otherPartyPhoto = messageThread.senderPhoto
             }
 
@@ -2206,8 +2210,8 @@ export class MessageThreadList extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadListItem extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             thread:"",
             otherParty:"",
@@ -2219,7 +2223,7 @@ export class MessageThreadListItem extends React.Component {
     }
 
     componentDidMount() {
-        this.checkIfUser()
+        this.checkIfUser();
         this.setState({
             thread: this.props.thread,
             user: this.props.user
@@ -2242,17 +2246,17 @@ export class MessageThreadListItem extends React.Component {
 
         }
 
-    }
+    };
 
     updateOtherPartyInfo () {
          if (this.state.thread.sender == this.state.user.id) {
-                    var otherPartyName = this.state.thread.receiverName
+                    var otherPartyName = this.state.thread.receiverName;
                     var otherPartyPhoto = s3ImageUrl + this.state.thread.receiverPhoto
                 } else {
-                    var otherPartyName = this.state.thread.senderName
+                    var otherPartyName = this.state.thread.senderName;
                     var otherPartyPhoto = s3ImageUrl + this.state.thread.senderPhoto
                 }
-                var theOtherParty = {name: otherPartyName, image: otherPartyPhoto}
+                var theOtherParty = {name: otherPartyName, image: otherPartyPhoto};
                 this.setState({otherParty: theOtherParty})
 
     }
@@ -2262,7 +2266,7 @@ export class MessageThreadListItem extends React.Component {
         if (this.props.storeRoot.user) {
             this.setState({
                 user: this.props.storeRoot.user
-            })
+            });
             this.updateOtherPartyInfo
 
 
@@ -2270,7 +2274,7 @@ export class MessageThreadListItem extends React.Component {
     }
 
 
-    }
+    };
 
 
 
@@ -2278,10 +2282,10 @@ export class MessageThreadListItem extends React.Component {
 
     handleClick = () => {
         this.props.click(this.state.thread)
-    }
+    };
 
     handleLabelCloseClick = (closeLabelId) => {
-        var labelsArray = this.state.thread.labels.slice()
+        var labelsArray = this.state.thread.labels.slice();
 
                 for(var i = labelsArray.length - 1; i >= 0; i--) {
                     if(labelsArray[i] == closeLabelId) {
@@ -2296,7 +2300,7 @@ export class MessageThreadListItem extends React.Component {
                         receiver: 9,
                         labels: labelsArray,
 
-                    }
+                    };
                     $.ajax({
                         traditional: true,
                         url: "api/messageThreads/" + this.state.thread.id + "/",
@@ -2318,20 +2322,20 @@ export class MessageThreadListItem extends React.Component {
 
 
 
-    }
+    };
 
     handleLabelsListMenuClick = (theLabel) => {
         if (theLabel.myId != "newLabel") {
-            var labelsArray = this.state.thread.labels.slice()
+            var labelsArray = this.state.thread.labels.slice();
             if (!labelsArray.includes(theLabel.myId)) {
-                labelsArray.push(theLabel.myId)
+                labelsArray.push(theLabel.myId);
 
                 var newMessage = {
                     sender: 2,
                     receiver: 9,
                     labels: labelsArray,
 
-                }
+                };
 
                 $.ajax({
                     traditional:true,
@@ -2353,7 +2357,7 @@ export class MessageThreadListItem extends React.Component {
 
             }
         }
-    }
+    };
 
 
     render() {
@@ -2397,8 +2401,8 @@ export class MessageThreadListItem extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class ContactListPane extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             user:"",
             contacts: {},
@@ -2415,7 +2419,7 @@ export class ContactListPane extends React.Component {
 
                 this.setState({
                     user: this.props.storeRoot.user
-                })
+                });
                 this.setupMessageLoading
 
             }
@@ -2433,7 +2437,7 @@ export class ContactListPane extends React.Component {
         }
         this.setState({
             isVisible: this.props.isVisible
-        })
+        });
         if (this.props.isVisible) {
             $(this.refs['ref_contactListPane']).show();
 
@@ -2450,7 +2454,7 @@ export class ContactListPane extends React.Component {
             if (nextProps.storeRoot.user) {
                 this.setState({
                     user: nextProps.storeRoot.user
-                })
+                });
                 this.setupMessageLoading
 
             }
@@ -2467,7 +2471,7 @@ export class ContactListPane extends React.Component {
             }
         }
         if (this.state.isVisible != nextProps.isVisible) {
-            this.setState({isVisible: nextProps.isVisible})
+            this.setState({isVisible: nextProps.isVisible});
             if (nextProps.isVisible) {
                 $(this.refs['ref_contactListPane']).show();
 
@@ -2476,10 +2480,10 @@ export class ContactListPane extends React.Component {
             }
         }
 
-    }
+    };
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = 'api/channelUsers/' + receiverId
+        var theUrl = 'api/channelUsers/' + receiverId;
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -2488,15 +2492,15 @@ export class ContactListPane extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(data) {
-                var theMessageThreadChannelLabel = data[0].label
+                var theMessageThreadChannelLabel = data[0].label;
                 var theCurrentMessageThreadChannel = {
                     label: theMessageThreadChannelLabel,
                     id: data[0].id,
                     type: "chat-messages",
 
-                }
+                };
                 this.setState({ currentMessageThreadChannel: theCurrentMessageThreadChannel},
-                    this.createAndOrConnectToThread)
+                    this.createAndOrConnectToThread);
                 //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
 
             }.bind(this),
@@ -2506,21 +2510,21 @@ export class ContactListPane extends React.Component {
             }
         })
 
-    }
+    };
 
      createAndOrConnectToThread = () => {
         if (this.state.currentContact != "" & this.state.currentMessageThreadChannel != "") {
-            this.sendNotificationToWakeupPrivateChannel(this.state.currentContact.notificationChannelLabel, this.state.currentMessageThreadChannel)
+            this.sendNotificationToWakeupPrivateChannel(this.state.currentContact.notificationChannelLabel, this.state.currentMessageThreadChannel);
 
             this.connectToThread(this.state.currentMessageThreadChannel.id)
 
 
         }
-    }
+    };
 
     sendNotificationToWakeupPrivateChannel = (receiverNotificationChannelLabel, privateChannel) => {
         //console.log("sendNotification to WakeupPrivateChannel " + receiverNotificationChannelLabel + " " + privateChannel)
-        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token)
+        var receiverNotificationWebsocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications/" + receiverNotificationChannelLabel + "/?token=" + localStorage.token);
         var notificationPrivateChannelWakeupMessage = {
             text: "openPrivateTextChannel",
             privateChannel: privateChannel.label,
@@ -2530,7 +2534,7 @@ export class ContactListPane extends React.Component {
             token: localStorage.token,
 
 
-        }
+        };
 
         receiverNotificationWebsocket.addEventListener('open', () => {
             receiverNotificationWebsocket.send(JSON.stringify(notificationPrivateChannelWakeupMessage));
@@ -2538,7 +2542,7 @@ export class ContactListPane extends React.Component {
 
         });
 
-}
+};
 
 
 
@@ -2575,17 +2579,17 @@ export class ContactListPane extends React.Component {
          else {
          clearInterval(this.state.intervalId)
          }*/
-    }
+    };
 
     contactItemClicked = (contact) => {
         //store.dispatch()
-        this.getOrCreateThreadChannel(contact.id)
+        this.getOrCreateThreadChannel(contact.id);
         //this.props.newThread(contact)
-    }
+    };
 
     createNewMessageThread() {
 
-        var theUrl = "api/messageThreads/"
+        var theUrl = "api/messageThreads/";
 
         $.ajax({
             url: theUrl,
@@ -2603,9 +2607,9 @@ export class ContactListPane extends React.Component {
             },
 
             success: function (messageThreadData) {
-                messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token)
-                store.dispatch(addThread(messageThreadData))
-                store.dispatch(setCurrentThread(messageThreadData))
+                messageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + messageThreadData.channelLabel + "/?token=" + localStorage.token);
+                store.dispatch(addThread(messageThreadData));
+                store.dispatch(setCurrentThread(messageThreadData));
 
                 this.setState({
                     //openThreads: this.state.openThreads.concat({messageThreadData}),
@@ -2613,7 +2617,7 @@ export class ContactListPane extends React.Component {
                     currentReceiverNotificationChannelLabel: "",
                     currentMessageThreadChannel: "",
                     currentReceiver: "",
-                })
+                });
                 //store.dispatch(setOpenThreads(this.state.openThreads))
 
             }.bind(this),
@@ -2625,7 +2629,7 @@ export class ContactListPane extends React.Component {
 
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread"
+        var theUrl = "api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -2635,12 +2639,12 @@ export class ContactListPane extends React.Component {
                 },
                 success: function (messageThreadData) {
                     if (messageThreadData.results[0]) {
-                        var theMessageThreadData = messageThreadData.results[0]
-                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token)
-                        store.dispatch(addThread(theMessageThreadData))
-                        store.dispatch(setCurrentThread(theMessageThreadData))
-                        store.dispatch(addOpenThread(theMessageThreadData))
-                        store.dispatch(setCurrentContact({}))
+                        var theMessageThreadData = messageThreadData.results[0];
+                        theMessageThreadData.websocket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat-messages/" + theMessageThreadData.channelLabel + "/?token=" + localStorage.token);
+                        store.dispatch(addThread(theMessageThreadData));
+                        store.dispatch(setCurrentThread(theMessageThreadData));
+                        store.dispatch(addOpenThread(theMessageThreadData));
+                        store.dispatch(setCurrentContact({}));
 
                         this.setState({
 
@@ -2666,12 +2670,12 @@ export class ContactListPane extends React.Component {
             })
 
 
-    }
+    };
 
     render() {
         if (this.state.contacts != undefined) {
 
-            var theData = this.state.contacts
+            var theData = this.state.contacts;
             var values = Object.keys(theData).map(function (key) {
                 return theData[key];
             });
@@ -2683,7 +2687,7 @@ export class ContactListPane extends React.Component {
                     )
                 }
 
-            })
+            });
 
 
             return (
@@ -2705,19 +2709,19 @@ export class ContactListPane extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class ContactItem extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         autobind(this)
 
     }
 
     handleClick() {
-        store.dispatch(setCurrentContact(this.props.contact))
+        store.dispatch(setCurrentContact(this.props.contact));
         this.props.contactItemClicked(this.props.contact)
     }
 
 
     render () {
-        var imageUrl
+        var imageUrl;
 
         if (this.props.profilePhoto != "") {
 
@@ -2742,8 +2746,8 @@ export class ContactItem extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class MessageThreadPane extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             messagesData:{},
             channelMessages:[],
@@ -2754,7 +2758,8 @@ export class MessageThreadPane extends React.Component {
             channelLabel:"",
             websocket:""
 
-        }
+        };
+        enableUniqueIds(this)
     }
 
 
@@ -2770,7 +2775,7 @@ export class MessageThreadPane extends React.Component {
             thread:this.props.thread,
             websocket: this.props.thread.websocket,
             messages:this.props.thread.messages
-        })
+        });
 
 
 
@@ -2789,7 +2794,7 @@ export class MessageThreadPane extends React.Component {
             if (this.state.thread != nextProps.thread) {
                 this.setState({
                     thread: nextProps.thread,
-                })
+                });
 
                 if (this.state.thread.websocket != undefined) {
                     this.setState({
@@ -2806,7 +2811,7 @@ export class MessageThreadPane extends React.Component {
             }
         }
         if (this.state.isVisible != nextProps.isVisible) {
-            this.setState({isVisible:nextProps.isVisible})
+            this.setState({isVisible:nextProps.isVisible});
             if (nextProps.isVisible) {
                 $(this.refs['ref_messageThreadPane']).show();
 
@@ -2826,7 +2831,7 @@ export class MessageThreadPane extends React.Component {
 
 
 
-    }
+    };
 
 
 
@@ -2865,7 +2870,7 @@ export class MessageThreadPane extends React.Component {
 
    handleData(newMessageData) {
       let newMessage = JSON.parse(newMessageData);
-       store.dispatch(addMessage(this.props.thread.id, newMessage))
+       store.dispatch(addMessage(this.props.thread.id, newMessage));
 
 
 
@@ -2878,7 +2883,7 @@ export class MessageThreadPane extends React.Component {
     }
 
   handleMessageSubmit (theMessageData) {
-      var theUrl = "api/messages/"
+      var theUrl = "api/messages/";
       $.ajax({
         url: theUrl,
         dataType: 'json',
@@ -2901,7 +2906,7 @@ export class MessageThreadPane extends React.Component {
             if (this.state.thread != undefined) {
                 if (this.state.thread.channelLabel != undefined) {
 
-                    var websocketUrl = ws_scheme + '://' + window.location.host + "/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token
+                    var websocketUrl = ws_scheme + '://' + window.location.host + "/chat-messages/" + this.state.thread.channelLabel + "/?token=" + localStorage.token;
                     var theWebsocket = <Websocket url={websocketUrl} onMessage={this.handleData.bind(this)}/>
 
 
@@ -2923,7 +2928,7 @@ export class MessageThreadPane extends React.Component {
                 var theOrientation = "left"
             }
             return (
-                    <Message key={message.id} messageText={message.text} receiverId={message.receiver} orientation={theOrientation} profilePhoto={this.state.user.profilePhoto} />
+                    <Message key={`key_message_${this.nextUniqueId()}`} messageText={message.text} receiverId={message.receiver} orientation={theOrientation} profilePhoto={this.state.user.profilePhoto} />
 )
 
         })
@@ -2946,8 +2951,8 @@ export class MessageThreadPane extends React.Component {
 
 export class MessageList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
 
@@ -2959,7 +2964,7 @@ export class MessageList extends React.Component {
         if (this.props.storeRoot.user) {
             this.setState({
                 user: this.props.storeRoot.user
-            })
+            });
             this.setupMessageLoading
 
 
@@ -2967,7 +2972,7 @@ export class MessageList extends React.Component {
     }
 
 
-    }
+    };
 
     componentDidMount() {
         this.setState({
@@ -2981,52 +2986,52 @@ export class MessageList extends React.Component {
                 data: nextProps.data
             })
         }
-    }
+    };
 
     render() {
-        var messageList = []
-        var messageSenderArray = []
+        var messageList = [];
+        var messageSenderArray = [];
 
         for (var i = 0; i < this.state.data.length - 1; i++) {
 
 
-            var message = this.state.data[i]
+            var message = this.state.data[i];
             if (this.message.sender == this.state.user.id) {
                 messageSenderArray[i] = true
             }
 
-            var nextMessage = this.state.data[i + 1]
+            var nextMessage = this.state.data[i + 1];
             if (nextMessage.sender != message.sender) {
                 messageList.push(i)
             }
         }
 
-        var messageShapes = []
+        var messageShapes = [];
 
-        messageShapes[0] = "roundedTop"
+        messageShapes[0] = "roundedTop";
         for (var i = 1; i < this.state.data.length; i++) {
-            messageShapes[i] = ""
+            messageShapes[i] = "";
 
 
             if (messageList.includes(i)) {
-                messageShapes[i] = "roundedBottom"
+                messageShapes[i] = "roundedBottom";
                 messageShapes[i + 1] = "roundedTop"
             }
 
 
         }
 
-        var fullMessageStyles = []
+        var fullMessageStyles = [];
         for (var i = 0; i < this.state.data.length; i++) {
             fullMessageStyles[i] = {sender: messageSenderArray[i], shape: messageShapes[i]}
         }
-        var messageListMarkup = ""
+        var messageListMarkup = "";
         for (var i = 0; i < this.state.data.length; i++) {
 
-            var message = this.state.data[i]
+            var message = this.state.data[i];
             var messageMarkup = <Message key={message.id} style={fullMessageStyles[i]} messageText={message.text}
                                          receiverId={message.receiver} orientation={theOrientation}
-                                         profilePhoto={this.state.user.profilePhoto}/>
+                                         profilePhoto={this.state.user.profilePhoto}/>;
             messageListMarkup = messageListMarkup + messageMarkup
 
         }
@@ -3045,8 +3050,8 @@ export class MessageList extends React.Component {
 
 class Content extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             messageList:[],
             messageListCount:"",
@@ -3062,20 +3067,20 @@ class Content extends React.Component {
       //this.context.scrollArea.scrollBottom()
     }
   });
-    }
+    };
 
     componentDidMount = () => {
         this.setState({
             messageList: this.props.messageList
         })
 
-    }
+    };
     shouldScrollToBottom() {
         if (this.state.messageList != undefined) {
             if (this.state.messageList.length != this.state.messageListCount) {
                 this.setState({
                     messageListCount: this.state.messageList.length
-                })
+                });
 
                 if (this.props.autoScroll) {
                     this.context.scrollArea.scrollBottom()
@@ -3093,7 +3098,7 @@ class Content extends React.Component {
 
         }
 
-    }
+    };
 
 
 render(){
@@ -3123,7 +3128,7 @@ export class NewLabelModal extends ChoiceModal {
                 modalIsOpen: false,
             })
 
-    }
+    };
 
     handleInputTextChange = (value) => {
         //if (validator.isEmail(e.target.value)) {
@@ -3131,7 +3136,7 @@ export class NewLabelModal extends ChoiceModal {
             this.setState({title: value});
 
         //}
-    }
+    };
 
     render() {
         return (<Modal
@@ -3185,7 +3190,7 @@ export class NewLabelModal extends ChoiceModal {
 
 
 Content.contextTypes = {
-    scrollArea: React.PropTypes.object
+    scrollArea: PropTypes.object
 };
 
-module.exports = { MessageThreadPane, MessagePage, NewLabelModal, MessageWindowContainer}
+module.exports = { MessageThreadPane, MessagePage, NewLabelModal, MessageWindowContainer};

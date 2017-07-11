@@ -15,7 +15,7 @@ import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
 import  { ValidatedInput, KRCheckBox } from './app'
-var auth = require('./auth')
+var auth = require('./auth');
 var Modal = require('react-modal');
 import {MessageWindowContainer} from './message'
 
@@ -118,14 +118,14 @@ export class ReduxDataGetter extends React.Component {
     }
 
     componentDidMount = () => {
-        store.dispatch(setMessageWindowVisibility(false))
+        store.dispatch(setMessageWindowVisibility(false));
         this.loadUserData()
 
 
-    }
+    };
 
     loadUserData() {
-        var theUrl =  'api/users/i'
+        var theUrl =  'api/users/i';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -137,8 +137,8 @@ export class ReduxDataGetter extends React.Component {
                 if (userData.id != null) {
 
 
-                store.dispatch(setCurrentUser(userData))
-                this.loadUniversalData()
+                store.dispatch(setCurrentUser(userData));
+                this.loadUniversalData();
 
                 if (userData.isCoach) {
                     this.loadCoachSpecificData()
@@ -156,10 +156,10 @@ export class ReduxDataGetter extends React.Component {
     }
 
     loadUniversalData() {
-        this.loadMessageThreadData()
-        this.loadContactData()
-        this.loadGoalData()
-        this.loadStepOccurrenceData()
+        this.loadMessageThreadData();
+        this.loadContactData();
+        this.loadGoalData();
+        this.loadStepOccurrenceData();
         this.loadPlanData()
     }
 
@@ -172,7 +172,7 @@ export class ReduxDataGetter extends React.Component {
 
     loadGoalData() {
 
-        var theUrl = "api/goals/"
+        var theUrl = "api/goals/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -195,7 +195,7 @@ export class ReduxDataGetter extends React.Component {
 
     loadPlanData() {
 
-        var theUrl = "api/planOccurrences/"
+        var theUrl = "api/planOccurrences/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -217,7 +217,7 @@ export class ReduxDataGetter extends React.Component {
     }
 
     loadProgramData() {
-        var theUrl = "api/programs/"
+        var theUrl = "api/programs/";
         $.ajax({
             url: theUrl,
             dataType: 'json',
@@ -243,7 +243,7 @@ export class ReduxDataGetter extends React.Component {
         //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
 
 
-        var theUrl = 'api/messageThreads/'
+        var theUrl = 'api/messageThreads/';
 
     $.ajax({
       url: theUrl ,
@@ -253,7 +253,7 @@ export class ReduxDataGetter extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
-          store.dispatch(setMessageThreads(data))
+          store.dispatch(setMessageThreads(data));
           store.dispatch(setOpenThreads({}))
 
 
@@ -272,7 +272,7 @@ export class ReduxDataGetter extends React.Component {
         var periodRangeEnd = new Date();
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
         $.ajax({
             url: theUrl,
@@ -293,7 +293,7 @@ export class ReduxDataGetter extends React.Component {
 
 
     loadContactData() {
-        var theUrl = "api/contacts/"
+        var theUrl = "api/contacts/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -317,23 +317,23 @@ export class ReduxDataGetter extends React.Component {
     }
 
     organizeContacts(theContactData) {
-        var theContacts = {}
+        var theContacts = {};
         if (this.props.storeRoot) {
             if (this.props.storeRoot.user) {
                 for (var key in theContactData) {
                     if (theContactData[key].receiverProfile.user == this.props.storeRoot.user.id) {
-                        var theSender = theContactData[key].senderProfile
+                        var theSender = theContactData[key].senderProfile;
 
-                        var theContactId = theContactData[key].id
-                        theContacts[theContactId] = theSender
+                        var theContactId = theContactData[key].id;
+                        theContacts[theContactId] = theSender;
 
 
                         //theContacts.push({theContactId: theContactData[key].sender})
 
                     } else {
-                        var theReceiver = theContactData[key].receiverProfile
+                        var theReceiver = theContactData[key].receiverProfile;
 
-                        var theContactId = theContactData[key].id
+                        var theContactId = theContactData[key].id;
                         theContacts[theContactId] = theReceiver
 
                     }
@@ -389,12 +389,12 @@ export class StandardSetOfComponents extends React.Component {
 
 
     handleModalClosed = () =>  {
-        this.props.modalShouldClose()
+        this.props.modalShouldClose();
         this.setState({
             signInOrSignUpModalFormIsOpen:false,
             refreshUser:true,
         }, this.noNeedToRefreshUser())
-    }
+    };
 
     noNeedToRefreshUser() {
         this.setState({
@@ -410,11 +410,11 @@ export class StandardSetOfComponents extends React.Component {
 
     render() {
         if (this.props.storeRoot.gui.isMessageWindowVisible == true) {
-            $(this.refs["ref_messageWindowContainer"]).show()
+            $(this.refs["ref_messageWindowContainer"]).show();
             $(this.refs["ref_messageRoundButton"]).hide()
 
         } else if (this.props.storeRoot.gui.isMessageWindowVisible == false) {
-            $(this.refs["ref_messageWindowContainer"]).hide()
+            $(this.refs["ref_messageWindowContainer"]).hide();
             $(this.refs["ref_messageRoundButton"]).show()
 
         }
@@ -480,12 +480,12 @@ export class NotificationManager extends React.Component {
 
             this.setState({
                 notificationRoomLabel: nextProps.notificationRoomLabel
-            })
+            });
             this.connectToRoomWebsocket(nextProps.notificationRoomLabel)
 
         }
 
-    }
+    };
     connectToRoomWebsocket(theRoomLabel) {
         var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/notifications" + "/" + theRoomLabel);
         chat_socket.onmessage = (message) => {
@@ -497,17 +497,17 @@ export class NotificationManager extends React.Component {
 
 
     componentDidMount = () => {
-        console.log("notification Manager componentDidMount")
+        console.log("notification Manager componentDidMount");
             this.setState({
                 notificationRoomLabel: this.props.notificationRoomLabel
-            })
+            });
         if (this.props.notificationRoomLabel != undefined) {
             this.connectToRoomWebsocket(this.props.notificationRoomLabel)
         }
 
 
 
-    }
+    };
 
     render() {
         return (
@@ -540,10 +540,10 @@ export class Menubar extends React.Component {
                 storeRoot:nextProps.storeRoot
             })
         }
-    }
+    };
 
     loadUserData() {
-        var theUrl = 'api/users/i'
+        var theUrl = 'api/users/i';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -555,7 +555,7 @@ export class Menubar extends React.Component {
                 if (res.id != null) {
                     this.setState({
                         'user': res
-                    })
+                    });
 
                     store.dispatch(setCurrentUser(res))
                 }
@@ -584,9 +584,9 @@ export class Menubar extends React.Component {
     }
 
     logoutHandler() {
-        store.dispatch(reduxLogout())
+        store.dispatch(reduxLogout());
 
-        auth.logout()
+        auth.logout();
 
         hashHistory.push('/account/login/')
 
@@ -722,7 +722,7 @@ export class SignInOrSignUpModalForm extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
 
     componentDidUpdate() {
@@ -741,7 +741,7 @@ export class SignInOrSignUpModalForm extends React.Component {
     this.setState({
       contentHeight: contentHeight,
     });
-  }
+  };
     componentWillReceiveProps(nextProps) {
         if (this.state.modalIsOpen != nextProps.modalIsOpen) {
             this.setState({
@@ -760,7 +760,7 @@ export class SignInOrSignUpModalForm extends React.Component {
     }
 
     closeModal = () => {
-        this.props.modalShouldClose()
+        this.props.modalShouldClose();
 
             this.setState({
                 modalIsOpen:false,
@@ -770,7 +770,7 @@ export class SignInOrSignUpModalForm extends React.Component {
 
             });
 
-    }
+    };
 
     handleFormChange(theSelectedForm) {
 
@@ -811,7 +811,7 @@ export class SignInOrSignUpModalForm extends React.Component {
         maxWidth: '40rem'
       }
     };
-      var theForm = ""
+      var theForm = "";
       if (this.state.form == "Join") {
           theForm = <ModalJoinForm selectedForm={this.handleFormChange}/>
       } else if (this.state.form == "SignIn") {
@@ -854,7 +854,7 @@ export class LoginPage extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
 
   render() {
@@ -932,14 +932,14 @@ export class JoinPage extends React.Component {
   componentDidMount = () => {
       $(this.refs['ref_joinForm']).hide()
 
-}
+};
 
 
     handleEmailSent = () => {
         this.setState({
            alert: "You've made a great first step. We've sent you an email. Please confirm your address to continue."
         }, () => {$(this.refs['ref_joinForm']).slideDown()})
-    }
+    };
 
   render() {
 
@@ -986,7 +986,7 @@ handleError = (theError) => {
             error:theError,
         })
 
-    }
+    };
 
   render() {
       return(
@@ -1028,7 +1028,7 @@ export class ErrorReporter extends React.Component {
 
   componentWillReceiveProps(nextProps) {
       if (this.state.error != nextProps.error) {
-          this.state.error = nextProps.error
+          this.state.error = nextProps.error;
                 //printObject(this.state.error)
 
       }
@@ -1078,7 +1078,7 @@ export class LoginForm extends React.Component {
 
   actionAfterLogin = () => {
 
-      var theUrl = '/api/users/i'
+      var theUrl = '/api/users/i';
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',
@@ -1094,7 +1094,7 @@ export class LoginForm extends React.Component {
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());
         }
-        })
+        });
 
 
       if (this.props.location) {
@@ -1102,7 +1102,7 @@ export class LoginForm extends React.Component {
       } else {
           hashHistory.push('/')
       }
-  }
+  };
 
   handleForgotPasswordClick() {
       hashHistory.push("/account/password/reset/")
@@ -1115,16 +1115,16 @@ export class LoginForm extends React.Component {
   handleSubmit = (e) => {
 
 
-      e.preventDefault()
-      var username = this.state.email
-      var pass = this.state.password
+      e.preventDefault();
+      var username = this.state.email;
+      var pass = this.state.password;
 
       auth.login(username, pass, (loggedIn) => {
         if (loggedIn) {
             this.actionAfterLogin()
         } else {
-            var theErrors = this.state.serverErrors
-            theErrors.push("That email/password combination is not that of a current user.")
+            var theErrors = this.state.serverErrors;
+            theErrors.push("That email/password combination is not that of a current user.");
             this.setState({serverErrors:theErrors})
 
 
@@ -1133,7 +1133,7 @@ export class LoginForm extends React.Component {
       })
 
 
-  }
+  };
 
   handleEmailChange = (value) => {
       this.setState({
@@ -1141,14 +1141,14 @@ export class LoginForm extends React.Component {
           username:value,
       })
 
-  }
+  };
 
   handlePasswordChange = (value) => {
       this.setState({
           password:value,
       })
 
-  }
+  };
 
   getServerErrors(fieldName) {
         if (this.state.serverErrors == undefined) {
@@ -1244,11 +1244,11 @@ export class PasswordConfirmForm extends React.Component {
     }
 
     handleSubmit = (e) => {
-        e.preventDefault()
-        var uid = this.state.uid
-        var token = this.state.token
-        var password1 = this.state.password1
-        var password2 = this.state.password2
+        e.preventDefault();
+        var uid = this.state.uid;
+        var token = this.state.token;
+        var password1 = this.state.password1;
+        var password2 = this.state.password2;
 
 
         $.ajax({
@@ -1272,7 +1272,7 @@ export class PasswordConfirmForm extends React.Component {
                 }
             }.bind(this)
         });
-    }
+    };
 
 
 
@@ -1347,8 +1347,8 @@ export class PasswordResetForm extends React.Component {
     }
 
     handleSubmit = (e) => {
-        e.preventDefault()
-        var email = this.state.email
+        e.preventDefault();
+        var email = this.state.email;
 
         $.ajax({
             url: ("rest-auth/password/reset/"),
@@ -1367,7 +1367,7 @@ export class PasswordResetForm extends React.Component {
                 }
             }.bind(this)
         });
-    }
+    };
 
     handleCompleted() {
         hashHistory.push("/account/login/")
@@ -1378,7 +1378,7 @@ export class PasswordResetForm extends React.Component {
             email: value,
         })
 
-    }
+    };
 
     render() {
         return (
@@ -1445,21 +1445,21 @@ export class JoinForm extends React.Component {
 
 
   handleSubmit = (e) => {
-      e.preventDefault()
+      e.preventDefault();
       this.setState({
           buttonLabel:"Joining..."
-      })
+      });
 
       if (this.state.tos == true) {
-          var username = this.state.username
-          var email = this.state.email
-          var password1 = this.state.password1
-          var password2 = this.state.password2
-          var first_name = this.state.first_name
-          var last_name = this.state.last_name
+          var username = this.state.username;
+          var email = this.state.email;
+          var password1 = this.state.password1;
+          var password2 = this.state.password2;
+          var first_name = this.state.first_name;
+          var last_name = this.state.last_name;
 
 
-          var theUrl = "rest-auth/registration/"
+          var theUrl = "rest-auth/registration/";
           $.ajax({
               url: theUrl,
               dataType: 'json',
@@ -1488,8 +1488,8 @@ export class JoinForm extends React.Component {
               }.bind(this)
           });
       } else {
-          var theServerErrors = this.state.tosErrors
-              theServerErrors.push( "You must agree to the Terms of Service to join." )
+          var theServerErrors = this.state.tosErrors;
+              theServerErrors.push( "You must agree to the Terms of Service to join." );
 
           this.setState({
               tosErrors: theServerErrors,
@@ -1498,7 +1498,7 @@ export class JoinForm extends React.Component {
 
           })
       }
-  }
+  };
 
   handleSuccess = () => {
       this.setState({
@@ -1510,36 +1510,36 @@ export class JoinForm extends React.Component {
           last_name:"",
           serverErrors:"",
           buttonLabel:"Joined"
-      })
+      });
       this.props.emailSent()
-  }
+  };
 
   handleUsernameChange = (value) => {
       this.setState({
           username:value,
       })
 
-  }
+  };
   handleEmailChange = (value) => {
       this.setState({
           email:value,
           username:value
       })
 
-  }
+  };
   handleFirstNameChange = (value) => {
       this.setState({
           first_name:value,
       })
 
-  }
+  };
 
   handleLastNameChange = (value) => {
       this.setState({
           last_name:value,
       })
 
-  }
+  };
 
   handlePassword1Change = (value) => {
       this.setState({
@@ -1547,23 +1547,23 @@ export class JoinForm extends React.Component {
           password2:value,
       })
 
-  }
+  };
 
   handlePassword2Change = (value) => {
       this.setState({
           password2:value,
       })
 
-  }
+  };
   handleTOSChange = (value) => {
       this.setState({
           tos:value
       })
-  }
+  };
 
   handleSignInClick = () => {
       hashHistory.push("/account/login/")
-  }
+  };
 
   getServerErrors(fieldName) {
         if (this.state.serverErrors == undefined) {
@@ -1751,10 +1751,10 @@ export class ModalLoginForm extends React.Component {
   }
 
   handleSubmit = (e) => {
-      console.log("handleSubmit")
-      e.preventDefault()
-      var username = this.state.email
-      var pass = this.state.password
+      console.log("handleSubmit");
+      e.preventDefault();
+      var username = this.state.email;
+      var pass = this.state.password;
 
       auth.login(username, pass, (loggedIn) => {
         if (loggedIn) {
@@ -1764,7 +1764,7 @@ export class ModalLoginForm extends React.Component {
         }
 
 
-      })
+      });
 
       {/*      if(!auth.loggedIn()) {
           this.setState({
@@ -1778,7 +1778,7 @@ export class ModalLoginForm extends React.Component {
 
 
 
-  }
+  };
 
   handleEmailChange = (value) => {
       this.setState({
@@ -1787,7 +1787,7 @@ export class ModalLoginForm extends React.Component {
           serverErrors:""
       })
 
-  }
+  };
 
   handlePasswordChange = (value) => {
       this.setState({
@@ -1796,10 +1796,10 @@ export class ModalLoginForm extends React.Component {
 
       })
 
-  }
+  };
 
   actionAfterLogin = () => {
-      var theUrl = 'api/users/i/'
+      var theUrl = 'api/users/i/';
       $.ajax({
             method: 'GET',
             url: theUrl,
@@ -1817,14 +1817,14 @@ export class ModalLoginForm extends React.Component {
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());
         }
-        })
+        });
 
-      var user = this.state.user
+      var user = this.state.user;
       this.props.selectedForm({
           form:"None",
           user:user
       })
-  }
+  };
 
   render() {
       return (
@@ -1894,10 +1894,7 @@ export class ModalLoginForm extends React.Component {
 
 
 
-//LoginForm.contextTypes = {
-//  router: React.PropTypes.object.isRequired
-//};
 
 
 
-module.exports = { NotificationManager, Footer, ErrorReporter, LoginPage, Menubar, JoinPage, PasswordResetPage , PasswordConfirmPage, PasswordConfirmForm, SignInOrSignUpModalForm, StandardSetOfComponents}
+module.exports = { NotificationManager, Footer, ErrorReporter, LoginPage, Menubar, JoinPage, PasswordResetPage , PasswordConfirmPage, PasswordConfirmForm, SignInOrSignUpModalForm, StandardSetOfComponents};

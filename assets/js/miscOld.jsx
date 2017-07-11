@@ -1,4 +1,79 @@
 // tutorial20.js
+export class StepOccurrenceItem2 extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:[]
+
+
+        }
+    }
+
+
+    componentDidMount() {
+        this.setState({
+            id: this.props.stepOccurrenceData.id,
+            title: this.props.stepOccurrenceData.step.title,
+            description: this.props.stepOccurrenceData.step.description,
+            wasCompleted: this.props.stepOccurrenceData.wasCompleted,
+        })
+
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({data: this.props.data})
+        }
+    }
+
+
+
+
+    render () {
+
+        return (
+            <div>
+                {/* <div className="ui top attached purple large button">Step</div>
+                                        <div className="ui fluid noTopMargin segment">
+
+                <div className="ui sixteen wide column">
+                    <div className="ui grid">
+                        <div className="three wide column">
+                            <div className="ui center aligned middle aligned grid height-100">
+                                <div className="ui sixteen wide column">
+                            <div className="pretty success circle smooth huge-checkbox">
+                            <input type="checkbox" id="id_wasCompleted" />
+                                <label><i className="mdi mdi-check"></i> </label>
+                        </div>
+                        </div></div></div>
+
+                        <div className="eight wide column">
+
+                        <div className="header"><h1>{this.state.title}</h1></div>
+                        <div className="header"><h3 dangerouslySetInnerHTML={{__html: this.state.description}} /></div>
+
+
+                        </div>
+                        <div className="four wide column">
+
+                        <UpdateOccurrenceList stepOccurrenceId={this.props.stepOccurrenceData.id}/>
+                    </div>
+                    <div className="one wide center aligned column ">
+                        <FacebookShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><FacebookIcon size={40} round={true} /></FacebookShareButton>
+                        <TwitterShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><TwitterIcon size={40} round={true} /></TwitterShareButton>
+                        <GooglePlusShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><GooglePlusIcon size={40} round={true} /></GooglePlusShareButton>
+                        <LinkedinShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><LinkedinIcon size={40} round={true} /></LinkedinShareButton>
+                    </div>
+                </div>
+                    </div></div>
+                    */}
+            </div>
+        )
+    }
+}
+
 var GoalBox = React.createClass({
   loadCommentsFromServer: function() {
     $.ajax({
@@ -158,7 +233,7 @@ this.showList()
 
     componentDidMount: function() {
         this.loadObjectsFromServer();
-        this.showCalendar()
+        this.showCalendar();
 
 
         $(".fullPageDiv").hide();
@@ -317,8 +392,7 @@ export class ObjectCreationPage extends React.Component {
             );
         }
     }
-};
-
+}
 var StepContainer = React.createClass({
     render: function() {
         return (
@@ -378,8 +452,8 @@ var FormRenderer = React.createClass({
     });
 export class ObjectListAndUpdate extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:"",
         }
@@ -1090,7 +1164,7 @@ var StepObjectEditForm = React.createClass({
         var endDateInIntegerForm = this.props.stepData.endDate;
 
         var planStartDateInDateForm = this.props.planStartDate;
-        var planStartDateInMomentForm = moment(planStartDateInDateForm)
+        var planStartDateInMomentForm = moment(planStartDateInDateForm);
 
         var calculatedStartDate = moment(planStartDateInMomentForm, "DD-MM-YYYY").add(startDateInIntegerForm, 'days');
         var calculatedEndDate = moment(planStartDateInMomentForm, "DD-MM-YYYY").add(endDateInIntegerForm, 'days');
@@ -1156,7 +1230,7 @@ var StepObjectEditForm = React.createClass({
         var absoluteEndDateInMomentForm = moment(absoluteEndDate);
 
         var planStartDateInDateForm = this.props.planStartDate;
-        var planStartDateInMomentForm = moment(planStartDateInDateForm)
+        var planStartDateInMomentForm = moment(planStartDateInDateForm);
         var startDate = absoluteStartDateInMomentForm.diff(planStartDateInMomentForm, 'days') +2;
         var endDate = absoluteEndDateInMomentForm.diff(planStartDateInMomentForm, 'days') + 2;
 
@@ -1742,7 +1816,7 @@ var StepFormAction = React.createClass({
         var absoluteEndDateInMomentForm = moment(absoluteEndDate);
 
         var planStartDateInDateForm = this.props.planStartDate;
-        var planStartDateInMomentForm = moment(planStartDateInDateForm)
+        var planStartDateInMomentForm = moment(planStartDateInDateForm);
         var startDate = absoluteStartDateInMomentForm.diff(planStartDateInMomentForm, 'days') +2;
         var endDate = absoluteEndDateInMomentForm.diff(planStartDateInMomentForm, 'days') + 2;
         var startTime = this.state.startTime;
@@ -1773,7 +1847,7 @@ var StepFormAction = React.createClass({
 
             plan:this.props.planId,},
             function(data){
-                this.toggleForm()
+                this.toggleForm();
 
                 this.setState({
                     title: '',
@@ -2187,8 +2261,8 @@ import validator from 'validator';
 var UpdatesList = require('./update');
 var Modal = require('react-modal');
 var DatePicker = require('react-datepicker');
-var moment = require('moment')
-var ValidatedInput = require('./app')
+var moment = require('moment');
+var ValidatedInput = require('./app');
 
 var TinyMCEInput = require('react-tinymce-input');
 
@@ -2219,13 +2293,13 @@ var StepCalendarComponent = React.createClass({
 
 
     setStepData: function() {
-            console.log("inside setStepData")
-            console.log("title is " + this.props.stepData.title)
+            console.log("inside setStepData");
+            console.log("title is " + this.props.stepData.title);
             var startDateInIntegerForm = this.props.stepData.startDate;
             var endDateInIntegerForm = this.props.stepData.endDate;
 
             var planStartDateInDateForm = this.props.planStartDate;
-            var planStartDateInMomentForm = moment(planStartDateInDateForm)
+            var planStartDateInMomentForm = moment(planStartDateInDateForm);
 
             var calculatedStartDate = moment(planStartDateInMomentForm, "DD-MM-YYYY").add(startDateInIntegerForm, 'days');
             var calculatedEndDate = moment(planStartDateInMomentForm, "DD-MM-YYYY").add(endDateInIntegerForm, 'days');
@@ -2254,7 +2328,7 @@ var StepCalendarComponent = React.createClass({
             plan: this.props.planId,
             formSubmittedSuccessfully:false,
             monthlyDates: this.props.stepData.monthlyDates
-        })
+        });
             clearInterval(this.state.intervalID);
 
 
@@ -2269,7 +2343,7 @@ var StepCalendarComponent = React.createClass({
 
                 $(this.refs["ref_createMenuBar"]).hide();
 
-                this.setStepData()
+                this.setStepData();
                 $(this.refs["ref_editMenuBar"]).slideDown();
 
                 $(this.refs["ref_stepExistingInfo"]).slideDown();
@@ -2281,12 +2355,12 @@ var StepCalendarComponent = React.createClass({
 
             if (this.props.eventInfo != this.state.eventInfo) {
 
-                this.getInitialState()
-                this.setState({eventInfo: this.props.eventInfo})
+                this.getInitialState();
+                this.setState({eventInfo: this.props.eventInfo});
                 this.setState({
                     absoluteStartDate: moment(this.props.eventInfo.start, "YYYY-MM-DD"),
                     absoluteEndDate: moment(this.props.eventInfo.start, "YYYY-MM-DD"),
-                })
+                });
 
                 $(this.refs["ref_editMenuBar"]).hide();
                 $(this.refs["ref_createMenuBar"]).show();
@@ -2398,7 +2472,7 @@ var StepCalendarComponent = React.createClass({
         var absoluteEndDateInMomentForm = moment(absoluteEndDate);
 
         var planStartDateInDateForm = this.props.planStartDate;
-        var planStartDateInMomentForm = moment(planStartDateInDateForm)
+        var planStartDateInMomentForm = moment(planStartDateInDateForm);
         var startDate = absoluteStartDateInMomentForm.diff(planStartDateInMomentForm, 'days') +2;
         var endDate = absoluteEndDateInMomentForm.diff(planStartDateInMomentForm, 'days') + 2;
 
@@ -2422,7 +2496,7 @@ var StepCalendarComponent = React.createClass({
                 duration:duration,
                 durationMetric:durationMetric,
                 plan:this.props.planId,
-            }
+            };
 
 
         if (this.props.method=="edit") {
@@ -2435,7 +2509,7 @@ var StepCalendarComponent = React.createClass({
             function(data){
 
                 if (this.props.method=="create") {
-                    this.toggleForm()
+                    this.toggleForm();
 
                     this.setState({
                         title: '',
@@ -3000,8 +3074,8 @@ var ToggleButton = React.createClass({
 
 export class PlanCalendar2 extends React.Component{
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             events:[],
             stepMethod:"",
@@ -3028,7 +3102,7 @@ export class PlanCalendar2 extends React.Component{
             console.error(theServer + "api/plans/" + this.props.planId + "/", status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
       componentWillReceiveProps = (nextProps) => {
           if (this.state.events != nextProps.events) {
@@ -3036,7 +3110,7 @@ export class PlanCalendar2 extends React.Component{
                   events:nextProps.events
               })
           }
-      }
+      };
 
 
     componentDidMount = () => {
@@ -3045,7 +3119,7 @@ export class PlanCalendar2 extends React.Component{
         $(this.refs["ref_edit"]).hide();
         this.getPlanStartDate()
 
-    }
+    };
 
 
     selectEvent = () => {
@@ -3055,7 +3129,7 @@ export class PlanCalendar2 extends React.Component{
         },
             () => this.showEdit())
 
-    }
+    };
 
     createEvent = (slotInfo) => {
         this.setState({
@@ -3065,36 +3139,36 @@ export class PlanCalendar2 extends React.Component{
 
         },
             () => this.showCreate())
-    }
+    };
 
     showCreate = () => {
-                $(this.refs["ref_edit"]).hide()
+                $(this.refs["ref_edit"]).hide();
         $(this.refs["ref_create"]).slideDown()
-    }
+    };
 
     showEdit = () => {
-        $(this.refs["ref_create"]).hide()
+        $(this.refs["ref_create"]).hide();
         $(this.refs["ref_edit"]).slideDown()
-    }
+    };
 
     handleStepEditCloseWindowClick = (toDisplay) => {
-                    $(this.refs["ref_edit"]).slideUp()
+                    $(this.refs["ref_edit"]).slideUp();
 
         if (!toDisplay.display) {
             $(this.refs["ref_edit"]).slideUp()
 
         }
-    }
+    };
 
     handleStepCloseWindowClick = (toDisplay) => {
-            $(this.refs["ref_create"]).slideUp()
+            $(this.refs["ref_create"]).slideUp();
 
         if (!toDisplay.display) {
             $(this.refs["ref_create"]).slideUp()
 
 
         }
-    }
+    };
 
 
 
@@ -3128,7 +3202,7 @@ export class PlanCalendar2 extends React.Component{
             });
 
         }
-  }
+  };
 
 
     render = () => {
@@ -4065,4 +4139,4 @@ var StepForm2 = forms.Form.extend({
 
 
 
-    })
+    });;

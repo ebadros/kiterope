@@ -57,8 +57,15 @@ function convertToDecimalIfAnInteger(value) {
     if (isAnInteger(value)) {
         return value.toFixed(1);
     } else {
-        return value;
+        if (value != undefined) {
+             return value;
+        } else {
+            return ""
+
+        }
     }
+
+
 }
 
 function isAnInteger(value) {
@@ -92,12 +99,12 @@ export const blah = [
     {value: "picture", label: "picture"},
     {value: "video", label: "video"},
     {value: "audio", label: "audio"},
-]
+];
 
 export class UpdateOccurrenceList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             id: "",
             measuringWhat: "",
@@ -138,7 +145,7 @@ export class UpdateOccurrenceList extends React.Component {
             return (
                 <UpdateOccurrenceInput key={occurrence.id} data={occurrence} handleSubmit={this.handleSubmit}/>
             )
-        })
+        });
 
         return (
             <div>
@@ -151,8 +158,8 @@ export class UpdateOccurrenceList extends React.Component {
 
 export class UpdateOccurrenceInput extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             id: "",
             measuringWhat: "",
@@ -176,20 +183,20 @@ export class UpdateOccurrenceInput extends React.Component {
     componentDidMount () {
         this.setState({
             data: this.props.data,
-            id: this.props.data.id,
+            id: this.props.data.update.id,
             measuringWhat: this.props.data.update.measuringWhat,
             units: this.props.data.update.units,
             format: this.props.data.update.format,
             metricLabel: this.props.data.update.metricLabel,
-            text: this.props.data.text,
-            decimal: convertToDecimalIfAnInteger(this.props.data.decimal),
-            longText: this.props.data.longText,
-            integer: this.props.data.integer,
-            time: this.props.data.time,
-            url: this.props.data.url,
-            picture: this.props.data.picture,
-            video: this.props.data.video,
-            audio: this.props.data.audio,
+            text: this.props.data.update.text,
+            decimal: convertToDecimalIfAnInteger(this.props.data.update.decimal),
+            longText: this.props.data.update.longText,
+            integer: this.props.data.update.integer,
+            time: this.props.data.update.time,
+            url: this.props.data.update.url,
+            picture: this.props.data.update.picture,
+            video: this.props.data.update.video,
+            audio: this.props.data.update.audio,
 
         })
     }
@@ -198,25 +205,89 @@ export class UpdateOccurrenceInput extends React.Component {
         if (this.state.data != nextProps.data) {
              this.setState({
             data: nextProps.data,
-            id: nextProps.data.id,
-            measuringWhat: nextProps.data.measuringWhat,
-            units: nextProps.data.units,
+            id: nextProps.data.update.id,
+            measuringWhat: nextProps.data.update.measuringWhat,
+            units: nextProps.data.update.units,
             format: nextProps.data.update.format,
             metricLabel: nextProps.data.update.metricLabel,
-                 text: nextProps.data.text,
-            decimal: convertToDecimalIfAnInteger(nextProps.data.decimal),
-            longText: nextProps.data.longText,
-            integer: nextProps.data.integer,
-            time: nextProps.data.time,
-            url: nextProps.data.url,
-            picture: nextProps.data.picture,
-            video: nextProps.data.video,
-            audio: nextProps.data.audio,
+                 text: nextProps.data.update.text,
+            decimal: convertToDecimalIfAnInteger(nextProps.data.update.decimal),
+            longText: nextProps.data.update.longText,
+            integer: nextProps.data.update.integer,
+            time: nextProps.data.update.time,
+            url: nextProps.data.update.url,
+            picture: nextProps.data.update.picture,
+            video: nextProps.data.update.video,
+            audio: nextProps.data.update.audio,
 
         })
 
+
+
         }
     }
+
+    makeSureNoValuesAreNull() {
+    if (this.state.id == undefined) {
+        this.setState({
+            id:""
+        })
+    }
+
+    if (this.state.text == undefined) {
+        this.setState({
+            text:""
+        })
+    }
+
+    if (this.state.decimal == undefined) {
+        this.setState({
+            decimal:""
+        })
+    }
+
+    if (this.state.longText == undefined) {
+        this.setState({
+            longText:""
+        })
+    }
+
+    if (this.state.integer == undefined) {
+        this.setState({
+            integer:""
+        })
+    }
+
+    if (this.state.time == undefined) {
+        this.setState({
+            time:""
+        })
+    }
+
+    if (this.state.url == undefined) {
+        this.setState({
+            url:""
+        })
+    }
+
+    if (this.state.picture == undefined) {
+        this.setState({
+            picture:""
+        })
+    }
+
+    if (this.state.video == undefined) {
+        this.setState({
+            video:""
+        })
+    }
+
+    if (this.state.audio == undefined) {
+        this.setState({
+            audio:""
+        })
+    }
+}
 
 
 
@@ -224,6 +295,7 @@ export class UpdateOccurrenceInput extends React.Component {
         this.setState({text: e});
     }
     getTextInput () {
+
         return (
             <div className="ui form row">
                 <ValidatedInput
@@ -231,8 +303,8 @@ export class UpdateOccurrenceInput extends React.Component {
                                       name="text"
                                       label={this.state.metricLabel}
                                       placeholder=""
-                                      value={this.state.text}
-                                      initialValue={this.state.text}
+                                      value={this.state.text || ''}
+                                      initialValue={this.state.text || ''}
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleTextChange}
@@ -250,6 +322,7 @@ export class UpdateOccurrenceInput extends React.Component {
     }
 
     getDecimalInput () {
+
         return (
             <div className="ui form  row">
                 <ValidatedInput
@@ -257,8 +330,8 @@ export class UpdateOccurrenceInput extends React.Component {
                                       name="decimal"
                                       label={this.state.metricLabel}
                                       placeholder=""
-                                      value={this.state.decimal}
-                                      initialValue={this.state.decimal}
+                                      value={this.state.decimal || ''}
+                                      initialValue={this.state.decimal || ''}
                                       validators='"!isEmpty(str)","isDecimal(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleDecimalChange}
@@ -275,6 +348,7 @@ export class UpdateOccurrenceInput extends React.Component {
     }
 
     getIntegerInput () {
+
         return (
             <div className="ui form  row">
                 <ValidatedInput
@@ -282,8 +356,8 @@ export class UpdateOccurrenceInput extends React.Component {
                                       name="integer"
                                       label={this.state.metricLabel}
                                       placeholder=""
-                                      value={this.state.integer}
-                                      initialValue={this.state.integer}
+                                      value={this.state.integer || ''}
+                                      initialValue={this.state.integer || ''}
                                       validators='"!isEmpty(str)","isInt(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleIntegerChange}
@@ -301,14 +375,15 @@ export class UpdateOccurrenceInput extends React.Component {
 
     getUrlInput () {
 
+
         <div className="ui form  row">
                 <ValidatedInput
                                       type="text"
                                       name="value"
                                       label={this.state.metricLabel}
                                       placeholder=""
-                                      value={this.state.url}
-                                      initialValue={this.state.url}
+                                      value={this.state.url || ''}
+                                      initialValue={this.state.url || ''}
                                       validators='"!isEmpty(str)","isURL(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleUrlChange}
@@ -329,16 +404,16 @@ export class UpdateOccurrenceInput extends React.Component {
     }
 
     handleSubmit() {
-        var id = this.state.id
-        var text = this.state.text
-        var decimal = this.state.decimal
-        var longText = this.state.longText
-        var integer = this.state.integer
-        var time = this.state.time
-        var url = this.state.url
-        var picture = this.state.picture
-        var video = this.state.video
-        var audio = this.state.audio
+        var id = this.state.id;
+        var text = this.state.text;
+        var decimal = this.state.decimal;
+        var longText = this.state.longText;
+        var integer = this.state.integer;
+        var time = this.state.time;
+        var url = this.state.url;
+        var picture = this.state.picture;
+        var video = this.state.video;
+        var audio = this.state.audio;
 
         var updateOccurrence = {
             id: id,
@@ -351,7 +426,7 @@ export class UpdateOccurrenceInput extends React.Component {
             picture: picture,
             video: video,
             audio: audio,
-        }
+        };
         this.props.handleSubmit(updateOccurrence)
 
         }
@@ -360,31 +435,31 @@ export class UpdateOccurrenceInput extends React.Component {
     render() {
         switch (this.state.format) {
             case("text"):
-                var inputHTML = this.getTextInput()
+                var inputHTML = this.getTextInput();
                 break;
             case("decimal"):
-                var inputHTML = this.getDecimalInput()
+                var inputHTML = this.getDecimalInput();
                 break;
             case("integer"):
-                var inputHTML = this.getIntegerInput()
+                var inputHTML = this.getIntegerInput();
                 break;
             case("time"):
-                var inputHTML = this.getTimeInput()
+                var inputHTML = this.getTimeInput();
                 break;
             case("url"):
-                var inputHTML = this.getUrlInput()
+                var inputHTML = this.getUrlInput();
                 break;
             case("picture"):
-                var inputHTML = this.getPictureInput()
+                var inputHTML = this.getPictureInput();
                 break;
             case("video"):
-                var inputHTML = this.getVideoInput()
+                var inputHTML = this.getVideoInput();
                 break;
             case("audio"):
-                var inputHTML = this.getAudioInput()
+                var inputHTML = this.getAudioInput();
                 break;
             default:
-                var inputHTML = () => {return (<div></div>)}
+                var inputHTML = () => {return (<div></div>)};
                 break;
 
         }
@@ -405,4 +480,4 @@ export class UpdateOccurrenceInput extends React.Component {
 
 }
 
-module.exports = { UpdateOccurrenceInput, UpdateOccurrenceList}
+module.exports = { UpdateOccurrenceInput, UpdateOccurrenceList};

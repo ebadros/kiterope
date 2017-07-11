@@ -35,6 +35,7 @@ import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import PropTypes from 'prop-types';
 
 
 export const isThisReasonableOptions = [
@@ -42,14 +43,14 @@ export const isThisReasonableOptions = [
 
     {value:true, label: "Yes, this is a realistic goal that challenges me."},
     {value:false, label: "This is not a realistic goal. I should rethink my goal."},
-    ]
+    ];
 
 export const goalInAlignmentWithCoreValuesOptions = [
         {value:null, label: ""},
 
     {value:true, label: "Yes, this goal aligns with my core values."},
     {value:false, label: "No, this goal does not align with my core values. I should rethink my goal."},
-    ]
+    ];
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -65,8 +66,8 @@ $.ajaxSetup({
 
 export class GoalEntryPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: []
         }
@@ -77,12 +78,12 @@ export class GoalEntryPage extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
     handleCancelClicked = () => {
         $(this.refs['ref_goalForm']).slideUp();
         $(this.refs['ref_goalsStepsHeader']).slideDown();
-    }
+    };
 
      handleGoalSubmit (goal) {
     $.ajax({
@@ -142,8 +143,8 @@ export class GoalEntryPage extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class GoalListPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             activePage:1,
             serverErrors:"",
@@ -159,7 +160,7 @@ export class GoalListPage extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
 
 /*
@@ -201,9 +202,9 @@ export class GoalListPage extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
         success: function(data) {
-                                 this.handleCloseForm()
+                                 this.handleCloseForm();
 
-                                 store.dispatch(addGoal(data))
+                                 store.dispatch(addGoal(data));
 
                                      //this.loadCommentsFromServer()
         }.bind(this),
@@ -226,7 +227,7 @@ export class GoalListPage extends React.Component {
   }
 handleToggleForm = () => {
         $(this.refs['ref_whichGoalForm']).slideToggle()
-    }
+    };
 
     componentDidMount() {
         //this.loadCommentsFromServer();
@@ -251,7 +252,7 @@ handleToggleForm = () => {
   handlePageChange = (pageNumber) => {
         this.setState({activePage: pageNumber}, () => this.loadCommentsFromServer());
 
-    }
+    };
 
   getPagination()  {
           if (this.state.next != null || this.state.previous != null) {
@@ -277,18 +278,18 @@ handleToggleForm = () => {
         }, () => {$(this.refs['ref_whichGoalForm']).slideDown()} )
 
 
-    }
+    };
     handleReloadItem = () => {
         this.loadStepsFromServer()
-    }
+    };
 handleCancelClicked = () => {
-      $(this.refs['ref_whichGoalForm']).slideUp()
+      $(this.refs['ref_whichGoalForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Add Goal"
       })
 
-  }
+  };
 
 
   handleCloseForm = () => {
@@ -297,7 +298,7 @@ handleCancelClicked = () => {
             formIsOpen:false,
         }, () => $(this.refs['ref_whichGoalForm']).slideUp())
 
-    }
+    };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -307,7 +308,7 @@ handleCancelClicked = () => {
       else {
           this.handleOpenForm()
       }
-    }
+    };
 
 
 componentWillUnmount() {
@@ -319,7 +320,7 @@ componentWillUnmount() {
     }
 
   render() {
-      var pagination = this.getPagination()
+      var pagination = this.getPagination();
 
     return (
 
@@ -359,8 +360,8 @@ componentWillUnmount() {
 @connect(mapStateToProps, mapDispatchToProps)
 export class GoalList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
         }
@@ -379,12 +380,12 @@ export class GoalList extends React.Component {
         backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
         width: '300px',
         height: '300px',
-    }
+    };
 
-    var goalNodes = () => { return(<div></div>)}
+    var goalNodes = () => { return(<div></div>)};
     if (this.state.data != undefined) {
 
-        var theData = this.state.data
+        var theData = this.state.data;
         var values = Object.keys(theData).map(function(key){
         return theData[key];
         });
@@ -414,7 +415,7 @@ function printObject(o) {
 }
 
 function getArrayObjectById(theArray, theId) {
-    var returnObject = ""
+    var returnObject = "";
     for (var i = 0; i < theArray.length; i += 1) {
         var theArrayObject = theArray[i];
         if (theArrayObject.id == theId) {
@@ -427,8 +428,8 @@ function getArrayObjectById(theArray, theId) {
 @connect(mapStateToProps, mapDispatchToProps)
 export class GoalDetailPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             editable:false,
@@ -442,8 +443,8 @@ export class GoalDetailPage extends React.Component {
     componentWillReceiveProps(nextProps) {
        if (this.state.data != nextProps.storeRoot.goals) {
            if (nextProps.storeRoot.goals != undefined) {
-               var theGoals = nextProps.storeRoot.goals
-                         this.setState({data: theGoals[this.props.params.goal_id]})
+               var theGoals = nextProps.storeRoot.goals;
+                         this.setState({data: theGoals[this.props.params.goal_id]});
 
                //var theGoal = getArrayObjectById(theGoals, nextProps.params.goal_id)
                //this.setState({data: theGoal })
@@ -463,7 +464,7 @@ export class GoalDetailPage extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    store.dispatch(updateGoal(data))
+                    store.dispatch(updateGoal(data));
                     //this.setState({data: data});
                 }.bind(this),
                 error: function (xhr, status, err) {
@@ -478,7 +479,7 @@ export class GoalDetailPage extends React.Component {
   }
 
     loadDetailFromServer = () => {
-        var theURL = "api/goals/" + this.props.params.goal_id + "/"
+        var theURL = "api/goals/" + this.props.params.goal_id + "/";
 
     $.ajax({
       url: theURL,
@@ -496,7 +497,7 @@ export class GoalDetailPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -512,15 +513,15 @@ export class GoalDetailPage extends React.Component {
 
       }
 
-}
+};
     handleCloseModalClicked = () => {
         this.setState({openModal:false})
-    }
+    };
 
     handleOpenModal = () => {
-        this.setState({openModal:true})
+        this.setState({openModal:true});
         //$(this.refs['id_whichPlanForm']).slideToggle()
-    }
+    };
 
     handleOpenForm = () => {
         this.setState({
@@ -530,7 +531,7 @@ export class GoalDetailPage extends React.Component {
         }, () => {$(this.refs['id_whichPlanForm']).slideDown()} )
 
 
-    }
+    };
 
 
     handleCloseForm = () => {
@@ -539,10 +540,10 @@ export class GoalDetailPage extends React.Component {
             formIsOpen:false,
         }, $(this.refs['id_whichPlanForm']).slideUp())
 
-    }
+    };
 
   determineOptions = () => {
-      var theUrl = "api/goals/" + this.props.params.goal_id + "/"
+      var theUrl = "api/goals/" + this.props.params.goal_id + "/";
 
       $.ajax({
       url: theUrl,
@@ -566,18 +567,18 @@ export class GoalDetailPage extends React.Component {
 
 
     });
-  }
+  };
 
   componentDidMount() {
            if (this.props.storeRoot.goals != undefined) {
-               console.log("inside goal componentDidMount")
-               var theGoals = this.props.storeRoot.goals
-                         this.setState({data: theGoals[this.props.params.goal_id]})
+               console.log("inside goal componentDidMount");
+               var theGoals = this.props.storeRoot.goals;
+                         this.setState({data: theGoals[this.props.params.goal_id]});
 
                //this.setState({data: getArrayObjectById(theGoals, this.props.params.goal_id)})
            }
 
-      this.determineOptions()
+      this.determineOptions();
       //this.loadDetailFromServer()
               $(this.refs['id_whichPlanForm']).hide()
 
@@ -588,16 +589,16 @@ export class GoalDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search")
+              hashHistory.push("/search");
               break;
           case ("create"):
-              this.handleOpenForm()
+              this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry")
+              hashHistory.push("/goalEntry");
               break;
       }
-  }
+  };
 
     render () {
         return (
@@ -651,14 +652,14 @@ export class GoalDetailPage extends React.Component {
 
 
 GoalList.propTypes = {
-    data: React.PropTypes.array.isRequired
+    data: PropTypes.array.isRequired
 
-}
+};
 
 
 export class GoalNode extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         autobind(this)
 
     }
@@ -671,7 +672,7 @@ export class GoalNode extends React.Component {
         hashHistory.push('/goals/' + this.props.goal.id + '/plans')
 
 
-    }
+    };
 
     render () {
 
@@ -697,12 +698,12 @@ export class GoalNode extends React.Component {
 
 export class GoalStepsHeader extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         autobind(this)
     }
 
     showGoalEntryForm() {
-        console.log("showGoalEntryForm")
+        console.log("showGoalEntryForm");
         this.props.goalEntryFormClicked()
 
     }
@@ -771,8 +772,8 @@ export class GoalStepsHeader extends React.Component {
 
 export class GoalForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             title: "",
             deadline: moment(),
@@ -794,7 +795,7 @@ export class GoalForm extends React.Component {
 
 
     componentDidMount () {
-        $(this.refs['id_whichGoalForm']).hide()
+        $(this.refs['id_whichGoalForm']).hide();
         this.checkIfUser()
     }
 
@@ -833,7 +834,7 @@ export class GoalForm extends React.Component {
 
     handleDeadlineChange = (value)  => {
         this.setState({deadline: value});
-    }
+    };
 
     handleDescriptionChange(e) {
         this.setState({description: e});
@@ -852,14 +853,14 @@ export class GoalForm extends React.Component {
         this.setState({
             image: callbackData.image
         })
-    }
+    };
     handleViewableByChange(e) {
         this.setState({viewableBy: e.value});
     }
 
 
     checkIfUser() {
-        var theUrl =    '/api/users/i/'
+        var theUrl =    '/api/users/i/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -898,15 +899,15 @@ export class GoalForm extends React.Component {
 
 
             e.preventDefault();
-        this.checkIfUser()
+        this.checkIfUser();
 
         if (this.state.user) {
 
             var title = this.state.title;
-            var deadline = moment(this.state.deadline).format("YYYY-MM-DD")
-            var image = this.state.image
+            var deadline = moment(this.state.deadline).format("YYYY-MM-DD");
+            var image = this.state.image;
             var description = this.state.description;
-            var metric = this.state.metric
+            var metric = this.state.metric;
 
 
             var why = this.state.why;
@@ -923,7 +924,7 @@ export class GoalForm extends React.Component {
                 updates: [],
                 wasAchieved: false,
                 plans: []
-            }
+            };
 
             if (this.state.id != "") {
                 goalData.id = this.state.id
@@ -954,7 +955,7 @@ export class GoalForm extends React.Component {
                 wasAchieved: false,
                 plans: []
             });
-        }
+        };
 
         getForm = () => {
             if (this.state.id) {
@@ -964,9 +965,9 @@ export class GoalForm extends React.Component {
             {
                 var buttonText = "Create Goal"
             }
-            var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
-            var smallColumnWidth = "eight wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
 
             if (this.state.image) {
                 var imageUrl = this.state.image
@@ -1121,12 +1122,12 @@ export class GoalForm extends React.Component {
                 </div>
             </div>
 
-        )}
+        )};
 
 
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -1155,8 +1156,8 @@ export class GoalForm extends React.Component {
 
 export class GoalSMARTForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             title: "",
             deadline: moment(),
@@ -1181,7 +1182,7 @@ export class GoalSMARTForm extends React.Component {
 
 
     componentDidMount () {
-        $(this.refs['id_whichGoalForm']).hide()
+        $(this.refs['id_whichGoalForm']).hide();
         this.checkIfUser()
     }
 
@@ -1219,7 +1220,7 @@ export class GoalSMARTForm extends React.Component {
 
     handleDeadlineChange = (value)  => {
         this.setState({deadline: value});
-    }
+    };
 
     handleDescriptionChange(e) {
         this.setState({description: e.target.value});
@@ -1253,7 +1254,7 @@ export class GoalSMARTForm extends React.Component {
         this.setState({
             image: callbackData.image
         })
-    }
+    };
     handleViewableByChange(e) {
         this.setState({viewableBy: e.target.value});
     }
@@ -1266,7 +1267,7 @@ export class GoalSMARTForm extends React.Component {
 
     checkIfUser() {
 
-        var theUrl = '/api/users/i/'
+        var theUrl = '/api/users/i/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -1317,20 +1318,20 @@ export class GoalSMARTForm extends React.Component {
 
 
             e.preventDefault();
-        this.checkIfUser()
+        this.checkIfUser();
 
         if (this.state.user) {
 
             var title = this.state.title;
-            var deadline = moment(this.state.deadline).format("MMM DD, YYYY")
-            var image = this.state.image
+            var deadline = moment(this.state.deadline).format("MMM DD, YYYY");
+            var image = this.state.image;
 
             var description = this.state.description;
             var coreValues = this.state.coreValues;
-            var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
-            var obstacles = this.state.obstacles
-            var isThisReasonable = this.state.isThisReasonable
-            var metric = this.state.metric
+            var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues;
+            var obstacles = this.state.obstacles;
+            var isThisReasonable = this.state.isThisReasonable;
+            var metric = this.state.metric;
 
 
             var why = this.state.why;
@@ -1352,7 +1353,7 @@ export class GoalSMARTForm extends React.Component {
                 updates: [],
                 wasAchieved: false,
                 plans: []
-            }
+            };
 
             if (this.state.id != "") {
                 goalData.id = this.state.id
@@ -1381,7 +1382,7 @@ export class GoalSMARTForm extends React.Component {
                 var buttonText = "Create Goal"
             }
 
-            var imageUrl = s3ImageUrl + this.state.image
+            var imageUrl = s3ImageUrl + this.state.image;
         return ( <div className="ui page container footerAtBottom">
                                 <div className="ui row">&nbsp;</div>
 
@@ -1583,12 +1584,12 @@ export class GoalSMARTForm extends React.Component {
                                     </div>
                             </div>
 
-        )}
+        )};
 
 
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -1617,8 +1618,8 @@ export class GoalSMARTForm extends React.Component {
 
 export class SimpleGoalForm extends GoalForm {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             title: "",
             deadline: moment(),
@@ -1643,8 +1644,8 @@ export class SimpleGoalForm extends GoalForm {
 
     getForm = () => {
 
-            var imageUrl = s3ImageUrl + this.state.image
-        var theDeadline = moment(this.state.deadline).format("MMM DD, YYYY")
+            var imageUrl = s3ImageUrl + this.state.image;
+        var theDeadline = moment(this.state.deadline).format("MMM DD, YYYY");
         return (
             <div className="ui page container footerAtBottom">
                 <div className="ui grid">
@@ -1723,10 +1724,10 @@ export class SimpleGoalForm extends GoalForm {
                     </div>
                 </div>
 
-        )}
+        )};
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -1779,7 +1780,7 @@ export class GoalBasicView extends React.Component {
 
     render() {
         if (this.state.data) {
-            var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY")
+            var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY");
             if (this.state.data.image == "") {
                 var theImage = "icons/goalItem.svg"
             } else {

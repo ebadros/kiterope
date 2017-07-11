@@ -42,8 +42,8 @@ function printObject(o) {
 export class UpdatesList extends React.Component {
 
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
         modalIsOpen: false,
@@ -52,22 +52,22 @@ export class UpdatesList extends React.Component {
     }
     componentDidMount = () => {
         //this.loadObjectsFromServer(this.props.stepId)
-        this.setState({stepId: this.props.stepId})
+        this.setState({stepId: this.props.stepId});
 
       //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID:intervalID});
 
-    }
+    };
 
     componentWillUnmount = () => {
    // use intervalId from the state to clear the interval
    //clearInterval(this.state.intervalId);
-    }
+    };
 
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.stepId != nextProps.stepId) {
-            this.setState({ stepId: nextProps.stepId})
+            this.setState({ stepId: nextProps.stepId});
 
            // this.setState({ stepId: nextProps.stepId}, this.loadObjectsFromServer(nextProps.stepId))
 
@@ -75,10 +75,10 @@ export class UpdatesList extends React.Component {
         if ((this.state.data != nextProps.updates) && (nextProps.updates != undefined)) {
             this.setState({data: nextProps.updates})
         }
-    }
+    };
     handleUpdateAdded= (data) => {
         this.props.updateAdded(data)
-    }
+    };
 
 
 
@@ -98,8 +98,8 @@ export class UpdatesList extends React.Component {
             type: theType,
             data: update,
             success: function (data) {
-                this.props.updateAdded(data)
-                callback
+                this.props.updateAdded(data);
+                callback;
                 console.log("callback called")
 
             }.bind(this),
@@ -107,12 +107,12 @@ export class UpdatesList extends React.Component {
                 console.error(theUrl, status, err.toString());
             }.bind(this)
         });
-    }
+    };
 
     loadObjectsFromServer = (theStepId) => {
 
         if (theStepId != undefined) {
-            var theUrl = "api/steps/" + theStepId + "/updates/"
+            var theUrl = "api/steps/" + theStepId + "/updates/";
 
             $.ajax({
                 url: theUrl ,
@@ -132,12 +132,12 @@ export class UpdatesList extends React.Component {
                 }.bind(this)
             });
         }
-      }
+      };
 
 
     handleReloadItem = () => {
         //this.loadObjectsFromServer(this.state.stepId)
-    }
+    };
 
 
 
@@ -197,7 +197,7 @@ export class UpdateAddAndEditItemForm extends React.Component {
     componentDidMount() {
         this.setState({
             data: this.props.updateData,
-        })
+        });
         if (this.props.updateData != undefined) {
             this.setState({
                 id: this.props.updateData.id,
@@ -215,7 +215,7 @@ export class UpdateAddAndEditItemForm extends React.Component {
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.data != nextProps.updateData) {
-            this.setState({data: nextProps.updateData})
+            this.setState({data: nextProps.updateData});
             if (nextProps.updateData != undefined) {
                 this.setState({
                     id: nextProps.updateData.id,
@@ -232,7 +232,7 @@ export class UpdateAddAndEditItemForm extends React.Component {
                 this.setState({currentView: nextProps.currentView})
             }
 
-    }
+    };
 
     openModal() {
         this.setState({
@@ -316,13 +316,13 @@ export class UpdateAddAndEditItemForm extends React.Component {
     }
 
     finishSubmit = () => {
-                this.closeModal()
+                this.closeModal();
                 this.props.reloadItem()
-    }
+    };
 
     deleteUpdate() {
 
-        var theUrl = "api/updates/" + this.state.data.id + "/"
+        var theUrl = "api/updates/" + this.state.data.id + "/";
 
         $.ajax({
         url: theUrl,
@@ -344,10 +344,10 @@ export class UpdateAddAndEditItemForm extends React.Component {
     handleClick (theClick) {
         switch(theClick) {
             case ("Edit"):
-                this.openModal()
+                this.openModal();
                 break;
             case ("Delete"):
-                this.deleteUpdate()
+                this.deleteUpdate();
                 break;
         }
 
@@ -414,7 +414,7 @@ return (
                                         label="What are you measuring?"
                                         id="id_measuringWhat"
                                         placeholder="distance, weight, time, etc"
-                                        value={this.state.measuringWhat}
+                                        value={this.state.measuringWhat || ''}
                                         initialValue={this.state.measuringWhat}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -432,7 +432,7 @@ return (
                                         placeholder="miles, pounds, hours, etc"
                                         label="What units are you measuring?"
                                         id="id_metricLabel"
-                                        value={this.state.units}
+                                        value={this.state.units || ''}
                                         initialValue={this.state.units}
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
@@ -678,14 +678,14 @@ export class UpdateItemMenu extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
      getProfileMenu () {
 
      }
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          return(
 
                   <div className="ui simple dropdown item" >
@@ -710,8 +710,8 @@ export class UpdateItemMenu extends React.Component {
 
 export class UpdateItem extends React.Component{
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             id: "",
             measuringWhat: "",
@@ -724,7 +724,7 @@ export class UpdateItem extends React.Component{
     }
 
     componentDidMount () {
-            this.setState({updateData: this.props.updateData})
+            this.setState({updateData: this.props.updateData});
 
         this.setState({
             id: this.props.updateData.id,
@@ -753,8 +753,8 @@ export class UpdateItem extends React.Component{
             type: theType,
             data: update,
             success: function (data) {
-                this.props.updateAdded(data)
-                callback
+                this.props.updateAdded(data);
+                callback;
                 console.log("callback called")
 
             }.bind(this),
@@ -762,7 +762,7 @@ export class UpdateItem extends React.Component{
                 console.error(theURL, status, err.toString());
             }.bind(this)
         });
-    }
+    };
 
     handleReloadItem() {
         this.props.reloadItem()
@@ -773,7 +773,7 @@ export class UpdateItem extends React.Component{
             this.setState({updateData: nextProps.updateData})
         }
 
-    }
+    };
 
 
 

@@ -74,8 +74,8 @@ function getCookie(name) {
 @connect(mapStateToProps, mapDispatchToProps)
 export class DailyList extends React.Component{
      constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
 
@@ -88,7 +88,7 @@ export class DailyList extends React.Component{
         var periodRangeEnd = new Date();
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/"
+        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
         $.ajax({
             url: theUrl,
@@ -170,8 +170,8 @@ export class DailyList extends React.Component{
 
 export class StepOccurrenceList2 extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: []
 
@@ -216,83 +216,12 @@ export class StepOccurrenceList2 extends React.Component {
     }
 }
 
-export class StepOccurrenceItem2 extends React.Component {
-    constructor(props) {
-        super(props)
-        autobind(this)
-        this.state = {
-            data:[]
 
-
-        }
-    }
-
-
-    componentDidMount() {
-        this.setState({
-            id: this.props.stepOccurrenceData.id,
-            title: this.props.stepOccurrenceData.step.title,
-            description: this.props.stepOccurrenceData.step.description,
-            wasCompleted: this.props.stepOccurrenceData.wasCompleted,
-        })
-
-
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if (this.state.data != nextProps.data) {
-            this.setState({data: this.props.data})
-        }
-    }
-
-
-
-
-    render () {
-
-        return (
-            <div>
-                        <div className="ui top attached purple large button">Step</div>
-                                        <div className="ui fluid noTopMargin segment">
-
-                <div className="ui sixteen wide column">
-                    <div className="ui grid">
-                        <div className="three wide column">
-                            <div className="ui center aligned middle aligned grid height-100">
-                                <div className="ui sixteen wide column">
-                            <div className="pretty success circle smooth huge-checkbox">
-                            <input type="checkbox" id="id_wasCompleted" />
-                                <label><i className="mdi mdi-check"></i> </label>
-                        </div>
-                        </div></div></div>
-
-                        <div className="eight wide column">
-
-                        <div className="header"><h1>{this.state.title}</h1></div>
-                        <div className="header"><h3 dangerouslySetInnerHTML={{__html: this.state.description}} /></div>
-
-
-                        </div>
-                        <div className="four wide column">
-
-                        <UpdateOccurrenceList stepOccurrenceId={this.props.stepOccurrenceData.id}/>
-                    </div>
-                    <div className="one wide center aligned column ">
-                        <FacebookShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><FacebookIcon size={40} round={true} /></FacebookShareButton>
-                        <TwitterShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><TwitterIcon size={40} round={true} /></TwitterShareButton>
-                        <GooglePlusShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><GooglePlusIcon size={40} round={true} /></GooglePlusShareButton>
-                        <LinkedinShareButton url="http://ericbadros.com" title="Eric Badros Page" description="Here's the description of the page"><LinkedinIcon size={40} round={true} /></LinkedinShareButton>
-                    </div>
-                </div>
-                    </div></div></div>
-        )
-    }
-}
 
 export class UpdateOccurrenceList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
 
@@ -412,4 +341,4 @@ var UpdateOccurrenceForm = React.createClass({
 
 });
 
-module.exports = { DailyList}
+module.exports = { DailyList};

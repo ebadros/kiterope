@@ -5,22 +5,22 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 var validator = require('validator');
-var TinyMCE = require('react-tinymce')
-var theServer = 'https://192.168.1.156:8000/'
+var TinyMCE = require('react-tinymce');
+var theServer = 'https://192.168.1.156:8000/';
 
 import autobind from 'class-autobind'
-var auth = require('./auth')
+var auth = require('./auth');
 var Global = require('react-global');
 import Select from 'react-select'
-
+import PropTypes from 'prop-types';
 
 
 
 export class App extends React.Component {
 
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             'user': [],
         }
@@ -33,8 +33,8 @@ export class App extends React.Component {
 
 
     logoutHandler(){
-        store.dispatch(reduxLogout())
-        auth.logout()
+        store.dispatch(reduxLogout());
+        auth.logout();
         hashHistory.push('/account/login/')
 
     }
@@ -110,7 +110,7 @@ export class KRCheckBox extends React.Component {
             })
         }
         this.props.stateCallback(event.target.checked);
-    }
+    };
 
     componentDidMount() {
         this.setState({
@@ -132,7 +132,7 @@ export class KRCheckBox extends React.Component {
                 serverErrors:nextProps.serverErrors
             })
         }
-    }
+    };
 
     buildErrors = () => {
         var i;
@@ -150,10 +150,10 @@ export class KRCheckBox extends React.Component {
         }
         return errorsHTML
 
-    }
+    };
 
     render () {
-        var errorsHTML = this.buildErrors()
+        var errorsHTML = this.buildErrors();
          if (errorsHTML != "") {
                 return (
                     <div className="ui row">
@@ -223,11 +223,11 @@ export class KSSelect extends React.Component {
         }
         return errorsHTML
 
-    }
+    };
 
     render= () => {
 
-        var errorsHTML = this.buildErrors()
+        var errorsHTML = this.buildErrors();
             if (errorsHTML != "") {
 
         return (
@@ -257,6 +257,8 @@ export class ValidatedInput extends React.Component{
         super(props);
         autobind(this);
         this.state = {
+            value:"",
+            initialValue:""
         }
     }
 
@@ -282,7 +284,7 @@ export class ValidatedInput extends React.Component{
                 serverErrors:nextProps.serverErrors
             })
         }
-    }
+    };
 
     getError = (failedEvalString) => {
         var i=0;
@@ -310,7 +312,7 @@ export class ValidatedInput extends React.Component{
 
         return error;
 
-    }
+    };
 
     validate = (e) => {
         this.setState({value: e.target.value});
@@ -362,12 +364,12 @@ export class ValidatedInput extends React.Component{
 
 
         return this.state.errors;
-    }
+    };
 
     updateState = (targetValue) => {
         this.setState({value: targetValue});
 
-    }
+    };
 
     buildErrors = () => {
         var i;
@@ -385,13 +387,13 @@ export class ValidatedInput extends React.Component{
         }
         return errorsHTML
 
-    }
+    };
 
 
 
 
     render = () => {
-        var errorsHTML = this.buildErrors()
+        var errorsHTML = this.buildErrors();
 
         if (this.props.isEnabled == null) {
 
@@ -475,11 +477,11 @@ export class ValidatedInput extends React.Component{
 }
 
 ValidatedInput.propTypes = {
-        stateCallback: React.PropTypes.func,
+        stateCallback: PropTypes.func,
     };
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: PropTypes.object.isRequired
 };
 
-module.exports =  { App, ValidatedInput, KSSelect, KRCheckBox }
+module.exports =  { App, ValidatedInput, KSSelect, KRCheckBox };
