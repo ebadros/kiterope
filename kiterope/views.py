@@ -405,6 +405,18 @@ class GoalViewSet(viewsets.ModelViewSet):
         context = super(GoalViewSet, self).get_serializer_context()
         return context
 
+    def get_queryset(self):
+        theUser = self.request.user
+        theQueryset = Goal.objects.filter(user=theUser)
+        try:
+            goal_id = self.kwargs['goal_id']
+            theQueryset = theQueryset.filter(pk=goal_id)
+        except:
+            theQueryset = theQueryset
+
+
+        return theQueryset
+
 
 
 

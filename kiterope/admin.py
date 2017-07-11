@@ -8,7 +8,6 @@ admin.site.register(Session)
 admin.site.register(Review)
 admin.site.register(Update)
 admin.site.register(Post)
-admin.site.register(Program)
 admin.site.register(Step)
 admin.site.register(Question)
 admin.site.register(Answer)
@@ -33,12 +32,15 @@ class KChannelAdmin(admin.ModelAdmin):
     inlines = (KChannelUserInline,)
 
 
+
+
 admin.site.register(Profile)
 admin.site.register(KChannel, KChannelAdmin)
 admin.site.register(KChannelUser)
 
 admin.site.register(KRMessage)
 admin.site.register(Contact)
+admin.site.register(Program)
 
 
 

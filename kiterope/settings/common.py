@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     #'debug_toolbar',
     'channels',
     'django_twilio',
-    'phonenumber_field'
+    'phonenumber_field',
 
 ]
 
@@ -88,6 +88,12 @@ AUTHENTICATION_BACKENDS = (
 
 )
 
+SERIALIZATION_MODULES = {
+    'xml':    'tagulous.serializers.xml_serializer',
+    'json':   'tagulous.serializers.json',
+    'python': 'tagulous.serializers.python',
+    'yaml':   'tagulous.serializers.pyyaml',
+}
 
 
 

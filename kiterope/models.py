@@ -27,6 +27,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 
 
+
 TIME_COMMITMENT_CHOICES = (
 ("10m", "10 minutes per day"),
 ("20m", "20 minutes per day"),
@@ -45,6 +46,17 @@ TIME_COMMITMENT_CHOICES = (
 SESSION_TYPE_CHOICES = (
     ("TRIAL", "Trial"),
     ("PAID", "Paid"),
+
+)
+
+PROGRAM_CATEGORY_CHOICES = (
+    ("UNCATEGORIZED", "Uncategorized"),
+    ("HEALTH_AND_FITNESS", "Health & Fitness"),
+    ("FAMILY", "Family"),
+    ("RELATIONSHIPS", "Relationships"),
+    ("CAREER", "Career"),
+    ("EDUCATION_AND_SKILLS", "Education & Skills"),
+    ("MONEY", "Money"),
 
 )
 
@@ -322,6 +334,7 @@ class Program(models.Model):
     timeCommitment = models.CharField(max_length=100, choices=TIME_COMMITMENT_CHOICES, blank=True, default="1h")
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="PER MONTH")
+    category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
 
 
     def get_userPlanOccurrenceId(self, theUser):
@@ -339,6 +352,8 @@ class Program(models.Model):
 
     def get_goals(self):
         return Goal.objects.filter(program=self)
+
+
 
     '''def get_scheduleLength(self):
         theScheduleLength = self.scheduleLength
