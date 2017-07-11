@@ -460,6 +460,8 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.cost = validated_data.get('cost', instance.cost)
         instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
         instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
+        instance.category = validated_data.get('category', instance.category)
+
 
 
         #instance.goals = validated_data.get('goals', instance.goals)
