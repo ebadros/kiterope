@@ -134,19 +134,6 @@ export class FormHeaderWithActionButton extends React.Component {
 }
 }
 
-var PlanForm2 = forms.Form.extend({
-
-        rowCssClass: 'field',
-        title: forms.CharField(),
-        description:forms.CharField({widget: forms.Textarea()}),
-        viewableBy:forms.ChoiceField({choices:["Only me": "ONLY_ME", "Just people I've shared this goal with": "SHARED", "Just my Pros": "MY_PROS", "All Pros": "ALL_PROS", "Everyone": "EVERYONE"]}),
-        forms.CharField({widget: forms.DateTimeInput()}),
-            endDate: forms.CharField({widget: forms.DateTimeInput()}),
-        scheduleLength: forms.IntegerField(),;
-        //calendar:forms.FileField({widget: forms.FileInput({attrs: {className: 'ui button', css:'opacity:0;'}}), label: "Import Calendar (.ics) File", css:"ui button"}),
-
-
-    })
 
 
 

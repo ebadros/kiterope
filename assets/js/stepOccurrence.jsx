@@ -30,7 +30,7 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 import {UpdateOccurrenceList } from './updateOccurrence'
 
 
-import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader,   ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
@@ -59,8 +59,8 @@ function printObject(o) {
 
 export class StepOccurrenceList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: []
 
@@ -108,8 +108,8 @@ export class StepOccurrenceList extends React.Component {
 
 export class StepOccurrenceItem extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             showingDetail:false,
@@ -126,12 +126,12 @@ export class StepOccurrenceItem extends React.Component {
 
     toggleDetail () {
         if (this.state.showingDetail) {
-            $(this.refs["ref_detail"]).slideUp()
+            $(this.refs["ref_detail"]).slideUp();
 
             this.setState({showingDetail:false})
 
         } else {
-            $(this.refs["ref_detail"]).slideDown()
+            $(this.refs["ref_detail"]).slideDown();
 
             this.setState({showingDetail:true})
 
@@ -157,7 +157,7 @@ export class StepOccurrenceItem extends React.Component {
 
 
 
-    }
+    };
 
 
 
@@ -195,9 +195,9 @@ export class StepOccurrenceItem extends React.Component {
         var stepOccurrence = {
             id:this.state.id,
             wasCompleted: this.state.wasCompleted
-        }
+        };
 
-        var theUrl = "api/stepOccurrences/" + this.state.id + "/"
+        var theUrl = "api/stepOccurrences/" + this.state.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -220,7 +220,7 @@ export class StepOccurrenceItem extends React.Component {
 
                 }.bind(this)
             });
-        var theUrl = "api/updateOccurrences/" + updateOccurrence.id + "/"
+        var theUrl = "api/updateOccurrences/" + updateOccurrence.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -288,4 +288,4 @@ export class StepOccurrenceItem extends React.Component {
 }
 
 
-module.exports = { StepOccurrenceItem, StepOccurrenceList }
+module.exports = { StepOccurrenceItem, StepOccurrenceList };
