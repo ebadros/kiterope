@@ -1,11 +1,11 @@
-export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/"
+export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/";
 export const getTheServer = () => {
      if (typeof window !== 'undefined') {
         var path = location.protocol + '//' + location.host + "/"; // (or whatever)
     }
   return path
-}
-export const theServer = getTheServer()
+};
+export const theServer = getTheServer();
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope-static.s3.amazonaws.com:443/";
 
@@ -45,7 +45,7 @@ export const durations = [
     {value:'120', label: "2 hours"},
     {value:'150', label: "2.5 hours"},
     {value:'180', label: "3 hours"},
-    ]
+    ];
 
 export const times = [
     {value:'12:00', label: "12:00 am"},
@@ -96,7 +96,7 @@ export const times = [
     {value:'22:30', label: "10:30 pm"},
     {value:'23:00', label: "11:00 pm"},
     {value:'23:30', label: "11:30 pm"},
-    ]
+    ];
 
 
 export const customModalStyles = {
@@ -121,13 +121,22 @@ export const customModalStyles = {
 };
 
 
+export const programCategoryOptions = [
+    {value:"UNCATEGORIZED", label:"Uncategorized"},
+{value:"HEALTH_AND_FITNESS", label:"Health & Fitness"},
+{value:"FAMILY", label:"Family"},
+{value:"RELATIONSHIPS", label:"Relationships"},
+{value:"CAREER",label: "Career"},
+{value:"EDUCATION_AND_SKILLS", label:"Education & Skills"},
+{value:"MONEY", label:"Money"},
 
+];
 
 export const frequencyOptions = [
      {value:'ONCE', label: "Don't repeat"},
     {value:'DAILY', label: "Daily"},
     {value:'WEEKLY', label: "Weekly"},
-    {value:'MONTHLY', label: "Monthly"}]
+    {value:'MONTHLY', label: "Monthly"}];
 
 export const programScheduleLengths = [
     {value:'1w', label: "1 week"},
@@ -146,7 +155,7 @@ export const programScheduleLengths = [
     {value:'9m', label: "9 months"},
     {value:'10m', label: "10 months"},
     {value:'11m', label: "11 months"},
-    {value:'1y', label: "1 year"}]
+    {value:'1y', label: "1 year"}];
 
 export const timeCommitmentOptions = [
     {value:'10m', label: "10 minutes a day"},
@@ -160,30 +169,30 @@ export const timeCommitmentOptions = [
     {value:'3h', label: "3 hours a day"},
     {value:'4h', label: "4 hours a day"},
     {value:'5h', label: "5 hours a day"},
-    {value:'8h', label: "8 hours a day"}]
+    {value:'8h', label: "8 hours a day"}];
 
 export const costFrequencyMetricOptions = [
     {value:'MONTH', label: "Per Month"},
     {value:'WEEK', label: "Per Week"},
-    {value:'ONE_TIME', label: "One Time"}]
+    {value:'ONE_TIME', label: "One Time"}];
 
 export const viewableByOptions = [
     {value:'ONLY_ME', label: "Only me"},
     {value:'ONLY_CLIENTS', label: "Only my clients"},
-    {value:'ANYONE', label: "Anyone"}]
+    {value:'ANYONE', label: "Anyone"}];
 
 export const userSharingOptions = [
     {value:'ONLY_ME', label: "Only me"},
     {value:'ONLY_COACHES', label: "Only coaches"},
     {value:'SHARED_WITH', label: "People I've shared with specifically"},
-    {value:'ANYONE', label: "Anyone"}]
+    {value:'ANYONE', label: "Anyone"}];
 
 export const notificationSendMethodOptions = [
     {value:'EMAIL_AND_TEXT', label: "Email and Text"},
     {value:'EMAIL', label: "Email Only"},
     {value:'TEXT', label: "Text Only"},
     {value:'NO_NOTIFICATIONS', label: "I don't want any notifications"}
-]
+];
 
 export const metricFormatOptions = [
 
@@ -195,7 +204,7 @@ export const metricFormatOptions = [
     {value: "picture", label: "picture"},
     {value: "video", label: "video"},
     {value: "audio", label: "audio"},
-]
+];
 
 export const formats = {
   dateFormat: 'DD',
@@ -203,7 +212,7 @@ export const formats = {
     dayFormat:'ddd MM/DD'
 
 
-}
+};
 
 export const customStepModalStyles = {
     overlay : {
@@ -253,5 +262,5 @@ function printObject(o) {
 
 
 
-module.exports = {  theServer, s3IconUrl, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
-    TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain }
+module.exports = {  theServer, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+    TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };

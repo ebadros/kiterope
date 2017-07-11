@@ -380,11 +380,13 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
     scheduleLength = serializers.CharField()
+    category = serializers.CharField(max_length=20)
+
     timeCommitment = serializers.CharField(max_length=20)
     costFrequencyMetric = serializers.CharField(max_length=20)
     cost = serializers.CharField(max_length=20)
@@ -420,6 +422,9 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
             return thePlanOccurrence.isSubscribed
         except:
             return False
+
+    def get_category(self, obj):
+        return obj.get_category_display()
 
 
     def get_timeCommitment(self, obj):

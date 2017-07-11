@@ -16,7 +16,7 @@ import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
 import  { ValidatedInput } from './app'
-var auth = require('./auth')
+var auth = require('./auth');
 var Modal = require('react-modal');
 
 import onClickOutside  from 'react-onclickoutside';
@@ -36,7 +36,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
             view: "Switch to User View"
 
 
-        }
+        };
                 setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
 
     }
@@ -59,7 +59,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
     }
 
     handleClickOutside = (e) => {
-        store.dispatch(showSidebar(false))
+        store.dispatch(showSidebar(false));
 
 
         {/*this.props.sidebarVisibilityChange({
@@ -69,7 +69,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         this.setState({
             visible:false,
         }) */}
-  }
+  };
 
   handleClose() {
       store.dispatch(showSidebar(false))
@@ -114,7 +114,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                 view: "Switch to Coach View"
             })
         }
-    }
+    };
 
     render() {
         if (this.props.user != undefined) {
@@ -144,7 +144,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
             zIndex: 2000,
 
 
-        }
+        };
         if (this.props.user != undefined) {
             if ((this.props.user.isCoach) && (this.state.view == "Switch to User View")) {
                 return (
@@ -189,8 +189,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
                         <a className="item">
                             <i className="large settings icon"/>
-                            Settings
+                            Settings  2
                         </a>
+
                     </div>
                 )
             }
@@ -232,8 +233,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </a>
                     <a className="item">
                         <i className="large settings icon"/>
-                        Settings
+                        Settings 2
                     </a>
+
                 </div>
 
             )
@@ -250,4 +252,4 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 export const Sidebar = SidebarWithoutClickingOutside;
 
-module.exports = { Sidebar, SidebarWithoutClickingOutside }
+module.exports = { Sidebar, SidebarWithoutClickingOutside };

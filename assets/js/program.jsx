@@ -7,7 +7,7 @@ import {ImageUploader, Breadcrumb, PlanForm2, ProgramViewEditDeleteItem, FormAct
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
-import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
+import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
 import autobind from 'class-autobind'
 import {StandardSetOfComponentsContainer} from './redux/containers'
 import Measure from 'react-measure'
@@ -40,7 +40,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, times, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, times, s3IconUrl, formats, s3ImageUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
@@ -63,7 +63,7 @@ function printObject(o) {
 }
 
 function getArrayObjectById(theArray, theId) {
-    var returnObject = ""
+    var returnObject = "";
     for (var i = 0; i < theArray.length; i += 1) {
         var theArrayObject = theArray[i];
         if (theArrayObject.id == theId) {
@@ -77,8 +77,8 @@ function getArrayObjectById(theArray, theId) {
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramListPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
             activePage:1,
@@ -95,15 +95,15 @@ export class ProgramListPage extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
     reload = () => {
         this.loadProgramsFromServer
-    }
+    };
 
     handleProgramSubmit (program, callback) {
 
-             var theUrl = "api/programs/"
+             var theUrl = "api/programs/";
 
              $.ajax({
                  url: theUrl,
@@ -114,8 +114,8 @@ export class ProgramListPage extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     this.handleCloseForm()
-                     store.dispatch(addProgram(data))
+                     this.handleCloseForm();
+                     store.dispatch(addProgram(data));
 
                                           //this.loadProgramsFromServer()
                      callback
@@ -144,7 +144,7 @@ export class ProgramListPage extends React.Component {
       //if (this.state.activePage != 1) {
         //        var theUrl = "api/programs/?page=" + this.state.activePage
       //}  else {
-         var theUrl = "api/programs/"
+         var theUrl = "api/programs/";
       //}
     $.ajax({
       url: theUrl,
@@ -163,12 +163,12 @@ export class ProgramListPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
 
 handleToggleForm = () => {
         $(this.refs['ref_whichProgramForm']).slideToggle()
-    }
+    };
 
     componentDidMount() {
         //this.loadProgramsFromServer();
@@ -194,7 +194,7 @@ handleToggleForm = () => {
   handlePageChange = (pageNumber) => {
         this.setState({activePage: pageNumber}, () => this.loadProgramsFromServer());
 
-    }
+    };
 
   getPagination()  {
           if (this.state.next != null || this.state.previous != null) {
@@ -220,24 +220,24 @@ handleToggleForm = () => {
         }, () => {$(this.refs['ref_whichProgramForm']).slideDown()} )
 
 
-    }
+    };
     handleReloadItem = () => {
         //this.loadProgramsFromServer()
-    }
+    };
 handleCancelClicked = () => {
-      $(this.refs['ref_whichProgramForm']).slideUp()
+      $(this.refs['ref_whichProgramForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Create Program"
       })
 
-  }
+  };
 
   handleNeedsLogin = () => {
       this.setState({
           signInOrSignUpModalFormIsOpen: true
       })
-  }
+  };
 
   handleCloseForm = () => {
         this.setState({
@@ -245,7 +245,7 @@ handleCancelClicked = () => {
             formIsOpen:false,
         }, () => $(this.refs['ref_whichProgramForm']).slideUp())
 
-    }
+    };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -255,7 +255,7 @@ handleCancelClicked = () => {
       else {
           this.handleOpenForm()
       }
-    }
+    };
 
 
 componentWillUnmount() {
@@ -267,7 +267,7 @@ componentWillUnmount() {
     }
 
   render() {
-      var pagination = this.getPagination()
+      var pagination = this.getPagination();
 
     return (
 
@@ -295,6 +295,7 @@ componentWillUnmount() {
                 {pagination}
             </div>
             </div>
+    <Footer />
 </div>
     );
   }
@@ -303,8 +304,8 @@ componentWillUnmount() {
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramDetailPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             editable:false,
@@ -319,7 +320,7 @@ export class ProgramDetailPage extends React.Component {
     }
 
     loadStepsFromServer = () => {
-        var theUrl = "api/programs/" + this.props.params.program_id + "/steps"
+        var theUrl = "api/programs/" + this.props.params.program_id + "/steps";
         $.ajax({
           url: theUrl ,
           dataType: 'json',
@@ -332,7 +333,7 @@ export class ProgramDetailPage extends React.Component {
             console.error(theUrl, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
 
     loadProgramsFromServer = () => {
@@ -352,7 +353,7 @@ export class ProgramDetailPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
   handleStepSubmit (step, callback) {
 
@@ -365,14 +366,14 @@ export class ProgramDetailPage extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     store.dispatch(addStep(data.program, data))
+                     store.dispatch(addStep(data.program, data));
 
-                     callback
+                     callback;
                      this.handleCancelClicked()
 
                  }.bind(this),
                  error: function (xhr, status, errors) {
-                    var serverErrors = xhr.responseJSON
+                    var serverErrors = xhr.responseJSON;
                      this.setState({
                          serverErrors: errors,
                      })
@@ -384,7 +385,7 @@ export class ProgramDetailPage extends React.Component {
     componentWillUnmount = () => {
         //clearInterval(this.state.stepsIntervalId);
 
-    }
+    };
 
 
 
@@ -415,12 +416,12 @@ export class ProgramDetailPage extends React.Component {
 
 
     });
-  }
+  };
 
 
 
     handleFormSubmit = (step, callback) => {
-        var theUrl =  "api/steps/"
+        var theUrl =  "api/steps/";
     $.ajax({
         url: theUrl,
         dataType: 'json',
@@ -431,7 +432,7 @@ export class ProgramDetailPage extends React.Component {
             console.error(theUrl, status, err.toString());
         }.bind(this)
     });
-  }
+  };
 
     showCalendar() {
         $(this.refs['ref_calendarView']).slideDown();
@@ -448,10 +449,10 @@ export class ProgramDetailPage extends React.Component {
     handleViewClick = (selectedView) => {
         this.setState({
             selectedView:selectedView
-        })
+        });
         this.selectView(selectedView)
 
-    }
+    };
 
     selectView = (selectedView) => {
         if (selectedView == "calendar") {
@@ -459,10 +460,10 @@ export class ProgramDetailPage extends React.Component {
         } else if (selectedView == "list") {
             this.showList()
         }
-    }
+    };
 
   componentDidMount() {
-          var thePrograms = this.props.storeRoot.programs
+          var thePrograms = this.props.storeRoot.programs;
       if (thePrograms != undefined) {
 
           //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
@@ -472,13 +473,13 @@ export class ProgramDetailPage extends React.Component {
       }
 
 
-      this.determineOptions()
+      this.determineOptions();
       //this.loadProgramsFromServer()
       //var stepsIntervalId = setInterval(this.loadStepsFromServer, 800)
       //this.setState({stepsIntervalId:stepsIntervalId})
       //this.loadStepsFromServer()
-      $(this.refs['ref_whichStepForm']).hide()
-    this.selectView(this.state.selectedView)
+      $(this.refs['ref_whichStepForm']).hide();
+    this.selectView(this.state.selectedView);
 
         $(".fullPageDiv").hide();
         $(".fullPageDiv").slideToggle();
@@ -488,7 +489,7 @@ export class ProgramDetailPage extends React.Component {
   componentWillReceiveProps(nextProps) {
        if (this.state.data != nextProps.storeRoot.programs) {
            if (nextProps.storeRoot.programs != undefined) {
-               var thePrograms = nextProps.storeRoot.programs
+               var thePrograms = nextProps.storeRoot.programs;
                //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
                          this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray(thePrograms[this.props.params.program_id].steps))
 
@@ -500,13 +501,13 @@ export class ProgramDetailPage extends React.Component {
 
 
   handleCancelClicked = () => {
-      $(this.refs['ref_whichStepForm']).slideUp()
+      $(this.refs['ref_whichStepForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Add Step"
       })
 
-  }
+  };
   handleOpenForm = () => {
         this.setState({
             openModal:false,
@@ -515,10 +516,10 @@ export class ProgramDetailPage extends React.Component {
         }, () => {$(this.refs['ref_whichStepForm']).slideDown()} )
 
 
-    }
+    };
     handleReloadItem = () => {
         //this.loadStepsFromServer()
-    }
+    };
 
 
 
@@ -528,7 +529,7 @@ export class ProgramDetailPage extends React.Component {
             formIsOpen:false,
         }, () => $(this.refs['ref_whichStepForm']).slideUp())
 
-    }
+    };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -538,12 +539,12 @@ export class ProgramDetailPage extends React.Component {
       else {
           this.handleOpenForm()
       }
-    }
+    };
 
     convertStepsIntoArray(theSteps) {
-        var stepArray = []
+        var stepArray = [];
         for (var key in theSteps) {
-            var theStep = theSteps[key]
+            var theStep = theSteps[key];
             stepArray.push(theStep)
         }
         this.setState({
@@ -624,6 +625,7 @@ export class ProgramDetailPage extends React.Component {
 
 
                     </div>
+                <Footer />
             </div>
 
         )
@@ -632,8 +634,8 @@ export class ProgramDetailPage extends React.Component {
 
 export class ViewSelector extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             selectedView:"list"
 
@@ -642,11 +644,11 @@ export class ViewSelector extends React.Component {
 
     handleCalendarViewClick = () => {
         this.props.viewClick("calendar")
-    }
+    };
 
     handleListViewClick = () => {
         this.props.viewClick("list")
-    }
+    };
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.selectedView != nextProps.selectedView) {
@@ -656,19 +658,19 @@ export class ViewSelector extends React.Component {
         }
 
 
-    }
+    };
 
     render = () => {
 
         if (this.state.selectedView == "calendar") {
-            var calendarSelected = "active raspberry  item"
-            var listSelected = " item "
-            var calendarIconColor = "Dark"
+            var calendarSelected = "active raspberry  item";
+            var listSelected = " item ";
+            var calendarIconColor = "Dark";
             var listIconColor = "Light"
         } else if (this.state.selectedView == "list") {
-            var listSelected = "active raspberry  item "
-            var calendarSelected = " item "
-                        var calendarIconColor = "Light"
+            var listSelected = "active raspberry  item ";
+            var calendarSelected = " item ";
+                        var calendarIconColor = "Light";
                         var listIconColor = "Dark"
 
 
@@ -726,10 +728,10 @@ export class ProgramSubscriptionModal extends React.Component {
     closeModal = () => {
             this.setState({
                 modalIsOpen: false,
-            })
+            });
         this.props.closeModalClicked()
 
-    }
+    };
 
     handleFormSubmitted () {
         this.closeModal()
@@ -738,17 +740,17 @@ export class ProgramSubscriptionModal extends React.Component {
 
 
     getButtons() {
-        var buttonHtml = ""
+        var buttonHtml = "";
         for (var i = 0; i < this.props.buttons.length; i++) {
-            var currentButton = this.props.buttons[i]
-            buttonHtml = buttonHtml
+            var currentButton = this.props.buttons[i];
+            buttonHtml = buttonHtml;
             return (buttonHtml)
         }
     }
 
     handleClick = (callbackData ) => {
         this.props.click({action:callbackData.action})
-    }
+    };
 
     render() {
         return (<Modal
@@ -799,7 +801,7 @@ export class ProgramSubscriptionForm extends React.Component {
         //this.getGoals()
         this.setState({
             program: this.props.program
-        })
+        });
 
         if (this.props.storeRoot) {
 
@@ -809,7 +811,7 @@ export class ProgramSubscriptionForm extends React.Component {
         },     this.convertGoalDataToGoalOptions )
             }
         }
-    }
+    };
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.program != nextProps.program) {
@@ -818,17 +820,17 @@ export class ProgramSubscriptionForm extends React.Component {
 
         if (this.props.storeRoot) {
             if (this.state.goalsData != this.props.storeRoot.goals) {
-                console.log("inside the componetWill receive props")
+                console.log("inside the componetWill receive props");
                 this.setState({
             goalsData: this.props.storeRoot.goals
         },     this.convertGoalDataToGoalOptions
 )
             }
         }
-    }
+    };
 
     getGoals = () => {
-        var theUrl = 'api/goals/'
+        var theUrl = 'api/goals/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -852,13 +854,13 @@ export class ProgramSubscriptionForm extends React.Component {
         }
         })
 
-    }
+    };
     handleClick() {
         this.props.click()
     }
 
     handleSubscribeClicked = () => {
-        var theUrl = "api/planOccurrences/"
+        var theUrl = "api/planOccurrences/";
         var planOccurrence = {
             program: this.state.program.id,
             goal: this.state.goal,
@@ -869,7 +871,7 @@ export class ProgramSubscriptionForm extends React.Component {
             notificationEmail: this.state.notificationEmail,
             notificationPhone: this.state.notificationPhone,
             notificationMethod: this.state.notificationMethod
-        }
+        };
         $.ajax({
                  url: theUrl,
                  dataType: 'json',
@@ -879,11 +881,11 @@ export class ProgramSubscriptionForm extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log("handleSubscribeClicked")
+                     console.log("handleSubscribeClicked");
                      this.setState({data: data});
 
 
-                     store.dispatch(addPlan(data))
+                     store.dispatch(addPlan(data));
 
                      this.props.formSubmitted()
 
@@ -899,15 +901,15 @@ export class ProgramSubscriptionForm extends React.Component {
                  }.bind(this)
              });
 
-    }
+    };
 
     convertGoalDataToGoalOptions () {
-        var i
-        var goalsData = this.state.goalsData
-        var goalOptions = []
+        var i;
+        var goalsData = this.state.goalsData;
+        var goalOptions = [];
 
         for (var key in goalsData) {
-            var aGoalOption = {value: goalsData[key].id, label: goalsData[key].title}
+            var aGoalOption = {value: goalsData[key].id, label: goalsData[key].title};
             goalOptions.push(aGoalOption)
 
         }
@@ -1062,8 +1064,8 @@ export class ProgramSubscriptionForm extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             image: "",
@@ -1077,6 +1079,7 @@ export class ProgramForm extends React.Component {
             costFrequencyMetric: "MONTH",
             editable:false,
             data:"",
+            category:"UNCATEGORIZED",
             serverErrors:{}
         }
 
@@ -1088,7 +1091,7 @@ export class ProgramForm extends React.Component {
 
     componentDidMount () {
 
-        $(this.refs['ref_whichProgramForm']).hide()
+        $(this.refs['ref_whichProgramForm']).hide();
         this.setState({
             serverErrors: this.props.serverErrors
             })
@@ -1111,6 +1114,7 @@ export class ProgramForm extends React.Component {
                 costFrequencyMetric: nextProps.data.costFrequencyMetric,
                 startDate: moment(nextProps.data.startDate, "YYYY-MM-DD"),
                 scheduleLength:nextProps.data.scheduleLength,
+                category:nextProps.data.category,
 
 
                 viewableBy: nextProps.data.viewableBy,
@@ -1165,11 +1169,15 @@ export class ProgramForm extends React.Component {
         this.setState({timeCommitment: option.value});
     }
 
+    handleCategoryChange(option){
+        this.setState({category: option.value});
+    }
+
     getDescriptionEditor () {
          //if (this.props.isListNode) {
-             var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
-            var smallColumnWidth = "eight wide column"
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
 
            // } else {
 
@@ -1259,19 +1267,20 @@ export class ProgramForm extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        this.checkIfUser()
+        this.checkIfUser();
 
         if (this.props.storeRoot.user) {
-            var author = this.props.storeRoot.user.id
+            var author = this.props.storeRoot.user.id;
             var title = this.state.title;
             var description = this.state.description;
             var viewableBy = this.state.viewableBy;
             var image = this.state.image;
             var scheduleLength = this.state.scheduleLength;
-            var startDate = moment(this.state.startDate).format("YYYY-MM-DD")
+            var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
             var timeCommitment = this.state.timeCommitment;
             var cost = this.state.cost;
             var costFrequencyMetric = this.state.costFrequencyMetric;
+            var category = this.state.category;
 
             var programData = {
                 author: author,
@@ -1284,7 +1293,8 @@ export class ProgramForm extends React.Component {
                 cost: cost,
                 startDate:startDate,
                 costFrequencyMetric: costFrequencyMetric,
-            }
+                category : category
+            };
 
             if (this.state.id != "") {
                 programData.id = this.state.id
@@ -1316,15 +1326,16 @@ export class ProgramForm extends React.Component {
                     editable: false,
                     serverErrors:"",
                     data: "",
+                    category:"UNCATEGORIZED"
                 }
             );
-        }
+        };
 
         handleImageChange = (callbackData) => {
         this.setState({
             image: callbackData.image
         })
-    }
+    };
 
 
         getForm = () => {
@@ -1347,18 +1358,18 @@ export class ProgramForm extends React.Component {
             }
 
 
-            var descriptionEditor = this.getDescriptionEditor()
+            var descriptionEditor = this.getDescriptionEditor();
 
             if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else{
 
 
-            var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "eight wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
             var smallColumnWidth = "four wide column"
         }
           return (
@@ -1477,6 +1488,18 @@ export class ProgramForm extends React.Component {
                               </div>
                           </div>
 
+                          <div className="ui row">
+                              <div className={mediumColumnWidth}>
+                                  <KSSelect value={this.state.category}
+                                            valueChange={this.handleCategoryChange}
+                                            label="Category:"
+                                            isClearable={false}
+                                            name="programCategory"
+                                            options={programCategoryOptions}
+                                            />
+                                  </div>
+                              </div>
+
 
 
                   </div>
@@ -1494,7 +1517,7 @@ export class ProgramForm extends React.Component {
               </div>
           )
 
-    }
+    };
 
 
 
@@ -1502,7 +1525,7 @@ export class ProgramForm extends React.Component {
 
     render() {
 
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
             return(
                 <div >
@@ -1520,8 +1543,8 @@ export class ProgramForm extends React.Component {
 
 export class SimpleProgramForm extends ProgramForm {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             image: "",
@@ -1550,8 +1573,8 @@ export class SimpleProgramForm extends ProgramForm {
 
     getForm = () => {
 
-        var imageUrl = s3ImageUrl + this.state.image
-        var startDate = moment(this.state.startDate).format("MMM DD, YYYY")
+        var imageUrl = s3ImageUrl + this.state.image;
+        var startDate = moment(this.state.startDate).format("MMM DD, YYYY");
         return (
             <div className="ui page container">
                 <div className="ui grid">
@@ -1626,10 +1649,10 @@ export class SimpleProgramForm extends ProgramForm {
                 </div>
             </div>
 
-        )}
+        )};
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -1659,8 +1682,8 @@ export class SimpleProgramForm extends ProgramForm {
 
 export class ProgramList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
         }
@@ -1675,10 +1698,10 @@ export class ProgramList extends React.Component {
 
     handleReloadItem = () => {
         //this.loadProgramsFromServer
-    }
+    };
 
     loadProgramsFromServer = () => {
-        var theURL = "api/goals/" + this.props.parentId + "/programs"
+        var theURL = "api/goals/" + this.props.parentId + "/programs";
 
       $.ajax({
       url: theURL,
@@ -1699,7 +1722,7 @@ export class ProgramList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data && nextProps.data != null) {
@@ -1712,7 +1735,7 @@ export class ProgramList extends React.Component {
 
      handleNeedsLogin = () => {
          this.props.needsLogin()
-     }
+     };
 
 
     render () {
@@ -1720,10 +1743,10 @@ export class ProgramList extends React.Component {
             backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
             width: '300px',
             height: '300px',
-        }
+        };
 
         if (this.state.data) {
-            var theData = this.state.data
+            var theData = this.state.data;
         var values = Object.keys(theData).map(function(key){
         return theData[key];
         });
@@ -1740,7 +1763,7 @@ export class ProgramList extends React.Component {
                                                reloadItem={this.handleReloadItem}
                     />
 
-)
+);
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })
@@ -1761,7 +1784,7 @@ export class ProgramList extends React.Component {
 
 export class ProgramListNode extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         autobind(this)
 
     }
@@ -1774,7 +1797,7 @@ export class ProgramListNode extends React.Component {
         hashHistory.push('/programs/' + this.props.program.id + '/steps')
 
 
-    }
+    };
 
     render () {
 
@@ -1823,11 +1846,11 @@ export class ProgramBasicView extends React.Component {
     }
 
     findLabel (theValue, theArray) {
-        var returnValue = "Not available"
+        var returnValue = "Not available";
         if (theValue) {
             for (var i = 0; i < theArray.length; i++) {
                 if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label
+                    returnValue =  theArray[i].label;
                     return returnValue
                 }
             }
@@ -1843,8 +1866,8 @@ export class ProgramBasicView extends React.Component {
 
 }
     render() {
-        var imageUrl = s3ImageUrl + "images/goalItem.svg"
-        var theCost
+        var imageUrl = s3ImageUrl + "images/goalItem.svg";
+        var theCost;
 
 
         if (this.state.data) {
@@ -1857,8 +1880,8 @@ export class ProgramBasicView extends React.Component {
             else {
                 theCost = this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
             }
-            var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths)
-            var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions)
+            var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
+            var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
 
             if (this.props.isListNode) {
 

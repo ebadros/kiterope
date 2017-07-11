@@ -45,12 +45,12 @@ InitialLoader,
 
 import { theServer, elasticSearchDomain } from './constants'
 
-var Searchkit = require('searchkit')
-var imageDirectory = "https://kiterope-static.s3.amazonaws.com/"
+var Searchkit = require('searchkit');
+var imageDirectory = "https://kiterope-static.s3.amazonaws.com/";
 
-const host = "http://127.0.0.1:8000/api/plan/search"
+const host = "http://127.0.0.1:8000/api/plan/search";
 //const searchkit = new Searchkit.SearchkitManager("http://127.0.0.1:9200/")
-const searchkit = new Searchkit.SearchkitManager("https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com")
+const searchkit = new Searchkit.SearchkitManager("https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com");
 
 
 function printObject(o) {
@@ -116,7 +116,7 @@ const placeholderText = [
     "get into my first-choice college",
 
 
-]
+];
 
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -195,13 +195,13 @@ export class Search extends React.Component {
 
 
 
-    }
+    };
 
 
 
     componentWillUnmount = () => {
         clearInterval(this.state.intervalID)
-    }
+    };
 
     changePlaceholderText = () => {
         if ( this.state.placeholderIterator > (placeholderText.length - 1)) {
@@ -213,7 +213,7 @@ export class Search extends React.Component {
 
         })
 
-    }
+    };
 
 
 
@@ -221,11 +221,11 @@ export class Search extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        hashHistory.push("/search/" + this.state.query + "/")
+        hashHistory.push("/search/" + this.state.query + "/");
 
         this.setState({
             queryUrl: this.state.query,
-        })
+        });
 
         var theQuery = this.state.query;
 
@@ -234,7 +234,7 @@ export class Search extends React.Component {
             query: theQuery,
 
         });
-    }
+    };
 
     handleCloseButtonClicked = () => {
         this.setState({
@@ -251,26 +251,26 @@ export class Search extends React.Component {
 
         )
 
-    }
+    };
     handleNeedsLogin = () => {
             this.setState({
                 signInOrSignUpModalFormIsOpen: true
             },)
 
-  }
+  };
 
   handleModalClosed = () => {
       this.setState({
                 signInOrSignUpModalFormIsOpen: false
             })
-  }
+  };
 
 handleChangeQuery = (e) => {
     this.setState({
         query: e.target.value,
     })
 
-}
+};
     render () {
         if (this.state.query == "") {
             $(this.refs["ref_closeButton"]).hide();
@@ -283,41 +283,38 @@ handleChangeQuery = (e) => {
         <div>
         <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
         <div className="">
-            <div className="ui container">
+            <div className="ui page container">
                 <div className="spacer">&nbsp;</div>
 
 
                 <div className="ui alert"></div>
-                <form className="ui form" onSubmit={this.handleSubmit}>
+                <div className="ui form" >
 
                     <div className="splashPageSection">
 
 
-                        <div className="ui grid ">
-                            <div className="ui row">&nbsp;</div>
-                            <div className="ui row">&nbsp;</div>
+                        <div className="ui grid noMargin">
+                            <div className="ui row ">&nbsp;</div>
+                            <div className="ui row ">&nbsp;</div>
 
                             <div className="ui centered row massiveType">What do you want to do?</div>
                                                 <div className="ui row">&nbsp;</div>
 
                             <div className="ui row noPaddingBottom">
 
-                                <input value="I want to" className="ui two wide column right aligned  searchLabel"
+                                <input value="I want to" className="ui three wide column right aligned searchLabel"
                                        type="text" disabled/>
 
 
-                                <input placeholder={this.state.placeholder} className="ui nine wide column searchInput"
-                                       type="text" value={this.state.query} onChange={this.handleChangeQuery}/>
-
+                                <input placeholder={this.state.placeholder} className="ui eight wide column searchInput"
+                                       type="text" value={this.state.query} onChange={this.handleChangeQuery} />
                                 <div ref="ref_closeButton" onClick={this.handleCloseButtonClicked} ><i className="large close icon"></i></div>
-                                <button type="submit"
-                                        className="ui right floated fluid three wide column purple button">Search Plans
-                                </button>
+                                <div onClick={this.handleSubmit} className="ui fluid  three wide column purple right floated medium  button" style={{marginTop:0, marginBottom:0}}>Search Plans</div>
 
-                            </div>
+</div>
                         </div>
                     </div>
-                </form>
+                    </div>
                 <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible} needsLogin={this.handleNeedsLogin}/>
             </div>
                 <div className="spacer">&nbsp;</div>
@@ -347,16 +344,16 @@ handleChangeQuery = (e) => {
 
                                                     <div className="ui row">
 
-                        <div className="column">Helps you set SMART goals and keeps you
+                        <div className="column mediumResponsiveText">Helps you set SMART goals and keeps you
                             focused on the process of achieving those goals
                         </div>
-                        <div className="column">Offers detailed, step-by-step plans and access to domain-experts to make
+                        <div className="column mediumResponsiveText">Offers detailed, step-by-step plans and access to domain-experts to make
                             sure you know what you're supposed to be doing and that it's the right thing
                         </div>
-                        <div className="column">Tracks your progress to let you know when you're encountering an
+                        <div className="column mediumResponsiveText">Tracks your progress to let you know when you're encountering an
                             obstacle and revises your plan to help you improve
                         </div>
-                        <div className="column">Keeps you motivated by making you accountable and connecting you with people invested in your success
+                        <div className="column mediumResponsiveText">Keeps you motivated by making you accountable and connecting you with people invested in your success
                         </div>
                     </div>
                         </div>
@@ -378,8 +375,8 @@ handleChangeQuery = (e) => {
 @connect(mapStateToProps, mapDispatchToProps)
 export class SearchHitsGrid extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
             url: "",
@@ -450,7 +447,7 @@ export class SearchHitsGrid extends React.Component {
             });
 
         }
-      }
+      };
 /*
       loadObjectsFromServerLocal = () =>  {
         if (this.state.url != "") {
@@ -484,12 +481,12 @@ export class SearchHitsGrid extends React.Component {
       showSearchHits = () => {
           this.setState({
               visible:"true",
-          })
+          });
 
             $(this.refs["ref_searchHits"]).slideDown();
                     //clearInterval(this.state.intervalID)
 
-    }
+    };
 
       componentDidMount = () => {
           $(this.refs["ref_searchHits"]).hide();
@@ -498,7 +495,7 @@ export class SearchHitsGrid extends React.Component {
         //this.setState({intervalID:intervalID});
 
 
-      }
+      };
 
       componentWillUnmount() {
           clearInterval(this.state.intervalID)
@@ -567,7 +564,7 @@ export class SearchHitsGrid extends React.Component {
 
     handleNeedsLogin = () => {
       this.props.needsLogin()
-  }
+  };
 
     render () {
         if (this.state.visible == 'true') {
@@ -581,16 +578,16 @@ export class SearchHitsGrid extends React.Component {
 
          if (this.state.data ) {
             var objectNodes = this.state.data.map(function (objectData) {
-                        var theUserPlanOccurrenceId = ""
+                        var theUserPlanOccurrenceId = "";
 
                 if (this.props.storeRoot) {
                     if (this.props.storeRoot.plans) {
                         for (var key in this.props.storeRoot.plans) {
-                            console.log("key is " + key + " objectDasta source id " +  objectData._source.id)
+                            console.log("key is " + key + " objectDasta source id " +  objectData._source.id);
                             if ((this.props.storeRoot.plans[key].program == objectData._source.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
-                                console.log("this.props.storeRoot.plans[key].program is " + this.props.storeRoot.plans[key].program + " objectDasta source id " +  objectData._source.id)
+                                console.log("this.props.storeRoot.plans[key].program is " + this.props.storeRoot.plans[key].program + " objectDasta source id " +  objectData._source.id);
 
-                                objectData._source.isSubscribed = this.props.storeRoot.plans[key].isSubscribed
+                                objectData._source.isSubscribed = this.props.storeRoot.plans[key].isSubscribed;
                                  theUserPlanOccurrenceId = key
 
                             }
@@ -646,7 +643,7 @@ export class SearchHitsGrid extends React.Component {
                     )
 
         }
-        var pagination = this.getPagination()
+        var pagination = this.getPagination();
 
 
 
@@ -757,7 +754,7 @@ var SearchPage3 = React.createClass({
     }
 
 
-})
+});
 
 
 
@@ -771,7 +768,7 @@ export class AtomicImage extends React.Component {
 
     onImgLoad({target:img}) {
 
-        var imageAspectRatio = img.offsetWidth/img.offsetHeight
+        var imageAspectRatio = img.offsetWidth/img.offsetHeight;
         this.setState({dimensions:{height:img.offsetHeight,
                                    width:img.offsetWidth},
             imageAspectRatio:imageAspectRatio
@@ -801,7 +798,7 @@ var OverlayText = React.createClass({
 
     onImgLoad({target:img}) {
 
-        var imageAspectRatio = img.offsetHeight/img.offsetWidth
+        var imageAspectRatio = img.offsetHeight/img.offsetWidth;
         this.setState({dimensions:{height:img.offsetHeight,
                                    width:img.offsetWidth},
             imageAspectRatio:imageAspectRatio
@@ -812,26 +809,26 @@ var OverlayText = React.createClass({
 
     calculateFontSize: function() {
         var numberOfLetters = this.props.text.length;
-        console.log("number of Letters " + numberOfLetters)
+        console.log("number of Letters " + numberOfLetters);
 
-        var screenWidth = $(window).width()
-        console.log("screenWidth " + screenWidth)
+        var screenWidth = $(window).width();
+        console.log("screenWidth " + screenWidth);
 
 
 
         var screenMultiplier = .25;
         var lettersMultiplier = -50;
         var screenRatio = screenMultiplier * screenWidth;
-        var numberOfLettersRatio = lettersMultiplier  * numberOfLetters
+        var numberOfLettersRatio = lettersMultiplier  * numberOfLetters;
 
 
-        var ratio = numberOfLettersRatio
+        var ratio = numberOfLettersRatio;
 
-        var fontSize = 20 * ratio
-        console.log("screenRatio " + screenRatio)
-        console.log("numberOfLettersRatio " + numberOfLettersRatio)
-        console.log("ratio " + ratio)
-                console.log("fontSize " + fontSize)
+        var fontSize = 20 * ratio;
+        console.log("screenRatio " + screenRatio);
+        console.log("numberOfLettersRatio " + numberOfLettersRatio);
+        console.log("ratio " + ratio);
+                console.log("fontSize " + fontSize);
 
         return fontSize
 
@@ -865,13 +862,13 @@ var OverlayText = React.createClass({
         )
     }
 
-})
+});
 
 export class PlanHit2 extends React.Component {
 
     render () {
         const result = this.props.result;
-        let url = "/plans/" + result.id + "/steps"
+        let url = "/plans/" + result.id + "/steps";
         return (
                 <div className="column" key={result.id}>
 
@@ -916,7 +913,7 @@ export class PlanHit2 extends React.Component {
 var PlanHit = React.createClass({
     render: function() {
         const result = this.props.result;
-        let url = "/plans/" + result.id + "/steps"
+        let url = "/plans/" + result.id + "/steps";
         return (
                 <div className="column" key={result.id}>
 
@@ -956,11 +953,11 @@ var PlanHit = React.createClass({
 
         )
     }
-})
+});
 
 export class UserLink extends React.Component {
     constructor (props) {
-        super (props)
+        super (props);
         this.state = {
             firstName:"",
             lastName:"",
@@ -973,7 +970,7 @@ export class UserLink extends React.Component {
     }
 
     componentDidMount () {
-        console.log("componentDidMount")
+        console.log("componentDidMount");
         this.loadObjectsFromServer()
 
     }
@@ -1000,7 +997,7 @@ export class UserLink extends React.Component {
             console.error(url, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
       render() {
           return (
@@ -1034,7 +1031,7 @@ var Searchbar = React.createClass({
         )
     }
 
-})
+});
 
 
 function printObject(o) {
@@ -1062,4 +1059,4 @@ function getCookie(name) {
 }
 
 
-module.exports = { SearchPage }
+module.exports = { SearchPage };

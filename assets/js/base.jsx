@@ -44,7 +44,7 @@ var Global = require('react-global');
 
 <Global values={{
   isSidebarVisible: 'false'
-}} />
+}} />;
 
 
 
@@ -97,7 +97,7 @@ export class FormHeaderWithActionButton extends React.Component {
         this.props.actionClick()
 
 
-    }
+    };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.buttonLabel != nextProps.buttonLabel) {
@@ -127,7 +127,7 @@ export class FormHeaderWithActionButton extends React.Component {
             <h1>{this.props.headerLabel}</h1>
         </div>
                     <div className="ui right floated column">
-                        <div className={`ui right floated ${this.props.color} large fluid button`} onClick={this.handleActionClick}>{this.state.buttonLabel}</div>
+                        <div className={`ui right floated ${this.props.color} medium fluid button`} onClick={this.handleActionClick}>{this.state.buttonLabel}</div>
                     </div>
                         </div>
         )
@@ -140,9 +140,9 @@ var PlanForm2 = forms.Form.extend({
         title: forms.CharField(),
         description:forms.CharField({widget: forms.Textarea()}),
         viewableBy:forms.ChoiceField({choices:["Only me": "ONLY_ME", "Just people I've shared this goal with": "SHARED", "Just my Pros": "MY_PROS", "All Pros": "ALL_PROS", "Everyone": "EVERYONE"]}),
-        startDate: forms.CharField({widget: forms.DateTimeInput()}),
+        forms.CharField({widget: forms.DateTimeInput()}),
             endDate: forms.CharField({widget: forms.DateTimeInput()}),
-        scheduleLength: forms.IntegerField(),
+        scheduleLength: forms.IntegerField(),;
         //calendar:forms.FileField({widget: forms.FileInput({attrs: {className: 'ui button', css:'opacity:0;'}}), label: "Import Calendar (.ics) File", css:"ui button"}),
 
 
@@ -348,8 +348,8 @@ function getImageDimensions(imageNode) {
 
 export class ImageUploader extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             image:"",
             dimensions:{
@@ -397,7 +397,7 @@ export class ImageUploader extends React.Component {
     }
 
     render() {
-        var theImage = this.state.image
+        var theImage = this.state.image;
 
         var theFilename = theImage.replace("images/", "");
         if (this.state.dimensions) {
@@ -410,10 +410,10 @@ export class ImageUploader extends React.Component {
             borderRadius: 0,
             position: 'relative',
             cursor: 'pointer',
-        }
+        };
 
 
-        var theClipping = "rect(0px," + (width - 32) + "px," + ((9 * (width - 32) / 16) - 2) + "px, 0px)"
+        var theClipping = "rect(0px," + (width - 32) + "px," + ((9 * (width - 32) / 16) - 2) + "px, 0px)";
 
         var imageStyle = {
             width: (width - 32),
@@ -421,7 +421,7 @@ export class ImageUploader extends React.Component {
             position: "absolute",
             clip: theClipping
 
-        }
+        };
 
         var imageUploaderProps = {
             style,
@@ -432,7 +432,7 @@ export class ImageUploader extends React.Component {
             signingUrlQueryParams: {uploadType: 'avatar'},
             uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
             signingUrl: "signS3Upload",
-        }
+        };
 
 
         return (
@@ -465,7 +465,7 @@ export class ViewEditDeleteItem extends React.Component {
 
 
      componentDidMount = () => {
-         this.determineOptions()
+         this.determineOptions();
 
          $(this.refs["ref_form"]).hide();
          $(this.refs["ref_detail"]).hide();
@@ -487,12 +487,12 @@ export class ViewEditDeleteItem extends React.Component {
 
 
              }
-         this.handleComponentDidMountSpecificActions()
+         this.handleComponentDidMountSpecificActions();
 
          this.showHideUIElements(this.props.currentView)
 
 
-         }
+         };
          handleComponentDidMountSpecificActions() {
 
          }
@@ -505,35 +505,35 @@ export class ViewEditDeleteItem extends React.Component {
 
             case "Basic":
 
-                this.switchToBasicView()
+                this.switchToBasicView();
                 break;
             case "Cancel":
 
-                this.switchToBasicView()
+                this.switchToBasicView();
                 break;
             case "Detail":
 
-                this.switchToDetailView()
+                this.switchToDetailView();
                 break;
 
             case "Edit":
 
-                this.switchToEditView()
+                this.switchToEditView();
                 break;
             case "Delete":
-                this.deleteItem()
+                this.deleteItem();
                 break;
             case "Close":
 
-                this.switchToClosedView()
+                this.switchToClosedView();
                 break;
             case "Duplicate":
 
-                this.duplicateItem()
+                this.duplicateItem();
                 break;
 
             case "Author":
-                this.goToAuthorPage()
+                this.goToAuthorPage();
                 break;
 
             default:
@@ -542,7 +542,7 @@ export class ViewEditDeleteItem extends React.Component {
 
         }
 
-    }
+    };
 
 
 
@@ -567,7 +567,7 @@ export class ViewEditDeleteItem extends React.Component {
 
         });
 
-    }
+    };
 
     determineOptions = () => {
 
@@ -596,7 +596,7 @@ export class ViewEditDeleteItem extends React.Component {
 
 
     });
-  }
+  };
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.data != nextProps.data) {
@@ -608,7 +608,7 @@ export class ViewEditDeleteItem extends React.Component {
         if (this.state.currentView != nextProps.currentView) {
             this.setState({
                 currentView:nextProps.currentView,
-            })
+            });
             this.showHideUIElements(nextProps.currentView)
         }
 
@@ -622,50 +622,50 @@ export class ViewEditDeleteItem extends React.Component {
 
 
 
-    }
+    };
 
     handleComponentWillReceivePropsSpecificActions = (nextProps) => {
 
-    }
+    };
 
     cancelClicked = () => {
         this.switchToBasicView()
-    }
+    };
 
     handleClick = (callbackData) => {
         this.setState({
             currentView:callbackData
         },this.showHideUIElements(callbackData))
 
-    }
+    };
 
     switchToDetailView = () => {
-        $(this.refs["ref_form"]).hide()
+        $(this.refs["ref_form"]).hide();
         $(this.refs["ref_detail"]).slideDown()
 
-        }
+        };
 
     switchToEditView = () => {
-        $(this.refs["ref_basic"]).hide()
+        $(this.refs["ref_basic"]).hide();
         $(this.refs["ref_form"]).slideDown()
 
 
-        }
+        };
     switchToClosedView = () => {
-        $(this.refs["ref_basic"]).show()
+        $(this.refs["ref_basic"]).show();
 
 
         $(this.refs["ref_form"]).slideUp()
-    }
+    };
 
 
 
      switchToBasicView = () => {
-         $(this.refs["ref_detail"]).hide()
-         $(this.refs["ref_form"]).slideUp()
+         $(this.refs["ref_detail"]).hide();
+         $(this.refs["ref_form"]).slideUp();
          $(this.refs["ref_basic"]).slideDown()
 
-    }
+    };
 
     getControlBar = () => {
         return(
@@ -675,7 +675,7 @@ export class ViewEditDeleteItem extends React.Component {
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -685,7 +685,7 @@ export class ViewEditDeleteItem extends React.Component {
             <GoalBasicView data={this.state.data} />
                             </div>
         )
-    }
+    };
 
     getEditView = () => {
         return(
@@ -699,7 +699,7 @@ export class ViewEditDeleteItem extends React.Component {
                   serverErrors={this.state.serverErrors} />
                             </div>
         )
-    }
+    };
 
     getDetailView = () => {
         return (
@@ -709,7 +709,7 @@ export class ViewEditDeleteItem extends React.Component {
         )
 
 
-    }
+    };
 
 
     hideComponent = () => {
@@ -717,12 +717,12 @@ export class ViewEditDeleteItem extends React.Component {
         $(this.refs['ref_item']).slideUp();
 
 
-    }
+    };
 
 
 deleteItem = () => {
-        var apiUrl = this.props.apiUrl
-        var theUrl = apiUrl + this.props.id + "/"
+        var apiUrl = this.props.apiUrl;
+        var theUrl = apiUrl + this.props.id + "/";
 
             $.ajax({
                 url: theUrl,
@@ -732,15 +732,15 @@ deleteItem = () => {
                 'Authorization': 'Token ' + localStorage.token
                 },
                 success: () => {
-                    this.hideComponent()
-                    this.callDeleteReducer()
+                    this.hideComponent();
+                    this.callDeleteReducer();
                     //this.reload()
                 },
                 error: function (xhr, status, err) {
                     console.error(theUrl, status, err.toString());
                 }
             });
-        }
+        };
 
 
 
@@ -748,27 +748,27 @@ deleteItem = () => {
 
 
     closeWindowButtonClicked = () => {
-        this.props.methodChange({isVisible:false})
+        this.props.methodChange({isVisible:false});
 
 
-         $(this.refs["ref_form"]).slideUp()
-        $(this.refs["ref_basic"]).slideDown()
-            this.setState ({ editButtonLabel: "Edit"})
+         $(this.refs["ref_form"]).slideUp();
+        $(this.refs["ref_basic"]).slideDown();
+            this.setState ({ editButtonLabel: "Edit"});
                 this.clearState();
 
-    }
+    };
 
     reload = () => {
         this.props.reloadItem()
-    }
+    };
 
     render() {
 
 
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
 
         return (
@@ -831,14 +831,14 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     store.dispatch(updateGoal(data))
+                     store.dispatch(updateGoal(data));
 
                      this.setState({
 
                      currentView:"Basic",
                          serverErrors:""
                      });
-                     this.switchToBasicView()
+                     this.switchToBasicView();
                      callback
 
 
@@ -864,14 +864,14 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                                          store.dispatch(addGoal(data))
+                                          store.dispatch(addGoal(data));
 
                      this.setState({
                          data: data,
                      currentView:"Basic",
                          serverErrors:""
                      });
-                     this.switchToBasicView()
+                     this.switchToBasicView();
                      callback
 
                  }.bind(this),
@@ -898,7 +898,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -908,7 +908,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
             <GoalBasicView data={this.state.data} />
                             </div>
         )
-    }
+    };
 
     getEditView = () => {
         return(
@@ -922,7 +922,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                   serverErrors={this.state.serverErrors}/>
                             </div>
         )
-    }
+    };
 
     getDetailView = () => {
         return (
@@ -932,14 +932,14 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
         )
 
 
-    }
+    };
 
     render() {
 
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
         return (
             <div>
@@ -1007,21 +1007,21 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
      reload = () => {
          this.props.reloadItem()
-     }
+     };
 
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search")
+              hashHistory.push("/search");
               break;
           case ("create"):
-              this.handleOpenForm()
+              this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry")
+              hashHistory.push("/goalEntry");
               break;
       }
-  }
+  };
 
 
 
@@ -1030,14 +1030,14 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
           this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
       }
 
-    }
+    };
 
 
 
 
     handleProgramSubmit (program, callback) {
          if (program.id != "") {
-             var theUrl = "api/programs/" + program.id +"/"
+             var theUrl = "api/programs/" + program.id +"/";
 
              $.ajax({
                  url: theUrl,
@@ -1048,9 +1048,9 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     this.switchToBasicView()
+                     this.switchToBasicView();
 
-                     store.dispatch(updateProgram(data))
+                     store.dispatch(updateProgram(data));
 
                      this.setState({
                         serverErrors:"",
@@ -1069,7 +1069,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              });
          }
          else {
-             var theUrl = "api/programs/" + program.id +"/"
+             var theUrl = "api/programs/" + program.id +"/";
 
              $.ajax({
                  url: theUrl,
@@ -1081,7 +1081,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                  },
                  success: function (data) {
                      this.setState({data: data});
-                     this.switchToBasicView()
+                     this.switchToBasicView();
                      callback
 
                  }.bind(this),
@@ -1110,7 +1110,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -1120,7 +1120,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
             <ProgramBasicView data={this.state.data} isListNode={this.props.isListNode} />
                             </div>
         )
-    }
+    };
 
     getEditView = () => {
         return(
@@ -1134,7 +1134,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                   serverErrors={this.state.serverErrors} />
                             </div>
         )
-    }
+    };
 
     getDetailView = () => {
 
@@ -1150,13 +1150,13 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
         else return (<div></div>)
 
 
-    }
+    };
 
     handleModalClosed = () =>  {
         this.setState({
             signInOrSignUpModalFormIsOpen:false,
         })
-    }
+    };
 
     handleSubscribeClick = () => {
         if (this.props.storeRoot.user != undefined) {
@@ -1171,12 +1171,12 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                 })
         }
 
-    }
+    };
 
 
     handleCloseModalClicked = () => {
         this.setState({openModal:false})
-    }
+    };
 
 
 hideComponent = () => {
@@ -1184,15 +1184,15 @@ hideComponent = () => {
         $(this.refs['ref_programItem_' + this.props.id]).slideUp();
 
 
-    }
+    };
 
     handleUnsubscribeClick = () => {
         if (this.state.userPlanOccurrenceId) {
-            var theUrl = "api/planOccurrences/" + this.state.userPlanOccurrenceId + "/"
+            var theUrl = "api/planOccurrences/" + this.state.userPlanOccurrenceId + "/";
             var planOccurrence = {
                 isSubscribed: false,
 
-            }
+            };
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -1202,8 +1202,8 @@ hideComponent = () => {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    console.log("success")
-                    this.state.data.isSubscribed = false
+                    console.log("success");
+                    this.state.data.isSubscribed = false;
                     store.dispatch(removePlan(this.state.userPlanOccurrenceId))
 
 
@@ -1219,17 +1219,17 @@ hideComponent = () => {
             });
         }
 
-    }
+    };
 
 
 
 
     render() {
 
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
 
         if (this.state.data) {
@@ -1316,16 +1316,16 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search")
+              hashHistory.push("/search");
               break;
           case ("create"):
-              this.handleOpenForm()
+              this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry")
+              hashHistory.push("/goalEntry");
               break;
       }
-  }
+  };
 
 
 
@@ -1347,7 +1347,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                         serverErrors:"",
                          currentView:"Basic"
                      });
-                     this.switchToBasicView()
+                     this.switchToBasicView();
                      callback
 
 
@@ -1375,7 +1375,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                  },
                  success: function (data) {
                      this.setState({data: data});
-                     this.switchToBasicView()
+                     this.switchToBasicView();
                      callback
 
                  }.bind(this),
@@ -1404,7 +1404,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -1414,7 +1414,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
             <PlanBasicView data={this.state.data} isListNode={this.props.isListNode} />
                             </div>
         )
-    }
+    };
 
     getEditView = () => {
         return(
@@ -1428,7 +1428,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                   serverErrors={this.state.serverErrors} />
                             </div>
         )
-    }
+    };
 
     getDetailView = () => {
 
@@ -1444,7 +1444,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
         else return (<div></div>)
 
 
-    }
+    };
 
     handleUnsubscribeClick = () => {
       if (this.state.openModal == false) {
@@ -1454,12 +1454,12 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
       }
 
-    }
+    };
 
 
     handleCloseModalClicked = () => {
         this.setState({openModal:false})
-    }
+    };
 
 
 hideComponent = () => {
@@ -1467,16 +1467,16 @@ hideComponent = () => {
         $(this.refs['ref_planOccurrenceItem_' + this.props.id]).slideUp();
 
 
-    }
+    };
 
 
 
     render() {
 
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
 
         return (
@@ -1523,7 +1523,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     }
 
      removeContact = () => {
-        var theUrl = "api/contacts/" + this.props.contact + "/"
+        var theUrl = "api/contacts/" + this.props.contact + "/";
 
             $.ajax({
                 url: theUrl,
@@ -1533,21 +1533,21 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                 'Authorization': 'Token ' + localStorage.token
                 },
                 success: () => {
-                    this.hideComponent()
-                    this.callDeleteReducer()
+                    this.hideComponent();
+                    this.callDeleteReducer();
                     //this.reload()
                 },
                 error: function (xhr, status, err) {
                     console.error(theUrl, status, err.toString());
                 }
             });
-        }
+        };
 
 
 
      handleProfileSubmit (profile, callback) {
 
-            var theURL =  "api/profiles/" + profile.id +"/"
+            var theURL =  "api/profiles/" + profile.id +"/";
              $.ajax({
                  url: theURL ,
                  dataType: 'json',
@@ -1561,7 +1561,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                          data: data,
                      currentView:"Basic"
                      });
-                     this.switchToBasicView()
+                     this.switchToBasicView();
 
 
                      callback
@@ -1590,14 +1590,14 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         if (this.state.currentView != nextProps.currentView) {
             this.setState({
                 currentView:nextProps.currentView,
-            })
+            });
             this.showHideUIElements(nextProps.currentView)
         }
 
         if (this.state.id != nextProps.id) {
             this.setState({
                 id:nextProps.id,
-            })
+            });
             this.determineOptions()
         }
         if (nextProps.storeRoot != undefined) {
@@ -1610,39 +1610,39 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
 
-    }
+    };
 
 
 
     handleClick = (callbackData) => {
         switch (callbackData) {
             case("Add Contact"):
-                this.addAsCoach()
+                this.addAsCoach();
                 break;
             case("Add as Client"):
-                this.addAsClient()
+                this.addAsClient();
                 break;
             case("Remove Contact"):
-                this.removeContact()
+                this.removeContact();
                 break;
             default:
                 this.setState({
                     currentView: callbackData
-                }, this.showHideUIElements(callbackData))
+                }, this.showHideUIElements(callbackData));
                 break;
 
         }
-    }
+    };
 
 
     addAsCoach = () => {
-        var theUrl = "api/contacts/"
+        var theUrl = "api/contacts/";
         var theContact = {
             sender:this.state.user.id,
             receiver: this.state.data.user,
             relationship: "coach",
             wasConfirmed:"sender",
-        }
+        };
         $.ajax({
                  url: theUrl,
                  dataType: 'json',
@@ -1666,7 +1666,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                  }.bind(this)
              });
 
-    }
+    };
 
 
 
@@ -1685,7 +1685,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -1695,7 +1695,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             <ProfileBasicView data={this.state.data} isListNode={this.props.isListNode} />
                             </div>
         )
-    }
+    };
 
     getEditView = () => {
         return(
@@ -1709,7 +1709,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         serverErrors={this.state.serverErrors} />
                             </div>
         )
-    }
+    };
 
     getDetailView = () => {
 
@@ -1722,10 +1722,10 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         )
 
 
-    }
+    };
     handleContactClicked =() => {
 
-    }
+    };
 
 
 hideComponent = () => {
@@ -1733,15 +1733,15 @@ hideComponent = () => {
         $(this.refs['ref_profileItem_' + this.props.id]).slideUp();
 
 
-    }
+    };
 
 
     render() {
 
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
         if (this.props.storeRoot.user) {
         return (
@@ -1818,7 +1818,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
-                store.dispatch(addStep(this.props.parentId, data))
+                store.dispatch(addStep(this.props.parentId, data));
 
                 this.reload()
 
@@ -1830,27 +1830,27 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
         });
 
-    }
+    };
 
     callDeleteReducer() {
         store.dispatch(deleteStep(this.props.parentId, this.props.id))
     }
 
     switchToEditView = () => {
-        $(this.refs["ref_basic"]).hide()
-        $(this.refs["ref_form"]).slideDown()
+        $(this.refs["ref_basic"]).hide();
+        $(this.refs["ref_form"]).slideDown();
         this.props.currentViewChanged("Edit")
 
 
-    }
+    };
 
     switchToBasicView = () => {
-        $(this.refs["ref_detail"]).hide()
-        $(this.refs["ref_form"]).slideUp()
-        $(this.refs["ref_basic"]).slideDown()
+        $(this.refs["ref_detail"]).hide();
+        $(this.refs["ref_form"]).slideUp();
+        $(this.refs["ref_basic"]).slideDown();
         this.props.currentViewChanged("Basic")
 
-    }
+    };
 
     componentDidMount = () => {
 
@@ -1876,17 +1876,17 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
         this.showHideUIElements(this.props.currentView)
 
-    }
+    };
 
 
     reload = () => {
         this.props.reloadItem()
-    }
+    };
 
     handleStepSubmit = (step, callback) => {
         if (step.id != undefined) {
 
-            var theUrl = "api/steps/" + step.id + "/"
+            var theUrl = "api/steps/" + step.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -1896,14 +1896,14 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    store.dispatch(updateStep(data.program, data))
+                    store.dispatch(updateStep(data.program, data));
 
                     this.setState({
                         updates:[],
                     });
 
-                    this.switchToBasicView()
-                    callback
+                    this.switchToBasicView();
+                    callback;
                     this.reload()
 
 
@@ -1928,9 +1928,9 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    store.dispatch(addStep(data.program, data))
-                    this.switchToBasicView()
-                    callback
+                    store.dispatch(addStep(data.program, data));
+                    this.switchToBasicView();
+                    callback;
                     //this.reload()
 
 
@@ -1946,22 +1946,22 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         }
 
 
-    }
+    };
 
     switchToClosedView = () => {
-        this.props.closeClicked()
-        this.switchToBasicView()
+        this.props.closeClicked();
+        this.switchToBasicView();
 
         //$(this.refs["ref_basic"]).show()
 
 
         //$(this.refs["ref_form"]).slideUp()
-    }
+    };
 
 
     getControlBar = () => {
 
-        var thePermissions = false
+        var thePermissions = false;
         if (this.state.data) {
             thePermissions = this.state.data.permissions
         }
@@ -1974,7 +1974,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                             editable={thePermissions}
                             showCloseButton={this.props.showCloseButton}/>
         )
-    }
+    };
 
 
     getBasicView = () => {
@@ -1985,7 +1985,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                                isListNode={this.props.isListNode}/>
             </div>
         )
-    }
+    };
 
     getEditView = () => {
 
@@ -2003,7 +2003,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                 </div>
             )
 
-    }
+    };
 
 
     getDetailView = () => {
@@ -2017,7 +2017,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         )
 
 
-    }
+    };
 
      /*handleClick() {
          if (this.props.id) {
@@ -2026,10 +2026,10 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
      }*/
 
     render() {
-        var controlBar = this.getControlBar()
-        var detailView = this.getDetailView()
-        var basicView = this.getBasicView()
-        var editView = this.getEditView()
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+        var editView = this.getEditView();
 
 
         return (
@@ -2070,33 +2070,33 @@ export class ItemControlBarButton extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
 
 
     render() {
-        var theMarkup
+        var theMarkup;
         switch(this.props.label) {
             case("Detail"):
-                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="menuIcon" src={`${s3IconUrl}viewDark.svg`} onClick={this.handleClick} /></div></div>)
+                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="menuIcon" src={`${s3IconUrl}viewDark.svg`} onClick={this.handleClick} /></div></div>);
             case("Edit"):
-                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="" src={`${s3IconUrl}editDark.svg`} onClick={this.handleClick} /></div></div>)
+                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="" src={`${s3IconUrl}editDark.svg`} onClick={this.handleClick} /></div></div>);
             case("Cancel"):
-                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="menuIcon"  src={`${s3IconUrl}hideDark.svg`} onClick={this.handleClick} /></div></div>)
+                return (<div className="ui dropdown item controlButtonMargin"><div className="ui extramini image"><img className="menuIcon"  src={`${s3IconUrl}hideDark.svg`} onClick={this.handleClick} /></div></div>);
             case("Menu"):
                 switch(this.props.menuType) {
                     case("Contact"):
-                        return (<ContactItemMenu click={this.handleClick}/>)
+                        return (<ContactItemMenu click={this.handleClick}/>);
                     case("Profile"):
-                        return (<ProfileItemMenu click={this.handleClick}/>)
+                        return (<ProfileItemMenu click={this.handleClick}/>);
                     case("Goal"):
-                        return (<ItemMenu click={this.handleClick}/>)
+                        return (<ItemMenu click={this.handleClick}/>);
                     case("Plan"):
-                        return (<ItemMenu click={this.handleClick}/>)
+                        return (<ItemMenu click={this.handleClick}/>);
                     case("Program"):
-                        return (<ItemMenu click={this.handleClick}/>)
+                        return (<ItemMenu click={this.handleClick}/>);
                     case("Step"):
-                        return (<StepItemMenu click={this.handleClick}/>)
+                        return (<StepItemMenu click={this.handleClick}/>);
                     case("Update"):
                         return (<UpdateItemMenu click={this.handleClick}/>)
 
@@ -2160,36 +2160,36 @@ export class ControlBarButtonConfiguration extends React.Component {
                     })
                 }
 
-    }
+    };
 
     handleCancelClicked = () => {
         this.props.click("Basic")
-    }
+    };
 
     handleDetailClicked = () => {
 
         this.props.click("Detail")
-    }
+    };
 
     handleEditClicked = () =>  {
 
         this.props.click("Edit")
-    }
+    };
 
     handleDeleteClicked = () =>  {
 
         this.props.click("Delete")
-    }
+    };
 
     handleMenuClicked = (callbackData) => {
 
         this.props.click(callbackData)
-    }
+    };
 
     handleCloseClicked = (callbackData) => {
 
         this.props.click("Close")
-    }
+    };
 
 
 
@@ -2214,7 +2214,7 @@ export class CancelControlBar extends ControlBarButtonConfiguration {
 
         }
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>
+                                              click={this.handleMenuClicked}/>;
 
 
         return (
@@ -2252,7 +2252,7 @@ export class DetailControlBar extends ControlBarButtonConfiguration {
         }
 
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>
+                                              click={this.handleMenuClicked}/>;
 
 
         return (
@@ -2288,7 +2288,7 @@ export class MenuControlBar extends ControlBarButtonConfiguration {
     render() {
 
         var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>
+                                              click={this.handleMenuClicked}/>;
 
 
         return (
@@ -2323,7 +2323,7 @@ export class EditDeleteControlBar extends ControlBarButtonConfiguration {
     render() {
 
         var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>
+                                              click={this.handleMenuClicked}/>;
 
 
         return (
@@ -2364,7 +2364,7 @@ export class DetailEditDeleteControlBar extends ControlBarButtonConfiguration {
 
         }
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>
+                                              click={this.handleMenuClicked}/>;
 
 
         return (
@@ -2427,12 +2427,12 @@ export class ItemControlBar extends React.Component {
 
     handleClick = (callbackData) => {
 
-        this.setState({currentView:callbackData})
+        this.setState({currentView:callbackData});
         this.props.click(callbackData)
-    }
+    };
 
     getButtonConfiguration = () => {
-        var buttonConfiguration
+        var buttonConfiguration;
 
         if (this.state.editable) {
             if (this.state.currentView == "Basic") {
@@ -2456,10 +2456,10 @@ export class ItemControlBar extends React.Component {
 
         }
         return buttonConfiguration
-    }
+    };
 
     getButtonConfigurationIncludingCloseButton = () => {
-        var buttonConfiguration
+        var buttonConfiguration;
 
         if (this.state.editable) {
             if (this.state.currentView == "Basic") {
@@ -2476,7 +2476,7 @@ export class ItemControlBar extends React.Component {
 
         }
         return buttonConfiguration
-    }
+    };
 
 
     render() {
@@ -2488,22 +2488,22 @@ export class ItemControlBar extends React.Component {
 
         switch(this.props.label) {
             case("Goal"):
-                var color = "blue"
+                var color = "blue";
                 break;
             case("Plan"):
-                var color = "green"
+                var color = "green";
                 break;
             case("Program"):
-                var color = "green"
+                var color = "green";
                 break;
             case("Step"):
-                var color = "raspberry"
+                var color = "raspberry";
                 break;
             case("Profile"):
-                var color = "cyan"
+                var color = "cyan";
                 break;
             case("Update"):
-                var color = "orange"
+                var color = "orange";
                 break;
 
         }
@@ -2539,21 +2539,21 @@ export class Breadcrumb extends React.Component {
     }
 
     buildBreadcrumb = () => {
-        var theBreadcrumb = '<div class="ui large breadcrumb"><a href="#/"><div class="section">Home</div></a>'
+        var theBreadcrumb = '<div class="ui large breadcrumb"><a href="#/"><div class="section">Home</div></a>';
         for (var i=0; i < this.state.values.length; i++) {
-            theBreadcrumb = theBreadcrumb + '<i class="right chevron icon divider"></i>'
-            theBreadcrumb = theBreadcrumb + '<a href=#' + this.state.values[i].url + ' >'
+            theBreadcrumb = theBreadcrumb + '<i class="right chevron icon divider"></i>';
+            theBreadcrumb = theBreadcrumb + '<a href=#' + this.state.values[i].url + ' >';
             theBreadcrumb = theBreadcrumb + '<div class="section">' + this.state.values[i].label + '</div></a>'
         }
-        theBreadcrumb = theBreadcrumb + '</div>'
+        theBreadcrumb = theBreadcrumb + '</div>';
 
         return theBreadcrumb
 
-        }
+        };
 
 
     render() {
-            var theBreadcrumb = this.buildBreadcrumb()
+            var theBreadcrumb = this.buildBreadcrumb();
             return (
                             <div dangerouslySetInnerHTML={{__html: theBreadcrumb}} />
 
@@ -2601,4 +2601,4 @@ module.exports = {
     FormAction,
     Header
 
-}
+};

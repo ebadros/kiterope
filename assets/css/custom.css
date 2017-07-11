@@ -15,8 +15,17 @@ html {
     z-index:1;
 }
 
+.mediumResponsiveText {
+    font-size:.9rem;
+    line-height:1.1rem;
+}
+
 .centeredContent {
     align:center;
+}
+
+.responsiveButtonType {
+    font-size: 1rem !important;
 }
 
 .google {
@@ -267,6 +276,7 @@ ul.days2 {
     background-color:white !important;
     color:#A333C8;
 }
+
 
 .green {
     background-color:#06D6A0 !important;

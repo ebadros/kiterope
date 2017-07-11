@@ -642,7 +642,7 @@ export class Menubar extends React.Component {
             var loginUI = <div className="right menu">
                 <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick} ><i className="large sidebar icon" style={{margin:0}}  /></div>
 
-                  <div className="ui simple dropdown item">
+                  <div className="ui simple dropdown item" style={{marginRight:10}}>
                       <img src="/static/images/avatar-placeholder.png" /> <div className="username">{this.props.storeRoot.user.username}</div>
 
                       <div className="menu">
