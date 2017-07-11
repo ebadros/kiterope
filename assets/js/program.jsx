@@ -103,33 +103,32 @@ export class ProgramListPage extends React.Component {
 
     handleProgramSubmit (program, callback) {
 
-             var theUrl = "api/programs/";
+            var theUrl = "api/programs/";
 
-             $.ajax({
-                 url: theUrl,
-                 dataType: 'json',
-                 type: 'POST',
-                 data: program,
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
-                 },
-                 success: function (data) {
-                     this.handleCloseForm();
-                     store.dispatch(addProgram(data));
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'POST',
+                data: program,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.handleCloseForm();
+                    store.dispatch(addProgram(data));
 
-                                          //this.loadProgramsFromServer()
-                     callback
+                    //this.loadProgramsFromServer()
+                    callback
 
-                 }.bind(this),
-                 error: function (xhr, status, err) {
-                     var serverErrors = xhr.responseJSON;
-            this.setState({
-                serverErrors:serverErrors,
-            })
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                    })
 
-                 }.bind(this)
-             });
-
+                }.bind(this)
+            });
 
 
   }
@@ -1093,7 +1092,8 @@ export class ProgramForm extends React.Component {
 
         $(this.refs['ref_whichProgramForm']).hide();
         this.setState({
-            serverErrors: this.props.serverErrors
+            serverErrors: this.props.serverErrors,
+
             })
 
 
@@ -1329,6 +1329,7 @@ export class ProgramForm extends React.Component {
                     category:"UNCATEGORIZED"
                 }
             );
+
         };
 
         handleImageChange = (callbackData) => {

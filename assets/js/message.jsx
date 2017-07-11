@@ -1338,11 +1338,8 @@ export class MessageWindow extends React.Component {
 
                 </div>
                 </div>
-               <MessageWindowMenuBar /*user={this.state.user}
-                                     threadCloseClick={this.handleThreadCloseClick}
-                                     openThreads={this.state.openThreads} */ />
-        <WindowPane /*newThread={this.handleNewThread} currentThread={this.state.currentThread} openThreads={this.state.openThreads}
-                    user={this.state.user} *//>
+               <MessageWindowMenuBar  />
+        <WindowPane />
         </span>
 
             </Rnd>
@@ -1990,7 +1987,11 @@ export class MessageInput extends React.Component {
             message: ""
         };
 
-        setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
+
+    }
+
+    componentDidMount () {
+                setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
 
     }
 

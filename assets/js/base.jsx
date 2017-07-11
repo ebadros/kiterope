@@ -1035,6 +1035,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     console.log("here's a success");
                      this.switchToBasicView();
 
                      store.dispatch(updateProgram(data));
@@ -1047,6 +1048,8 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
+                                          console.log("here's failer");
+
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -1056,7 +1059,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              });
          }
          else {
-             var theUrl = "api/programs/" + program.id +"/";
+             var theUrl = "api/programs/";
 
              $.ajax({
                  url: theUrl,

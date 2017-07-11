@@ -205,6 +205,13 @@ export class KSSelect extends React.Component {
         this.props.valueChange(option)
     }
 
+    componentWillReceiveProps (nextProps) {
+        if (this.state.value != nextProps.value) {
+            this.setState({
+                value:nextProps.value
+            })
+        }
+    }
 
 
     buildErrors = () => {
