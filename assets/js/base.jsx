@@ -376,7 +376,9 @@ export class ImageUploader extends React.Component {
     handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;
             var urlForDatabase = fullUrl.split("?")[0];
+
             urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
+
             this.setState({image: urlForDatabase});
         this.props.imageReturned({
             image:urlForDatabase
@@ -491,11 +493,9 @@ export class ViewEditDeleteItem extends React.Component {
         switch (callbackData) {
 
             case "Basic":
-
                 this.switchToBasicView();
                 break;
             case "Cancel":
-
                 this.switchToBasicView();
                 break;
             case "Detail":
@@ -1536,6 +1536,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
      handleProfileSubmit (profile, callback) {
+         console.log("handleProfileSubmit");
 
             var theURL =  "api/profiles/" + profile.id +"/";
              $.ajax({
@@ -1547,11 +1548,14 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                              console.log("success");
+
+                     this.switchToBasicView();
+
                      this.setState({
                          data: data,
                      currentView:"Basic"
                      });
-                     this.switchToBasicView();
 
 
                      callback
@@ -1560,13 +1564,21 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
+                                                   console.log("error");
+
                      console.error(theURL, status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
             })
 
-                 }.bind(this)
+                 }.bind(this),
+                 complete: function (jqXHR, textStatus){
+                if (textStatus == "success"){
+                     this.switchToBasicView();
+
+                }
+            }.bind(this)
              });
          }
 
@@ -1577,12 +1589,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             })
         }
 
-        if (this.state.currentView != nextProps.currentView) {
-            this.setState({
-                currentView:nextProps.currentView,
-            });
-            this.showHideUIElements(nextProps.currentView)
-        }
+
 
         if (this.state.id != nextProps.id) {
             this.setState({
@@ -1655,6 +1662,12 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this)
              });
+
+    };
+    switchToBasicView = () => {
+        $(this.refs["ref_detail"]).hide();
+        $(this.refs["ref_form"]).slideUp();
+        $(this.refs["ref_basic"]).slideDown();
 
     };
 

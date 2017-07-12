@@ -45,6 +45,7 @@ router.register(r'users', views.UserViewSet)
 
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'steps', views.StepViewSet)
+router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
 router.register(r'sessions', views.SessionViewSet, base_name='Session')
@@ -153,8 +154,3 @@ urlpatterns = [
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ]

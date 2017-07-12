@@ -1227,31 +1227,6 @@ export class ProgramForm extends React.Component {
 
 
 
-
-
-
-
-    checkIfUser() {
-        $.ajax({
-            method: 'GET',
-            url: '/api/users/i/',
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(res) {
-                if (res.id != null) {
-                this.setState({
-                    'user': res
-                })
-
-            }}.bind(this),
-            error: function(xhr, status, err) {
-                console.error("this is bad", status, err.toString());
-        }
-        })
-    }
-
     getServerErrors(fieldName) {
         if (this.state.serverErrors == undefined) {
             return ""
@@ -1267,7 +1242,6 @@ export class ProgramForm extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        this.checkIfUser();
 
         if (this.props.storeRoot.user) {
             var author = this.props.storeRoot.user.id;

@@ -70,7 +70,6 @@ INSTALLED_APPS = [
     'timezone_field',
     'webpack_loader',
     'rest_framework_swagger',
-    #'debug_toolbar',
     'channels',
     'django_twilio',
     'phonenumber_field',
@@ -107,8 +106,6 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-
     #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
