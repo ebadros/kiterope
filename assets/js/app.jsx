@@ -241,7 +241,7 @@ export class KSSelect extends React.Component {
              <div className="field error">
                  <label htmlFor={this.props.name}>{this.props.label}</label>
                  <Select value={this.state.value}
-                                              onChange={this.handleValueChange} name={this.props.name}
+                                              onChange={this.handleValueChange} name={this.props.name} searchable={this.props.searchable}
                                               options={this.props.options} clearable={this.props.isClearable} />
                  <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
 
@@ -252,7 +252,7 @@ export class KSSelect extends React.Component {
              <div className="field">
                  <label htmlFor={this.props.name}>{this.props.label}</label>
                  <Select value={this.state.value}
-                                              onChange={this.handleValueChange} name={this.props.name}
+                                              onChange={this.handleValueChange} name={this.props.name} searchable={this.props.searchable}
                                               options={this.props.options} clearable={this.props.isClearable} />
                  </div>
         )}

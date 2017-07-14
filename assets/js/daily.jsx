@@ -5,6 +5,10 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import {ImageUploader, Breadcrumb,  ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
 import autobind from 'class-autobind'
+import DatePicker  from 'react-datepicker';
+require('react-datepicker/dist/react-datepicker.css');
+
+
 
 
 var Datetime = require('react-datetime');
@@ -12,7 +16,7 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import ValidatedInput from './app'
+import { ValidatedInput, KSSelect } from './app'
 import { Funnybar, SearchPage } from './search'
 
 import { StandardSetOfComponents, ErrorReporter, Footer} from './accounts'
@@ -24,7 +28,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, periodOptions, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 var moment = require('moment');
 import {
@@ -55,6 +59,23 @@ $.ajaxSetup({
     }
 });
 
+Date.prototype.addDays = function(days) {
+   this.setDate(this.getDate() + parseInt(days));
+   return this;
+ };
+
+ Date.prototype.subtractDays = function(days) {
+   this.setDate(this.getDate() - parseInt(days));
+   return this;
+ };
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -77,18 +98,51 @@ export class DailyList extends React.Component{
         super(props);
         autobind(this);
         this.state = {
-            data:[]
+            data:[],
+            startDate:moment(),
+            endDate:moment(),
+            period:"TODAY",
+            periodRangeStartString: new Date().toDateString(),
+            periodRangeEndString: new Date().toDateString(),
+
 
 
         }
     }
 
-    loadObjectsFromServer () {
-        var periodRangeStart = new Date();
-        var periodRangeEnd = new Date();
+    loadObjectsFromServer (periodValue) {
+
+        switch (periodValue) {
+            case("TODAY"):
+                var periodRangeStart = new Date();
+                var periodRangeEnd = new Date();
+                break;
+            case("NEXT7"):
+                var periodRangeStart = new Date();
+                var periodRangeEnd = new Date();
+                periodRangeEnd = periodRangeEnd.addDays(7);
+                break;
+            case("LAST7"):
+                var periodRangeEnd =   new Date();
+                var periodRangeStart = new Date();
+                 periodRangeStart.subtractDays(7);
+                break;
+            case("CUSTOM"):
+                var periodRangeStart = new Date(this.state.startDate);
+                var periodRangeEnd = new Date(this.state.endDate);
+                break;
+
+        }
+
+        this.setState({
+            periodRangeStartString: periodRangeStart.toDateString(),
+            periodRangeEndString:periodRangeEnd.toDateString()
+        });
+
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
         var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
+
 
         $.ajax({
             url: theUrl,
@@ -108,29 +162,63 @@ export class DailyList extends React.Component{
     }
 
     componentDidMount () {
-        this.loadObjectsFromServer();
+        this.loadObjectsFromServer("TODAY");
 
         //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID: intervalID});
 
     }
 
+    handleStartDateChange(date)   {
+        this.setState({startDate: date});
+        if (date > this.state.endDate) {
+            this.setState({endDate:date})
+        }
+
+  }
+  handleEndDateChange(date)   {
+        this.setState({endDate: date});
+      if (date < this.state.startDate) {
+            this.setState({startDate:date})
+        }
+  }
+
+  handlePeriodChange(option){
+        this.setState({period: option.value});
+
+      if (option.value != "CUSTOM") {
+          this.loadObjectsFromServer(option.value)
+      }
+
+
+    }
+
+    handleSubmitCustom() {
+        this.loadObjectsFromServer("CUSTOM")
+    }
 
 
 
     render () {
         var dateData, dateObject, readableDate;
         dateObject = new Date();
-        readableDate = dateObject.toDateString();
+
+        var readableStartDate = "";
+    var readableEndDate = "";
+
+        if (this.state.periodRangeStart != undefined) {
+            readableStartDate = this.state.periodRangeStartString;
+            readableEndDate = this.state.periodRangeEndString
+        }
 
                 if (this.state.data != undefined) {
                 return (
                     <div>
                         <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
 
-
                         <div className="fullPageDiv">
                             <div className="ui page container footerAtBottom">
+
 
 
                                 <div className="spacer">&nbsp;</div>
@@ -145,18 +233,54 @@ export class DailyList extends React.Component{
                                     </Link>
                                 </div>
                                 <div>&nbsp;</div>
-                                <div className="ui column header">
-                                    <h1>{readableDate}</h1>
-                                </div>
+                                <div className="ui grid">
+                                    <div className="ui row">
+                                <div className="ui eight wide column header"> {this.state.periodRangeStartString != this.state.periodRangeEndString ? <h1>{this.state.periodRangeStartString} to {this.state.periodRangeEndString}</h1>: <h1>{this.state.periodRangeStartString}</h1>}</div>
+
+                                    <div className="ui right floated four wide column form ">
+
+
+                                        <KSSelect value={this.state.period}
+                                            valueChange={this.handlePeriodChange}
+                                            label=""
+                                            isClearable={false}
+                                            name="period"
+                                                  searchable={false}
+                                            options={periodOptions}
+                                            />
+                                    </div></div>
+                        {this.state.period == "CUSTOM" ?
+<div className="ui row smallVerticalPaddingNoMargin">
+
+    <div className="ui right floated four wide column form">
+        <div className="ui two column grid">
+                            <div  className="column field absolutelyNoMargin">
+                                <DatePicker  selected={this.state.startDate}
+                                                  onChange={this.handleStartDateChange}/> </div>
+                                    <div  className="column field absolutelyNoMargin">
+                                        <DatePicker  selected={this.state.endDate}
+                                                  onChange={this.handleEndDateChange}/>
+
+
+                                </div></div></div></div>: <div></div>}
+                                    {this.state.period == "CUSTOM" ?
+<div className="ui row smallVerticalPaddingNoMargin">
+
+    <div className="ui right floated four wide column form "><div className="ui fluid purple medium button" onClick={this.handleSubmitCustom}>Update</div>
+       </div></div>: <div></div>}
+                                                            </div>
+
                                 <StepOccurrenceList data={this.state.data}/>
 
-                            </div>
-                        </div>
+
+                        </div></div>
+
                         <Footer />
-                    </div>
+                            </div>
 
 
-                )}
+                )
+                        }
         else {
                     return (
                         <div></div>

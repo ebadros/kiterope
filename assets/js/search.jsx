@@ -271,6 +271,14 @@ handleChangeQuery = (e) => {
     })
 
 };
+_handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+
+      this.handleSubmit(e)
+    }
+  };
     render () {
         if (this.state.query == "") {
             $(this.refs["ref_closeButton"]).hide();
@@ -307,7 +315,8 @@ handleChangeQuery = (e) => {
 
 
                                 <input placeholder={this.state.placeholder} className="ui eight wide column searchInput"
-                                       type="text" value={this.state.query} onChange={this.handleChangeQuery} />
+                                       type="text" value={this.state.query}     onKeyPress={this._handleKeyPress}
+ onChange={this.handleChangeQuery} />
                                 <div ref="ref_closeButton" onClick={this.handleCloseButtonClicked} ><i className="large close icon"></i></div>
                                 <div onClick={this.handleSubmit} className="ui fluid  three wide column purple right floated medium  button" style={{marginTop:0, marginBottom:0}}>Search Plans</div>
 

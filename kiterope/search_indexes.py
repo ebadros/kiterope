@@ -14,6 +14,7 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     costFrequencyMetric = indexes.CharField(model_attr="costFrequencyMetric", faceted=True)
     author = indexes.CharField(model_attr='author')
     author_id = indexes.CharField(model_attr='author')
+    category = indexes.CharField(model_attr="category")
 
     def prepare_timeCommitment(self, obj):
         return obj.get_timeCommitment_display()

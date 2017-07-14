@@ -969,6 +969,9 @@ export class GoalForm extends React.Component {
             var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column";
 
+
+
+
             if (this.state.image) {
                 var imageUrl = this.state.image
 
@@ -979,6 +982,14 @@ export class GoalForm extends React.Component {
         return (
             <div className="ui page container footerAtBottom">
                 <div className="ui grid">
+                    <div className="ui row">
+                                                      <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
+
+                        <div className={smallColumnWidth}>
+
+                        <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                       label="Select an image that will help motivate you." defaultImage={imageUrl}/>
+                    </div></Measure></div>
 
                     <div className="ui row">
                         <div className="ten wide column">
@@ -1047,14 +1058,7 @@ export class GoalForm extends React.Component {
 
 
                     </div>
-                    <div className="ui row">
-                                                      <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-                        <div className={smallColumnWidth}>
-
-                        <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                       label="Select an image that will help motivate you." defaultImage={imageUrl}/>
-                    </div></Measure></div>
                     <div className="ui row">
 
 
@@ -1781,10 +1785,11 @@ export class GoalBasicView extends React.Component {
     render() {
         if (this.state.data) {
             var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY");
-            if (this.state.data.image == "") {
-                var theImage = "icons/goalItem.svg"
-            } else {
+            if (this.state.data.image != undefined){
                 var theImage = this.state.data.image
+            } else {
+                var theImage = "images/goalItem.svg"
+
             }
             return (
                 <div className="ui grid">

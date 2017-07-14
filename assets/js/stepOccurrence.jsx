@@ -257,7 +257,8 @@ export class StepOccurrenceItem extends React.Component {
                     <div className="ui segment noBottomMargin noTopMargin">
                         <div onClick={this.toggleDetail} ><ClippedImage item="plan" src={s3ImageUrl + this.state.image} /></div>
 
-                        <div className="planTitle" onClick={this.toggleDetail}>{this.state.title}</div>
+                        <div className="planTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
+</div>
                         <div ref="ref_detail">
                             <div className="itemDetailSmall">
                                 <div dangerouslySetInnerHTML={{__html: this.state.description}}></div>

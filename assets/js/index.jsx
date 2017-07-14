@@ -24,7 +24,7 @@ import {ProgramListPage, ProgramDetailPage} from'./program'
 
 import {Router, Route, Link, hashHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
-
+import {BrowseProgramsPage } from './browse'
 
 import auth from './auth'
 
@@ -70,6 +70,7 @@ ReactDOM.render((
                        onEnter={requireAuth}/>
 
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
+                <Route path="/browse" component={BrowseProgramsPage} />
                 <Route path="/account/login" component={ LoginPage }/>
                 <Route path="/joinKiterope" component={ JoinPage }/>
                 <Route path="/account/password/reset" component={ PasswordResetPage }/>

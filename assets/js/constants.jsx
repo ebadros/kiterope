@@ -206,6 +206,15 @@ export const metricFormatOptions = [
     {value: "audio", label: "audio"},
 ];
 
+
+export const periodOptions = [
+
+    {value: "TODAY", label: "Today"},
+    {value: "LAST7", label: "Last 7 Days"},
+    {value: "NEXT7", label: "Next 7 Days"},
+    {value: "CUSTOM", label: "Custom Range"},
+];
+
 export const formats = {
   dateFormat: 'DD',
 
@@ -262,5 +271,5 @@ function printObject(o) {
 
 
 
-module.exports = {  theServer, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {  theServer, periodOptions, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };

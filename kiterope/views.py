@@ -41,6 +41,8 @@ from datetime import timedelta
 
 import boto
 import mimetypes
+import uuid
+import os.path
 
 
 from kiterope.helpers import formattime
@@ -734,7 +736,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print("persistedOccurrences %d" % persistedOccurrences.count())
 
 
-
+            print(userPlanOccurrences)
             for aPlanOccurrence in userPlanOccurrences:
                 #print("aPlanOccurrence.startDate %s" % type(aPlanOccurrence.startDate))
                 #periodRangeStart = datetime.datetime.strftime(periodRangeStart, '%Y-%m-%d')
@@ -933,11 +935,12 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print("getQueryset periodRangeStart %s periodRangeEnd %s" % (periodRangeStart, periodRangeEnd))
             #querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
             #theQueryset = StepOccurrence.objects.filter(Q(date__lte=periodRangeEnd))
+            userIsCurrentUser = Q(user=self.request.user)
             dateLessThanEnd = Q(date__lte=periodRangeEnd)
             dateLaterThanStart = Q(date__gte=periodRangeStart)
 
 
-            theQueryset = StepOccurrence.objects.filter(dateLessThanEnd & dateLaterThanStart)
+            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & dateLessThanEnd & dateLaterThanStart)
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -946,7 +949,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             periodRangeEnd = periodRangeStart
 
 
-            theQueryset = StepOccurrence.objects.all()
+            theQueryset = StepOccurrence.objects.none()
 
         return theQueryset
 
@@ -1249,6 +1252,9 @@ conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
     object_name = request.GET['objectName']
+    extension = os.path.splitext(object_name)[1]
+    object_name = str(uuid.uuid4()) + extension
+
     content_type = mimetypes.guess_type(object_name)[0]
 
     signed_url = conn.generate_url(

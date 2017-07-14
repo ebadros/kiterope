@@ -40,6 +40,9 @@ function printObject(o) {
   }
   alert(out);
 }
+
+const uuidv4 = require('uuid/v4');
+
 var Global = require('react-global');
 
 <Global values={{
@@ -333,6 +336,84 @@ function getImageDimensions(imageNode) {
 }
 
 
+export class ImageDisplay extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+        fileUrl:"",
+        s3Url:"",
+        filename:"",
+        progress:"",
+        error:"",
+        imageStyle:""}
+    }
+
+
+
+    componentDidMount() {
+        this.setState({
+            fileUrl:this.props.fileUrl,
+        s3Url:this.props.s3Url,
+        filename:this.props.filename,
+        progress:this.props.progress,
+        error:this.props.error,
+        imageStyle:this.props.imageStyle
+
+        })
+    }
+
+    handleGetImage () {
+        var dom = ReactDOM.findDOMNode(this).children[0];
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.fileUrl != nextProps.fileUrl) {
+            this.setState({
+                fileUrl:nextProps.fileUrl,
+
+            })}
+        if (this.state.s3Url != nextProps.s3Url) {
+            this.setState({
+                s3Url:nextProps.s3Url,
+
+            })}
+        if (this.state.filename != nextProps.filename) {
+            this.setState({
+                filename:nextProps.filename,
+
+            })}
+        if (this.state.progress != nextProps.progress) {
+            this.setState({
+                progress:nextProps.progress,
+
+            })}
+        if (this.state.error != nextProps.error) {
+            this.setState({
+                error:nextProps.error,
+
+            })}
+        if (this.state.imageStyle != nextProps.imageStyle) {
+            this.setState({
+                imageStyle:nextProps.imageStyle,
+
+            })}
+
+    }
+    render() {
+        return (
+            <div>
+                <img style={this.props.imageStyle} src={this.state.s3Url + "/" + this.state.filename} />
+            </div>
+        )
+    }
+
+
+}
+
+
+
 export class ImageUploader extends React.Component {
     constructor(props) {
         super(props);
@@ -362,22 +443,34 @@ export class ImageUploader extends React.Component {
     }
 
     componentWillReceiveProps (nextProps) {
-        if (this.state.defaultImage != nextProps.defaultImage) {
-            this.setState({
-                image: nextProps.defaultImage,
-            })
+        if (this.state.image != nextProps.defaultImage) {
+            this.setState({image: nextProps.defaultImage})
         }
+
+
+
 
         if (this.state.dimensions != nextProps.dimensions) {
             this.setState({dimensions:nextProps.dimensions})
         }
+
+
+
+
     }
 
     handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;
-            var urlForDatabase = fullUrl.split("?")[0];
+            var fileUrl = fullUrl.split("?")[0];
 
-            urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
+
+            var urlForDatabase = fileUrl.replace(s3ImageUrl, "");
+        this.setState({
+            image:urlForDatabase.replace("images/", ""),
+            fileUrl:fileUrl
+        });
+
+
 
             this.setState({image: urlForDatabase});
         this.props.imageReturned({
@@ -385,9 +478,13 @@ export class ImageUploader extends React.Component {
         })
     }
 
+
+
+
+
+
     render() {
         var theImage = this.state.image;
-
         var theFilename = theImage.replace("images/", "");
         if (this.state.dimensions) {
             var {width, height} = this.state.dimensions
@@ -421,6 +518,7 @@ export class ImageUploader extends React.Component {
             signingUrlQueryParams: {uploadType: 'avatar'},
             uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
             signingUrl: "signS3Upload",
+
         };
 
 
@@ -428,6 +526,7 @@ export class ImageUploader extends React.Component {
 
 
             <DropzoneS3Uploader filename={theFilename} onFinish={this.handleFinishedUpload} {...imageUploaderProps} >
+        <ImageDisplay filename={theFilename} {...imageUploaderProps} />
             </DropzoneS3Uploader>
 
         )

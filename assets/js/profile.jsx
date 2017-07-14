@@ -549,7 +549,7 @@ if (this.state.user) {
                       <div className="ui three column grid">
                                                     <div className="ui row"> <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-<div className={smallColumnWidth}>
+<div className={mediumColumnWidth}>
 
                           <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
                                          label="Select an image that will help motivate you." defaultImage={imageUrl}/>
