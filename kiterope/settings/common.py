@@ -76,7 +76,6 @@ INSTALLED_APPS = [
 
 ]
 
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
 

@@ -1155,6 +1155,54 @@ class ProgramSearchViewSet(HaystackViewSet):
     pagination_class = StandardResultsSetPagination
 
 
+class ProgramDuplicatorViewSet(viewsets.ModelViewSet):
+    serializer_class = ProgramSerializer
+    queryset = Program.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=False)
+
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+            program_id = self.kwargs['program_id']
+            theProgram = Program.objects.get(id=program_id)
+            theNewProgram = deepcopy(theProgram)
+            theNewProgram.id = None
+            theNewProgram.title = theNewProgram.title + " Copy"
+            theNewProgram.save()
+            theSteps = Step.objects.filter(program=theProgram)
+            for theStep in theSteps:
+                theNewStep = deepcopy(theStep)
+                theNewStep.id = None
+                theNewStep.program_id = theNewProgram.id
+                theNewStep.save()
+                theUpdates = Update.objects.filter(step=theStep)
+                for theUpdate in theUpdates:
+                    theNewUpdate = deepcopy(theUpdate)
+                    theNewUpdate.id = None
+                    theNewUpdate.step_id = theNewStep.id
+                    theNewUpdate.save()
+
+
+            aQueryset = Program.objects.get(id=theNewProgram.id)
+
+            return aQueryset
+            #aQuerySet = Step.objects.filter(id=theNewStep.id)
+
+
+            #serializer = StepSerializer(aQuerySet)
+
+
+
+        except:
+
+            aQueryset = Program.objects.none()
+            return aQueryset
 
 class StepDuplicatorViewSet(viewsets.ModelViewSet):
     serializer_class = StepSerializer
@@ -1167,9 +1215,6 @@ class StepDuplicatorViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=False)
 
         return Response(serializer.data)
-
-
-
 
 
     def get_queryset(self):
@@ -1200,10 +1245,6 @@ class StepDuplicatorViewSet(viewsets.ModelViewSet):
 
             aQueryset = Step.objects.none()
             return aQueryset
-
-
-
-
 
 
 

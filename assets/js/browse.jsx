@@ -74,4 +74,4 @@ export class BrowseProgramsPage extends React.Component {
     }
 }
 
-modules.export = { BrowseProgramsPage};
+module.exports = { BrowseProgramsPage};

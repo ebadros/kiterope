@@ -88,8 +88,8 @@ function printObject(o) {
 @connect(mapStateToProps, mapDispatchToProps)
 export class StepList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:{},
             programId:"",
@@ -99,19 +99,19 @@ export class StepList extends React.Component {
 
     handleReloadItem = () => {
         this.props.reloadItem()
-    }
+    };
 
     componentDidMount () {
         this.setState({
             data:this.props.data
-        })
+        });
         //this.loadFromServer()
     }
 
      handlePageChange = (pageNumber) => {
         this.setState({activePage: pageNumber}, () => this.loadFromServer());
 
-    }
+    };
 
     getPagination()  {
           if (this.state.next != null || this.state.previous != null) {
@@ -133,7 +133,7 @@ export class StepList extends React.Component {
         //if (this.state.activePage != 1) {
           //      var theUrl = theServer + "api/programs/" + this.props.programId + "/steps/?page=" + this.state.activePage
       //}  else {
-                var theUrl = "api/programs/" + this.props.programId + "/steps"
+                var theUrl = "api/programs/" + this.props.programId + "/steps";
       //}
 
       $.ajax({
@@ -156,7 +156,7 @@ export class StepList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data) {
@@ -174,14 +174,14 @@ export class StepList extends React.Component {
 
       this.setState({currentView:currentView})
 
-  }
+  };
 
 
 
     render () {
                       //var pagination = this.getPagination()
         if (this.state.data) {
-             var theData = this.state.data
+             var theData = this.state.data;
         var values = Object.keys(theData).map(function(key){
         return theData[key];
         });
@@ -202,7 +202,7 @@ export class StepList extends React.Component {
                                             currentView="Basic"
                     />
 
-)
+);
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })
@@ -283,7 +283,7 @@ export class StepDetailView extends React.Component {
         if (this.state.data != nextProps.data) {
             this.setState({
                 data:nextProps.data
-            })
+            });
                         this.setDateAndTimeInfo()
 
         }
@@ -293,11 +293,11 @@ export class StepDetailView extends React.Component {
         }
     }
      findLabel (theValue, theArray) {
-        var returnValue = "Not available"
+        var returnValue = "Not available";
         if (theValue) {
             for (var i = 0; i < theArray.length; i++) {
                 if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label
+                    returnValue =  theArray[i].label;
                     return returnValue
                 }
             }
@@ -309,7 +309,7 @@ export class StepDetailView extends React.Component {
     }
 
     getWeeklyDays() {
-        var theDaysPerWeek = ""
+        var theDaysPerWeek = "";
         if (this.state.data.day01) {
             theDaysPerWeek = theDaysPerWeek + "M"
         }
@@ -334,7 +334,7 @@ export class StepDetailView extends React.Component {
     }
 
 setDateAndTimeInfo() {
-        this.setDateInfo()
+        this.setDateInfo();
         this.setTimeInfo()
     }
 
@@ -343,39 +343,39 @@ setDateAndTimeInfo() {
 
 
     setDateInfo = () => {
-        var theAbsoluteStartDate = this.state.data.absoluteStartDate
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY")
-        var theAbsoluteEndDate = this.state.data.absoluteEndDate
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY")
+        var theAbsoluteStartDate = this.state.data.absoluteStartDate;
+        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY");
+        var theAbsoluteEndDate = this.state.data.absoluteEndDate;
+        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY");
 
         switch (this.state.data.frequency) {
             case("ONCE"):
                 this.setState({
                     dateInfo: theAbsoluteStartDate
-                })
+                });
                 break;
             case("DAILY"):
                 this.setState({
                     dateInfo: "Daily, " +  theAbsoluteStartDate + " to " + theAbsoluteEndDate,
-                })
+                });
                 break;
             case("WEEKLY"):
                 this.setState({
                     dateInfo: this.getWeeklyDays() + " Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
-                })
+                });
                 break;
             case("MONTHLY"):
                 this.setState({
                     dateInfo:  this.state.data.monthlyDates + " Montly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
-                })
+                });
                 break;
         }
 
 
-}
+};
     setTimeInfo = () => {
-        var duration = this.findLabel(this.state.data.duration, durations)
-        var startTime = this.findLabel(this.state.data.startTime, times)
+        var duration = this.findLabel(this.state.data.duration, durations);
+        var startTime = this.findLabel(this.state.data.startTime, times);
         if ((duration != "Not available") && (startTime != "Not available")) {
             var timeInfo = duration + ", starting at " + startTime
 
@@ -394,10 +394,10 @@ setDateAndTimeInfo() {
         this.setState({
             timeInfo: timeInfo
         })
-    }
+    };
         render() {
 
-            var theTitle = this.state.data.title
+            var theTitle = this.state.data.title;
 
 
             if (this.props.isListNode) {
@@ -453,7 +453,7 @@ export class StepBasicView extends React.Component {
         if (this.state.data != nextProps.data) {
             this.setState({
                 data:nextProps.data
-            })
+            });
             this.setDateAndTimeInfo(nextProps.data)
 
 
@@ -461,18 +461,18 @@ export class StepBasicView extends React.Component {
         if (this.state.currentView != nextProps.currentView) {
             this.setState({
                 currentView: nextProps.currentView
-            })
+            });
             this.setDateAndTimeInfo()
 
         }
     }
 
     findLabel (theValue, theArray) {
-        var returnValue = "Not available"
+        var returnValue = "Not available";
         if (theValue) {
             for (var i = 0; i < theArray.length; i++) {
                 if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label
+                    returnValue =  theArray[i].label;
                     return returnValue
                 }
             }
@@ -484,7 +484,7 @@ export class StepBasicView extends React.Component {
     }
 
     getWeeklyDays(theData) {
-        var theDaysPerWeek = ""
+        var theDaysPerWeek = "";
         if (theData.day01) {
             theDaysPerWeek = theDaysPerWeek + "M"
         }
@@ -510,39 +510,39 @@ export class StepBasicView extends React.Component {
 
 
     setDateAndTimeInfo(theData) {
-        this.setDateInfo(theData)
+        this.setDateInfo(theData);
         this.setTimeInfo(theData)
     }
 
 
     setDateInfo = (theData) => {
-        var theAbsoluteStartDate = theData.absoluteStartDate
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY")
-        var theAbsoluteEndDate = theData.absoluteEndDate
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY")
+        var theAbsoluteStartDate = theData.absoluteStartDate;
+        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY");
+        var theAbsoluteEndDate = theData.absoluteEndDate;
+        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY");
 
         switch (theData.frequency) {
 
             case("ONCE"):
                 this.setState({
                     dateInfo: theAbsoluteStartDate
-                })
+                });
                 break;
 
             case("DAILY"):
                 this.setState({
                     dateInfo: "Daily, " +  theAbsoluteStartDate + " to " + theAbsoluteEndDate,
-                })
+                });
                 break;
             case("WEEKLY"):
                 this.setState({
                     dateInfo: this.getWeeklyDays(theData) + " Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
-                })
+                });
                 break;
             case("MONTHLY"):
                 this.setState({
                     dateInfo:  this.state.data.monthlyDates + " Monthly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
-                })
+                });
                 break;
 
 
@@ -550,10 +550,10 @@ export class StepBasicView extends React.Component {
         }
 
 
-}
+};
     setTimeInfo = (theData) => {
-        var duration = this.findLabel(theData.duration, durations)
-        var startTime = this.findLabel(theData.startTime, times)
+        var duration = this.findLabel(theData.duration, durations);
+        var startTime = this.findLabel(theData.startTime, times);
         if ((duration != "Not available") && (startTime != "Not available")) {
             var timeInfo = duration + ", starting at " + startTime
 
@@ -572,7 +572,7 @@ export class StepBasicView extends React.Component {
         this.setState({
             timeInfo: timeInfo
         })
-    }
+    };
 
     goToDetail() {
          if (this.state.data.id) {
@@ -581,7 +581,7 @@ export class StepBasicView extends React.Component {
      }
     render() {
 
-            var theTitle = this.state.data.title
+            var theTitle = this.state.data.title;
 
 
             if (this.props.isListNode) {
@@ -642,8 +642,8 @@ export class StepBasicView extends React.Component {
 @connect(mapStateToProps, mapDispatchToProps)
 export class StepForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             id:"",
@@ -715,7 +715,7 @@ export class StepForm extends React.Component {
 
 
     loadParentFromServer = () => {
-     var theUrl = "api/programs/" + this.props.parentId
+     var theUrl = "api/programs/" + this.props.parentId;
 
       $.ajax({
       url: theUrl,
@@ -733,14 +733,14 @@ export class StepForm extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
 
     componentDidMount() {
-        this.resetForm()
+        this.resetForm();
         this.setState({
             serverErrors:this.props.serverErrors
-        })
+        });
 
         if (!this.state.editFormIsOpen) {
             //$(this.refs["ref_stepForm" + this.props.stepData.id]).hide();
@@ -760,14 +760,14 @@ export class StepForm extends React.Component {
         }
         if (this.state.parentData != nextProps.data) {
             if (nextProps.data != undefined) {
-                this.showAndHideUIElements(nextProps.data.frequency)
+                this.showAndHideUIElements(nextProps.data.frequency);
 
                 var startDate = nextProps.data.startDate;
 
                 var endDate = nextProps.data.endDate;
 
                 var programStartDateInStringForm = nextProps.data.programStartDate;
-                var programStartDateInMomentForm = moment(programStartDateInStringForm)
+                var programStartDateInMomentForm = moment(programStartDateInStringForm);
 
 
                 //var calculatedStartDate = moment(programStartDateInMomentForm, "MM-DD-YYYY").add(startDateInIntegerForm, 'days');
@@ -776,10 +776,10 @@ export class StepForm extends React.Component {
 
 
 
-                var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD")
-                var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD")
-                calculatedStartDate = moment(calculatedStartDate)
-                                calculatedEndDate = moment(calculatedEndDate)
+                var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+                var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+                calculatedStartDate = moment(calculatedStartDate);
+                                calculatedEndDate = moment(calculatedEndDate);
 
 
 
@@ -808,7 +808,7 @@ export class StepForm extends React.Component {
                     monthlyDates: nextProps.data.monthlyDates,
                     programStartDate: nextProps.data.programStartDate,
                     updates:nextProps.data.updates,
-                })
+                });
 
                 if (nextProps.data.description == undefined) {
                     this.setState({
@@ -832,7 +832,7 @@ export class StepForm extends React.Component {
         this.setState({frequency: e.value});
         this.showAndHideUIElements(e.value)
 
-    }
+    };
 
 
     handleTitleChange = (value) => {
@@ -841,7 +841,7 @@ export class StepForm extends React.Component {
             this.setState({title: value});
 
         //}
-    }
+    };
 
     handleDescriptionChange(value) {
         this.setState({description: value});
@@ -898,44 +898,44 @@ export class StepForm extends React.Component {
     handleDay01Change = (e) =>  {
 
         this.setState({day01: e});
-    }
+    };
 
     handleDay02Change = (e) =>  {
 
         this.setState({day02: e});
-    }
+    };
 
     handleDay03Change = (e) =>  {
 
         this.setState({day03: e});
-    }
+    };
 
     handleDay04Change = (e) =>  {
 
         this.setState({day04: e});
-    }
+    };
 
     handleDay05Change = (e) =>  {
 
 
         this.setState({day05: e});
-    }
+    };
 
     handleDay06Change = (e) => {
 
         this.setState({day06: e});
-    }
+    };
 
     handleDay07Change = (e) => {
 
 
         this.setState({day07: e});
-    }
+    };
 
     handleStartTimeChange = (e) =>  {
 
         this.setState({startTime:e.value});
-    }
+    };
     handleDurationChange(e) {
 
         this.setState({duration: e.value});
@@ -967,7 +967,7 @@ export class StepForm extends React.Component {
     if (this.props.storeRoot.user) {
 
         var title = this.state.title;
-        var image = this.state.image
+        var image = this.state.image;
         var description = this.state.description;
         var frequency = this.state.frequency;
         var day01 = this.state.day01;
@@ -982,14 +982,14 @@ export class StepForm extends React.Component {
         var monthlyDates = this.state.monthlyDates;
         var theProgram = this.props.parentId;
 
-        var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime")
-        var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime")
-        var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime")
-        var startDate = this.state.startDate
-        var endDate = this.state.endDate
-        var updates = this.state.updates
-        var updatesIds = []
-        var i
+        var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime");
+        var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime");
+        var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime");
+        var startDate = this.state.startDate;
+        var endDate = this.state.endDate;
+        var updates = this.state.updates;
+        var updatesIds = [];
+        var i;
         for (i=0; i < updates.length; i++ ) {
             updatesIds.push(updates[i].id)
         }
@@ -1017,7 +1017,7 @@ export class StepForm extends React.Component {
             duration:duration,
             program:theProgram,
             'updatesIds[]': updatesIds,
-        }
+        };
 
         if (this.state.id != "" ) {
             stepData.id = this.state.id
@@ -1063,16 +1063,16 @@ export class StepForm extends React.Component {
             }
 
             );
-        }
+        };
 
         handleUpdateAdded = (theUpdateData) => {
-            var i
-            var alreadyAdded = false
-            var updatesArray = this.state.updates
+            var i;
+            var alreadyAdded = false;
+            var updatesArray = this.state.updates;
             for (i=0; i < updatesArray.length; i++) {
                 if (theUpdateData.id == updatesArray[i].id) {
-                    updatesArray[i] = theUpdateData
-                    this.setState({updates: updatesArray})
+                    updatesArray[i] = theUpdateData;
+                    this.setState({updates: updatesArray});
                     var alreadyAdded = true
                 }
 
@@ -1082,27 +1082,27 @@ export class StepForm extends React.Component {
             }
 
 
-        }
+        };
 
         handleImageChange = (callbackData) => {
         this.setState({
             image: callbackData.image
         })
-    }
+    };
 
 
 
         getDescriptionEditor () {
             if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else {
 
 
-            var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
         }
 
@@ -1139,21 +1139,27 @@ export class StepForm extends React.Component {
             {
                 var buttonText = "Create"
             }
-                        var imageUrl = this.state.image
+                        if (this.state.image) {
+                var imageUrl = this.state.image
 
 
-        var descriptionEditor = this.getDescriptionEditor()
+            } else {
+                var imageUrl = "stepDefaultImage.svg"
+            }
+
+
+        var descriptionEditor = this.getDescriptionEditor();
 
     if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else {
 
 
-            var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "eight wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
             var smallColumnWidth = "eight wide column"
         }
           return (
@@ -1327,14 +1333,14 @@ export class StepForm extends React.Component {
               </div>
           )
 
-    }
+    };
 
 
 
 
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
             return(
                 <div >
@@ -1352,8 +1358,8 @@ export class StepForm extends React.Component {
 
 export class SimpleStepForm extends StepForm {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             id:"",
@@ -1380,11 +1386,11 @@ export class SimpleStepForm extends StepForm {
         }
     }
     findLabel (theValue, theArray) {
-        var returnValue = "Not available"
+        var returnValue = "Not available";
         if (theValue) {
             for (var i = 0; i < theArray.length; i++) {
                 if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label
+                    returnValue =  theArray[i].label;
                     return returnValue
                 }
             }
@@ -1399,13 +1405,13 @@ export class SimpleStepForm extends StepForm {
     componentWillReceiveProps(nextProps) {
         if (this.state.parentData != nextProps.data) {
             if (nextProps.data != undefined) {
-                this.showAndHideUIElements(nextProps.data.frequency)
+                this.showAndHideUIElements(nextProps.data.frequency);
 
                 var startDateInIntegerForm = nextProps.data.startDate;
                 var endDateInIntegerForm = nextProps.data.endDate;
 
                 var programStartDateInDateForm = nextProps.data.programStartDate;
-                var programStartDateInMomentForm = moment(programStartDateInDateForm)
+                var programStartDateInMomentForm = moment(programStartDateInDateForm);
                 var calculatedStartDate = moment(programStartDateInMomentForm, "DD-MM-YYYY").add(startDateInIntegerForm, 'days');
                 var calculatedEndDate = moment(programStartDateInMomentForm, "DD-MM-YYYY").add(endDateInIntegerForm, 'days');
 
@@ -1442,11 +1448,11 @@ export class SimpleStepForm extends StepForm {
 
 
     getDateInfo = () => {
-        var theAbsoluteStartDate = this.state.absoluteStartDate
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YYYY")
+        var theAbsoluteStartDate = this.state.absoluteStartDate;
+        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YYYY");
 
-        var theAbsoluteEndDate = this.state.absoluteEndDate
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YYYY")
+        var theAbsoluteEndDate = this.state.absoluteEndDate;
+        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YYYY");
         if (this.state.frequency == "ONCE") {
             return(
 
@@ -1479,12 +1485,12 @@ export class SimpleStepForm extends StepForm {
                 )
         }
 
-}
+};
 
 
     getForm = () => {
 
-        var dateInfo = this.getDateInfo()
+        var dateInfo = this.getDateInfo();
                 if (this.state.frequency) {
 
                     var theFrequency = this.findLabel(this.state.frequency, frequencyOptions)
@@ -1576,10 +1582,10 @@ export class SimpleStepForm extends StepForm {
 
 
 
-        )}
+        )};
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -1615,8 +1621,8 @@ export class SimpleStepForm extends StepForm {
 export class ToggleButton extends React.Component {
 
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             checked: false
         }
@@ -1634,28 +1640,28 @@ export class ToggleButton extends React.Component {
             this.state.checked = nextProps.value
         }
 
-}
+};
 
 
 
     handleToggleChange = (e) => {
-                    e.preventDefault()
+                    e.preventDefault();
 
         if (!this.props.disabled) {
             var currentState = this.state.checked;
 
             if (currentState == true) {
                 //this.setState({ checked: false});
-                var callbackValue = false
+                var callbackValue = false;
                 this.props.callback(callbackValue)
             } else {
                 //this.setState({ checked: true});
-                var callbackValue = true
+                var callbackValue = true;
                 this.props.callback(callbackValue)
 
             }
         }
-    }
+    };
 
 
   render = () => {
@@ -1705,6 +1711,8 @@ var DynamicSelectButton = React.createClass({
   }
 });
 
+
+
 export class StepItemMenu extends React.Component {
     constructor(props) {
         super(props);
@@ -1713,10 +1721,10 @@ export class StepItemMenu extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          return(
 
                   <div className="ui simple dropdown item" >

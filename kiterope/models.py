@@ -371,6 +371,13 @@ class Program(models.Model):
     def get_author_id(self):
         return "%s" % self.author.id
 
+    def get_author_fullName(self):
+        return "%s" % self.author.profile.get_fullName()
+
+    def get_author_profilePhoto(self):
+        return "%s" % self.author.profile.profilePhoto
+
+
 class Step(models.Model):
     program = models.ForeignKey(Program, null=True, blank=True)
     title = models.CharField(max_length=100, default=" ")

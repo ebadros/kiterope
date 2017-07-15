@@ -11,7 +11,7 @@ import { GoalForm, GoalBasicView, SimpleGoalForm } from './goal'
 import { UpdateItemMenu } from './update'
 
 import { PlanForm, PlanBasicView, SimplePlanForm } from './plan'
-import { ProgramForm, ProgramBasicView, SimpleProgramForm, ProgramSubscriptionModal, ProgramSubscriptionForm } from './program'
+import { ProgramForm, ProgramBasicView, SimpleProgramForm, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionForm } from './program'
 
 import { StepForm, StepBasicView, StepDetailView, SimpleStepForm, StepItemMenu } from './step'
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
@@ -1080,6 +1080,31 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
       store.dispatch(deleteProgram(this.props.id))
 
   }
+
+  duplicateItem = () => {
+        var theUrl = this.props.apiUrl + this.props.id + "/duplicate/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            type: 'GET',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addProgram(data));
+
+                this.reload()
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }.bind(this),
+
+
+        });
+
+    };
 
 
 
@@ -2196,7 +2221,7 @@ export class ItemControlBarButton extends React.Component {
                     case("Plan"):
                         return (<ItemMenu click={this.handleClick}/>);
                     case("Program"):
-                        return (<ItemMenu click={this.handleClick}/>);
+                        return (<ProgramItemMenu click={this.handleClick}/>);
                     case("Step"):
                         return (<StepItemMenu click={this.handleClick}/>);
                     case("Update"):

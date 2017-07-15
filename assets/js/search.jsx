@@ -592,9 +592,7 @@ export class SearchHitsGrid extends React.Component {
                 if (this.props.storeRoot) {
                     if (this.props.storeRoot.plans) {
                         for (var key in this.props.storeRoot.plans) {
-                            console.log("key is " + key + " objectDasta source id " +  objectData._source.id);
                             if ((this.props.storeRoot.plans[key].program == objectData._source.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
-                                console.log("this.props.storeRoot.plans[key].program is " + this.props.storeRoot.plans[key].program + " objectDasta source id " +  objectData._source.id);
 
                                 objectData._source.isSubscribed = this.props.storeRoot.plans[key].isSubscribed;
                                  theUserPlanOccurrenceId = key

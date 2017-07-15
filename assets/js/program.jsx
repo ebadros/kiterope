@@ -1879,11 +1879,20 @@ export class ProgramBasicView extends React.Component {
                                             <IconLabelCombo size="extramini" orientation="left" text="100% Success"
                                                             icon="success" background="Light" link="/goalEntry"/>
                                         </div>
+                                        {!this.props.search ?
                                         <div className="ui right aligned column">
                                             <IconLabelCombo size="extramini" orientation="right"
                                                             text={theScheduleLength} icon="deadline" background="Light"
                                                             link="/goalEntry"/>
                                         </div>
+
+                                            :
+
+                                            <div className="ui right aligned column">
+                                            <IconLabelCombo size="extramini" orientation="right"
+                                                            text={theScheduleLength} icon="deadline" background="Light"
+                                                            link="/goalEntry"/>
+                                        </div>}
                                     </div>
                                 </div>
                                 <div className="row">
@@ -2028,7 +2037,40 @@ var GoalHeader = React.createClass({
 
 
 
+export class ProgramItemMenu extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+     }
 
+     handleClick = (callbackData) => {
+         this.props.click(callbackData)
+     };
+
+     render () {
+         var myStyle = { display: "block"};
+         return(
+
+                  <div className="ui simple dropdown item" >
+                      <div className="ui extramini image controlButtonMargin">
+                      <img src={`${s3IconUrl}menuDark.svg`} /></div>
+                      <div className="menu">
+                          <div className="ui item">
+                              <IconLabelCombo size="extramini" orientation="left" text="Duplicate" icon="duplicate" background="Light" click={this.handleClick} />
+                              </div>
+
+                          <div className="ui item">
+                            <IconLabelCombo size="extramini" orientation="left" text="Delete" icon="trash" background="Light" click={this.handleClick} />
+                            </div>
+
+                      </div>
+                  </div>
+
+
+         )
+     }
+
+}
 
 
 function getCookie(name) {
@@ -2049,4 +2091,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, SimpleProgramForm, ProgramForm, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, SimpleProgramForm, ProgramForm, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
