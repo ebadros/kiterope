@@ -68,10 +68,15 @@ router.register(r'channels', views.KChannelViewSet, base_name='Room')
 
 router.register(r'channelUsers/(?P<receiver_id>\w+)', views.ReceiverKChannelViewSet, base_name='KChannel')
 router.register(r'^steps/(?P<step_id>\w+)/duplicate', views.StepDuplicatorViewSet, base_name='step-duplicate')
+router.register(r'^programs/(?P<program_id>\w+)/duplicate', views.ProgramDuplicatorViewSet, base_name='program-duplicate')
+
 
 router.register(r'^programs/(?P<program_id>\w+)/steps', views.StepViewSet, base_name='Step')
 router.register(r'^programs/(?P<program_id>\w+)/', views.ProgramViewSet, base_name='Program')
 router.register(r'programs', views.ProgramViewSet)
+
+router.register(r'browseablePrograms', views.BrowseableProgramViewSet, base_name='Program')
+
 
 
 router.register(r'^plans/(?P<plan_id>\w+)/steps', views.StepOccurrenceViewSet, base_name='Step')

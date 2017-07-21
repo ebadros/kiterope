@@ -18,6 +18,8 @@ from os.path import abspath, basename, dirname, join, normpath
 IN_PRODUCTION = False
 IN_STAGING=False
 
+UNAUTHENTICATED_USER = 'django.contrib.auth.models.AnonymousUser'
+UNAUTHENTICATED_TOKEN = None
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -29,7 +31,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
-ALLOWED_HOSTS = ['192.168.1.156', '*']
+ALLOWED_HOSTS = ['192.168.1.156', '*', '127.0.0.1']
 
 
 TWILIO_ACCOUNT_SID = 'AC8d2c5238f8d12bb1b382e57428af3c90'

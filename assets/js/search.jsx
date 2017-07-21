@@ -318,9 +318,11 @@ _handleKeyPress = (e) => {
                                        type="text" value={this.state.query}     onKeyPress={this._handleKeyPress}
  onChange={this.handleChangeQuery} />
                                 <div ref="ref_closeButton" onClick={this.handleCloseButtonClicked} ><i className="large close icon"></i></div>
-                                <div onClick={this.handleSubmit} className="ui fluid  three wide column purple right floated medium  button" style={{marginTop:0, marginBottom:0}}>Search Plans</div>
-
+                                <div onClick={this.handleSubmit} className="ui fluid three wide column purple right floated medium  button" style={{marginTop:0, marginBottom:0}}>Search Plans</div>
 </div>
+                            <div className="ui row noPaddingBottom">
+                                <div className="three wide column right floated ">    <Link to="browse">Browse Plans</Link></div></div>
+
                         </div>
                     </div>
                     </div>
@@ -618,6 +620,7 @@ export class SearchHitsGrid extends React.Component {
                                            data={objectData._source}
                                            editable={false}
                                            needsLogin={this.handleNeedsLogin}
+                                           forSearch={true}
                                            userPlanOccurrenceId = {theUserPlanOccurrenceId} />
 
                       //  <PlanHit key={objectData.id} result={objectData} />
@@ -962,7 +965,7 @@ var PlanHit = React.createClass({
     }
 });
 
-export class UserLink extends React.Component {
+export class UserLink2 extends React.Component {
     constructor (props) {
         super (props);
         this.state = {

@@ -43,35 +43,257 @@ import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, redu
 import { theServer, times, s3IconUrl, formats, s3ImageUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
+function groupBy(list, keyGetter) {
+    const map = new Map();
+    list.forEach((item) => {
+        const key = keyGetter(item);
+        const collection = map.get(key);
+        if (!collection) {
+            map.set(key, [item]);
+        } else {
+            collection.push(item);
+        }
+    });
+    return map;
+}
 
+function findLabel (theValue, theArray) {
+        for (var i=0; theArray.length; i++ ) {
+            if (theArray[i].value == theValue) {
+                return theArray[i].label
+            }
+        }
+    }
+
+
+
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+    out += p + ': ' + o[p] + '\n';
+  }
+  alert(out);
+}
+
+export class IndividualProgram extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+
+    }
+
+
+
+    render() {
+        return (
+            <Link to={`programs/${this.props.id}/steps`}>{this.props.title}</Link>
+
+        )
+    }
+
+}
+
+export class ProgramCategory extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            programs: []
+        }
+
+    }
+    componentDidMount () {
+        this.setState({programs: this.props.programs})
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.programs != nextProps.programs) {
+            this.setState({programs: nextProps.programs})
+        }
+}
+
+    render() {
+        var thePrograms = this.state.programs.map((program) => {
+            return ( <IndividualProgram key={`program_${program.id}`} id={program.id} title={program.title}/>
+
+            )
+        });
+
+        var theCategoryReadable = findLabel (this.props.category, programCategoryOptions);
+
+        return (
+            <div>
+        <div className="column header"><h1>{theCategoryReadable}</h1></div>
+        {thePrograms}
+                </div>
+
+        )
+    }
+
+}
 export class BrowseProgramsPage extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
         this.state = {
             data: [],
-            activePage:1,
-            serverErrors:"",
-            formIsOpen:false,
-            headerActionButtonLabel:"Create Program"
+            browseablePrograms:""
+
 
 
         }
     }
 
     componentDidMount() {
-        loadExistingPlansFromServer()
+        this.loadExistingProgramsFromServer()
     }
 
-    loadExistingPlansFromServer () {
+    loadExistingProgramsFromServer () {
+        var theUrl = "api/browseablePrograms/";
+
+      $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+        this.setState({data: data}, this.getBrowseablePrograms(data)
+)
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+      }.bind(this),
+
+    });
 
     }
 
-    render() {
-        return (<div></div>
 
-        )
+
+    getBrowseablePrograms(data) {
+        var theGlobalPrograms = {};
+    if (data != undefined) {
+
+        var thePrograms = data;
+
+
+        for (var i=0; i < thePrograms.length; i++) {
+            var theProgram = thePrograms[i];
+            console.log(theProgram.category);
+            if (theGlobalPrograms[theProgram.category] == undefined) {
+                theGlobalPrograms[theProgram.category] = [];
+                theGlobalPrograms[theProgram.category].push(theProgram)
+
+
+            } else {
+                theGlobalPrograms[theProgram.category].push(theProgram)
+            }
+        }
+        this.setState({browseablePrograms: theGlobalPrograms})
     }
 }
+
+
+
+
+
+
+
+
+    render() {
+        var theNodes ="";
+        var theNumberOfPlans = this.state.data.length;
+
+        if (this.state.browseablePrograms != undefined ) {
+            var theData = this.state.browseablePrograms;
+            var values = Object.keys(theData).map(function (key) {
+                return theData[key];
+            });
+
+            var theNodes = values.map((theProgramCategory) => {
+                return (
+
+                    <ProgramCategory key={theProgramCategory[0].category} programs={theProgramCategory} category={theProgramCategory[0].category}/>
+                )
+            })
+        }
+
+        return (
+        <div>
+        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
+        <div className="">
+            <div className="ui page container">
+                <div className="spacer">&nbsp;</div>
+                <div className="spacer">&nbsp;</div>
+
+                <div className="massiveType">We currently feature {theNumberOfPlans} plans</div>
+                <div className="spacer">&nbsp;</div>
+
+                <div className="ui six column grid">
+                {theNodes}
+                    </div>
+
+
+                <div className="ui alert"></div>
+
+
+            </div>
+                <div className="spacer">&nbsp;</div>
+                            <div className="spacer">&nbsp;</div>
+
+
+            <div className="blue">
+                <div className="centered hugeType topPadding">Kiterope helps you get things done</div>
+                <div className="spacer">&nbsp;</div>
+
+                <div className="ui page container">
+                    <div className="ui center aligned four column grid">
+                        <div className="ui row">
+                            <div className="column">
+                                <img width="70%" src="/static/images/goal.svg"></img>
+                                </div>
+                            <div className="column">
+                                <img width="70%" src="/static/images/strategy.svg"></img>
+                                </div>
+                            <div className="column">
+                                <img width="70%" src="/static/images/bar-chart.svg"></img>
+                                </div>
+                            <div className="column">
+                                <img width="70%" src="/static/images/checked.svg"></img>
+                                </div>
+                            </div>
+
+                                                    <div className="ui row">
+
+                        <div className="column mediumResponsiveText">Helps you set SMART goals and keeps you
+                            focused on the process of achieving those goals
+                        </div>
+                        <div className="column mediumResponsiveText">Offers detailed, step-by-step plans and access to domain-experts to make
+                            sure you know what you're supposed to be doing and that it's the right thing
+                        </div>
+                        <div className="column mediumResponsiveText">Tracks your progress to let you know when you're encountering an
+                            obstacle and revises your plan to help you improve
+                        </div>
+                        <div className="column mediumResponsiveText">Keeps you motivated by making you accountable and connecting you with people invested in your success
+                        </div>
+                    </div>
+                        </div>
+                </div>
+
+
+            </div>
+
+        </div>
+            </div>
+
+
+
+    )
+    }
+}
+
+
 
 module.exports = { BrowseProgramsPage};

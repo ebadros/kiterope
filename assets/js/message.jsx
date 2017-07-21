@@ -363,6 +363,7 @@ export class MessageWindowContainer extends React.Component {
     };
 
     getOrCreateThreadChannel = (receiverId) => {
+        console.log("inside get or create");
         var theUrl = 'api/channelUsers/' + receiverId;
         $.ajax({
             method: 'GET',
@@ -2465,51 +2466,68 @@ export class ContactListPane extends React.Component {
                     contacts: nextProps.storeRoot.contacts
                 })
             }
-            if (nextProps.storeRoot.gui.currentContact) {
+
+            /*if (nextProps.storeRoot.gui.currentContact) {
+                this.setState({
+                    currentContact: nextProps.storeRoot.gui.currentContact
+                })
+
+            }*/
+            if ((this.state.currentContact != nextProps.storeRoot.gui.currentContact) && (nextProps.storeRoot.gui.currentContact != null)) {
+                var contactId = nextProps.storeRoot.gui.currentContact.id;
+                this.setState({
+                    currentContact: nextProps.storeRoot.gui.currentContact
+                }, this.getOrCreateThreadChannel(contactId))
+
+            } else if (nextProps.storeRoot.gui.currentContact) {
                 this.setState({
                     currentContact: nextProps.storeRoot.gui.currentContact
                 })
             }
         }
-        if (this.state.isVisible != nextProps.isVisible) {
-            this.setState({isVisible: nextProps.isVisible});
-            if (nextProps.isVisible) {
-                $(this.refs['ref_contactListPane']).show();
 
-            } else {
-                $(this.refs['ref_contactListPane']).hide();
+            if (this.state.isVisible != nextProps.isVisible) {
+                this.setState({isVisible: nextProps.isVisible});
+                if (nextProps.isVisible) {
+                    $(this.refs['ref_contactListPane']).show();
+
+                } else {
+                    $(this.refs['ref_contactListPane']).hide();
+                }
             }
-        }
+
 
     };
 
     getOrCreateThreadChannel = (receiverId) => {
-        var theUrl = 'api/channelUsers/' + receiverId;
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(data) {
-                var theMessageThreadChannelLabel = data[0].label;
-                var theCurrentMessageThreadChannel = {
-                    label: theMessageThreadChannelLabel,
-                    id: data[0].id,
-                    type: "chat-messages",
+        if (receiverId != undefined ) {
+            var theUrl = 'api/channelUsers/' + receiverId;
+            $.ajax({
+                method: 'GET',
+                url: theUrl,
+                datatype: 'json',
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    var theMessageThreadChannelLabel = data[0].label;
+                    var theCurrentMessageThreadChannel = {
+                        label: theMessageThreadChannelLabel,
+                        id: data[0].id,
+                        type: "chat-messages",
 
-                };
-                this.setState({ currentMessageThreadChannel: theCurrentMessageThreadChannel},
-                    this.createAndOrConnectToThread);
-                //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
+                    };
+                    this.setState({currentMessageThreadChannel: theCurrentMessageThreadChannel},
+                        this.createAndOrConnectToThread);
+                    //console.log("theMessageThreadChannelLabel " + theMessageThreadChannelLabel)
 
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-                return null
-            }
-        })
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    return null
+                }
+            })
+        }
 
     };
 
@@ -2556,30 +2574,7 @@ export class ContactListPane extends React.Component {
                 this.setState({contacts: this.props.storeRoot.contacts})
             }
         }
-        /*if (this.state.data[0] == null)  {
-         if (this.state.isVisible) {
-         $.ajax({
-         url: 'api/users/',
-         dataType: 'json',
-         cache: false,
-         headers: {
-         'Authorization': 'Token ' + localStorage.token
-         },
-         success: function (data) {
-         this.setState({
-         data: data
-         });
-         }.bind(this),
-         error: function (xhr, status, err) {
-         console.error(this.props.url, status, err.toString());
-         }.bind(this),
 
-         });
-         }
-         }
-         else {
-         clearInterval(this.state.intervalId)
-         }*/
     };
 
     contactItemClicked = (contact) => {
@@ -2717,7 +2712,7 @@ export class ContactItem extends React.Component {
 
     handleClick() {
         store.dispatch(setCurrentContact(this.props.contact));
-        this.props.contactItemClicked(this.props.contact)
+        //this.props.contactItemClicked(this.props.contact)
     }
 
 

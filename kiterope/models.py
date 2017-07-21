@@ -23,6 +23,8 @@ import json
 import ast
 from django.db.models import Q
 from phonenumber_field.modelfields import PhoneNumberField
+from django.db.models.query import QuerySet
+from django_group_by import GroupByMixin
 
 
 
@@ -322,7 +324,10 @@ def date_handler(obj):
         raise TypeError
 
 
+
+
 class Program(models.Model):
+
     title = models.CharField(max_length=200, default=" ")
     author = models.ForeignKey(User, null=True, blank=True)
     description = models.CharField(max_length=1000, default=" ")

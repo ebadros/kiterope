@@ -118,6 +118,9 @@ export class StepOccurrenceItem extends React.Component {
             title:"",
             id:"",
             updateOccurrences:[],
+            doneSaving: true,
+            stepOccurrenceDoneSaving:true,
+            updateOccurrenceDoneSaving:true,
 
 
 
@@ -191,7 +194,10 @@ export class StepOccurrenceItem extends React.Component {
         }
     }
 
+
+
     handleSubmit(updateOccurrence) {
+        this.setState({doneSaving:false});
         var stepOccurrence = {
             id:this.state.id,
             wasCompleted: this.state.wasCompleted
@@ -207,6 +213,10 @@ export class StepOccurrenceItem extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
+                    this.setState({stepOccurrenceDoneSaving:true});
+                    if (this.state.updateOccurrenceDoneSaving) {
+                        this.setState({doneSaving:true})
+                    }
 
 
 
@@ -230,6 +240,10 @@ export class StepOccurrenceItem extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
+                    this.setState({updateOccurrenceDoneSaving:true});
+                    if (this.state.stepOccurrenceDoneSaving) {
+                        this.setState({doneSaving:true})
+                    }
 
 
 
@@ -257,7 +271,7 @@ export class StepOccurrenceItem extends React.Component {
                     <div className="ui segment noBottomMargin noTopMargin">
                         <div onClick={this.toggleDetail} ><ClippedImage item="plan" src={s3ImageUrl + this.state.image} /></div>
 
-                        <div className="planTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
+                        <div className="stepOccurrenceTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
 </div>
                         <div ref="ref_detail">
                             <div className="itemDetailSmall">
@@ -276,7 +290,7 @@ export class StepOccurrenceItem extends React.Component {
                             </div>
                         </div>
                                                     <div className="row">&nbsp;</div>
-<UpdateOccurrenceList data={this.state.updateOccurrences} handleSubmit={this.handleSubmit} />
+<UpdateOccurrenceList data={this.state.updateOccurrences} handleSubmit={this.handleSubmit} doneSaving={this.state.doneSaving}/>
 
 
 

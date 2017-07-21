@@ -112,6 +112,7 @@ export class UpdateOccurrenceList extends React.Component {
             format: "",
             metricLabel: "",
             data:[],
+            doneSaving:true
 
         }
     }
@@ -119,6 +120,7 @@ export class UpdateOccurrenceList extends React.Component {
     componentDidMount () {
         this.setState({
             data: this.props.data,
+            doneSaving:true
 
 
         })
@@ -130,10 +132,16 @@ export class UpdateOccurrenceList extends React.Component {
             data: nextProps.data,
 
 
+
         })
 
         }
+
+        if (this.state.doneSaving != nextProps.doneSaving) {
+            this.setState({doneSaving: nextProps.doneSaving})
+        }
     }
+
 
     handleSubmit(updateOccurrenceData) {
         this.props.handleSubmit(updateOccurrenceData)
@@ -143,13 +151,18 @@ export class UpdateOccurrenceList extends React.Component {
     render() {
         var updateOccurrences = this.state.data.map((occurrence) => {
             return (
-                <UpdateOccurrenceInput key={occurrence.id} data={occurrence} handleSubmit={this.handleSubmit}/>
+                <UpdateOccurrenceInput key={occurrence.id} data={occurrence} handleSubmit={this.handleSubmit} ref={instance => { this.child = instance; }}/>
             )
         });
 
-        return (
+        return (<div>
             <div>
                 {updateOccurrences}</div>
+            <div className="ui row">
+                    {this.state.doneSaving ? <div className="ui fluid purple button" onClick={() => { this.child.handleSubmit(); }}>Save</div>:<div className="ui fluid purple loading button" ></div> }
+
+                    </div>
+            </div>
         )
 
     }
@@ -176,6 +189,7 @@ export class UpdateOccurrenceInput extends React.Component {
             picture: "",
             video: "",
             audio: "",
+            doneSaving:true,
 
         }
     }
@@ -183,48 +197,52 @@ export class UpdateOccurrenceInput extends React.Component {
     componentDidMount () {
         this.setState({
             data: this.props.data,
-            id: this.props.data.update.id,
+            id: this.props.data.id,
             measuringWhat: this.props.data.update.measuringWhat,
             units: this.props.data.update.units,
             format: this.props.data.update.format,
             metricLabel: this.props.data.update.metricLabel,
-            text: this.props.data.update.text,
-            decimal: convertToDecimalIfAnInteger(this.props.data.update.decimal),
-            longText: this.props.data.update.longText,
-            integer: this.props.data.update.integer,
-            time: this.props.data.update.time,
-            url: this.props.data.update.url,
-            picture: this.props.data.update.picture,
-            video: this.props.data.update.video,
-            audio: this.props.data.update.audio,
+            text: this.props.data.text,
+            decimal: convertToDecimalIfAnInteger(this.props.data.decimal),
+            longText: this.props.data.longText,
+            integer: this.props.data.integer,
+            time: this.props.data.time,
+            url: this.props.data.url,
+            picture: this.props.data.picture,
+            video: this.props.data.video,
+            audio: this.props.data.audio,
 
         })
+
     }
 
     componentWillReceiveProps (nextProps) {
         if (this.state.data != nextProps.data) {
              this.setState({
             data: nextProps.data,
-            id: nextProps.data.update.id,
+            id: nextProps.data.id,
             measuringWhat: nextProps.data.update.measuringWhat,
             units: nextProps.data.update.units,
             format: nextProps.data.update.format,
             metricLabel: nextProps.data.update.metricLabel,
                  text: nextProps.data.update.text,
-            decimal: convertToDecimalIfAnInteger(nextProps.data.update.decimal),
-            longText: nextProps.data.update.longText,
-            integer: nextProps.data.update.integer,
-            time: nextProps.data.update.time,
-            url: nextProps.data.update.url,
-            picture: nextProps.data.update.picture,
-            video: nextProps.data.update.video,
-            audio: nextProps.data.update.audio,
+            decimal: convertToDecimalIfAnInteger(nextProps.data.decimal),
+            longText: nextProps.data.longText,
+            integer: nextProps.data.integer,
+            time: nextProps.data.time,
+            url: nextProps.data.url,
+            picture: nextProps.data.picture,
+            video: nextProps.data.video,
+            audio: nextProps.data.audio,
 
         })
 
 
 
+
         }
+
+
     }
 
     makeSureNoValuesAreNull() {
@@ -469,9 +487,7 @@ export class UpdateOccurrenceInput extends React.Component {
         {inputHTML}
                                             <div className="ui row">&nbsp;</div>
 
-                <div className="ui row">
-                    <div className="ui fluid purple button" onClick={this.handleSubmit}>Save</div>
-                    </div>
+
             </div>
         )
     }

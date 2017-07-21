@@ -1158,6 +1158,25 @@ export class ProfileView extends React.Component {
     }
 }
 
+export class UserLink extends React.Component {
+    constructor (props) {
+        super (props);
+        this.state = {
+
+        }
+
+    }
+
+      render() {
+          return (
+              <div>
+
+                   <img className="ui mini avatar image" src={s3ImageUrl + this.props.profilePhoto} /><span>{this.props.fullName}</span>
+
+              </div>
+          )
+      }
+}
 
 export class ProfileList extends React.Component {
     constructor(props) {
@@ -1274,4 +1293,4 @@ checkIfUser() {
 }
 
 
-module.exports = { ProfileViewPage, ProfileItemMenu, ProfileView, ProfileViewAndEditPage, ProfileDetailPage, ProfileBasicView, ProfileForm, ProfileListPage , ProfileList };
+module.exports = { ProfileViewPage, UserLink, ProfileItemMenu, ProfileView, ProfileViewAndEditPage, ProfileDetailPage, ProfileBasicView, ProfileForm, ProfileListPage , ProfileList };

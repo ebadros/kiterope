@@ -377,6 +377,16 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
         return obj.get_costFrequencyMetric_display()
 
 
+class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Program
+        fields = ('id', 'title', 'category')
+
+    title = serializers.CharField(max_length=200)
+    category = serializers.CharField(max_length=20)
+
+
+
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program

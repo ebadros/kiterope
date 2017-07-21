@@ -20,7 +20,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, removePlan, deleteContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, removePlan, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -1231,7 +1231,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
         return (
                         <div ref="ref_basic">
 
-            <ProgramBasicView data={this.state.data} isListNode={this.props.isListNode} />
+            <ProgramBasicView data={this.state.data} forSearch={this.props.forSearch} isListNode={this.props.isListNode} />
                             </div>
         )
     };
@@ -1851,6 +1851,9 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
     };
     handleContactClicked =() => {
+        store.dispatch(setMessageWindowVisibility(true));
+                store.dispatch(setCurrentContact(this.state.data));
+
 
     };
 
@@ -1912,7 +1915,7 @@ hideComponent = () => {
                         </div>
                     </div>
 
-                </div><div className="ui purple bottom attached large button">Contact</div>
+                </div><div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>
 
             </div>
 

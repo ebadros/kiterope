@@ -28,10 +28,12 @@ from rest_framework_extensions.mixins import PaginateByMaxMixin
 from django.db.models import Q
 
 from rest_framework.permissions import AllowAny
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 
 from kiterope.send_sms import sendMessage
 
-from kiterope.permissions import UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
+from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 
 
 import requests
@@ -50,7 +52,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ContactSerializer,  KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ContactSerializer,  BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -67,7 +69,7 @@ from rest_framework import generics
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework import response, schemas
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
 # OpenTok is the protocol for Video and Voice chat that Kiterope uses
@@ -1143,6 +1145,27 @@ class SearchQueryViewSet(viewsets.ModelViewSet):
     serializer_class = SearchQuerySerializer
     queryset = SearchQuery.objects.all()
     permission_classes = [AllAccessPostingOrAdminAll]
+
+#This is a good example of how to allow fully authorized without sign in
+class BrowseableProgramViewSet(viewsets.ModelViewSet):
+    serializer_class=BrowseableProgramSerializer
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = [AllowAny]
+
+
+
+
+    queryset = Program.objects.all()
+
+
+
+    def get_queryset(self):
+        queryset = Program.objects.all().order_by('category')
+        return queryset
+
+
+
+
 
 
 

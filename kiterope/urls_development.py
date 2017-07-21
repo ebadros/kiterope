@@ -76,6 +76,7 @@ router.register(r'^programs/(?P<program_id>\w+)/duplicate', views.ProgramDuplica
 router.register(r'^programs/(?P<program_id>\w+)/steps', views.StepViewSet, base_name='Step')
 router.register(r'^programs/(?P<program_id>\w+)/', views.ProgramViewSet, base_name='Program')
 router.register(r'programs', views.ProgramViewSet)
+router.register(r'browseablePrograms', views.BrowseableProgramViewSet, base_name='Program')
 
 
 router.register(r'^plans/(?P<plan_id>\w+)/steps', views.StepOccurrenceViewSet, base_name='Step')

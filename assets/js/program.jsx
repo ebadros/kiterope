@@ -28,6 +28,8 @@ import Phone from 'react-phone-number-input'
 import rrui from 'react-phone-number-input/rrui.css'
 import rpni from 'react-phone-number-input/style.css'
 
+import {UserLink } from './profile'
+
 
 
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
@@ -1857,42 +1859,52 @@ export class ProgramBasicView extends React.Component {
             }
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
+            var authorLink = "/profiles/" + this.state.data.author_id;
 
             if (this.props.isListNode) {
 
                 return (
-                    <div onClick={this.goToDetail}>
-                        <ClippedImage item="plan" src={imageUrl}/>
+                    <div >
+                        <div style={{cursor:"pointer"}}><ClippedImage item="plan" src={imageUrl} onClick={this.goToDetail} /></div>
 
 
                         <div className="ui grid">
                             <div className="sixteen wide column">
 
-                                <div className="planTitle"> {this.state.data.title}
+                                <div className="planTitle" onClick={this.goToDetail} style={{cursor:"pointer"}}> {this.state.data.title}
 
                                 </div>
                                 <div className="row">&nbsp;</div>
 
                                 <div className="row">
                                     <div className="ui two column grid">
-                                        <div className="ui left aligned column">
-                                            <IconLabelCombo size="extramini" orientation="left" text="100% Success"
-                                                            icon="success" background="Light" link="/goalEntry"/>
+                                        {this.props.forSearch ?
+
+                                            <div className="ui left aligned column">
+                                                <Link to={authorLink} >
+                                            <UserLink
+                                                            fullName={this.state.data.author_fullName}
+                                                            profilePhoto={this.state.data.author_profilePhoto} /></Link>
                                         </div>
-                                        {!this.props.search ?
-                                        <div className="ui right aligned column">
-                                            <IconLabelCombo size="extramini" orientation="right"
-                                                            text={theScheduleLength} icon="deadline" background="Light"
-                                                            link="/goalEntry"/>
-                                        </div>
+
 
                                             :
-
-                                            <div className="ui right aligned column">
-                                            <IconLabelCombo size="extramini" orientation="right"
+                                            <div className="ui left aligned column">
+                                            <IconLabelCombo size="extramini" orientation="left"
                                                             text={theScheduleLength} icon="deadline" background="Light"
                                                             link="/goalEntry"/>
-                                        </div>}
+                                        </div>
+
+
+
+                                            }
+                                            <div className="ui right aligned column">
+                                            <IconLabelCombo size="extramini" orientation="right" text="100% Success"
+                                                            icon="success" background="Light" link="/goalEntry"/>
+                                        </div>
+
+
+
                                     </div>
                                 </div>
                                 <div className="row">

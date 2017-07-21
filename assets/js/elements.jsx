@@ -58,7 +58,9 @@ export class IconLabelCombo extends React.Component {
     }
 
     handleClick = () => {
-        this.props.click(this.props.text)
+        if (this.props.click) {
+            this.props.click(this.props.text)
+        }
     };
 
     render() {
