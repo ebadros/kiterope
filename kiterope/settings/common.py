@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     'rest_auth',
     'rest_auth.registration',
     'haystack',
-    'oauth2_provider', #django-oauth-toolkit
+    #'oauth2_provider', #django-oauth-toolkit
     'corsheaders',
     'timezone_field',
     'webpack_loader',
@@ -84,7 +84,7 @@ INSTALLED_APPS = [
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'oauth2_provider.backends.OAuth2Backend',
+    #'oauth2_provider.backends.OAuth2Backend',
 
 )
 
@@ -111,8 +111,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'kiterope.middleware.DisableCsrfCheck',
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    #'oauth2_provider.middleware.OAuth2TokenMiddleware',
 
 ]
 

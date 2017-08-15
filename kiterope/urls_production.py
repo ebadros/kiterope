@@ -22,8 +22,8 @@ from rest_framework.views import APIView
 from django.views.generic import TemplateView
 from django.conf.urls import url
 from kiterope.views import schema_view
-from .views import ApiEndpoint
-import oauth2_provider.views as oauth2_views
+#from .views import ApiEndpoint
+#import oauth2_provider.views as oauth2_views
 from django.conf.urls import include, url
 
 
@@ -108,7 +108,7 @@ router.register(r'^program/search', views.ProgramSearchViewSet, base_name="progr
 from django.views.generic.base import RedirectView
 
 
-
+'''
 oauth2_endpoint_views = [
     url(r'^authorize/$', oauth2_views.AuthorizationView.as_view(), name="authorize"),
     url(r'^token/$', oauth2_views.TokenView.as_view(), name="token"),
@@ -132,6 +132,7 @@ if settings.DEBUG:
         url(r'^authorized-tokens/(?P<pk>\d+)/delete/$', oauth2_views.AuthorizedTokenDeleteView.as_view(),
             name="authorized-token-delete"),
     ]
+    '''
 
 urlpatterns = [
       url(r'^$', TemplateView.as_view(template_name='index.html')),
@@ -142,9 +143,9 @@ urlpatterns = [
       url(r'^rest-auth/', include('rest_auth.urls')),
       url(r'^api/obtain-auth-token/$', obtain_auth_token),
       url(r'^swagger/', schema_view),
-      url(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
+      #url(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
       url(r'^api/', include(router.urls)),
-      url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+      #url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
       url(r'^search/', include('haystack.urls')),
       url(r'^admin/', admin.site.urls),
       url(r'^accounts/', include('allauth.urls')),

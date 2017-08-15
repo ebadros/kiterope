@@ -233,7 +233,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </a>
                     <a className="item">
                         <i className="large settings icon"/>
-                        Settings 2
+                        Settings
                     </a>
 
                 </div>

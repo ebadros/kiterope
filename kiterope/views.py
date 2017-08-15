@@ -13,9 +13,11 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
-from oauth2_provider.views.generic import ProtectedResourceView
+#from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from django.shortcuts import get_object_or_404
+
+#from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.decorators import detail_route
@@ -28,7 +30,7 @@ from rest_framework_extensions.mixins import PaginateByMaxMixin
 from django.db.models import Q
 
 from rest_framework.permissions import AllowAny
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 
 from kiterope.send_sms import sendMessage
@@ -81,10 +83,10 @@ from copy import deepcopy
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
 OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
 
-class ApiEndpoint(ProtectedResourceView):
+'''class ApiEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
         return HttpResponse('Hello, OAuth2!')
-
+'''
 
 def create_missing_profiles(request):
     users = User.objects.filter(profile=None)
@@ -97,6 +99,11 @@ def create_missing_profiles(request):
 def schema_view(request):
     generator = schemas.SchemaGenerator(title='Bookings API')
     return response.Response(generator.get_schema(request=request))
+
+class CurrentUserView(APIView):
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
     model=User
@@ -114,8 +121,12 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
+            #print(request.user.username)
+
             return Response(UserSerializer(request.user, context={'request': request}).data)
+
         return super(UserViewSet, self).retrieve(request, pk)
+
 
 
 class LargeResultsSetPagination(PageNumberPagination):
@@ -528,15 +539,26 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
+    def get_queryset(self):
+
+        try:
+
+            aQueryset = PlanOccurrence.objects.filter(user=self.request.user)
+        except:
+            aQueryset = PlanOccurrence.objects.none()
+
+        return aQueryset
+
 
 
     def create(self, request, *args, **kwargs):
-        #print(self.request.data)
+        print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 
@@ -566,7 +588,7 @@ class GoalPlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         try:
             goal_id = self.kwargs['goal_id']
-            aQueryset = PlanOccurrence.objects.filter(goal=goal_id)
+            aQueryset = PlanOccurrence.objects.filter(goal=goal_id, isSubscribed=True)
         except:
             aQueryset = PlanOccurrence.objects.none()
 
@@ -578,6 +600,8 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     required_scopes = ['groups']
     pagination_class = StandardResultsSetPagination
+
+
 
 
 
@@ -598,6 +622,8 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
             aQueryset = UpdateOccurrence.objects.all()
 
         return aQueryset
+
+
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -678,6 +704,8 @@ class PeriodViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
 
     def list(self, request, *args, **kwargs):
+        #print(self.request.META)
+        #print(self.request.user.is_authenticated())
 
         try:
             periodRangeStart = self.kwargs['periodRangeStart']
@@ -698,7 +726,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print ("periodRangeStart " + periodRangeStart)
             #print ("periodRangeEnd " + periodRangeEnd)
 
-        currentUser = request.user
+        currentUser = request.user.is_authenticated()
 
 
 
@@ -940,9 +968,10 @@ class PeriodViewSet(viewsets.ModelViewSet):
             userIsCurrentUser = Q(user=self.request.user)
             dateLessThanEnd = Q(date__lte=periodRangeEnd)
             dateLaterThanStart = Q(date__gte=periodRangeStart)
+            isSubscribed = Q(planOccurrence__isSubscribed=True)
 
 
-            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & dateLessThanEnd & dateLaterThanStart)
+            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & dateLessThanEnd & dateLaterThanStart).order_by('date')
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -1149,14 +1178,9 @@ class SearchQueryViewSet(viewsets.ModelViewSet):
 #This is a good example of how to allow fully authorized without sign in
 class BrowseableProgramViewSet(viewsets.ModelViewSet):
     serializer_class=BrowseableProgramSerializer
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    #authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = [AllowAny]
-
-
-
-
     queryset = Program.objects.all()
-
 
 
     def get_queryset(self):

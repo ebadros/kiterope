@@ -1,12 +1,4 @@
 
-
-@mobileBreakpoint            : 900px;
-@tabletBreakpoint            : 768px;
-@computerBreakpoint          : 992px;
-@largeMonitorBreakpoint      : 1280px;
-@widescreenMonitorBreakpoint : 1920px;
-
-
 .login-reveal {
     width:450px;
 }
@@ -27,6 +19,8 @@ html {
 .responsiveButtonType {
     font-size: 1rem !important;
 }
+
+
 
 .google {
     color:black;

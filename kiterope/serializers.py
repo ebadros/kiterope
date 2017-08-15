@@ -223,6 +223,10 @@ class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     posts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
 
+
+
+
+
     def get_updateOccurrences(self, obj):
         serializer = UpdateOccurrenceSerializer(obj.get_updateOccurrences(), many=True, )
         return serializer.data
@@ -230,7 +234,7 @@ class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = StepOccurrence
-        fields=( 'id','date', 'step','planOccurrence', 'wasCompleted', 'posts', 'updateOccurrences' )
+        fields=( 'id','date', 'step','planOccurrence', 'wasCompleted', 'posts', 'updateOccurrences',  )
 
 
 
@@ -358,8 +362,11 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_isSubscribed(self, obj):
         try:
-            thePlanOccurrence = PlanOccurrence.objects.get(program=self, user=self.context['request'].user, isSubscribed=True)
-            return thePlanOccurrence.isSubscribed
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
         except:
             return False
 
@@ -380,10 +387,24 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
 class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id', 'title', 'category')
+        fields = ('id', 'title', 'category', 'image', 'isSubscribed')
 
     title = serializers.CharField(max_length=200)
     category = serializers.CharField(max_length=20)
+    image = serializers.CharField(max_length=20)
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_isSubscribed(self, obj):
+        try:
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
+        except:
+            return False
+
+
 
 
 
@@ -428,8 +449,11 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_isSubscribed(self, obj):
         try:
-            thePlanOccurrence = PlanOccurrence.objects.get(program=self, user=self.context['request'].user, isSubscribed=True)
-            return thePlanOccurrence.isSubscribed
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
         except:
             return False
 
@@ -528,8 +552,11 @@ class ProgramSearchSerializer(HaystackSerializer):
 
     def get_isSubscribed(self, obj):
         try:
-            thePlanOccurrence = PlanOccurrence.objects.get(program=obj.id, user=self.context['request'].user, isSubscribed=True)
-            return thePlanOccurrence.isSubscribed
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
         except:
             return False
 

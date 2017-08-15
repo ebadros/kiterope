@@ -642,7 +642,7 @@ export class Menubar extends React.Component {
             var loginUI = <div className="right menu">
                 <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick} ><i className="large sidebar icon" style={{margin:0}}  /></div>
 
-                  <div className="ui simple dropdown item" style={{marginRight:10}}>
+                <div className="ui simple dropdown item" style={{marginRight:10}}>
                       <img src="/static/images/avatar-placeholder.png" /> <div className="username">{this.props.storeRoot.user.username}</div>
 
                       <div className="menu">
@@ -655,7 +655,7 @@ export class Menubar extends React.Component {
 
         return (
 
-             <div className="ui fixed top inverted blue menu onTop" style={{marginTop:0}}>
+             <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0}}>
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}
@@ -1078,7 +1078,7 @@ export class LoginForm extends React.Component {
 
   actionAfterLogin = () => {
 
-      var theUrl = '/api/users/i';
+      var theUrl = '/api/users/i/';
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',

@@ -508,7 +508,7 @@ class PlanOccurrence(models.Model):
     goal = models.ForeignKey(Goal, null=True, blank=True)
     startDate = models.DateField(blank=True, null=True)
     user = models.ForeignKey(User, null=True, blank=True)
-    isSubscribed = models.BooleanField(default=True)
+    isSubscribed = models.BooleanField(default=False)
 
     notificationEmail = models.EmailField(max_length=70, blank=True)
     notificationPhone = PhoneNumberField(blank=True)
