@@ -31,7 +31,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
-ALLOWED_HOSTS = ['192.168.1.156', '*', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1']
 
 
 TWILIO_ACCOUNT_SID = 'AC8d2c5238f8d12bb1b382e57428af3c90'
@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     'channels',
     'django_twilio',
     'phonenumber_field',
+    'django_celery_beat',
+    'easy_timezones',
 
 ]
 
@@ -97,6 +99,8 @@ SERIALIZATION_MODULES = {
 
 
 
+GEOIP_DATABASE = 'static/GeoLiteCity.dat'
+GEOIPV6_DATABASE = 'static/GeoIPv6.dat'
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
@@ -111,6 +115,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'easy_timezones.middleware.EasyTimezoneMiddleware',
+
     #'kiterope.middleware.DisableCsrfCheck',
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     #'oauth2_provider.middleware.OAuth2TokenMiddleware',
@@ -212,10 +218,10 @@ USE_I18N = True
 
 USE_L10N = True
 
-#USE_TZ = True
+USE_TZ = True
 
 INTERNAL_IPS = (
-    '192.168.1.156',
+    '192.168.1.48',
 )
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -307,6 +313,8 @@ SOCIALACCOUNT_PROVIDERS = \
             'AUTH_PARAMS': { 'access_type': 'online' } }
 }
 USE_S3 = False
+
+
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 

@@ -279,7 +279,7 @@ class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user',  )
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken' )
 
 
     bio = serializers.CharField(max_length=2000, required=False)
@@ -522,10 +522,6 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
         serializer = PlanProgramSerializer(obj.program, many=False, context=serializer_context)
         return serializer.data
-
-
-
-
 
 
 

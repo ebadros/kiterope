@@ -43,6 +43,7 @@ router = routers.DefaultRouter()
 
 router.register(r'users', views.UserViewSet)
 
+router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'steps', views.StepViewSet)

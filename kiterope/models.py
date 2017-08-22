@@ -25,6 +25,7 @@ from django.db.models import Q
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.query import QuerySet
 from django_group_by import GroupByMixin
+from easy_timezones.signals import detected_timezone
 
 
 
@@ -531,6 +532,7 @@ class PlanOccurrence(models.Model):
 
 
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.CharField(max_length=2000, default=" ", blank=True)
@@ -540,8 +542,16 @@ class Profile(models.Model):
     zipCode = models.CharField(max_length=10, blank=True, null=True)
     profilePhoto = models.CharField(max_length=200, null=True, blank=True, default="images/user.svg")
     notificationChannel = models.OneToOneField('KChannel', null=True, blank=True)
+    expoPushToken = models.CharField(max_length=100, blank=True, null=True)
+    timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
 
-
+    @receiver(detected_timezone, sender=User)
+    def process_timezone(sender, instance, timezone, **kwargs):
+        print("the timezone is %s" % timezone)
+        if instance.is_authenticated():
+            if instance.profile.timezone != timezone:
+                instance.profile.timezone = timezone
+                instance.profile.save()
 
 
     def get_profilePhoto(self):
@@ -929,7 +939,6 @@ class UpdateOccurrence(models.Model):
     longText = models.CharField(max_length=1000, blank=True, )
 
     objects = UpdateOccurrenceManager()
-
 
 
 

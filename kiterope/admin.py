@@ -23,6 +23,7 @@ admin.site.register(Label)
 admin.site.register(MessageThread)
 
 
+
 class KChannelUserInline(admin.TabularInline):
     model = KChannelUser
     extra = 1

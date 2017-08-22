@@ -1,23 +1,46 @@
-'''from celery import shared_task, periodic_task
-
-
-from .celery_setup import app
+from __future__ import absolute_import, unicode_literals
+from celery import shared_task
+from .celery import app
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from django.contrib.auth.models import User
 from kiterope.views import PeriodViewSet
 from kiterope.models import StepOccurrence, PlanOccurrence, Program
 from datetime import date
+from kiterope.expoPushNotifications import send_push_message
 
 
-@app.task
-def add(x, y):
-    return x + y
+app.conf.beat_schedule = {
+    #'send_notification': {
+    #    'task': 'kiterope.tasks.send_notification',
+    #    'schedule': crontab(minute="*/1"),
+    #},
+    'create_users_daily_step_occurrences': {
+        'task': 'kiterope.tasks.dailyUpdateStepOccurrences',
+        'schedule': crontab(minute=0, hour=0),
+
+    }
+}
+
+app.conf.timezone = 'UTC'
+
+
+#@app.on_after_configure.connect
+#def setup_periodic_tasks(sender, **kwargs):
+    #sender.add_periodic_task(crontab(minute='*/1'), send_notification(), name='send_notification' )
+#    pass
+
+@app.task()
+def send_notification():
+    print("send notification called")
+    send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]', "did you get this?")
 
 
 
 
-#@periodic_task(run_every=(crontab(minute='*/1')), name="dailyUpdateStepOccurrences", ignore_result=True)
+
+
+@app.task()
 def dailyUpdateStepOccurrences():
     userSet = User.objects.all()
     for theUser in userSet:
@@ -220,4 +243,3 @@ def updateOccurrences(currentUser, periodRangeStart, periodRangeEnd):
 
     except:
         pass
-'''

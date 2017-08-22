@@ -36,7 +36,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from kiterope.send_sms import sendMessage
 
 from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
-
+from kiterope.expoPushNotifications import send_push_message
 
 import requests
 import json
@@ -121,11 +121,43 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
+            send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
             #print(request.user.username)
 
             return Response(UserSerializer(request.user, context={'request': request}).data)
 
         return super(UserViewSet, self).retrieve(request, pk)
+
+class ExpoPushTokenViewSet(viewsets.ModelViewSet):
+    model = Profile
+    queryset = Profile.objects.all()
+
+    serializer_class = ProfileSerializer
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(Profile.objects.none())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+
+
+
+
+
+
 
 
 
@@ -766,7 +798,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print("persistedOccurrences %d" % persistedOccurrences.count())
 
 
-            print(userPlanOccurrences)
+            #print(userPlanOccurrences)
             for aPlanOccurrence in userPlanOccurrences:
                 #print("aPlanOccurrence.startDate %s" % type(aPlanOccurrence.startDate))
                 #periodRangeStart = datetime.datetime.strftime(periodRangeStart, '%Y-%m-%d')
