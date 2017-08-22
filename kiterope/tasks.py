@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
-from .celery import app
+from .celery_setup import app
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from django.contrib.auth.models import User
