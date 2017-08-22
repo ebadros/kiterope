@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 #from celery import Celery
 import celery
-print celery.__file__
+print(celery.__file__)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kiterope.settings.settingsConfiguration')
 
