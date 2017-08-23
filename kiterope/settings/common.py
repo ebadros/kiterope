@@ -15,6 +15,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import sys
 import os
 from os.path import abspath, basename, dirname, join, normpath
+import kiterope
+
 IN_PRODUCTION = False
 IN_STAGING=False
 
@@ -76,7 +78,6 @@ INSTALLED_APPS = [
     'django_twilio',
     'phonenumber_field',
     'django_celery_beat',
-    'easy_timezones',
 
 ]
 
@@ -115,7 +116,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'easy_timezones.middleware.EasyTimezoneMiddleware',
 
     #'kiterope.middleware.DisableCsrfCheck',
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
@@ -384,3 +384,13 @@ STATICFILES_FINDERS = (
     #'pipeline.finders.PipelineFinder',
 )
 
+# Celery configuration
+broker_url = 'amqp://localhost'
+result_backend = 'rpc://localhost'
+
+task_serializer = 'json'
+result_serializer = 'json'
+accept_content = ['json']
+timezone = 'Europe/Oslo'
+enable_utc = True
+include='kiterope.tasks'

@@ -4,7 +4,9 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 # You can key the configurations off of anything - I use project path.
 configs = {'/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/kiterope/settings': 'development',
     '/opt/python/current/app/kiterope/settings': 'production',
-    '/opt/python/current/app/kiterope/kiterope/settings': 'staging',
+        '/opt/python/bundle/5/app/kiterope/settings': 'production',
+
+       '/opt/python/current/app/kiterope/kiterope/settings': 'staging',
 }
 
 # Import the configuration settings file - REPLACE projectname with your project

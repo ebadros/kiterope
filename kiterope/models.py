@@ -25,7 +25,6 @@ from django.db.models import Q
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.query import QuerySet
 from django_group_by import GroupByMixin
-from easy_timezones.signals import detected_timezone
 
 
 
@@ -545,13 +544,7 @@ class Profile(models.Model):
     expoPushToken = models.CharField(max_length=100, blank=True, null=True)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
 
-    @receiver(detected_timezone, sender=User)
-    def process_timezone(sender, instance, timezone, **kwargs):
-        print("the timezone is %s" % timezone)
-        if instance.is_authenticated():
-            if instance.profile.timezone != timezone:
-                instance.profile.timezone = timezone
-                instance.profile.save()
+
 
 
     def get_profilePhoto(self):
