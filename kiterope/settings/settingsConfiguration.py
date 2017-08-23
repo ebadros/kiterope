@@ -9,10 +9,16 @@ configs = {'/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/kite
        '/opt/python/current/app/kiterope/kiterope/settings': 'staging',
 }
 
+settingsConfig = ""
+if '/Users/eric' in ROOT_PATH:
+    settingsConfig = 'development'
+else:
+    settingsConfig = 'production'
+
 # Import the configuration settings file - REPLACE projectname with your project
 #config_module = __import__('kiterope.settings.%s' % configs[ROOT_PATH], globals(), locals(), 'kiterope')
 
-config_module = __import__('kiterope.settings.%s' % configs[ROOT_PATH], globals(), locals(), 'kiterope')
+config_module = __import__('kiterope.settings.%s' % settingsConfig, globals(), locals(), 'kiterope')
 
 
 # Load the config settings properties into the local scope.
