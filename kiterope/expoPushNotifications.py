@@ -41,9 +41,10 @@ def send_push_message(token, message, extra=None):
         # flows.
         response.validate_response()
     except DeviceNotRegisteredError:
+        pass
         # Mark the push token as inactive
-        from notifications.models import PushToken
-        PushToken.objects.filter(token=token).update(active=False)
+        #from notifications.models import PushToken
+        #PushToken.objects.filter(token=token).update(active=False)
     except PushResponseError as exc:
         # Encountered some other per-notification error.
         '''rollbar.report_exc_info(
