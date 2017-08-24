@@ -32,7 +32,6 @@ app.conf.timezone = 'UTC'
 
 @app.task()
 def send_notification():
-    print("send notification called")
     send_push_message('ExponentPushToken[u9Rw6jBgLm9MVSKXYeSk3p]', "did you get this?")
 
 
