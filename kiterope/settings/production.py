@@ -70,6 +70,8 @@ if 'RDS_DB_NAME' in os.environ:
     }
 else:'''
 
+TINYMCE_JS_URL = os.path.join(MEDIA_URL, "static/js/tiny_mce/tiny_mce.js")
+
 SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True

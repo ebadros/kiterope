@@ -1244,8 +1244,14 @@ class BrowseableProgramViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        queryset = Program.objects.all().order_by('category')
-        return queryset
+
+        viewableByAnyone = Q(viewableBy="ANYONE")
+
+        theQueryset = Program.objects.filter(viewableByAnyone).order_by('category')
+
+
+
+        return theQueryset
 
 
 

@@ -81,7 +81,7 @@ INSTALLED_APPS = [
 
 ]
 TINYMCE_JS_URL = 'https://cloud.tinymce.com/stable/tinymce.min.js'
-
+TINYMCE_INCLUDE_JQUERY = False
 TINYMCE_DEFAULT_CONFIG = {
     'theme': "simple", # default value
     'relative_urls': False, # default value
