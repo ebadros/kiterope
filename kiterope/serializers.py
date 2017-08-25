@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Message, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -382,6 +382,20 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_costFrequencyMetric(self, obj):
         return obj.get_costFrequencyMetric_display()
+
+
+class BlogPostSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = BlogPost
+        fields = ('id', 'title', 'description', 'modified', 'author', 'authorName')
+
+    author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    authorName = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_authorName(self, obj):
+        return obj.author.profile.get_fullName()
+
+
 
 
 class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):

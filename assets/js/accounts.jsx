@@ -628,18 +628,25 @@ export class Menubar extends React.Component {
 
     }
 
+    goToBlog() {
+                hashHistory.push('/blog')
+
+    }
+
 
 
     render() {
 
         if (!this.props.storeRoot.user) {
             var loginUI =  <div className="right menu">
+
                   <button className="ui button item" onClick={this.joinKiteropeHandler}>Join Kiterope</button>
                   <button className="ui button item" onClick={this.loginHandler}>Sign In</button>
               </div>
 
         } else {
             var loginUI = <div className="right menu">
+
                 <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick} ><i className="large sidebar icon" style={{margin:0}}  /></div>
 
                 <div className="ui simple dropdown item" style={{marginRight:10}}>

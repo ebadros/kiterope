@@ -49,6 +49,8 @@ router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
 router.register(r'sessions', views.SessionViewSet, base_name='Session')
+router.register(r'blogPosts', views.BlogPostViewSet, base_name='BlogPost')
+
 router.register(r'notifications', views.NotificationViewSet, base_name='Notification')
 
 router.register(r'messageThreads/(?P<thread_id>\w+)/messages', views.MessageThreadMessageViewSet, base_name='MessageThreadMessage')

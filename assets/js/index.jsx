@@ -16,6 +16,7 @@ import {Provider, connect, dispatch} from 'react-redux'
 import  {store} from "./redux/store";
 import {SearchPage} from './search'
 import {SplashPage} from './splash'
+import {BlogPage} from './blog'
 
 
 import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
@@ -66,6 +67,8 @@ ReactDOM.render((
         <Router history={hashHistory}>
             <div>
                 <Route path="/" component={ SplashPage }  />
+                <Route path="/blog" component={ BlogPage } />
+
                 <Route path="/daily" component={DailyList}
                        onEnter={requireAuth}/>
 

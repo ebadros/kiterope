@@ -189,7 +189,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
                         <a className="item">
                             <i className="large settings icon"/>
-                            Settings  2
+                            Settings
+                        </a>
+                        <a className="item" style={style} href="/#/blog">
+                            <i className="large heartbeat icon"/>
+                            Blog
                         </a>
 
                     </div>
@@ -235,6 +239,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         <i className="large settings icon"/>
                         Settings
                     </a>
+                    <a className="item" style={style} href="/#/blog">
+                            <i className="large heartbeat icon"/>
+                            Blog
+                        </a>
 
                 </div>
 

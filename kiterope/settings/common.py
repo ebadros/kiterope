@@ -80,9 +80,26 @@ INSTALLED_APPS = [
     'django_celery_beat',
 
 ]
+TINYMCE_JS_URL = 'https://cloud.tinymce.com/stable/tinymce.min.js'
 
-
-
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': "simple", # default value
+    'relative_urls': False, # default value
+    'width': '100%',
+    'height': 300,
+    'language': 'en',
+    'theme': 'modern',
+    'toolbar': 'bold italic underline strikethrough hr | bullist numlist | link unlink | undo redo | spellchecker code',
+    'menubar': True,
+    'statusbar': True,
+    'resize': True,
+    'plugins': 'emoticons template paste textcolor colorpicker textpattern imagetools codesample insertdatetime media nonbreaking save table contextmenu directionality advlist autolink lists link image charmap print preview hr anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen',
+    'toolbar1': 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+    'toolbar2': 'print preview media | forecolor backcolor emoticons | codesample ',
+    'image_advtab': True,
+    'theme_modern_toolbar_location': 'top',
+    'theme_modern_toolbar_align': 'left'
+}
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -385,12 +402,14 @@ STATICFILES_FINDERS = (
 )
 
 # Celery configuration
-broker_url = 'amqp://localhost'
-result_backend = 'rpc://localhost'
+celery_broker_url = 'amqp://5ebe2294ecd0e0f08eab7690e2a6ee69:eac8d74fae134a9bbedb21ff824605ead6d858ef@localhost:5672'
+celery_result_backend = 'rpc://localhost'
 
-task_serializer = 'json'
-result_serializer = 'json'
-accept_content = ['json']
-timezone = 'Europe/Oslo'
+celery_task_serializer = 'json'
+celery_result_serializer = 'json'
+celery_accept_content = ['json']
+celery_beat_scheduler='django_celery_beat.schedulers.DatabaseScheduler',
+
+timezone = 'North America/Los Angeles'
 enable_utc = True
 include='kiterope.tasks'

@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -54,7 +54,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ContactSerializer,  BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ContactSerializer,  BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -303,6 +303,13 @@ class MessageThreadChannelViewSet(viewsets.ModelViewSet):
 
 
 
+class BlogPostViewSet(viewsets.ModelViewSet):
+    model = BlogPost
+    queryset = BlogPost.objects.all()
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+    serializer_class = BlogPostSerializer
+    pagination_class = StandardResultsSetPagination
 
 
 class MessageThreadViewSet(viewsets.ModelViewSet):

@@ -25,7 +25,7 @@ from django.db.models import Q
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.query import QuerySet
 from django_group_by import GroupByMixin
-
+from tinymce.models import HTMLField
 
 
 
@@ -710,6 +710,8 @@ class KRMessage(models.Model):
     sender = models.ForeignKey(User, null=True, blank=False)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
+
+
 class KChannelManager(models.Manager):
     def create_channel(self, theUserIds, thePermission):
         print("inside create_channel")
@@ -963,4 +965,22 @@ class Image(models.Model):
 
 class StudentSettings(models.Model):
     allNotifications = models.BooleanField(default=True)
+
+
+class BlogPost(models.Model):
+    author = models.ForeignKey(User, null=True, blank=True)
+    title = models.CharField(max_length=200, default=" ")
+    description = HTMLField()
+    created = models.DateTimeField(editable=False)
+    modified = models.DateTimeField()
+
+
+    def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            self.created = timezone.now()
+        self.modified = timezone.now()
+        return super(BlogPost, self).save(*args, **kwargs)
+
+
 
