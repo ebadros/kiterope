@@ -64,15 +64,15 @@ PROGRAM_CATEGORY_CHOICES = (
 
 VIEWABLE_CHOICES = (
     ("ONLY_ME", "Only me"),
-    ("SHARED", "Just people I've shared this with"),
-    ("ONLY_COACHES", "Just my coaches"),
-    ("ALL_COACHES", "All coaches"),
+    #("SHARED", "Just people I've shared this with"),
+    #("ONLY_COACHES", "Just my coaches"),
+    #("ALL_COACHES", "All coaches"),
     ("ANYONE", "Anyone"),
     
     )
 PROGRAM_VIEWABLEBY_CHOICES =(
     ("ONLY_ME", "Only me"),
-    ("ONLY_CLIENTS", "Just my clients"),
+    #("ONLY_CLIENTS", "Just my clients"),
     ("ANYONE", "Anyone"),
 
     )

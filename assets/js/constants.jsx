@@ -178,13 +178,13 @@ export const costFrequencyMetricOptions = [
 
 export const viewableByOptions = [
     {value:'ONLY_ME', label: "Only me"},
-    {value:'ONLY_CLIENTS', label: "Only my clients"},
+    //{value:'ONLY_CLIENTS', label: "Only my clients"},
     {value:'ANYONE', label: "Anyone"}];
 
 export const userSharingOptions = [
     {value:'ONLY_ME', label: "Only me"},
-    {value:'ONLY_COACHES', label: "Only coaches"},
-    {value:'SHARED_WITH', label: "People I've shared with specifically"},
+    //{value:'ONLY_COACHES', label: "Only coaches"},
+    //{value:'SHARED_WITH', label: "People I've shared with specifically"},
     {value:'ANYONE', label: "Anyone"}];
 
 export const notificationSendMethodOptions = [

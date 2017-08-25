@@ -461,7 +461,12 @@ class GoalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         theUser = self.request.user
-        theQueryset = Goal.objects.filter(user=theUser)
+
+        userIsCurrentUser = Q(user=theUser)
+        viewableByAnyone = Q(viewableBy="ANYONE")
+
+        theQueryset = Goal.objects.filter(userIsCurrentUser | viewableByAnyone)
+
         try:
             goal_id = self.kwargs['goal_id']
             theQueryset = theQueryset.filter(pk=goal_id)
@@ -1075,6 +1080,22 @@ class ProgramViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
+    def get_queryset(self):
+        theUser = self.request.user
+
+        userIsCurrentUser = Q(author=theUser)
+        viewableByAnyone = Q(viewableBy="ANYONE")
+
+        theQueryset = Program.objects.filter(userIsCurrentUser | viewableByAnyone)
+
+        try:
+            program_id = self.kwargs['program_id']
+            theQueryset = theQueryset.filter(pk=program_id)
+        except:
+            theQueryset = theQueryset
+
+        return theQueryset
 
 
 class ContactViewSet(viewsets.ModelViewSet):
