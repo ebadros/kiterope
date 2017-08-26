@@ -70,7 +70,6 @@ if 'RDS_DB_NAME' in os.environ:
     }
 else:'''
 
-TINYMCE_JS_URL = "/static/js/tinymce/tinymce.min.js"
 
 SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
