@@ -26,7 +26,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.query import QuerySet
 from django_group_by import GroupByMixin
 from tinymce.models import HTMLField
-
+from tinymce.widgets import TinyMCE
 
 
 

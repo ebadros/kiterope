@@ -1,8 +1,8 @@
 from django import forms
 from django.forms import ModelForm
-from kiterope.models import Profile, User, Goal, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer, Interest
+from kiterope.models import Profile, User, Goal, BlogPost, Student, Coach, Rate, Session, Review, Update, Post, Plan, Step, Question, Answer, Interest
 from django.contrib.admin import widgets
-
+from tinymce.widgets import TinyMCE
 
 class UserForm(ModelForm):
     class Meta:
@@ -42,3 +42,10 @@ class StepForm(ModelForm):
         model = Step
         fields = {'title', 'plan', 'description', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates', 'startTime', 'duration', }
 
+
+class BlogPost(ModelForm):
+    description = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}))
+
+    class Meta:
+        model = BlogPost
+        fields = {'title', 'description', 'author', 'modified'}
