@@ -53,9 +53,12 @@ admin.site.register(Contact)
 admin.site.register(Program)
 
 
-admin.site.register(BlogPost)
 
+class TinyMCEAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('https://cdn.tinymce.com/4/tinymce.min.js', )
 
+admin.site.register(BlogPost, TinyMCEAdmin)
 
 
 
