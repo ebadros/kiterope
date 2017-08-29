@@ -7,6 +7,7 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     id = indexes.CharField(model_attr="id")
     title = indexes.CharField(model_attr="title")
     description = indexes.CharField(model_attr="description")
+    viewableBy = indexes.CharField(model_attr="viewableBy")
     scheduleLength = indexes.CharField(model_attr="scheduleLength", faceted=True)
     cost = indexes.CharField(model_attr="cost")
     timeCommitment = indexes.CharField(model_attr="timeCommitment", faceted=True)

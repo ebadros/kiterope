@@ -973,6 +973,8 @@ class BlogPost(models.Model):
     description = HTMLField()
     created = models.DateTimeField(editable=False)
     modified = models.DateTimeField()
+    def __str__(self):
+        return "%s" % (self.title)
 
 
     def save(self, *args, **kwargs):
