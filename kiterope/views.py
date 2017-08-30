@@ -35,7 +35,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from kiterope.send_sms import sendMessage
 
-from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
+from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, PostPutAuthorOrView, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 from kiterope.expoPushNotifications import send_push_message
 
 import requests
@@ -54,7 +54,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ContactSerializer,  BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, ContactSerializer,  BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -1048,7 +1048,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 class ProgramViewSet(viewsets.ModelViewSet):
     serializer_class = ProgramSerializer
     queryset = Program.objects.all()
-    permission_classes = [PostPutAuthorOrNone]
+    permission_classes = [PostPutAuthorOrView]
 
     required_scopes = ['groups']
     pagination_class = StandardResultsSetPagination
@@ -1082,12 +1082,73 @@ class ProgramViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_queryset(self):
-        theUser = self.request.user
+        try:
+            theUser = self.request.user.is_authenticated()
+            userIsCurrentUser = Q(author=theUser)
+            viewableByAnyone = Q(viewableBy="ANYONE")
 
-        userIsCurrentUser = Q(author=theUser)
-        viewableByAnyone = Q(viewableBy="ANYONE")
+            theQueryset = Program.objects.filter(userIsCurrentUser | viewableByAnyone)
+        except:
+            viewableByAnyone = Q(viewableBy="ANYONE")
 
-        theQueryset = Program.objects.filter(userIsCurrentUser | viewableByAnyone)
+            theQueryset = Program.objects.filter(viewableByAnyone)
+
+
+        try:
+            program_id = self.kwargs['program_id']
+            theQueryset = theQueryset.filter(pk=program_id)
+        except:
+            theQueryset = theQueryset
+
+        return theQueryset
+
+
+class ProgramNoStepsViewSet(viewsets.ModelViewSet):
+    serializer_class = ProgramNoStepsSerializer
+    queryset = Program.objects.all()
+    permission_classes = [AllowAny]
+
+    required_scopes = ['groups']
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        # This is the line that allows us to get at the object without iterating over an array
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        try:
+            theUser = self.request.user.is_authenticated()
+            userIsCurrentUser = Q(author=theUser)
+            viewableByAnyone = Q(viewableBy="ANYONE")
+            theQueryset = Program.objects.filter(userIsCurrentUser | viewableByAnyone)
+        except:
+            viewableByAnyone = Q(viewableBy="ANYONE")
+
+            theQueryset = Program.objects.filter(viewableByAnyone)
+
 
         try:
             program_id = self.kwargs['program_id']

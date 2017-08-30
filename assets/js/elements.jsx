@@ -270,9 +270,11 @@ export class ClippedImage extends React.Component {
         super(props);
         autobind(this);
         this.state = {
+            isImageLoaded:false,
+
             dimensions: {
                 width: -1,
-                height: -1
+                height: -1 ,
             }
         }
     }
@@ -281,6 +283,7 @@ export class ClippedImage extends React.Component {
         this.setState({
             imageHeight:img.height,
             imageWidth:img.width,
+            isImageLoaded:true,
         } );
     }
      render () {
@@ -328,7 +331,8 @@ export class ClippedImage extends React.Component {
                      width: width,
                      height: "auto",
                      clip: rectString,
-                     left:left
+                     left:left,
+                     display: this.state.isImageLoaded
 
                  }
 
@@ -342,6 +346,8 @@ export class ClippedImage extends React.Component {
                          clip: rectString,
                          height: containerHeight,
                           width: "auto",
+                                               display: this.state.isImageLoaded
+
 
 
                      }
@@ -356,18 +362,21 @@ export class ClippedImage extends React.Component {
 
 
                          height: containerHeight,
+                                              display: this.state.isImageLoaded
+
 
                      }
                  }
              }
          }
+
             return (
                 <Measure onMeasure={(dimensions) => {
                     this.setState({dimensions})
                 }}>
                     <div className={classDescriptor} style={containerStyle}>
                         <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad}
-                             style={myStyle}/>
+                             style={myStyle} />
                     </div>
                 </Measure>
             )

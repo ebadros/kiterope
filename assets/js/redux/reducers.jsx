@@ -5,7 +5,7 @@ import { createStore, combineReducers } from 'redux';
 
 const initialUserState = {
   user: {}
-}
+};
 function printObject(o) {
   var out = '';
   for (var p in o) {
@@ -23,20 +23,25 @@ export const rootReducer = (state = {}, action) => {
     case 'SET_CURRENT_CONTACT':
     return Object.assign({}, state, { currentContact: action.contact });
     break;
+
+      case 'SHOULD_RELOAD':
+          return Object.assign({}, state, { shouldReload: action.shouldReload });
+         break;
+
   case 'SET_GOALS':
     return Object.assign({}, state, { goals: action.goals });
     break;
 
     case 'ADD_GOAL':
 
-        var theGoals = state.goals
-        theGoals[action.goal.id] = action.goal
-      return Object.assign({}, state, { goals: theGoals })
+        var theGoals = state.goals;
+        theGoals[action.goal.id] = action.goal;
+      return Object.assign({}, state, { goals: theGoals });
       break;
 
     case 'UPDATE_GOAL':
-      var theGoals = state.goals
-        theGoals[action.goal.id] = action.goal
+      var theGoals = state.goals;
+        theGoals[action.goal.id] = action.goal;
 
 
 
@@ -44,9 +49,9 @@ export const rootReducer = (state = {}, action) => {
       break;
 
     case 'DELETE_GOAL':
-      var initialGoals = state.goals
+      var initialGoals = state.goals;
 
-       delete initialGoals[action.goalId]
+       delete initialGoals[action.goalId];
 
 
 
@@ -58,50 +63,50 @@ export const rootReducer = (state = {}, action) => {
 
     case 'ADD_PROGRAM':
 
-        var thePrograms = state.programs
-        thePrograms[action.program.id] = action.program
-      return Object.assign({}, state, { programs: thePrograms })
+        var thePrograms = state.programs;
+        thePrograms[action.program.id] = action.program;
+      return Object.assign({}, state, { programs: thePrograms });
       break;
     case 'UPDATE_PROGRAM':
 
-        var thePrograms = state.programs
-        thePrograms[action.program.id] = action.program
-      return Object.assign({}, state, { programs: thePrograms })
+        var thePrograms = state.programs;
+        thePrograms[action.program.id] = action.program;
+      return Object.assign({}, state, { programs: thePrograms });
       break;
 
     case 'DELETE_PROGRAM':
-      var initialPrograms = state.programs
-       delete initialPrograms[action.programId]
+      var initialPrograms = state.programs;
+       delete initialPrograms[action.programId];
 
       return Object.assign({}, state,  {programs : initialPrograms});
       break;
 
     case 'ADD_STEP':
 
-        var thePrograms = state.programs
-        var theProgram = thePrograms[action.programId]
-        var theSteps = theProgram.steps
-        theSteps[action.step.id] = action.step
-      return Object.assign({}, state, { programs: thePrograms })
+        var thePrograms = state.programs;
+        var theProgram = thePrograms[action.programId];
+        var theSteps = theProgram.steps;
+        theSteps[action.step.id] = action.step;
+      return Object.assign({}, state, { programs: thePrograms });
       break;
 
     case 'ADD_MESSAGE':
 
-        var theThreads = state.messageThreads
-        theThreads[action.threadId].messages.push(action.message)
-      return Object.assign({}, state, { messageThreads: theThreads })
+        var theThreads = state.messageThreads;
+        theThreads[action.threadId].messages.push(action.message);
+      return Object.assign({}, state, { messageThreads: theThreads });
       break;
 
     case 'UPDATE_STEP':
 
-        var thePrograms = state.programs
-        thePrograms[action.programId].steps[action.step.id] = action.step
-      return Object.assign({}, state, { programs: thePrograms })
+        var thePrograms = state.programs;
+        thePrograms[action.programId].steps[action.step.id] = action.step;
+      return Object.assign({}, state, { programs: thePrograms });
       break;
 
     case 'DELETE_STEP':
-      var initialPrograms = state.programs
-       delete initialPrograms[action.programId].steps[action.stepId]
+      var initialPrograms = state.programs;
+       delete initialPrograms[action.programId].steps[action.stepId];
 
       return Object.assign({}, state,  {programs : initialPrograms});
       break;
@@ -117,28 +122,28 @@ export const rootReducer = (state = {}, action) => {
     return Object.assign({}, state, { plans: action.plans });
     break;
     case 'ADD_PLAN':
-       var thePlans = state.plans
-        thePlans[action.plan.id] = action.plan
+       var thePlans = state.plans;
+        thePlans[action.plan.id] = action.plan;
     return Object.assign({}, state, { plans: thePlans });
     break;
 
     case 'ADD_CONTACT':
-       var theContacts = state.contacts
-        theContacts[action.contact.id] = action.contact
+       var theContacts = state.contacts;
+        theContacts[action.contact.id] = action.contact;
     return Object.assign({}, state, { contacts: theContacts });
     break;
 case 'DELETE_CONTACT':
-      var theContacts = state.contacts
-           delete theContacts[action.contactId]
+      var theContacts = state.contacts;
+           delete theContacts[action.contactId];
 
 
     return Object.assign({}, state, { contacts: theContacts });
     break;
 
     case 'REMOVE_PLAN':
-      var initialPlans = state.plans
+      var initialPlans = state.plans;
 
-       initialPlans[action.planId].isSubscribed = false
+       initialPlans[action.planId].isSubscribed = false;
 
     return Object.assign({}, state, { plans: initialPlans });
     break;
@@ -156,14 +161,14 @@ case 'DELETE_CONTACT':
 
     case 'ADD_OPEN_THREAD':
 
-      var theOpenThreads = state.openThreads
-        theOpenThreads[action.thread.id] = action.thread
-      return Object.assign({}, state, { openThreads: theOpenThreads , })
+      var theOpenThreads = state.openThreads;
+        theOpenThreads[action.thread.id] = action.thread;
+      return Object.assign({}, state, { openThreads: theOpenThreads , });
     break;
 
     case 'CLOSE_OPEN_THREAD':
-      var theOpenThreads = state.openThreads
-       delete theOpenThreads[action.threadId]
+      var theOpenThreads = state.openThreads;
+       delete theOpenThreads[action.threadId];
 
       return Object.assign({}, state,  {openThreads : theOpenThreads});
       break;
@@ -172,12 +177,12 @@ case 'DELETE_CONTACT':
 
     case 'ADD_THREAD':
 
-      var theOpenThreads = state.openThreads
-        theOpenThreads[action.thread.id] = action.thread
+      var theOpenThreads = state.openThreads;
+        theOpenThreads[action.thread.id] = action.thread;
 
-        var theMessageThreads = state.messageThreads
-        theMessageThreads[action.thread.id] = action.thread
-      return Object.assign({}, state, { openThreads: theOpenThreads , messageThreads: theMessageThreads})
+        var theMessageThreads = state.messageThreads;
+        theMessageThreads[action.thread.id] = action.thread;
+      return Object.assign({}, state, { openThreads: theOpenThreads , messageThreads: theMessageThreads});
     break;
 
     case 'SET_CURRENT_THREAD':
@@ -198,13 +203,13 @@ case 'LOGIN':
 
 
   case 'LOGOUT':
-    state = undefined
-    return state
+    state = undefined;
+    return state;
     break;
   }
   return state;
-}
+};
 
 
 
-module.exports = { rootReducer }
+module.exports = { rootReducer };

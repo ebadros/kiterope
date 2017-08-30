@@ -3,7 +3,7 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, Breadcrumb,  ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
@@ -40,7 +40,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
-import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, times, s3IconUrl, formats, s3ImageUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
@@ -633,6 +633,151 @@ export class ProgramDetailPage extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class ProgramDetailPageNoSteps extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:[],
+            editable:false,
+            openModal:false,
+            formIsOpen:false,
+            stepData:[],
+            activePage:1,
+            selectedView:"list",
+            headerActionButtonLabel:"Add Step",
+            stepArray:[],
+            userPlanOccurrenceId:"",
+        }
+    }
+
+
+
+
+    loadProgramsFromServer = () => {
+        console.log("load plans from server");
+    $.ajax({
+      url: "api/plan/view/" + this.props.params.program_id + "/",
+      dataType: 'json',
+        type: 'GET',
+
+      cache: false,
+      success: function(programData) {
+        this.setState({
+            data: programData[0]});
+
+        store.dispatch(shouldReload(""))
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error( "api/plan/view/" + this.props.params.program_id + "/", status, err.toString());
+      }.bind(this),
+
+    });
+  };
+
+
+    componentWillUnmount = () => {
+        //clearInterval(this.state.stepsIntervalId);
+
+    };
+
+    componentWillReceiveProps(nextProps) {
+        if (this.props.storeRoot) {
+            if (this.props.storeRoot.gui.shouldReload != nextProps.storeRoot.gui.shouldReload) {
+                if (nextProps.storeRoot.gui.shouldReload == "subscribed") {
+                    this.loadProgramsFromServer()
+                }
+            }
+        }
+    }
+
+
+
+
+  componentDidMount() {
+      this.loadProgramsFromServer()
+
+  }
+
+  determineIfSubscribed() {
+
+
+        if (this.state.data ) {
+
+
+            if (this.props.storeRoot) {
+                if (this.props.storeRoot.plans) {
+                                                  console.log("determineIfSubscribed");
+
+                    for (var key in this.props.storeRoot.plans) {
+                        if ((this.props.storeRoot.plans[key].program == this.state.data.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
+                            var theStateData = this.state.data;
+                            theStateData.isSubscribed = this.props.storeRoot.plans[key].isSubscribed;
+                            this.setState({data: theStateData});
+                            this.setState({
+                                userPlanOccurrenceId : key
+                            })
+
+                        }
+                    }
+
+                }
+            }
+        }
+  }
+
+
+
+
+
+
+
+
+
+
+    render() {
+
+
+        return (
+            <div>
+                <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+
+                    <div className="ui container footerAtBottom">
+                        <div className="spacer">&nbsp;</div>
+                        <div className="ui alert"></div>
+                         <Breadcrumb values={[
+                                    {url:"/plan/view/" + this.props.params.program_id , label:"Plan Detail"},
+
+                        ]}/>
+                        <div>&nbsp;</div>
+
+                        <ProgramViewEditDeleteItem isListNode={false}
+                                                showCloseButton={false}
+                                                apiUrl="api/programs/"
+                                                id={this.props.params.program_id}
+                                                data={this.state.data}
+                                                currentView="Basic"
+                                                   userPlanOccurrenceId = {this.state.data.userPlanOccurrenceId}
+
+                                                   extendedBasic={true}
+                        />
+
+
+
+
+
+
+
+
+                    </div>
+                <Footer />
+            </div>
+
+        )
+    }
+}
+
 export class ViewSelector extends React.Component {
     constructor(props) {
         super(props);
@@ -887,6 +1032,7 @@ export class ProgramSubscriptionForm extends React.Component {
 
 
                      store.dispatch(addPlan(data));
+                     store.dispatch(shouldReload("subscribed"));
 
                      this.props.formSubmitted()
 
@@ -1738,6 +1884,8 @@ export class ProgramList extends React.Component {
                                             currentView="Basic"
                                                needsLogin={this.handleNeedsLogin}
                                                reloadItem={this.handleReloadItem}
+                                                                                                  extendedBasic={false}
+
                     />
 
 );
@@ -1839,7 +1987,12 @@ export class ProgramBasicView extends React.Component {
     }
 
     goToDetail() {
-        hashHistory.push("/programs/" + this.state.data.id + "/steps")
+        if (this.props.forSearch) {
+                    hashHistory.push("/plan/view/" + this.state.data.id + "/")
+
+        } else {
+            hashHistory.push("/programs/" + this.state.data.id + "/steps")
+        }
 
 }
     render() {
@@ -1859,7 +2012,13 @@ export class ProgramBasicView extends React.Component {
             }
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
-            var authorLink = "/profiles/" + this.state.data.author_id;
+            if (this.state.data.author_id) {
+                            var authorLink = "/profiles/" + this.state.data.author_id;
+
+            } else if (this.state.data.author) {
+                                            var authorLink = "/profiles/" + this.state.data.author
+
+            }
 
             if (this.props.isListNode) {
 
@@ -1943,6 +2102,9 @@ export class ProgramBasicView extends React.Component {
                             <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
                         </div>
                         <div className="right aligned six wide column">
+                            <Link to={authorLink} >
+                                            <UserLink orientation="right" fullName={this.state.data.authorName}
+                                                            profilePhoto={this.state.data.authorPhoto} /></Link>
                             <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success"
                                             background="Light" link="/goalEntry"/>
                             <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
@@ -2103,4 +2265,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, SimpleProgramForm, ProgramForm, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, SimpleProgramForm, ProgramForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};

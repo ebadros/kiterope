@@ -1053,6 +1053,8 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
 
 }
 
+
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
     constructor(props) {
@@ -1216,14 +1218,25 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     getControlBar = () => {
-        return(
-        <ItemControlBar myRef="ref_itemControlBar"
-                        label="Program"
-                        click={this.handleClick}
-                        currentView={this.state.currentView}
-                        editable={this.state.editable}
-                        showCloseButton={this.props.showCloseButton} />
-        )
+        var label;
+        if (this.props.extendedBasic == true) {
+            label = "Plan"
+        }
+        else {
+            label = "Program"
+        }
+
+            return (
+                <ItemControlBar myRef="ref_itemControlBar"
+                                label={label}
+                                click={this.handleClick}
+                                currentView={this.state.currentView}
+                                editable={this.state.editable}
+                                showCloseButton={this.props.showCloseButton}
+                                extendedBasic={this.props.extendedBasic}
+                />
+            )
+
     };
 
 
@@ -1359,7 +1372,7 @@ hideComponent = () => {
 
         }
         if (this.props.storeRoot.user) {
-            if (this.state.data.author == this.props.storeRoot.user.id) {
+            if ((this.state.data.author == this.props.storeRoot.user.id) && (this.props.extendedBasic != true)){
                 subscribeButton = null
             }
         }
@@ -1385,7 +1398,6 @@ hideComponent = () => {
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
               program={this.state.data}
 />
-
                 <div className="ui segment noBottomMargin noTopMargin">
                     <div>{basicView}</div>
                     {detailView}
@@ -1400,7 +1412,7 @@ hideComponent = () => {
 
                 </div>{subscribeButton}
 
-            </div>
+                </div>
 
         )
     }
@@ -1516,7 +1528,10 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                         click={this.handleClick}
                         currentView={this.state.currentView}
                         editable={this.state.editable}
-                        showCloseButton={this.props.showCloseButton} />
+                        showCloseButton={this.props.showCloseButton}
+                                            extendedBasic={this.props.extendedBasic}
+                        />
+
         )
     };
 
@@ -1876,11 +1891,11 @@ hideComponent = () => {
         if (this.props.storeRoot.user) {
         return (
 
-            <div ref={`ref_profileItem_${this.props.id}`} className="column">
+            <div ref={`ref_profileItem_${this.props.id}`} className="ui column">
                 {controlBar}
 
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div>{basicView}</div>
                     {detailView}
 
@@ -1899,7 +1914,7 @@ hideComponent = () => {
         )}
         else return (
 
-            <div ref={`ref_profileItem_${this.props.id}`} className="column">
+            <div ref={`ref_profileItem_${this.props.id}`} className="ui column">
                 {controlBar}
 
 
@@ -2353,9 +2368,11 @@ export class CancelControlBar extends ControlBarButtonConfiguration {
                 <div className="column left aligned">{this.props.label}</div>
                 <div className="column right aligned noRightPadding">
 
-                        <ItemControlBarButton myRef="ref_cancelButton" label="Cancel"
-                                              click={this.handleCancelClicked}/>
-                    {menuButton}
+                        {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_cancelButton" label="Cancel"
+                                              click={this.handleCancelClicked}/>  }
+
+                    {this.props.extendedBasic ? null : menuButton }
+
                     {closeButton}
 
                     </div>
@@ -2392,9 +2409,10 @@ export class DetailControlBar extends ControlBarButtonConfiguration {
                 <div className="column right aligned noRightPadding"  >
 
 
-                    <ItemControlBarButton myRef="ref_detailButton" label="Detail"
-                                              click={this.handleDetailClicked}/>
-                    {menuButton}
+                    {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_detailButton" label="Detail"
+                                              click={this.handleDetailClicked}/>   }
+                                        {this.props.extendedBasic ? null : menuButton }
+
 
                     {closeButton}
 
@@ -2500,14 +2518,14 @@ export class DetailEditDeleteControlBar extends ControlBarButtonConfiguration {
         return (
 <div className="ui two column grid">
 
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding"  >
+                <div className="column left aligned" >{this.props.label}</div>
+                <div   className="column right aligned noRightPadding"   >
 
 
-                    <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked}/>
-                    <ItemControlBarButton myRef="ref_detailButton" label="Detail"
-                                              click={this.handleDetailClicked}/>
-                    {menuButton}
+                    {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked}/>}
+                    {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_detailButton" label="Detail"
+                                              click={this.handleDetailClicked}/>}
+                    {this.props.extendedBasic ? null : menuButton}
                     {closeButton}
 
 </div>
@@ -2566,22 +2584,22 @@ export class ItemControlBar extends React.Component {
 
         if (this.state.editable) {
             if (this.state.currentView == "Basic") {
-                buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             } else if (this.state.currentView == "UpdateBasic" ) {
-                buttonConfiguration = <EditDeleteControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <EditDeleteControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             } else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             }
         } else {
             if (this.state.currentView == "Basic") {
-                buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             } else if (this.state.currentView == "UpdateBasic" ) {
-                buttonConfiguration = <MenuControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <MenuControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             }else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label}/>
+                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             }
 
         }
@@ -2593,15 +2611,15 @@ export class ItemControlBar extends React.Component {
 
         if (this.state.editable) {
             if (this.state.currentView == "Basic") {
-                buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label} showCloseButton={true} />
+                buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label} showCloseButton={true} extendedBasic={this.props.extendedBasic}/>
             } else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} showCloseButton={true}  />
+                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} showCloseButton={true}  extendedBasic={this.props.extendedBasic}/>
             }
         } else {
             if (this.state.currentView == "Basic") {
-                buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label} showCloseButton={true} />
+                buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label} showCloseButton={true} extendedBasic={this.props.extendedBasic} />
             } else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} showCloseButton={true}  />
+                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} showCloseButton={true}  extendedBasic={this.props.extendedBasic}/>
             }
 
         }
@@ -2640,7 +2658,7 @@ export class ItemControlBar extends React.Component {
 
 
         return (
-            <div ref={this.props.myRef} className={`ui top attached ${color} button`}>
+            <div ref={this.props.myRef} className={`ui top attached ${color} button`} >
 
                     {buttonConfiguration}
 

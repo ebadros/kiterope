@@ -85,35 +85,39 @@ export class BlogPage extends React.Component {
         if (this.state.data != undefined) {
             return (
                 <div>
-                                <StandardSetOfComponents />
+                    <StandardSetOfComponents />
                     <div className="fullPageDiv">
-            <div className="ui  container footerAtBottom">
+                        <div className="ui  container footerAtBottom">
 
 
-            <div className="spacer">&nbsp;</div>
-            <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
+                            <div className="spacer">&nbsp;</div>
+                            <div className="ui large breadcrumb">
+                                <Link to={`/#`}>
+                                    <div className="section">Home</div>
+                                </Link>
 
-                  <i className="right chevron icon divider"></i>
-                  <Link to={`/#/blog`}><div className="active section">Blog</div></Link>
-            </div>
-            <div>&nbsp;</div>
-                <Header headerLabel="Blog"/>
-                <div className="ui grid" >
+                                <i className="right chevron icon divider"></i>
+                                <Link to={`/#/blog`}>
+                                    <div className="active section">Blog</div>
+                                </Link>
+                            </div>
+                            <div>&nbsp;</div>
+                            <Header headerLabel="Blog"/>
+                            <div className="ui grid">
 
-                <BlogPostList data={this.state.data} />
+                                <BlogPostList data={this.state.data}/>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-                    </div>
             )
         } else {
             return (
                 <div>
-                                <StandardSetOfComponents />
-            <div className="fullPageDiv">
-            </div>
+                    <StandardSetOfComponents />
+                    <div className="fullPageDiv">
                     </div>
+                </div>
             )
 
         }
@@ -192,7 +196,7 @@ export class BlogPost extends React.Component {
                         </div>
 
                         <div className="ui row">
-                                                    <div className="ui eight wide column">
+                            <div className="ui eight wide column">
 
 
 
@@ -201,6 +205,7 @@ export class BlogPost extends React.Component {
                         </div>
 
                     </div>
+                <div className="ui spacer">&nbsp;</div>
                 </div>
 
 

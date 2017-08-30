@@ -1,9 +1,9 @@
 {% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="width:100vw;">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Kiterope is a system for optimizing your path to success. If you're serious about achieving your goals, Kiterope can help you. Find a plan now."/>
     <title>{% block title %}Kiterope{% endblock %}</title>
 
@@ -47,7 +47,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
 
 
-<div id="react-app"></div>
+<div id="react-app"  style="width:100%;"></div>
 
 {% render_bundle 'main' %}
 

@@ -20,7 +20,9 @@ html {
     font-size: 1rem !important;
 }
 
-
+.noBottomPadding {
+    padding-bottom: 0 !important;
+}
 
 .google {
     color:black;
@@ -303,15 +305,29 @@ div.ui.segment.noTopMargin {
 }
 
 
+.myButton {
+    border-radius: 4px 4px 0px 0px;
+    background-color:cyan;
+    color: white;
+    display:flex;
 
+
+}
 
 .plan {
     background-color: #e0e0e0
 }
 
-html { height: 100%; margin-bottom: 1px; }
+html { height: 100%; margin-bottom: 1px;}
 
-
+.noTopRadius {
+    border-radius: 0px 0px 4px 4px !important;
+}
+.attachedButtonFix {
+    color:orange !important;
+    width:100% !important;
+    height:auto !important;
+}
 
 .errorField {
  border:1px solid red;
@@ -408,8 +424,10 @@ input.inline-edit:focus{
 }
 
 
-
-
+.extratiny {
+    width:50px;
+    height:auto;
+}
 
 .sidebar-spacer {
     height:6rem;
@@ -572,29 +590,69 @@ label.NLtextinput {
     background:none !important;
     border:none !important;
     border-bottom: 1px dashed #2185d0 !important;
+
+
+
     color: #2185d0;
     display:inline-block;
-    float:right;
+    float:left;
     padding:0 0 !important;
+    margin:0 0 !important;
     margin-left: .5vw !important;
     font-size:2vw !important;
     line-height:2vw;
+    width:calc(100% - 35px);
+    outline:none;
+    text-align:left;
+
+
 
 
 
 }
 
+
+.noRightPadding {
+    padding-right:0 !important;
+}
+
+.noLeftPadding {
+    padding-left:0 !important;
+}
+
+.searchInputColumn {
+    border:none !important;
+    padding-left:0 !important;
+
+    width:100%;
+
+
+
+}
+
+.middleVertically {
+    vertical-align:0 !important;
+}
+.searchCloseButton {
+    position:absolute;
+    left:calc(100% - 40px);
+    top: 18px;
+
+}
+
+
+
 .searchLabel {
     background:none !important;
     border:none !important;
     border-bottom: 1px dashed #FFFFFF !important;
-
-    color: #2185d0;
     display:inline-block;
     padding:0 0 !important;
     margin:0 0 !important;
     font-size:2vw !important;
     line-height:2vw;
+    text-align:right;
+    width:100%;
 
 }
 
@@ -633,8 +691,8 @@ label.NLtextinput {
 }
 
 .massiveType {
-    font-size: 4vw;
-    line-height:4vw;
+    font-size: 4rem;
+    line-height: 4rem;
     font-weight:bold;
 
 }

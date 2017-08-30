@@ -104,6 +104,18 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     }
 
+    handleLogout() {
+        store.dispatch(reduxLogout());
+
+        auth.logout();
+
+        hashHistory.push('/account/login/')
+
+
+
+
+    }
+
     switchView = () => {
         if (this.state.view == "Switch to Coach View") {
             this.setState({
@@ -133,6 +145,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
             }
         } else {
+
             if (this.props.storeRoot.gui.isSidebarVisible) {
                 $(this.refs["ref_sidebar"]).show("slide")
 
@@ -196,6 +209,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             Blog
                         </a>
 
+
                     </div>
                 )
             }
@@ -243,6 +257,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>
+
 
                 </div>
 

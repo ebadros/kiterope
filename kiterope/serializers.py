@@ -419,7 +419,106 @@ class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
             return False
 
 
+class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Program
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'category','scheduleLength', 'startDate', 'authorName','authorPhoto','isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000)
+    scheduleLength = serializers.CharField()
+    category = serializers.CharField(max_length=20)
+
+    timeCommitment = serializers.CharField(max_length=20)
+    costFrequencyMetric = serializers.CharField(max_length=20)
+    cost = serializers.CharField(max_length=20)
+    startDate = serializers.DateField()
+    author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    authorName = serializers.SerializerMethodField(required=False, read_only=True)
+    authorPhoto = serializers.SerializerMethodField(required=False, read_only=True)
+
+    #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    #steps = serializers.PrimaryKeyRelatedField(many=True, queryset=Step.objects.all())
+
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+    userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+    def get_userPlanOccurrenceId(self,obj):
+        try:
+            return obj.get_userPlanOccurrenceId(self.context['request'].user)
+        except:
+            return ""
+
+
+    def get_authorName(self, obj):
+        try:
+            return Profile.objects.get(user=obj.author).get_fullName()
+        except:
+            return ""
+
+    def get_authorPhoto(self, obj):
+        try:
+            return Profile.objects.get(user=obj.author).profilePhoto
+        except:
+            return ""
+
+    def get_isSubscribed(self, obj):
+        try:
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
+        except:
+            return False
+
+    def get_category(self, obj):
+        return obj.get_category_display()
+
+
+    def get_timeCommitment(self, obj):
+        return obj.get_timeCommitment_display()
+
+    def get_scheduleLength(self, obj):
+        return obj.get_scheduleLength_display()
+
+    def get_viewableBy(self, obj):
+        return obj.get_viewableBy_display()
+
+    def get_costFrequencyMetric(self, obj):
+        return obj.get_costFrequencyMetric_display()
+
+    '''def create(self, validated_data):
+        steps_data = validated_data.pop('program')
+        program = Program.objects.create(**validated_data)
+        for steps_data in steps_data:
+            Step.objects.create(program=program, **steps_data)
+        return program'''
+
+    def update(self, instance, validated_data):
+        instance.image = validated_data.get('image', instance.image)
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.author = validated_data.get('author', instance.author)
+        instance.description = validated_data.get('description', instance.description)
+        #instance.steps = validated_data.get('steps', instance.steps)
+        instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
+        instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
+
+        instance.startDate = validated_data.get('startDate', instance.startDate)
+        instance.cost = validated_data.get('cost', instance.cost)
+        instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
+        instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
+        instance.category = validated_data.get('category', instance.category)
+
+
+
+        #instance.goals = validated_data.get('goals', instance.goals)
+
+        instance.save()
+        return instance
 
 
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):

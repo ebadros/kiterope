@@ -20,6 +20,7 @@ const mapStateToProps = (state) => {
         stepOccurrences:state.stepOccurrences,
         messageThreads:state.messageThreads,
         gui: {
+          shouldReload:state.shouldReload,
           isSidebarVisible:state.isSidebarVisible,
           isMessageWindowVisible: state.isMessageWindowVisible,
           currentThread: state.currentThread,
@@ -40,7 +41,7 @@ const mapStateToProps = (state) => {
     }
   }
 
-}
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -157,9 +158,9 @@ const mapDispatchToProps = (dispatch) => {
 
 
   }
-}
+};
 
 
 //const StandardSetOfComponentsContainer = connect(mapStateToProps, mapDispatchToProps)(StandardSetOfComponents)
 
-module.exports = { mapDispatchToProps, mapStateToProps }
+module.exports = { mapDispatchToProps, mapStateToProps };

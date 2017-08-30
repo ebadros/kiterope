@@ -20,7 +20,7 @@ import { ValidatedInput}  from './app'
 import autobind from 'class-autobind'
 import { ClippedImage, ChoiceModal , IconLabelCombo } from './elements'
 import { ImageUploader, Header, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'
-import { StandardSetOfComponents, ErrorReporter } from './accounts'
+import { StandardSetOfComponents, ErrorReporter, Menubar } from './accounts'
 
 import { PlanForm, PlanList } from './plan'
 import { Caller, CallManager } from './call'
@@ -812,23 +812,44 @@ export class ProfileDetailPage extends React.Component {
 
         var theURL = "api/profiles/" + this.props.params.profile_id + "/";
 
-
-    $.ajax({
-      url: theURL,
-      dataType: 'json',
-      cache: false,
-        headers: {
+    if (localStorage.token ) {
+        $.ajax({
+            url: theURL,
+            dataType: 'json',
+            cache: false,
+            type:'GET',
+            headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
-      success: function(data) {
-        this.setState({
-            data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theURL, status, err.toString());
-      }.bind(this),
+            success: function (data) {
+                this.setState({
+                    data: data
+                });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theURL, status, err.toString());
+            }.bind(this),
 
-    });
+        });
+    } else {
+        $.ajax({
+            url: theURL,
+            dataType: 'json',
+            cache: false,
+                        type:'GET',
+
+            success: function (data) {
+                this.setState({
+                    data: data
+                });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theURL, status, err.toString());
+            }.bind(this),
+
+        });
+
+    }
   };
 
   handleFormActionClick = () => {
@@ -942,7 +963,9 @@ export class ProfileDetailPage extends React.Component {
 
 
                 <div className="fullPageDiv">
+
                     <div className="ui page container footerAtBottom">
+
                         <div className="spacer">&nbsp;</div>
 
                          <Breadcrumb values={[
@@ -956,16 +979,16 @@ export class ProfileDetailPage extends React.Component {
                                                    id={this.props.params.profile_id}
                                                    data={this.state.data}
                                                    currentView="Basic"/>
+                        {/*
                         <div>&nbsp;</div>
                         <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleFormActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
-        <div ref="id_whichPlanForm">
+        <div ref="id_whichPlanForm">*/}
             </div>
 
 
 
                     </div>
-                </div>
 
             </div>
 
@@ -1168,13 +1191,27 @@ export class UserLink extends React.Component {
     }
 
       render() {
-          return (
-              <div>
+          if (this.props.orientation == 'right') {
+              return (
+                  <div style={{marginBottom:5, marginRight:-10}}>
 
-                   <img className="ui mini avatar image" src={s3ImageUrl + this.props.profilePhoto} /><span>{this.props.fullName}</span>
+                      <span>{this.props.fullName}</span><img className="ui mini avatar image"
+                           src={s3ImageUrl + this.props.profilePhoto} style={{marginLeft:'5px'}}/>
 
-              </div>
-          )
+                  </div>
+              )
+
+          } else {
+              return (
+                  <div style={{marginBottom:5}}>
+
+                      <img className="ui mini avatar image"
+                           src={s3ImageUrl + this.props.profilePhoto}/><span>{this.props.fullName}</span>
+
+                  </div>
+              )
+
+          }
       }
 }
 

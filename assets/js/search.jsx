@@ -289,92 +289,115 @@ _handleKeyPress = (e) => {
         }
     return (
         <div>
-        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed}/>
-        <div className="">
+            <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
+                                     modalShouldClose={this.handleModalClosed}/>
             <div className="ui page container">
-                <div className="spacer">&nbsp;</div>
+
+                    <div className="ui one column grid">
+                        <div className="spacer">&nbsp;</div>
 
 
-                <div className="ui alert"></div>
-                <div className="ui form" >
+                        <div className="ui row ">&nbsp;</div>
 
-                    <div className="splashPageSection">
+                        <div className="ui centered row  massiveType">What do you want to do?</div>
+                        <div className="ui row">&nbsp;</div>
+                    </div>
 
-
-                        <div className="ui grid noMargin">
-                            <div className="ui row ">&nbsp;</div>
-                            <div className="ui row ">&nbsp;</div>
-
-                            <div className="ui centered row massiveType">What do you want to do?</div>
-                                                <div className="ui row">&nbsp;</div>
-
-                            <div className="ui row noPaddingBottom">
-
-                                <input value="I want to" className="ui three wide column right aligned searchLabel"
-                                       type="text" disabled/>
+                    <div className="ui grid">
 
 
-                                <input placeholder={this.state.placeholder} className="ui eight wide column searchInput"
-                                       type="text" value={this.state.query}     onKeyPress={this._handleKeyPress}
- onChange={this.handleChangeQuery} />
-                                <div ref="ref_closeButton" onClick={this.handleCloseButtonClicked} ><i className="large close icon"></i></div>
-                                <div onClick={this.handleSubmit} className="ui fluid three wide column purple right floated medium  button" style={{marginTop:0, marginBottom:0}}>Search Plans</div>
-</div>
-                            <div className="ui row noPaddingBottom">
-                                <div className="three wide column right floated ">    <Link to="browse">Browse Plans</Link></div></div>
+                        <div className="ui three wide column noRightPadding">
+                            <input value="I want to" className="searchLabel "
+                                   type="text" disabled/>
+                        </div>
 
+
+                        <div className="ui eight wide column">
+                            <div className="ui one column grid ">
+                                <div className="column searchInputColumn">
+
+                                    <input placeholder={this.state.placeholder} className="searchInput"
+                                           type="text" value={this.state.query} onKeyPress={this._handleKeyPress}
+                                           onChange={this.handleChangeQuery}/>
+                                    <div className="searchCloseButton" ref="ref_closeButton"
+                                         onClick={this.handleCloseButtonClicked}>
+                                        <i className="large close icon"></i></div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div className="ui four wide column noBottomPadding">
+                            <div className="ui fluid purple left floated medium button"
+                                 onClick={this.handleSubmit} style={{paddingBottom: "0 !important"}}>Search Plans
+                            </div>
                         </div>
                     </div>
+
+
+                    <div className="ui grid">
+                        <div className="ui eleven wide column">&nbsp;</div>
+                        <div className="ui four wide column center aligned noPaddingTop">
+                            <div className="ui fluid"><Link to="browse">Browse
+                                Plans</Link></div>
+                        </div>
+
                     </div>
-                <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible} needsLogin={this.handleNeedsLogin}/>
-            </div>
+
+
+                    <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible}
+                                    needsLogin={this.handleNeedsLogin}/>
+
+                </div>
                 <div className="spacer">&nbsp;</div>
-                            <div className="spacer">&nbsp;</div>
-
-
-            <div className="blue">
-                <div className="centered hugeType topPadding">Kiterope helps you get things done</div>
                 <div className="spacer">&nbsp;</div>
 
-                <div className="ui page container">
-                    <div className="ui center aligned four column grid">
-                        <div className="ui row">
-                            <div className="column">
-                                <img width="70%" src="/static/images/goal.svg"></img>
+
+                <div className="blue">
+                    <div className="centered hugeType topPadding">Kiterope helps you get things done</div>
+                    <div className="spacer">&nbsp;</div>
+
+                    <div className="ui page container">
+                        <div className="ui center aligned four column grid">
+                            <div className="ui row">
+                                <div className="column">
+                                    <img width="70%" src="/static/images/goal.svg"></img>
                                 </div>
-                            <div className="column">
-                                <img width="70%" src="/static/images/strategy.svg"></img>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/strategy.svg"></img>
                                 </div>
-                            <div className="column">
-                                <img width="70%" src="/static/images/bar-chart.svg"></img>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/bar-chart.svg"></img>
                                 </div>
-                            <div className="column">
-                                <img width="70%" src="/static/images/checked.svg"></img>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/checked.svg"></img>
                                 </div>
                             </div>
 
-                                                    <div className="ui row">
+                            <div className="ui row">
 
-                        <div className="column mediumResponsiveText">Helps you set SMART goals and keeps you
-                            focused on the process of achieving those goals
-                        </div>
-                        <div className="column mediumResponsiveText">Offers detailed, step-by-step plans and access to domain-experts to make
-                            sure you know what you're supposed to be doing and that it's the right thing
-                        </div>
-                        <div className="column mediumResponsiveText">Tracks your progress to let you know when you're encountering an
-                            obstacle and revises your plan to help you improve
-                        </div>
-                        <div className="column mediumResponsiveText">Keeps you motivated by making you accountable and connecting you with people invested in your success
-                        </div>
+                                <div className="column mediumResponsiveText">Helps you set SMART goals and keeps you
+                                    focused on the process of achieving those goals
+                                </div>
+                                <div className="column mediumResponsiveText">Offers detailed, step-by-step plans and
+                                    access to domain-experts to make
+                                    sure you know what you're supposed to be doing and that it's the right thing
+                                </div>
+                                <div className="column mediumResponsiveText">Tracks your progress to let you know when
+                                    you're encountering an
+                                    obstacle and revises your plan to help you improve
+                                </div>
+                                <div className="column mediumResponsiveText">Keeps you motivated by making you
+                                    accountable and connecting you with people invested in your success
+                                </div>
+                            </div>
                     </div>
-                        </div>
+
+
                 </div>
 
-
             </div>
-
         </div>
-            </div>
 
 
 
@@ -621,7 +644,9 @@ export class SearchHitsGrid extends React.Component {
                                            editable={false}
                                            needsLogin={this.handleNeedsLogin}
                                            forSearch={true}
-                                           userPlanOccurrenceId = {theUserPlanOccurrenceId} />
+                                           userPlanOccurrenceId = {theUserPlanOccurrenceId}
+                                           extendedBasic={false} />
+
 
                       //  <PlanHit key={objectData.id} result={objectData} />
 
@@ -661,7 +686,7 @@ export class SearchHitsGrid extends React.Component {
 
         return (
             <div ref="ref_searchHits">
-            <div className="ui container stackable three column grid">
+            <div className="ui stackable three column grid">
                 {objectNodes}
                 </div>
                 {noResultsFoundText}
@@ -727,39 +752,44 @@ var SearchPage3 = React.createClass({
                 <div className="ui page container">
                     <div className="spacer">&nbsp;</div>
                     <div className="ui alert"></div>
+                                            <SearchkitProvider searchkit={searchkit}>
+
                     <div className="ui center aligned grid">
-                        <div className="ui row hugeType">
-                            <SearchkitProvider searchkit={searchkit} >
+                            <div className="ui row hugeType">
+
                                 <div className="search">
 
                                     <div className="search__query">
                                     </div>
                                     <label className="NLtextinput"> I want to </label>
                                     {/*Change Searchkit/Searchbox code line 101 to:
-            React.createElement("div", {type: "submit", value: "search", className: "ui two column wide purple button", "data-qa": "submit"},"Search"),
-*/}
+                                     React.createElement("div", {type: "submit", value: "search", className: "ui two column wide purple button", "data-qa": "submit"},"Search"),
+                                     */}
                                     <SearchBox searchOnChange={false}
                                                placeholder={this.state.placeholder}
-                                               queryOptions={{analyzer:"standard"}}
+                                               queryOptions={{analyzer: "standard"}}
                                                queryFields={["title", "description", "author", "image", "cost", "scheduleLength", "costFrequencyMetric"]}/>
-                        <div className="spacer">&nbsp;</div>
-<div ref="search_hits">
-                                    <Hits mod="ui container stackable three column grid" hitsPerPage={8} itemComponent={PlanHit}/>
-<NoHits translations={{
-        "NoHits.NoResultsFound":"No plans found were found for '{query}'",
-        "NoHits.DidYouMean":"Search for {suggestion}",
-        "NoHits.SearchWithoutFilters":"Search for {query} without filters"
-      }} suggestionsField="title"/>
-    </div>
+                                </div>
+                            </div>
 
-                                    </div>
+                            <div ref="search_hits" className="ui row">
+                                <Hits mod="ui stackable three column grid" hitsPerPage={8}
+                                      itemComponent={PlanHit}/>
+                                <NoHits translations={{
+                                    "NoHits.NoResultsFound": "No plans found were found for '{query}'",
+                                    "NoHits.DidYouMean": "Search for {suggestion}",
+                                    "NoHits.SearchWithoutFilters": "Search for {query} without filters"
+                                }} suggestionsField="title"/>
+                            </div>
 
-                            </SearchkitProvider>
 
-                        </div>
+
                     </div>
-                    </div>
+                                                                        </SearchkitProvider>
+
                 </div>
+            </div>
+
         )
     }
 

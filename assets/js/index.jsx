@@ -21,7 +21,7 @@ import {BlogPage} from './blog'
 
 import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
 import {PlanDetailPage} from './plan'
-import {ProgramListPage, ProgramDetailPage} from'./program'
+import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
 import {Router, Route, Link, hashHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
@@ -91,6 +91,7 @@ ReactDOM.render((
 
                 <Route path="/goals" component={GoalListPage} onEnter={requireAuth}/>
                 <Route path="/programs/:program_id/steps" component={ProgramDetailPage} onEnter={requireAuth}/>
+                <Route path="/plan/view/:program_id" component={ProgramDetailPageNoSteps} />
 
                 <Route path="/programs" component={ProgramListPage} onEnter={requireAuth}/>
 

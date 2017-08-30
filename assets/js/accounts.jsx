@@ -639,6 +639,8 @@ export class Menubar extends React.Component {
 
         if (!this.props.storeRoot.user) {
             var loginUI =  <div className="right menu">
+                                  <button className="ui button item" onClick={this.goToBlog}>Blog</button>
+
 
                   <button className="ui button item" onClick={this.joinKiteropeHandler}>Join Kiterope</button>
                   <button className="ui button item" onClick={this.loginHandler}>Sign In</button>
@@ -649,13 +651,16 @@ export class Menubar extends React.Component {
 
                 <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick} ><i className="large sidebar icon" style={{margin:0}}  /></div>
 
-                <div className="ui simple dropdown item" style={{marginRight:10}}>
-                      <img src="/static/images/avatar-placeholder.png" /> <div className="username">{this.props.storeRoot.user.username}</div>
+                <div className="ui simple dropdown item" >
+                    { this.props.storeRoot.user.profilePhoto ? <div className="ui extratiny circular image"><img src={s3ImageUrl + this.props.storeRoot.user.profilePhoto} /> </div>: <img src="/static/images/avatar-placeholder.png" />}
+                    {/*<div className="username">{this.props.storeRoot.user.username}</div>*/}
 
                       <div className="menu">
                           <button className="ui button fluid item" onClick={this.logoutHandler}>Logout</button>
                       </div>
                   </div>
+                                <div className="ui simple dropdown item">&nbsp;</div>
+
 
               </div>
         }
