@@ -658,7 +658,7 @@ export class ProgramDetailPageNoSteps extends React.Component {
     loadProgramsFromServer = () => {
         console.log("load plans from server");
     $.ajax({
-      url: "api/plan/view/" + this.props.params.program_id + "/",
+      url: "/api/plan/view/" + this.props.params.program_id + "/",
       dataType: 'json',
         type: 'GET',
 
