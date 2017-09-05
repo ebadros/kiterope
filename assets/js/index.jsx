@@ -23,7 +23,7 @@ import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
 import {PlanDetailPage} from './plan'
 import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
-import {Router, Route, Link, hashHistory} from 'react-router'
+import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 import {BrowseProgramsPage } from './browse'
 
@@ -64,7 +64,7 @@ ReactDOM.render((
     <Provider store={store}>
 
 
-        <Router history={hashHistory}>
+        <Router history={browserHistory}>
             <div>
                 <Route path="/" component={ SplashPage }  />
                 <Route path="/blog" component={ BlogPage } />

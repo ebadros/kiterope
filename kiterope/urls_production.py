@@ -139,7 +139,6 @@ if settings.DEBUG:
     '''
 
 urlpatterns = [
-      url(r'^$', TemplateView.as_view(template_name='index.html')),
       url(r'^', include('django.contrib.auth.urls')),
 
 
@@ -151,7 +150,7 @@ urlpatterns = [
       #url(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
       url(r'^api/', include(router.urls)),
       #url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-      url(r'^search/', include('haystack.urls')),
+      #url(r'^search/', include('haystack.urls')),
       url(r'^admin/', admin.site.urls),
       url(r'^accounts/', include('allauth.urls')),
       url(r'^secret', views.secret_page, name='secret'),
@@ -159,6 +158,6 @@ urlpatterns = [
       url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
-
+      url(r'^', views.React.as_view(), name='index'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

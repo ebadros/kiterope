@@ -221,7 +221,7 @@ export class Search extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        hashHistory.push("/search/" + this.state.query + "/");
+        browserHistory.push("/search/" + this.state.query + "/");
 
         this.setState({
             queryUrl: this.state.query,
@@ -245,7 +245,7 @@ export class Search extends React.Component {
             },
                             //store.dispatch(push('/search/'))
 
-            hashHistory.push("/search/")
+            browserHistory.push("/search/")
 
 
 
@@ -583,12 +583,12 @@ export class SearchHitsGrid extends React.Component {
       handleWePlanClick() {
                           //store.dispatch(push('/goalEntry'))
 
-      hashHistory.push('/goalEntry')
+      browserHistory.push('/goalEntry')
       }
 
       handleYouPlanClick() {
           //store.dispatch(push('/goalEntry'))
-      hashHistory.push('/goalEntry')
+      browserHistory.push('/goalEntry')
       }
 
 

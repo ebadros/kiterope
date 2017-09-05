@@ -249,10 +249,10 @@ componentWillUnmount() {
 
             <div className="spacer">&nbsp;</div>
             <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
+                <Link to={`/`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">My Contacts</div></Link>
+                  <Link to={`/`}><div className="active section">My Contacts</div></Link>
             </div>
             <div>&nbsp;</div>
                         <Header headerLabel="My Contacts"/>
@@ -709,7 +709,7 @@ export class ProfileViewAndEditPage extends React.Component {
                     <div className="ui large breadcrumb">
                          <Link to={`/`}><div className="section">Home</div></Link>
                             <i className="right chevron icon divider"></i>
-                            <Link to="myProfile"><div className=" section">Profile</div></Link>
+                            <Link to="/myProfile"><div className=" section">Profile</div></Link>
 
                     </div>
                     <div>&nbsp;</div>
@@ -932,13 +932,13 @@ export class ProfileDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search");
+              browserHistory.push("/search");
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry");
+              browserHistory.push("/goalEntry");
               break;
 
       }
@@ -1019,7 +1019,7 @@ export class ProfileBasicView extends React.Component {
     }
 
     goToDetail() {
-        hashHistory.push("/profiles/" + this.state.data.id + "/")
+        browserHistory.push("/profiles/" + this.state.data.id + "/")
 
 }
     render() {

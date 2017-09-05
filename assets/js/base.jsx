@@ -1074,7 +1074,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
      goToAuthorPage() {
 
-         hashHistory.push("/profiles/" + this.state.data.author)
+         browserHistory.push("/profiles/" + this.state.data.author)
 
      }
 
@@ -1108,6 +1108,12 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
     };
 
+    handleGetDetailOnPlan = () => {
+        console.log("inside here");
+      browserHistory.push("/plan/view/" + this.props.id)
+
+};
+
 
 
      handleComponentDidMountSpecificActions() {
@@ -1125,13 +1131,13 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search");
+              browserHistory.push("/search");
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry");
+              browserHistory.push("/goalEntry");
               break;
       }
   };
@@ -1241,13 +1247,15 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     getBasicView = () => {
-        return (
-                        <div ref="ref_basic">
+            return (
+                <div ref="ref_basic" >
 
-            <ProgramBasicView data={this.state.data} forSearch={this.props.forSearch} isListNode={this.props.isListNode} />
-                            </div>
-        )
-    };
+                    <ProgramBasicView data={this.state.data} forSearch={this.props.forSearch} isListNode={this.props.isListNode}  />
+                </div>
+            )
+        };
+
+
 
     getEditView = () => {
         return(
@@ -1434,7 +1442,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
      }
      goToAuthorPage() {
 
-         hashHistory.push("/profiles/" + this.state.data.author)
+         browserHistory.push("/profiles/" + this.state.data.author)
 
      }
 
@@ -1442,13 +1450,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search");
+              browserHistory.push("/search");
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry");
+              browserHistory.push("/goalEntry");
               break;
       }
   };
@@ -1521,6 +1529,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
 
 
+
     getControlBar = () => {
         return(
         <ItemControlBar myRef="ref_itemControlBar"
@@ -1536,13 +1545,18 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
 
-    getBasicView = () => {
-        return (
-                        <div ref="ref_basic">
 
-            <PlanBasicView data={this.state.data} isListNode={this.props.isListNode} />
-                            </div>
-        )
+
+    getBasicView = () => {
+
+            return (
+                <div ref="ref_basic" >
+
+                    <PlanBasicView data={this.state.data} isListNode={this.props.isListNode}/>
+                </div>
+            )
+
+
     };
 
     getEditView = () => {
@@ -1621,7 +1635,7 @@ hideComponent = () => {
 />
 
                 <div className="ui segment noBottomMargin noTopMargin">
-                    <div>{basicView}</div>
+                    <div>{basicView2}</div>
                     {detailView}
                     {editView}
 

@@ -55,7 +55,7 @@ export class BlogPage extends React.Component {
 
     getPosts = () => {
         console.log("getPosts");
-        var theUrl = 'api/blogPosts/';
+        var theUrl = '/api/blogPosts/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -92,12 +92,12 @@ export class BlogPage extends React.Component {
 
                             <div className="spacer">&nbsp;</div>
                             <div className="ui large breadcrumb">
-                                <Link to={`/#`}>
+                                <Link to={`/`}>
                                     <div className="section">Home</div>
                                 </Link>
 
                                 <i className="right chevron icon divider"></i>
-                                <Link to={`/#/blog`}>
+                                <Link to={`/blog`}>
                                     <div className="active section">Blog</div>
                                 </Link>
                             </div>

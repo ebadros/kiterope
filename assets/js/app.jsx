@@ -35,7 +35,7 @@ export class App extends React.Component {
     logoutHandler(){
         store.dispatch(reduxLogout());
         auth.logout();
-        hashHistory.push('/account/login/')
+        browserHistory.push('/account/login/')
 
     }
 
@@ -159,7 +159,7 @@ export class KRCheckBox extends React.Component {
                     <div className="ui row">
                  <div className="ui checkbox">
                      <input type="checkbox" defaultChecked={this.state.value} onChange={this.handleChangeValue}/>
-                     <label>I have read and agree to Kiterope's <Link to="tos">Terms of Service.</Link></label>
+                     <label>I have read and agree to Kiterope's <Link to="/tos">Terms of Service.</Link></label>
                      <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
 
 
@@ -173,7 +173,7 @@ export class KRCheckBox extends React.Component {
              <div className="ui row">
                  <div className="ui checkbox">
                      <input type="checkbox" value={this.state.value} onChange={this.handleChangeValue}/>
-                     <label>I have read and agree to Kiterope's <Link to="tos">Terms of Service.</Link></label>
+                     <label>I have read and agree to Kiterope's <Link to="/tos">Terms of Service.</Link></label>
 
 </div></div>
         )

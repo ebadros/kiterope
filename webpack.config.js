@@ -7,17 +7,38 @@ module.exports = {
 
   context: __dirname,
 
-  entry: './assets/js/index', // entry point of our app. assets/js/index.js should require other js modules and dependencies it needs
+  entry: ['webpack-dev-server/client?http://localhost:3000',
+      'webpack/hot/only-dev-server',
+    './assets/js/index',
+    ],
 
   output: {
       path: path.resolve('./assets/bundles/'),
       //filename: "main_bundle.js",
 
       filename: "[name]-[hash].js",
+     publicPath: 'http://localhost:3000/static/bundles/'
   },
+  devServer: {
+        historyApiFallback: {
+            index: '/index.html'
+        },
+        stats: true,
+        inline: true,
+        progress: true
+    },
+
+
+
+
+
 
 
   plugins: [
+          new webpack.HotModuleReplacementPlugin(),
+          new webpack.NoErrorsPlugin(), // don't reload if there is an error
+
+
     new BundleTracker({filename: './webpack-stats.json'}),
     new webpack.ProvidePlugin({
       $: 'jquery',
@@ -31,13 +52,13 @@ module.exports = {
     loaders: [
       { test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        query:
-      {
-        presets:['react','es2015',  'stage-2'],
-        plugins: ["transform-decorators-legacy", "transform-class-properties", ]
+        loaders: ['react-hot','babel-loader']},
+        //query:
+      //{
+        //presets:['react','es2015',  'stage-2'],
+        //plugins: ["transform-decorators-legacy", "transform-class-properties", ]
 
-      }},
+      //}},
       { test: /\.css$/, loader: "style-loader!css-loader" },
         {test: /\.json$/, loader: 'json-loader'}
 // to transform JSX into JS

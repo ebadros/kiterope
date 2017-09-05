@@ -25,8 +25,8 @@ function printObject(o) {
 @connect(mapStateToProps, mapDispatchToProps)
 export class SplashPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             user: ""
         }
@@ -38,7 +38,7 @@ export class SplashPage extends React.Component {
     }
 
     checkIfUser() {
-        var theUrl = 'api/users/i/'
+        var theUrl = '/api/users/i/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -51,19 +51,22 @@ export class SplashPage extends React.Component {
                 if (theUser.id != null) {
                     this.setState({
                         user: theUser
-                    })
-                    store.dispatch(setCurrentUser(theUser))
-                    hashHistory.push("/daily/")
+                    });
+                    store.dispatch(setCurrentUser(theUser));
+                    browserHistory.push("/daily/")
                 } else {
+                   browserHistory.push("/search/")
 
-                    hashHistory.push("/search/")
+
 
                 }
 
             }.bind(this),
             error: function (xhr, status, err) {
                 //store.dispatch(push('/search/'))
-                hashHistory.push("/search/")
+                                   // props.history.push("/search/")
+
+                browserHistory.push("/search/");
                 //history.push('/search/')
 
 
@@ -87,4 +90,4 @@ export class SplashPage extends React.Component {
     }
 }
 
-module.exports =  { SplashPage }
+module.exports =  { SplashPage };

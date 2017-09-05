@@ -250,13 +250,14 @@ export const subscribeModalStyle = {
 
   content : {
     top                   : '10%',
-    left                  : '50%',
-    right                 : '50%',
-    bottom                : '5%',
+    left                  : '10%',
+    right                 : '10%',
+    bottom                : '10%',
     WebkitOverflowScrolling    : 'touch',
     borderRadius               : '4px',
     outline                    : 'none',
-    padding                    : '40px'
+    padding                    : '40px',
+      paddingTop:'40px'
   }
 };
 function printObject(o) {
@@ -272,4 +273,4 @@ function printObject(o) {
 
 
 module.exports = {  theServer, periodOptions, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
-    TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };
+    TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };

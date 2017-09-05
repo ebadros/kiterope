@@ -51,8 +51,8 @@ function printObject(o) {
 
 export class PlanDetailPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             editable:false,
@@ -66,7 +66,7 @@ export class PlanDetailPage extends React.Component {
 
     loadStepsFromServer = () => {
         $.ajax({
-          url: "api/plans/" + this.props.params.plan_id + "/steps" ,
+          url: "/api/plans/" + this.props.params.plan_id + "/steps" ,
           dataType: 'json',
           cache: false,
           success: function(data) {
@@ -77,11 +77,11 @@ export class PlanDetailPage extends React.Component {
             console.error(this.props.url, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
     loadFromServer = () => {
     $.ajax({
-      url: "api/plans/" + this.props.params.plan_id + "/",
+      url: "/api/plans/" + this.props.params.plan_id + "/",
       dataType: 'json',
       cache: false,
         headers: {
@@ -92,16 +92,16 @@ export class PlanDetailPage extends React.Component {
             data: planData});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error("api/plans/" + this.props.params.plan_id + "/", status, err.toString());
+        console.error("/api/plans/" + this.props.params.plan_id + "/", status, err.toString());
       }.bind(this),
 
     });
-  }
+  };
 
   handleStepSubmit (step, callback) {
 
              $.ajax({
-                 url: "api/steps/",
+                 url: "/api/steps/",
                  dataType: 'json',
                  type: 'POST',
                  data: step,
@@ -109,12 +109,12 @@ export class PlanDetailPage extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     callback
+                     callback;
                      this.handleCancelClicked()
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error("api/steps/", status, err.toString());
+                     console.error("/api/steps/", status, err.toString());
                      this.setState({
                          error: err,
                      })
@@ -126,7 +126,7 @@ export class PlanDetailPage extends React.Component {
     componentWillUnmount = () => {
         //clearInterval(this.state.stepsIntervalId);
 
-    }
+    };
 
   determineOptions = () => {
               //var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
@@ -150,12 +150,12 @@ export class PlanDetailPage extends React.Component {
           }
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error("api/plans/" + this.props.params.plan_id + "/", status, err.toString());
+        console.error("/api/plans/" + this.props.params.plan_id + "/", status, err.toString());
       }.bind(this),
 
 
     });
-  }
+  };
 
 
 
@@ -170,7 +170,7 @@ export class PlanDetailPage extends React.Component {
             console.error(this.props.url, status, err.toString());
         }.bind(this)
     });
-  }
+  };
 
     showCalendar() {
         $(this.refs['ref_calendarView']).slideDown();
@@ -187,10 +187,10 @@ export class PlanDetailPage extends React.Component {
     handleViewClick = (selectedView) => {
         this.setState({
             selectedView:selectedView
-        })
+        });
         this.selectView(selectedView)
 
-    }
+    };
 
     selectView = (selectedView) => {
         if (selectedView == "calendar") {
@@ -198,16 +198,16 @@ export class PlanDetailPage extends React.Component {
         } else if (selectedView == "list") {
             this.showList()
         }
-    }
+    };
 
   componentDidMount() {
-      this.determineOptions()
-      this.loadFromServer()
+      this.determineOptions();
+      this.loadFromServer();
       //var stepsIntervalId = setInterval(this.loadStepsFromServer, 800)
       //this.setState({stepsIntervalId:stepsIntervalId})
-      this.loadStepsFromServer()
-      $(this.refs['ref_whichStepForm']).hide()
-    this.selectView(this.state.selectedView)
+      this.loadStepsFromServer();
+      $(this.refs['ref_whichStepForm']).hide();
+    this.selectView(this.state.selectedView);
 
         $(".fullPageDiv").hide();
         $(".fullPageDiv").slideToggle();
@@ -215,13 +215,13 @@ export class PlanDetailPage extends React.Component {
   }
 
   handleCancelClicked = () => {
-      $(this.refs['ref_whichStepForm']).slideUp()
+      $(this.refs['ref_whichStepForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Add Step"
       })
 
-  }
+  };
   handleOpenForm = () => {
         this.setState({
             openModal:false,
@@ -230,10 +230,10 @@ export class PlanDetailPage extends React.Component {
         }, () => {$(this.refs['ref_whichStepForm']).slideDown()} )
 
 
-    }
+    };
     handleReloadItem = () => {
         this.loadStepsFromServer()
-    }
+    };
 
 
 
@@ -243,7 +243,7 @@ export class PlanDetailPage extends React.Component {
             formIsOpen:false,
         }, () => $(this.refs['ref_whichStepForm']).slideUp())
 
-    }
+    };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -253,7 +253,7 @@ export class PlanDetailPage extends React.Component {
       else {
           this.handleOpenForm()
       }
-    }
+    };
 
     render() {
         return (
@@ -273,7 +273,7 @@ export class PlanDetailPage extends React.Component {
 
                         <PlanOccurrenceViewEditDeleteItem isListNode={false}
                                                 showCloseButton={false}
-                                                apiUrl="api/plans/"
+                                                apiUrl="/api/plans/"
                                                 id={this.props.params.plan_id}
                                                 data={this.state.data}
                                                 currentView="Basic" />
@@ -334,8 +334,8 @@ export class PlanDetailPage extends React.Component {
 
 export class ViewSelector extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             selectedView:"calendar"
 
@@ -344,11 +344,11 @@ export class ViewSelector extends React.Component {
 
     handleCalendarViewClick = () => {
         this.props.viewClick("calendar")
-    }
+    };
 
     handleListViewClick = () => {
         this.props.viewClick("list")
-    }
+    };
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.selectedView != nextProps.selectedView) {
@@ -356,19 +356,19 @@ export class ViewSelector extends React.Component {
                 selectedView: nextProps.selectedView
             })
         }
-    }
+    };
 
     render = () => {
 
         if (this.state.selectedView == "calendar") {
-            var calendarSelected = "active raspberry  item"
-            var listSelected = " item "
-            var calendarIconColor = "Dark"
+            var calendarSelected = "active raspberry  item";
+            var listSelected = " item ";
+            var calendarIconColor = "Dark";
             var listIconColor = "Light"
         } else if (this.state.selectedView == "list") {
-            var listSelected = "active raspberry  item "
-            var calendarSelected = " item "
-                        var calendarIconColor = "Light"
+            var listSelected = "active raspberry  item ";
+            var calendarSelected = " item ";
+                        var calendarIconColor = "Light";
                         var listIconColor = "Dark"
 
 
@@ -391,8 +391,8 @@ export class ViewSelector extends React.Component {
 
 export class PlanForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             image: "",
@@ -464,18 +464,18 @@ export class PlanForm extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        this.checkIfUser()
+        this.checkIfUser();
 
         if (this.state.user) {
             var viewableBy = this.state.viewableBy;
-            var startDate = moment(this.state.startDate).format("YYYY-MM-DD")
+            var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
 
             var planData = {
 
                 viewableBy: viewableBy,
                 startDate: startDate,
 
-            }
+            };
 
             if (this.state.id != "") {
                 planData.id = this.state.id
@@ -509,7 +509,7 @@ export class PlanForm extends React.Component {
                     data: "",
                 }
             );
-        }
+        };
 
 
         getForm = () => {
@@ -520,12 +520,12 @@ export class PlanForm extends React.Component {
                 var buttonText = "Create"
             }
 
-            var imageUrl = s3ImageUrl + this.state.image
+            var imageUrl = s3ImageUrl + this.state.image;
 
 
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
-            var smallColumnWidth = "eight wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
 
 
           return (
@@ -575,14 +575,14 @@ export class PlanForm extends React.Component {
               </div>
           )
 
-    }
+    };
 
 
 
 
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
             return(
                 <div >
@@ -600,8 +600,8 @@ export class PlanForm extends React.Component {
 
 export class SimplePlanForm extends PlanForm {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             image: "",
@@ -630,8 +630,8 @@ export class SimplePlanForm extends PlanForm {
 
     getForm = () => {
 
-        var imageUrl = s3ImageUrl + this.state.image
-        var startDate = moment(this.state.startDate).format("MMM DD, YYYY")
+        var imageUrl = s3ImageUrl + this.state.image;
+        var startDate = moment(this.state.startDate).format("MMM DD, YYYY");
         return (
             <div className="ui page container">
                 <div className="ui grid">
@@ -706,10 +706,10 @@ export class SimplePlanForm extends PlanForm {
                 </div>
             </div>
 
-        )}
+        )};
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
         if (this.state.editable) {
             return(
@@ -739,8 +739,8 @@ export class SimplePlanForm extends PlanForm {
 
 export class PlanList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
         }
@@ -751,7 +751,7 @@ export class PlanList extends React.Component {
     }
 
     loadFromServer = () => {
-        var theURL = "api/goals/" + this.props.parentId + "/planOccurrences"
+        var theURL = "/api/goals/" + this.props.parentId + "/planOccurrences";
 
       $.ajax({
       url: theURL,
@@ -772,7 +772,7 @@ export class PlanList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data && nextProps.data != null) {
@@ -788,7 +788,7 @@ export class PlanList extends React.Component {
             backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
             width: '300px',
             height: '300px',
-        }
+        };
 
         if (this.state.data) {
 
@@ -797,12 +797,12 @@ export class PlanList extends React.Component {
                     <PlanViewEditDeleteItem key={planOccurrence.id}
                                             isListNode={true}
                                             showCloseButton={false}
-                                            apiUrl="api/plans/"
+                                            apiUrl="/api/plans/"
                                             id={planOccurrence.id}
                                             data={planOccurrence.programInfo}
                                             currentView="Basic"/>
 
-)
+);
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })
@@ -824,7 +824,7 @@ export class PlanList extends React.Component {
 
 export class PlanListNode extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         autobind(this)
 
     }
@@ -834,10 +834,10 @@ export class PlanListNode extends React.Component {
 
     clearPage = () => {
 
-        hashHistory.push('/plans/' + this.props.plan.id + '/steps')
+        browserHistory.push('/plans/' + this.props.plan.id + '/steps')
 
 
-    }
+    };
 
     render () {
 
@@ -886,11 +886,11 @@ export class PlanBasicView extends React.Component {
     }
 
     findLabel (theValue, theArray) {
-        var returnValue = "Not available"
+        var returnValue = "Not available";
         if (theValue) {
             for (var i = 0; i < theArray.length; i++) {
                 if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label
+                    returnValue =  theArray[i].label;
                     return returnValue
                 }
             }
@@ -902,19 +902,19 @@ export class PlanBasicView extends React.Component {
     }
 
     goToDetail() {
-        hashHistory.push("/plans/" + this.state.data.id + "/steps")
+        browserHistory.push("/plans/" + this.state.data.id + "/steps")
 
 }
     render() {
-        var theCost
+        var theCost;
             if (this.state.data.cost == 0.00 || this.state.data.costFrequencyMetric == "FREE") {
                 theCost = "Free"
             }
             else {
                 theCost =  this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
             }
-            var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths)
-            var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions)
+            var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
+            var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
 
         if (this.props.isListNode) {
 

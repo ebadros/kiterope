@@ -84,12 +84,12 @@ export class UpdatesList extends React.Component {
 
     handleFormSubmit = (update, callback) => {
         if (this.props.updateId) {
-            var theUrl = "api/updates/" + this.props.updateId + "/";
+            var theUrl = "/api/updates/" + this.props.updateId + "/";
             var theType = 'PATCH';
 
         }
         else {
-            var theUrl = "api/updates/";
+            var theUrl = "/api/updates/";
             var theType = 'POST';
         }
         $.ajax({
@@ -112,7 +112,7 @@ export class UpdatesList extends React.Component {
     loadObjectsFromServer = (theStepId) => {
 
         if (theStepId != undefined) {
-            var theUrl = "api/steps/" + theStepId + "/updates/";
+            var theUrl = "/api/steps/" + theStepId + "/updates/";
 
             $.ajax({
                 url: theUrl ,
@@ -322,7 +322,7 @@ export class UpdateAddAndEditItemForm extends React.Component {
 
     deleteUpdate() {
 
-        var theUrl = "api/updates/" + this.state.data.id + "/";
+        var theUrl = "/api/updates/" + this.state.data.id + "/";
 
         $.ajax({
         url: theUrl,
@@ -739,7 +739,7 @@ export class UpdateItem extends React.Component{
 
     handleFormSubmit = (update, callback) => {
         if (this.state.id) {
-            var theUrl = "api/updates/" + this.state.id + "/";
+            var theUrl = "/api/updates/" + this.state.id + "/";
             var theType = 'PATCH';
 
         }

@@ -576,7 +576,7 @@ export class StepBasicView extends React.Component {
 
     goToDetail() {
          if (this.state.data.id) {
-             hashHistory.push("/steps/" + this.state.data.id + "/updates")
+             browserHistory.push("/steps/" + this.state.data.id + "/updates")
          }
      }
     render() {

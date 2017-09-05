@@ -43,8 +43,8 @@ function printObject(o) {
 
 export class ClientListPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
             activePage:1,
@@ -61,7 +61,7 @@ export class ClientListPage extends React.Component {
             error:theError,
         })
 
-    }
+    };
 
 
 
@@ -71,7 +71,7 @@ export class ClientListPage extends React.Component {
       }  else {
           var theUrl = "api/clients/"
       }
-      console.log(theUrl)
+      console.log(theUrl);
     $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -92,7 +92,7 @@ export class ClientListPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
   handleGoalSubmit (goal) {
     $.ajax({
@@ -124,7 +124,7 @@ export class ClientListPage extends React.Component {
   }
 handleToggleForm = () => {
         $(this.refs['ref_whichProfileForm']).slideToggle()
-    }
+    };
 
     componentDidMount() {
         this.loadClientsFromServer();
@@ -150,7 +150,7 @@ handleToggleForm = () => {
   handlePageChange = (pageNumber) => {
         this.setState({activePage: pageNumber}, () => this.loadClientsFromServer());
 
-    }
+    };
 
   getPagination()  {
           if (this.state.next != null || this.state.previous != null) {
@@ -176,18 +176,18 @@ handleToggleForm = () => {
         }, () => {$(this.refs['ref_whichProfileForm']).slideDown()} )
 
 
-    }
+    };
     handleReloadItem = () => {
         this.loadStepsFromServer()
-    }
+    };
 handleCancelClicked = () => {
-      $(this.refs['ref_whichProfileForm']).slideUp()
+      $(this.refs['ref_whichProfileForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Add Client"
       })
 
-  }
+  };
 
 
   handleCloseForm = () => {
@@ -196,7 +196,7 @@ handleCancelClicked = () => {
             formIsOpen:false,
         }, () => $(this.refs['ref_whichProfileForm']).slideUp())
 
-    }
+    };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -206,7 +206,7 @@ handleCancelClicked = () => {
       else {
           this.handleOpenForm()
       }
-    }
+    };
 
 
 componentWillUnmount() {
@@ -218,7 +218,7 @@ componentWillUnmount() {
     }
 
   render() {
-      var pagination = this.getPagination()
+      var pagination = this.getPagination();
 
     return (
 
@@ -234,10 +234,10 @@ componentWillUnmount() {
 
             <div className="spacer">&nbsp;</div>
             <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
+                <Link to={`/`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">My Clients</div></Link>
+                  <Link to={`/`}><div className="active section">My Clients</div></Link>
             </div>
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="My Clients" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
@@ -256,8 +256,8 @@ componentWillUnmount() {
 }
 export class ProfileForm extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
            files:[],
             id:"",
@@ -273,7 +273,7 @@ export class ProfileForm extends React.Component {
 
 
     componentDidMount () {
-        $(this.refs['id_whichGoalForm']).hide()
+        $(this.refs['id_whichGoalForm']).hide();
         this.checkIfUser()
     }
 
@@ -326,15 +326,15 @@ export class ProfileForm extends React.Component {
 
     getDescriptionEditor () {
          if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else {
 
 
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
+            var wideColumnWidth = "ten wide column";
+            var mediumColumnWidth = "four wide column";
             var smallColumnWidth = "three wide column"
         }
                 if (this.state.bio == null) {
@@ -368,18 +368,18 @@ export class ProfileForm extends React.Component {
     getImageEditSection() {
 
         if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else {
 
 
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
+            var wideColumnWidth = "ten wide column";
+            var mediumColumnWidth = "four wide column";
             var smallColumnWidth = "three wide column"
         }
-            var theImage = s3ImageUrl + this.state.profilePhoto
+            var theImage = s3ImageUrl + this.state.profilePhoto;
             var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/images/", "");
 
             return (
@@ -435,7 +435,7 @@ export class ProfileForm extends React.Component {
         this.setState({
             profilePhoto: callbackData.image
         })
-    }
+    };
 
     resetForm = () => {
         this.setState({
@@ -449,20 +449,20 @@ export class ProfileForm extends React.Component {
             notificationChannel:""
             })
 
-    }
+    };
 
     handleSubmit(e) {
         e.preventDefault();
-        this.checkIfUser()
+        this.checkIfUser();
 
 if (this.state.user) {
-        var id = this.state.id
+        var id = this.state.id;
         var firstName = this.state.firstName;
         var lastName = this.state.lastName;
         var zipCode = this.state.zipCode;
         var profilePhoto = this.state.profilePhoto;
         var bio = this.state.bio;
-    var notificationChannel = this.state.notificationChannel
+    var notificationChannel = this.state.notificationChannel;
 
 
 
@@ -501,20 +501,20 @@ if (this.state.user) {
                 var buttonText = "Create"
             }
 
-            var imageUrl = s3ImageUrl + this.state.profilePhoto
+            var imageUrl = s3ImageUrl + this.state.profilePhoto;
 
-            var descriptionEditor = this.getDescriptionEditor()
+            var descriptionEditor = this.getDescriptionEditor();
 
             if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column"
-            var mediumColumnWidth = "sixteen wide column"
+                var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column"
 
             } else {
 
 
-            var wideColumnWidth = "ten wide column"
-            var mediumColumnWidth = "four wide column"
+            var wideColumnWidth = "ten wide column";
+            var mediumColumnWidth = "four wide column";
             var smallColumnWidth = "three wide column"
         }
           return (
@@ -608,14 +608,14 @@ if (this.state.user) {
               </div>
           )
 
-    }
+    };
 
 
 
 
 
     render() {
-    var theForm = this.getForm()
+    var theForm = this.getForm();
 
             return(
                 <div >
@@ -634,8 +634,8 @@ if (this.state.user) {
 export class ProfileViewAndEditPage extends React.Component {
 
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
         }
@@ -645,11 +645,11 @@ export class ProfileViewAndEditPage extends React.Component {
 
         this.loadObjectsFromServer()
 
-    }
+    };
 
     loadObjectsFromServer = () => {
-        var theUrl = "api/myProfile"
-        console.log(theUrl)
+        var theUrl = "api/myProfile";
+        console.log(theUrl);
         $.ajax({
           url: "api/myProfile",
           dataType: 'json',
@@ -663,7 +663,7 @@ export class ProfileViewAndEditPage extends React.Component {
             console.error(theUrl, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
 
 
@@ -696,8 +696,8 @@ export class ProfileViewAndEditPage extends React.Component {
 export class ProfileViewPage extends React.Component {
 
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
         }
@@ -708,12 +708,12 @@ export class ProfileViewPage extends React.Component {
 
         this.loadObjectsFromServer()
 
-    }
+    };
 
     loadObjectsFromServer = () => {
 
-        console.log("inside loadObjectsFromServer")
-        var myUrl = "api/profiles/" + this.props.params.profile_id + "/"
+        console.log("inside loadObjectsFromServer");
+        var myUrl = "api/profiles/" + this.props.params.profile_id + "/";
         $.ajax({
           url: myUrl,
           dataType: 'json',
@@ -730,7 +730,7 @@ export class ProfileViewPage extends React.Component {
             console.error(myUrl, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
     render() {
 
@@ -764,8 +764,8 @@ export class ProfileViewPage extends React.Component {
 
 export class ClientDetailPage extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[],
             editable:false,
@@ -779,7 +779,7 @@ export class ClientDetailPage extends React.Component {
 
     loadDetailFromServer = () => {
 
-        var theURL = "api/clients/" + this.props.params.profile_id + "/"
+        var theURL = "api/clients/" + this.props.params.profile_id + "/";
 
 
     $.ajax({
@@ -798,7 +798,7 @@ export class ClientDetailPage extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
   handleFormActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -814,14 +814,14 @@ export class ClientDetailPage extends React.Component {
 
       }
 
-}
+};
 
     handleOpenModal = () => {
-        this.setState({openModal:true})
+        this.setState({openModal:true});
         //$(this.refs['id_whichPlanForm']).slideToggle()
-    }
+    };
 
-    handleOpenForm = () => {;
+    handleOpenForm = () => {
         this.setState({
             openModal:false,
             headerActionButtonLabel: "Close Form",
@@ -829,7 +829,7 @@ export class ClientDetailPage extends React.Component {
         }, () => {$(this.refs['id_whichPlanForm']).slideDown()} )
 
 
-    }
+    };
 
 
     handleCloseForm = () => {
@@ -838,10 +838,10 @@ export class ClientDetailPage extends React.Component {
             formIsOpen:false,
         }, $(this.refs['id_whichPlanForm']).slideUp())
 
-    }
+    };
 
   determineOptions = () => {
-            var theURL = "api/profiles/" + this.props.params.profile_id + "/"
+            var theURL = "api/profiles/" + this.props.params.profile_id + "/";
       $.ajax({
       url: theURL,
       dataType: 'json',
@@ -865,11 +865,11 @@ export class ClientDetailPage extends React.Component {
 
 
     });
-  }
+  };
 
   componentDidMount() {
-    this.determineOptions()
-      this.loadDetailFromServer()
+    this.determineOptions();
+      this.loadDetailFromServer();
       $(this.refs['id_whichPlanForm']).hide()
 
 
@@ -879,16 +879,16 @@ export class ClientDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search")
+              browserHistory.push("/search");
               break;
           case ("create"):
-              this.handleOpenForm()
+              this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry")
+              browserHistory.push("/goalEntry");
               break;
       }
-  }
+  };
 
     render () {
 
@@ -957,7 +957,7 @@ export class ProfileBasicView extends React.Component {
     }
 
     goToDetail() {
-        hashHistory.push("/plans/" + this.state.data.id + "/steps")
+        browserHistory.push("/plans/" + this.state.data.id + "/steps")
 
 }
     render() {
@@ -1028,8 +1028,8 @@ export class ProfileBasicView extends React.Component {
 
 export class ProfileView extends React.Component {
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
             streams: []
@@ -1107,8 +1107,8 @@ export class ProfileView extends React.Component {
 
 export class ClientList extends React.Component {
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data:[]
         }
@@ -1119,7 +1119,7 @@ export class ClientList extends React.Component {
     }
 
     loadFromServer = () => {
-        var theURL = "api/clients"
+        var theURL = "api/clients";
 
       $.ajax({
       url: theURL,
@@ -1140,7 +1140,7 @@ export class ClientList extends React.Component {
       }.bind(this),
 
     });
-  }
+  };
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data && nextProps.data != null) {
@@ -1156,7 +1156,7 @@ export class ClientList extends React.Component {
             backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
             width: '300px',
             height: '300px',
-        }
+        };
 
         if (this.state.data) {
 
@@ -1170,7 +1170,7 @@ export class ClientList extends React.Component {
                                             data={profile}
                                             currentView="Basic"/>
 
-)
+);
 
             //return (<PlanListNode key={plan.id} plan={plan}/>)
         })
@@ -1190,4 +1190,4 @@ export class ClientList extends React.Component {
 }
 
 
-module.exports = { ProfileViewPage, ProfileView, ProfileViewAndEditPage, ClientDetailPage, ProfileBasicView, ProfileForm, ClientListPage , ClientList }
+module.exports = { ProfileViewPage, ProfileView, ProfileViewAndEditPage, ClientDetailPage, ProfileBasicView, ProfileForm, ClientListPage , ClientList };

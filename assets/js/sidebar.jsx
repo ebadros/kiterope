@@ -37,7 +37,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 
         };
-                setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
+                //setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
 
     }
 
@@ -109,7 +109,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
         auth.logout();
 
-        hashHistory.push('/account/login/')
+        browserHistory.push('/account/login/')
 
 
 
@@ -174,29 +174,29 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
                         {viewSwitcher}
 
-                        <a className="item" style={style} href="/#/programs">
+                        <a className="item" style={style} href="/programs">
                             <i className="large cubes icon"/>
                             My Programs
                         </a>
-                        <a className="item" style={style} href="/#/contacts">
+                        <a className="item" style={style} href="/contacts">
                             <i className="large users icon"/>
                             My Contacts
                         </a>
 
                                 { this.props.user ?
-                                    <a className="item" style={style} href={`/#/profiles/${this.props.user.profileId}`}>
+                                    <a className="item" style={style} href={`/profiles/${this.props.user.profileId}`}>
                                         <i className="large user icon"/>
                                         My Profile
                                     </a> : <div></div>}
 
 
-                        <a className="item"  style={style} href="/#/search">
+                        <a className="item"  style={style} href="/search">
                             <i className="large search icon"/>
                             Search
                         </a>
 
 
-                        <a className="item" href="/#/messages">
+                        <a className="item" href="/messages">
                             <i className="large mail icon"/>
                             Messages
                         </a>
@@ -204,7 +204,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large settings icon"/>
                             Settings
                         </a>
-                        <a className="item" style={style} href="/#/blog">
+                        <a className="item" style={style} href="/blog">
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>
@@ -220,32 +220,32 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large close icon"></i>
                         </a>
 
-                    <a className="item" onClick={() => hashHistory.push("/")}>
+                    <a className="item" onClick={() => browserHistory.push("/")}>
                         <i className="large home icon"></i>
                         Home
                     </a>
                     {viewSwitcher}
 
-                    <a className="item" href="/#/goals">
+                    <a className="item" href="/goals">
                         <i className="large block layout icon"/>
                         My Goals
                     </a>
-                    <a className="item" href="/#/contacts">
+                    <a className="item" href="/contacts">
                         <i className="large users icon"/>
                         My Contacts
                     </a>
-                    { this.props.user ? <a className="item" href={`/#/profiles/${this.props.user.profileId}`}>
+                    { this.props.user ? <a className="item" href={`/profiles/${this.props.user.profileId}`}>
                         <i className="large user icon"/>
                         My Profile
                     </a> : <div></div>}
 
-                    <a className="item" href="/#/search">
+                    <a className="item" href="/search">
                         <i className="large search icon"/>
                         Search
                     </a>
 
 
-                    <a className="item" href="/#/messages">
+                    <a className="item" href="/messages">
                         <i className="large mail icon"/>
                         Messages
                     </a>
@@ -253,7 +253,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         <i className="large settings icon"/>
                         Settings
                     </a>
-                    <a className="item" style={style} href="/#/blog">
+                    <a className="item" style={style} href="/blog">
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>

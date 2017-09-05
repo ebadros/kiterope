@@ -40,7 +40,7 @@ BigCalendar.setLocalizer(
   BigCalendar.momentLocalizer(moment)
 );
 //BigCalendar.momentLocalizer(moment);
-let allViews = Object.keys(BigCalendar.views).map(k => BigCalendar.views[k])
+let allViews = Object.keys(BigCalendar.views).map(k => BigCalendar.views[k]);
 
 import {  s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, TINYMCE_CONFIG, times, durations, theServer, } from './constants'
@@ -55,8 +55,8 @@ function printObject(o) {
 
 export class ProgramCalendar extends React.Component{
     constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             events:[],
             stepMethod:"",
@@ -69,7 +69,7 @@ export class ProgramCalendar extends React.Component{
 
 
     getProgramStartDate = () => {
-        var theUrl = "api/programs/" + this.props.planId + "/"
+        var theUrl = "api/programs/" + this.props.planId + "/";
         $.ajax({
           url: theUrl ,
           dataType: 'json',
@@ -85,12 +85,12 @@ export class ProgramCalendar extends React.Component{
             console.error(theUrl, status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
       componentWillReceiveProps = (nextProps) => {
           if (this.state.events != nextProps.events) {
               if (this.state.currentStepId != "") {
-                  var newCurrentStepData = this.findObjectById(this.state.currentStepId, nextProps.events)
+                  var newCurrentStepData = this.findObjectById(this.state.currentStepId, nextProps.events);
                   this.setState({
                       events: nextProps.events,
                       currentStepData: newCurrentStepData
@@ -101,7 +101,7 @@ export class ProgramCalendar extends React.Component{
 
 
           }
-      }
+      };
 
 
 
@@ -118,7 +118,7 @@ export class ProgramCalendar extends React.Component{
         $(this.refs["ref_edit"]).hide();
         this.getProgramStartDate()
 
-    }
+    };
 
 
     // I need to switch StepViewEditDeleteItem so that it gets a stepId and gets its own data and also gets its own eventInfo
@@ -135,23 +135,23 @@ export class ProgramCalendar extends React.Component{
         },
             () => this.showEdit())
 
-    }
+    };
 
     convertEventToWork = (theEvent) => {
-        var convertedEvent = theEvent
+        var convertedEvent = theEvent;
         convertedEvent.startDate = theEvent.startDate
-    }
+    };
 
 
 
     createEvent = (slotInfo) => {
-        var programStartDate = convertDate(this.state.programStartDate, 0, "dateFormat", "relativeTime")
-        var eventStartDate = convertDate(slotInfo.start, 0, "dateFormat", "relativeTime" )
+        var programStartDate = convertDate(this.state.programStartDate, 0, "dateFormat", "relativeTime");
+        var eventStartDate = convertDate(slotInfo.start, 0, "dateFormat", "relativeTime" );
 
-        var startDate = daysBetweenDates(programStartDate, eventStartDate, )
-        var endDate = startDate
+        var startDate = daysBetweenDates(programStartDate, eventStartDate, );
+        var endDate = startDate;
 
-        var startDate
+        var startDate;
         this.setState({
             eventInfo:slotInfo,
                 currentView: "Edit",
@@ -161,27 +161,27 @@ export class ProgramCalendar extends React.Component{
 
         },
             () => this.showCreate())
-    }
+    };
 
     convertToSameTimeInCurrentTimezoneInDateForm (theDate) {
-        var todaysDate = new Date()
+        var todaysDate = new Date();
         var tzDifference = todaysDate.getTimezoneOffset();
-        var theConvertedDate = new Date(theDate.getTime() + tzDifference * 60 * 1000)
+        var theConvertedDate = new Date(theDate.getTime() + tzDifference * 60 * 1000);
         return theConvertedDate
     }
 
     showCreate = () => {
-        $(this.refs["ref_edit"]).hide()
+        $(this.refs["ref_edit"]).hide();
         $(this.refs["ref_create"]).slideDown()
-    }
+    };
 
     showEdit = () => {
-        $(this.refs["ref_create"]).hide()
+        $(this.refs["ref_create"]).hide();
         $(this.refs["ref_edit"]).slideDown()
-    }
+    };
 
     handleStepEditCloseWindowClick = () => {
-        $(this.refs["ref_edit"]).slideUp()
+        $(this.refs["ref_edit"]).slideUp();
         this.setState({
             currentStepData:"",
             eventInfo:"",
@@ -189,23 +189,23 @@ export class ProgramCalendar extends React.Component{
 
         })
 
-    }
+    };
 
     handleStepCloseClick = () => {
-            $(this.refs["ref_create"]).slideUp()
+            $(this.refs["ref_create"]).slideUp();
         this.setState({
             currentStepData:"",
             eventInfo:"",
             stepMethod:"",
         })
 
-    }
+    };
 
 
 
     handleReloadItem = () => {
         this.props.reloadItem()
-    }
+    };
 
 
 
@@ -241,12 +241,12 @@ export class ProgramCalendar extends React.Component{
             });
 
         }
-  }
+  };
   handleCurrentViewChanged = (currentView) => {
 
       this.setState({currentView:currentView})
 
-  }
+  };
 
 
     render = () => {
@@ -260,7 +260,7 @@ export class ProgramCalendar extends React.Component{
                                             currentView={this.state.currentView}
                                             isListNode={false}
                                             showCloseButton={true}
-                                            apiUrl="api/steps/"
+                                            apiUrl="/api/steps/"
                                             id={this.state.currentStepId}
                                             data={this.state.currentStepData}
                                             editable={true}
@@ -280,7 +280,7 @@ export class ProgramCalendar extends React.Component{
 
                                             isListNode={false}
                                             showCloseButton={true}
-                                            apiUrl="api/steps/"
+                                            apiUrl="/api/steps/"
                                             id={this.state.currentStepId}
                                             data={this.state.currentStepData}
                                             editable={true}
@@ -394,7 +394,7 @@ export class StepCalendarComponent extends React.Component {
 
 
       getStepForm() {
-          var descriptionEditor = this.getDescriptionEditor()
+          var descriptionEditor = this.getDescriptionEditor();
 
           return (<div ref={`ref_stepForm_${this.props.method}`} className="ui form">
                 <form onSubmit={this.handleSubmit}>
@@ -590,11 +590,11 @@ export class StepCalendarComponent extends React.Component {
                         absoluteEndDate: moment(nextProps.eventInfo.start, "YYYY-MM-DD"),
                     })
                 }
-        }
+        };
 
     cancelButtonClicked = () => {
        this.closeWindowButtonClicked()
-    }
+    };
 
     componentDidMount() {
     //$(this.refs["ref_menubar_" + this.props.method]).slideDown();
@@ -629,7 +629,7 @@ export class StepCalendarComponent extends React.Component {
             })
 
 
-        }
+        };
 
         getDescriptionEditor() {
                 if (this.state.description == null) {
@@ -689,7 +689,7 @@ export class StepCalendarComponent extends React.Component {
         var absoluteEndDateInMomentForm = moment(absoluteEndDate);
 
         var programStartDateInDateForm = this.props.programStartDate;
-        var programStartDateInMomentForm = moment(programStartDateInDateForm)
+        var programStartDateInMomentForm = moment(programStartDateInDateForm);
         var startDate = absoluteStartDateInMomentForm.diff(programStartDateInMomentForm, 'days');
         var endDate = absoluteEndDateInMomentForm.diff(programStartDateInMomentForm, 'days');
 
@@ -718,7 +718,7 @@ export class StepCalendarComponent extends React.Component {
                 duration:duration,
                 durationMetric:durationMetric,
                 plan:this.props.planId,
-            }
+            };
 
 
         if (this.props.method=="edit") {
@@ -729,8 +729,8 @@ export class StepCalendarComponent extends React.Component {
         this.props.onFormSubmit(
             formData,
             function(data){
-                console.log("callback received")
-                this.props.methodChange({isVisible:false})
+                console.log("callback received");
+                this.props.methodChange({isVisible:false});
 
                     this.setState({
                         title: '',
@@ -749,14 +749,14 @@ export class StepCalendarComponent extends React.Component {
                         startTime:"",
                         duration:"1",
                         durationMetric:"Hour",
-                    })
+                    });
 
                 if (this.props.method=="edit") {
                     this.setState({editFormButtonText: "Edit"});
                 }
         }.bind(this));
 
-    }
+    };
 
 
     showAndHideUIElements = () => {
@@ -793,86 +793,86 @@ export class StepCalendarComponent extends React.Component {
 
 
         }
-    }
+    };
 
     handleFrequencyChange = (e) => {
         this.setState({frequency: e.target.value});
 
 
-    }
+    };
 
     handleTitleChange = (value) => {
-        console.log("handleTitleChange " + this.state.description)
+        console.log("handleTitleChange " + this.state.description);
 
             this.setState({title: value})
 
-    }
+    };
 
 
 
 
     handleAbsoluteStartDateChange = (date) =>  {
         this.setState({absoluteStartDate: date});
-  }
+  };
 
     handleAbsoluteEndDateChange = (date) => {
 
         this.setState({absoluteEndDate: date});
-  }
+  };
 
 
    handleEditorChange = (e) => {
         this.setState({description: e});
-  }
+  };
 
     handleDay01Change = (e) => {
         this.setState({day01: e.target.value});
-    }
+    };
 
     handleDay02Change = (e) => {
         this.setState({day02: e.target.value});
-    }
+    };
 
     handleDay03Change = (e) => {
         this.setState({day03: e.target.value});
-    }
+    };
 
     handleDay04Change = (e) => {
         this.setState({day04: e.target.value});
-    }
+    };
 
     handleDay05Change = (e) => {
 
         this.setState({day05: e.target.value});
-    }
+    };
 
     handleDay06Change = (e) => {
 
         this.setState({day06: e.target.value});
-    }
+    };
 
     handleDay07Change = (e) => {
 
         this.setState({day07: e.target.value});
-    }
+    };
 
     handleStartTimeChange = (e) => {
 
         this.setState({startTime:e});
-    }
+    };
 
     handleDurationChange = (e) => {
 
         this.setState({duration: e});
-    }
+    };
 
     handleDurationMetricChange = (e) => {
         this.setState({durationMetric: e.target.value});
-    }
+    };
 
     handleMonthlyDatesChange = (e) => {
         this.setState({monthlyDates: e.target.value});
-    }
+    };
 
 
      clearPage(plan_id) {
@@ -884,13 +884,13 @@ export class StepCalendarComponent extends React.Component {
 
     closeWindowButtonClicked = () => {
 
-        this.props.methodChange({isVisible:false})
+        this.props.methodChange({isVisible:false});
 
 
         this.clearState();
         //$(this.refs["ref_step_" + this.props.method]).slideUp();
 
-    }
+    };
 
 
 
@@ -908,7 +908,7 @@ export class StepCalendarComponent extends React.Component {
 
 
 
-    }
+    };
 
 
     getMenubar = () => {
@@ -927,12 +927,12 @@ export class StepCalendarComponent extends React.Component {
                             </div>
         )
 
-    }
+    };
 
 
     getExistingInfo = () => {
         return ""
-    }
+    };
 
     render() {
         var menubar = this.getMenubar();
@@ -977,13 +977,7 @@ export class StepCalendarComponent extends React.Component {
     }
 
 
-};
-
-
-
-
-
-
+}
 export class StepEditCalendarComponent extends StepCalendarComponent {
     constructor(props) {
         super(props);
@@ -1013,14 +1007,14 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
 
     cancelButtonClicked = () => {
         if($(this.refs["ref_stepForm_edit"]).is(":visible"))  {
-            $(this.refs["ref_stepForm_edit"]).slideUp()
-            $(this.refs["ref_stepExistingInfo"]).slideDown()
-            this.setState ({ editFormButtonText: "Edit"})
+            $(this.refs["ref_stepForm_edit"]).slideUp();
+            $(this.refs["ref_stepExistingInfo"]).slideDown();
+            this.setState ({ editFormButtonText: "Edit"});
             this.setStepData(this.props.stepData)
 
 
         }
-    }
+    };
 
 
 
@@ -1029,8 +1023,8 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
             var endDateInIntegerForm = stepData.endDate;
 
             var programStartDateInDateForm = this.props.programStartDate;
-            console.log("this.props.programStartDate " + programStartDateInDateForm)
-            var programStartDateInMomentForm = moment(programStartDateInDateForm)
+            console.log("this.props.programStartDate " + programStartDateInDateForm);
+            var programStartDateInMomentForm = moment(programStartDateInDateForm);
 
             var calculatedStartDate = moment(programStartDateInMomentForm, "MM-DD-YYYY").add(startDateInIntegerForm, 'days');
             var calculatedEndDate = moment(programStartDateInMomentForm, "MM-DD-YYYY").add(endDateInIntegerForm, 'days');
@@ -1095,28 +1089,28 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
 
         )
 
-    }
+    };
 
 
     editButtonClicked = () => {
 
         if($(this.refs["ref_stepForm_edit"]).is(":visible"))  {
-            $(this.refs["ref_stepForm_edit"]).slideUp()
-            $(this.refs["ref_stepExistingInfo"]).slideDown()
-            this.setState ({ editFormButtonText: "Edit"})
+            $(this.refs["ref_stepForm_edit"]).slideUp();
+            $(this.refs["ref_stepExistingInfo"]).slideDown();
+            this.setState ({ editFormButtonText: "Edit"});
             this.setStepData(this.props.stepData)
 
 
 
         } else {
-            $(this.refs["ref_stepForm_edit"]).slideDown()
-            $(this.refs["ref_stepExistingInfo"]).slideUp()
+            $(this.refs["ref_stepForm_edit"]).slideDown();
+            $(this.refs["ref_stepExistingInfo"]).slideUp();
 
             this.setState({ editFormButtonText: "Cancel"})
 
 
         }
-    }
+    };
 
 
     getExistingInfo = () => {
@@ -1131,23 +1125,23 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
 
 </Link></div>
                     </div>)
-    }
+    };
 
     revealUIElements = () => {
 
 
-    }
+    };
 
 
     hideComponent = () => {
         this.props.methodChange({isVisible:false})
 
-    }
+    };
 
     deleteStep = () => {
 
             $.ajax({
-                url: "api/steps/" + this.state.id + "/",
+                url: "/api/steps/" + this.state.id + "/",
                 dataType: 'json',
                 type: 'DELETE',
                 //data: step,
@@ -1160,7 +1154,7 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
                     console.error("https://127.0.0.1:8000/api/steps/" + this.state.id + "/", status, err.toString());
                 }
             });
-        }
+        };
 
 
         componentWillReceiveProps = (nextProps) => {
@@ -1169,7 +1163,7 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
                     this.setStepData(nextProps.stepData)
                 }
 
-    }
+    };
 
     getMenubar() {
 
@@ -1189,12 +1183,12 @@ export class StepEditCalendarComponent extends StepCalendarComponent {
 
 
     closeWindowButtonClicked = () => {
-        this.props.methodChange({isVisible:false})
+        this.props.methodChange({isVisible:false});
 
 
         this.clearState();
-         $(this.refs["ref_stepForm_edit"]).slideUp()
-        $(this.refs["ref_stepExistingInfo"]).slideDown()
+         $(this.refs["ref_stepForm_edit"]).slideUp();
+        $(this.refs["ref_stepExistingInfo"]).slideDown();
             this.setState ({ editFormButtonText: "Edit"})
     }
 
@@ -1236,6 +1230,5 @@ export class TimeInput extends React.Component{
 
     )
   }
-};
-
-module.exports = { StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar }
+}
+module.exports = { StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar };

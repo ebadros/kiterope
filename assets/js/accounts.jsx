@@ -125,7 +125,7 @@ export class ReduxDataGetter extends React.Component {
     };
 
     loadUserData() {
-        var theUrl =  'api/users/i';
+        var theUrl =  '/api/users/i';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -172,7 +172,7 @@ export class ReduxDataGetter extends React.Component {
 
     loadGoalData() {
 
-        var theUrl = "api/goals/";
+        var theUrl = "/api/goals/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -195,7 +195,7 @@ export class ReduxDataGetter extends React.Component {
 
     loadPlanData() {
 
-        var theUrl = "api/planOccurrences/";
+        var theUrl = "/api/planOccurrences/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -217,7 +217,7 @@ export class ReduxDataGetter extends React.Component {
     }
 
     loadProgramData() {
-        var theUrl = "api/programs/";
+        var theUrl = "/api/programs/";
         $.ajax({
             url: theUrl,
             dataType: 'json',
@@ -243,7 +243,7 @@ export class ReduxDataGetter extends React.Component {
         //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
 
 
-        var theUrl = 'api/messageThreads/';
+        var theUrl = '/api/messageThreads/';
 
     $.ajax({
       url: theUrl ,
@@ -272,7 +272,7 @@ export class ReduxDataGetter extends React.Component {
         var periodRangeEnd = new Date();
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
+        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
         $.ajax({
             url: theUrl,
@@ -293,7 +293,7 @@ export class ReduxDataGetter extends React.Component {
 
 
     loadContactData() {
-        var theUrl = "api/contacts/";
+        var theUrl = "/api/contacts/";
         $.ajax({
       url: theUrl,
       dataType: 'json',
@@ -543,7 +543,7 @@ export class Menubar extends React.Component {
     };
 
     loadUserData() {
-        var theUrl = 'api/users/i';
+        var theUrl = '/api/users/i';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -576,11 +576,11 @@ export class Menubar extends React.Component {
 
 
     loginHandler() {
-        hashHistory.push('/account/login/')
+        browserHistory.push('/account/login/')
     }
 
     joinKiteropeHandler() {
-        hashHistory.push('/joinKiterope')
+        browserHistory.push('/joinKiterope')
     }
 
     logoutHandler() {
@@ -588,7 +588,7 @@ export class Menubar extends React.Component {
 
         auth.logout();
 
-        hashHistory.push('/account/login/')
+        browserHistory.push('/account/login/')
 
 
 
@@ -629,7 +629,7 @@ export class Menubar extends React.Component {
     }
 
     goToBlog() {
-                hashHistory.push('/blog')
+                browserHistory.push('/blog')
 
     }
 
@@ -1084,7 +1084,7 @@ export class LoginForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          hashHistory.push(nextProps.location.state.nextPathname)
+          browserHistory.push(nextProps.location.state.nextPathname)
       }
   }
 
@@ -1110,18 +1110,18 @@ export class LoginForm extends React.Component {
 
 
       if (this.props.location) {
-          hashHistory.push(nextProps.location.state.nextPathname)
+          browserHistory.push(nextProps.location.state.nextPathname)
       } else {
-          hashHistory.push('/')
+          browserHistory.push('/')
       }
   };
 
   handleForgotPasswordClick() {
-      hashHistory.push("/account/password/reset/")
+      browserHistory.push("/account/password/reset/")
   }
 
   handleJoinClick() {
-      hashHistory.push("/joinKiterope/")
+      browserHistory.push("/joinKiterope/")
   }
 
   handleSubmit = (e) => {
@@ -1280,7 +1280,7 @@ export class PasswordConfirmForm extends React.Component {
 
             complete: function (jqXHR, textStatus){
                 if (textStatus == "success"){
-                    hashHistory.push("/account/login")
+                    browserHistory.push("/account/login")
                 }
             }.bind(this)
         });
@@ -1382,7 +1382,7 @@ export class PasswordResetForm extends React.Component {
     };
 
     handleCompleted() {
-        hashHistory.push("/account/login/")
+        browserHistory.push("/account/login/")
     }
 
     handleEmailChange = (value) => {
@@ -1451,7 +1451,7 @@ export class JoinForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          hashHistory.push(nextProps.location.state.nextPathname)
+          browserHistory.push(nextProps.location.state.nextPathname)
       }
   }
 
@@ -1574,7 +1574,7 @@ export class JoinForm extends React.Component {
   };
 
   handleSignInClick = () => {
-      hashHistory.push("/account/login/")
+      browserHistory.push("/account/login/")
   };
 
   getServerErrors(fieldName) {
@@ -1758,7 +1758,7 @@ export class ModalLoginForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          hashHistory.push(nextProps.location.state.nextPathname)
+          browserHistory.push(nextProps.location.state.nextPathname)
       }
   }
 
@@ -1811,7 +1811,7 @@ export class ModalLoginForm extends React.Component {
   };
 
   actionAfterLogin = () => {
-      var theUrl = 'api/users/i/';
+      var theUrl = '/api/users/i/';
       $.ajax({
             method: 'GET',
             url: theUrl,

@@ -87,7 +87,7 @@ export class GoalEntryPage extends React.Component {
 
      handleGoalSubmit (goal) {
     $.ajax({
-        url: "api/goals/",
+        url: "/api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -194,7 +194,7 @@ export class GoalListPage extends React.Component {
 
   handleGoalSubmit (goal, callback) {
     $.ajax({
-        url: "api/goals/",
+        url: "/api/goals/",
         dataType: 'json',
         type: 'POST',
         data: goal,
@@ -336,10 +336,10 @@ componentWillUnmount() {
 
             <div className="spacer">&nbsp;</div>
             <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
+                <Link to={`/`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">My Goals</div></Link>
+                  <Link to={`/`}><div className="active section">My Goals</div></Link>
             </div>
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Goals" color="blue" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
@@ -456,7 +456,7 @@ export class GoalDetailPage extends React.Component {
 
     handleGoalSubmit (goal, callback) {
         $.ajax({
-                url: "api/goals/" + goal.id +"/",
+                url: "/api/goals/" + goal.id +"/",
                 dataType: 'json',
                 type: 'PUT',
                 data: goal,
@@ -479,7 +479,7 @@ export class GoalDetailPage extends React.Component {
   }
 
     loadDetailFromServer = () => {
-        var theURL = "api/goals/" + this.props.params.goal_id + "/";
+        var theURL = "/api/goals/" + this.props.params.goal_id + "/";
 
     $.ajax({
       url: theURL,
@@ -543,7 +543,7 @@ export class GoalDetailPage extends React.Component {
     };
 
   determineOptions = () => {
-      var theUrl = "api/goals/" + this.props.params.goal_id + "/";
+      var theUrl = "/api/goals/" + this.props.params.goal_id + "/";
 
       $.ajax({
       url: theUrl,
@@ -589,13 +589,13 @@ export class GoalDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              hashHistory.push("/search");
+              browserHistory.push("/search");
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              hashHistory.push("/goalEntry");
+              browserHistory.push("/goalEntry");
               break;
       }
   };
@@ -625,7 +625,7 @@ export class GoalDetailPage extends React.Component {
                         <div>&nbsp;</div>
                         <GoalViewEditDeleteItem key={this.props.params.goal_id}
                                                 showCloseButton={false}
-                                                apiUrl="api/goals/"
+                                                apiUrl="/api/goals/"
                                                 id={this.props.params.goal_id}
                                                 data={this.state.data}
                                                 currentView="Basic"/>
@@ -669,7 +669,7 @@ export class GoalNode extends React.Component {
 
     clearPage = () => {
 
-        hashHistory.push('/goals/' + this.props.goal.id + '/plans')
+        browserHistory.push('/goals/' + this.props.goal.id + '/plans')
 
 
     };

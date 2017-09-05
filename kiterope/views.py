@@ -79,6 +79,10 @@ from opentok import OpenTok, MediaModes, OpenTokException, __version__
 from rest_framework.pagination import PageNumberPagination
 from copy import deepcopy
 
+from django.views.generic import TemplateView
+
+
+
 
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
 OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
@@ -99,6 +103,12 @@ def create_missing_profiles(request):
 def schema_view(request):
     generator = schemas.SchemaGenerator(title='Bookings API')
     return response.Response(generator.get_schema(request=request))
+
+
+class React(TemplateView):
+    template_name = 'index.html'
+
+
 
 class CurrentUserView(APIView):
     def get(self, request):

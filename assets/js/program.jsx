@@ -43,7 +43,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, times, s3IconUrl, formats, s3ImageUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
-    costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
+    costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -280,10 +280,10 @@ componentWillUnmount() {
 
             <div className="spacer">&nbsp;</div>
             <div className="ui large breadcrumb">
-                <Link to={`/#`}><div className="section">Home</div></Link>
+                <Link to={`/`}><div className="section">Home</div></Link>
 
                   <i className="right chevron icon divider"></i>
-                  <Link to={`/#`}><div className="active section">My Programs</div></Link>
+                  <Link to={`/`}><div className="active section">My Programs</div></Link>
             </div>
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
@@ -903,7 +903,7 @@ export class ProgramSubscriptionModal extends React.Component {
                             isOpen={this.state.modalIsOpen}
                             onAfterOpen={this.afterOpenModal}
                             onRequestClose={this.closeModal}
-                            style={customStepModalStyles} >
+                            style={subscribeModalStyle} >
             <div className="ui grid">
                 <div className="right floated column noPaddingBottom ">
                 <div className="ui right floated button absolutelyNoMargin" onClick={this.closeModal}><i className="large remove icon button "></i></div>
@@ -976,7 +976,7 @@ export class ProgramSubscriptionForm extends React.Component {
     };
 
     getGoals = () => {
-        var theUrl = 'api/goals/';
+        var theUrl = '/api/goals/';
         $.ajax({
             method: 'GET',
             url: theUrl,
@@ -1121,7 +1121,7 @@ export class ProgramSubscriptionForm extends React.Component {
                     </div>
 
 <div className="ui row">
-    <div className="ui sixteen wide column">
+    <div className="ui twelve wide column">
                 <div className="fluid field">
                     <KSSelect value={this.state.goal}
                                             valueChange={this.handleGoalChange}
@@ -1130,7 +1130,11 @@ export class ProgramSubscriptionForm extends React.Component {
                                             name="goal"
                                             options={this.state.goalOptions}
                                             />
-                    </div></div>
+                    </div>
+    </div>
+    <div className="ui four wide column" style={{paddingTop:'10px !important'}}>
+                <Link to="/goals" >Add Goal</Link>
+        </div>
     </div>
                 <div className="ui row">
                         <div className="ui sixteen wide column">
@@ -1919,7 +1923,7 @@ export class ProgramListNode extends React.Component {
 
     clearPage = () => {
 
-        hashHistory.push('/programs/' + this.props.program.id + '/steps')
+        browserHistory.push('/programs/' + this.props.program.id + '/steps')
 
 
     };
@@ -1988,10 +1992,10 @@ export class ProgramBasicView extends React.Component {
 
     goToDetail() {
         if (this.props.forSearch) {
-                    hashHistory.push("/plan/view/" + this.state.data.id + "/")
+                    browserHistory.push("/plan/view/" + this.state.data.id + "/")
 
         } else {
-            hashHistory.push("/programs/" + this.state.data.id + "/steps")
+            browserHistory.push("/programs/" + this.state.data.id + "/steps")
         }
 
 }
@@ -2024,7 +2028,7 @@ export class ProgramBasicView extends React.Component {
 
                 return (
                     <div >
-                        <div style={{cursor:"pointer"}}><ClippedImage item="plan" src={imageUrl} onClick={this.goToDetail} /></div>
+                        <div style={{cursor:"pointer"}} onClick={() => this.goToDetail()} ><ClippedImage item="plan" src={imageUrl}  /></div>
 
 
                         <div className="ui grid">
