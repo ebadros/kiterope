@@ -20,6 +20,13 @@ STATICFILES_DIRS = (
     #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles-prod/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-prod.json'),
+    }
+}
+
 AWS_KEY='GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX'
 AWS_KEY_ID='AKIAJ5YZL4QGGT7IUJRA'
 CLUSTER_NAME='kiterope-es'

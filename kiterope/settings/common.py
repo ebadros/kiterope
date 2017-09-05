@@ -287,20 +287,7 @@ DEFAULT_FROM_EMAIL = 'support@kiterope.com'
 
 LOGIN_REDIRECT_URL = '/'
 
-if DEBUG:
-    WEBPACK_LOADER = {
-        'DEFAULT': {
-            'BUNDLE_DIR_NAME': 'bundles/',
-            'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-        }
-    }
-else:
-    WEBPACK_LOADER = {
-        'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles-prod/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-prod.json'),
-    }
-}
+
 
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_REQUIRED=True
