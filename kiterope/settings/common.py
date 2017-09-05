@@ -253,6 +253,8 @@ STATICFILES_DIRS = (
 #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
+
+
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
@@ -285,10 +287,18 @@ DEFAULT_FROM_EMAIL = 'support@kiterope.com'
 
 LOGIN_REDIRECT_URL = '/'
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+if DEBUG:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'bundles/',
+            'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+        }
+    }
+else:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles-prod/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-prod.json'),
     }
 }
 
