@@ -78,8 +78,12 @@ INSTALLED_APPS = [
     'django_twilio',
     'phonenumber_field',
     'django_celery_beat',
+    'django_seo_js'
+
 
 ]
+
+SEO_JS_PRERENDER_TOKEN = "Vhb8E2xto5Yc7GJC00Ug"
 
 TINYMCE_JS_URL = "https://cdn.tinymce.com/4/tinymce.min.js"
 
@@ -135,6 +139,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_seo_js.middleware.EscapedFragmentMiddleware',  # If you're using #!
+    'django_seo_js.middleware.UserAgentMiddleware',
 
     #'kiterope.middleware.DisableCsrfCheck',
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',

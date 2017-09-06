@@ -61,6 +61,7 @@
     "react-phone-number-input": "^0.11.6",
     "react-redux": "^5.0.4",
     "react-render-html": "^0.1.6",
+    "react-render-service": "^1.0.0",
     "react-rnd": "^4.2.2",
     "react-rotating-text": "^1.1.2",
     "react-router": "^2.8.1",
@@ -109,6 +110,5 @@
     "license": "ISC",
     "start": "node server.js",
     "build-production": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors"
-
   }
 }

@@ -27,6 +27,9 @@ WEBPACK_LOADER = {
     }
 }
 
+REACT_SERVICE_URL = 'http://localhost:63578/render'
+
+
 AWS_KEY='GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX'
 AWS_KEY_ID='AKIAJ5YZL4QGGT7IUJRA'
 CLUSTER_NAME='kiterope-es'
@@ -108,6 +111,8 @@ REST_FRAMEWORK = {
     #'PAGE_SIZE': 9,
 
 }
+
+
 
 
 CHANNEL_LAYERS = {

@@ -1,7 +1,12 @@
 {% load render_bundle from webpack_loader %}
+{% load django_seo_js %}
+
 <!DOCTYPE html>
 <html lang="en" style="width:100vw;">
+
 <head>
+        {% seo_js_head %}
+
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Kiterope is a system for optimizing your path to success. If you're serious about achieving your goals, Kiterope can help you. Find a plan now."/>
