@@ -105,7 +105,7 @@ export class ProgramListPage extends React.Component {
 
     handleProgramSubmit (program, callback) {
 
-            var theUrl = "api/programs/";
+            var theUrl = "/api/programs/";
 
             $.ajax({
                 url: theUrl,
@@ -145,7 +145,7 @@ export class ProgramListPage extends React.Component {
       //if (this.state.activePage != 1) {
         //        var theUrl = "api/programs/?page=" + this.state.activePage
       //}  else {
-         var theUrl = "api/programs/";
+         var theUrl = "/api/programs/";
       //}
     $.ajax({
       url: theUrl,
@@ -321,7 +321,7 @@ export class ProgramDetailPage extends React.Component {
     }
 
     loadStepsFromServer = () => {
-        var theUrl = "api/programs/" + this.props.params.program_id + "/steps";
+        var theUrl = "/api/programs/" + this.props.params.program_id + "/steps";
         $.ajax({
           url: theUrl ,
           dataType: 'json',
@@ -339,7 +339,7 @@ export class ProgramDetailPage extends React.Component {
 
     loadProgramsFromServer = () => {
     $.ajax({
-      url: "api/programs/" + this.props.params.program_id + "/",
+      url: "/api/programs/" + this.props.params.program_id + "/",
       dataType: 'json',
       cache: false,
         headers: {
@@ -350,7 +350,7 @@ export class ProgramDetailPage extends React.Component {
             data: programData});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error( "api/programs/" + this.props.params.program_id + "/", status, err.toString());
+        console.error( "/api/programs/" + this.props.params.program_id + "/", status, err.toString());
       }.bind(this),
 
     });
@@ -359,7 +359,7 @@ export class ProgramDetailPage extends React.Component {
   handleStepSubmit (step, callback) {
 
              $.ajax({
-                 url: "api/steps/",
+                 url: "/api/steps/",
                  dataType: 'json',
                  type: 'POST',
                  data: step,
@@ -394,7 +394,7 @@ export class ProgramDetailPage extends React.Component {
               //var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
 
       $.ajax({
-      url:  "api/programs/" + this.props.params.program_id + "/",
+      url:  "/api/programs/" + this.props.params.program_id + "/",
       dataType: 'json',
       cache: false,
           type: 'OPTIONS',
@@ -412,7 +412,7 @@ export class ProgramDetailPage extends React.Component {
           }
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error( "api/programs/" + this.props.params.program_id + "/", status, err.toString());
+        console.error( "/api/programs/" + this.props.params.program_id + "/", status, err.toString());
       }.bind(this),
 
 
@@ -422,7 +422,7 @@ export class ProgramDetailPage extends React.Component {
 
 
     handleFormSubmit = (step, callback) => {
-        var theUrl =  "api/steps/";
+        var theUrl =  "/api/steps/";
     $.ajax({
         url: theUrl,
         dataType: 'json',
@@ -573,7 +573,7 @@ export class ProgramDetailPage extends React.Component {
 
                         <ProgramViewEditDeleteItem isListNode={false}
                                                 showCloseButton={false}
-                                                apiUrl="api/programs/"
+                                                apiUrl="/api/programs/"
                                                 id={this.props.params.program_id}
                                                 data={this.state.data}
                                                 currentView="Basic"
@@ -670,7 +670,7 @@ export class ProgramDetailPageNoSteps extends React.Component {
         store.dispatch(shouldReload(""))
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error( "api/plan/view/" + this.props.params.program_id + "/", status, err.toString());
+        console.error( "/api/plan/view/" + this.props.params.program_id + "/", status, err.toString());
       }.bind(this),
 
     });
@@ -754,7 +754,7 @@ export class ProgramDetailPageNoSteps extends React.Component {
 
                         <ProgramViewEditDeleteItem isListNode={false}
                                                 showCloseButton={false}
-                                                apiUrl="api/programs/"
+                                                apiUrl="/api/programs/"
                                                 id={this.props.params.program_id}
                                                 data={this.state.data}
                                                 currentView="Basic"
@@ -1006,7 +1006,7 @@ export class ProgramSubscriptionForm extends React.Component {
     }
 
     handleSubscribeClicked = () => {
-        var theUrl = "api/planOccurrences/";
+        var theUrl = "/api/planOccurrences/";
         var planOccurrence = {
             program: this.state.program.id,
             goal: this.state.goal,
@@ -1828,7 +1828,7 @@ export class ProgramList extends React.Component {
     };
 
     loadProgramsFromServer = () => {
-        var theURL = "api/goals/" + this.props.parentId + "/programs";
+        var theURL = "/api/goals/" + this.props.parentId + "/programs";
 
       $.ajax({
       url: theURL,
@@ -1882,7 +1882,7 @@ export class ProgramList extends React.Component {
                     <ProgramViewEditDeleteItem key={program.id}
                                             isListNode={true}
                                             showCloseButton={false}
-                                            apiUrl="api/programs/"
+                                            apiUrl="/api/programs/"
                                             id={program.id}
                                             data={program}
                                             currentView="Basic"

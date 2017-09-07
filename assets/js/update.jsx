@@ -744,7 +744,7 @@ export class UpdateItem extends React.Component{
 
         }
         else {
-            var theUrl = "api/updates/";
+            var theUrl = "/api/updates/";
             var theType = 'POST';
         }
         $.ajax({

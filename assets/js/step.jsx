@@ -133,7 +133,7 @@ export class StepList extends React.Component {
         //if (this.state.activePage != 1) {
           //      var theUrl = theServer + "api/programs/" + this.props.programId + "/steps/?page=" + this.state.activePage
       //}  else {
-                var theUrl = "api/programs/" + this.props.programId + "/steps";
+                var theUrl = "/api/programs/" + this.props.programId + "/steps";
       //}
 
       $.ajax({
@@ -193,7 +193,7 @@ export class StepList extends React.Component {
                                             key={step.id}
                                             isListNode={true}
                                             showCloseButton={false}
-                                            apiUrl="api/steps/"
+                                            apiUrl="/api/steps/"
                                             id={step.id}
                                             data={step}
                                             currentViewChanged={this.handleCurrentViewChanged}
@@ -715,7 +715,7 @@ export class StepForm extends React.Component {
 
 
     loadParentFromServer = () => {
-     var theUrl = "api/programs/" + this.props.parentId;
+     var theUrl = "/api/programs/" + this.props.parentId;
 
       $.ajax({
       url: theUrl,

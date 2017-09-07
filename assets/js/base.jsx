@@ -909,7 +909,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          if (goal.id != "") {
 
              $.ajax({
-                 url: "api/goals/" + goal.id +"/",
+                 url: "/api/goals/" + goal.id +"/",
                  dataType: 'json',
                  type: 'PUT',
                  data: goal,
@@ -942,7 +942,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          }
          else {
              $.ajax({
-                 url: "api/goals/",
+                 url: "/api/goals/",
                  dataType: 'json',
                  type: 'POST',
                  data: goal,
@@ -1156,7 +1156,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
     handleProgramSubmit (program, callback) {
          if (program.id != "") {
-             var theUrl = "api/programs/" + program.id +"/";
+             var theUrl = "/api/programs/" + program.id +"/";
 
              $.ajax({
                  url: theUrl,
@@ -1191,7 +1191,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              });
          }
          else {
-             var theUrl = "api/programs/";
+             var theUrl = "/api/programs/";
 
              $.ajax({
                  url: theUrl,
@@ -1323,7 +1323,7 @@ hideComponent = () => {
 
     handleUnsubscribeClick = () => {
         if (this.state.userPlanOccurrenceId) {
-            var theUrl = "api/planOccurrences/" + this.state.userPlanOccurrenceId + "/";
+            var theUrl = "/api/planOccurrences/" + this.state.userPlanOccurrenceId + "/";
             var planOccurrence = {
                 isSubscribed: false,
 
@@ -1468,7 +1468,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          if (plan.id != "") {
 
              $.ajax({
-                 url: "api/planOccurrences/" + planOccurrence.id +"/",
+                 url: "/api/planOccurrences/" + planOccurrence.id +"/",
                  dataType: 'json',
                  type: 'PUT',
                  data: plan,
@@ -1500,7 +1500,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          }
          else {
              $.ajax({
-                 url: "api/plans/",
+                 url: "/api/plans/",
                  dataType: 'json',
                  type: 'POST',
                  data: plan,
@@ -1666,7 +1666,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     }
 
      removeContact = () => {
-        var theUrl = "api/contacts/" + this.props.contact + "/";
+        var theUrl = "/api/contacts/" + this.props.contact + "/";
 
             $.ajax({
                 url: theUrl,
@@ -1689,9 +1689,8 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
      handleProfileSubmit (profile, callback) {
-         console.log("handleProfileSubmit");
 
-            var theURL =  "api/profiles/" + profile.id +"/";
+            var theURL =  "/api/profiles/" + profile.id +"/";
              $.ajax({
                  url: theURL ,
                  dataType: 'json',
@@ -1786,7 +1785,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     addAsCoach = () => {
-        var theUrl = "api/contacts/";
+        var theUrl = "/api/contacts/";
         var theContact = {
             sender:this.state.user.id,
             receiver: this.state.data.user,
@@ -2045,7 +2044,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
     handleStepSubmit = (step, callback) => {
         if (step.id != undefined) {
 
-            var theUrl = "api/steps/" + step.id + "/";
+            var theUrl = "/api/steps/" + step.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -2079,7 +2078,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         else {
 
             $.ajax({
-                url: "api/steps/",
+                url: "/api/steps/",
                 dataType: 'json',
                 type: 'POST',
                 data: step,

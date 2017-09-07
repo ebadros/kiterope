@@ -1,11 +1,10 @@
-{% load render_bundle from webpack_loader %}
 {% load django_seo_js %}
+{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
 <html lang="en" style="width:100vw;">
 
 <head>
-        {% seo_js_head %}
 
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,6 +33,8 @@
     <script language="javascript" src="https://code.jquery.com/jquery.min.js"></script>
     <script language="javascript" src="/static/js/sidebar.min.js"></script>
     <script type="text/jsx" src="/static/js/index.js"></script>
+            {% seo_js_head %}
+
 
 </head>
 

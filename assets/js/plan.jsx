@@ -132,7 +132,7 @@ export class PlanDetailPage extends React.Component {
               //var theUrl = theServer + "api/goals/" + this.props.params.goal_id + "/"
 
       $.ajax({
-      url: "api/plans/" + this.props.params.plan_id + "/",
+      url: "/api/plans/" + this.props.params.plan_id + "/",
       dataType: 'json',
       cache: false,
           type: 'OPTIONS',
@@ -161,7 +161,7 @@ export class PlanDetailPage extends React.Component {
 
     handleFormSubmit = (step, callback) => {
     $.ajax({
-        url: ("api/steps/"),
+        url: ("/api/steps/"),
         dataType: 'json',
         type: 'POST',
         data: step,

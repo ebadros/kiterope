@@ -69,7 +69,7 @@ export class ProgramCalendar extends React.Component{
 
 
     getProgramStartDate = () => {
-        var theUrl = "api/programs/" + this.props.planId + "/";
+        var theUrl = "/api/programs/" + this.props.planId + "/";
         $.ajax({
           url: theUrl ,
           dataType: 'json',
@@ -212,7 +212,7 @@ export class ProgramCalendar extends React.Component{
     handleFormSubmit = (step, callback) => {
         if (this.state.stepMethod == 'edit') {
             $.ajax({
-                url: ("api/steps/" + step.id + "/"),
+                url: ("/api/steps/" + step.id + "/"),
                 dataType: 'json',
                 type: 'PATCH',
                 data: step,
@@ -227,7 +227,7 @@ export class ProgramCalendar extends React.Component{
         }
         else if (this.state.stepMethod=='create') {
             $.ajax({
-                url: ("api/steps/"),
+                url: ("/api/steps/"),
                 dataType: 'json',
                 type: 'POST',
                 data: step,

@@ -128,7 +128,7 @@ export class SearchPage extends React.Component {
 
     handleFormSubmit(query) {
         $.ajax({
-        url: ("api/searchQuery/"),
+        url: ("/api/searchQuery/"),
         dataType: 'json',
         type: 'POST',
         data: query,
@@ -638,7 +638,7 @@ export class SearchHitsGrid extends React.Component {
                                            currentView="Basic"
                                            showCloseButton={false}
                                            hideControlBar={true}
-                                           apiUrl="api/programs/"
+                                           apiUrl="/api/programs/"
                                            id={objectData._source.id}
                                            data={objectData._source}
                                            editable={false}
@@ -1017,7 +1017,7 @@ export class UserLink2 extends React.Component {
 
     loadObjectsFromServer = () => {
         $.ajax({
-          url: "api/profiles/" + this.props.userId + "/",
+          url: "/api/profiles/" + this.props.userId + "/",
           dataType: 'json',
           cache: false,
           success: function(data) {

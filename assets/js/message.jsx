@@ -224,7 +224,7 @@ export class MessageWindowContainer extends React.Component {
     */
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread";
+        var theUrl = "/api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -281,7 +281,7 @@ export class MessageWindowContainer extends React.Component {
 
     createNewMessageThread(){
     $.ajax({
-        url: "api/messageThreads/",
+        url: "/api/messageThreads/",
         dataType: 'json',
         headers: {
             'Authorization': 'Token ' + localStorage.token
@@ -538,7 +538,7 @@ export class MessagePage extends React.Component {
     };
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread";
+        var theUrl = "/api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -612,7 +612,7 @@ export class MessagePage extends React.Component {
     createNewMessageThread(){
         console.log("");
     $.ajax({
-        url: "api/messageThreads/",
+        url: "/api/messageThreads/",
         dataType: 'json',
         headers: {
             'Authorization': 'Token ' + localStorage.token
@@ -1253,7 +1253,7 @@ export class MessageWindow extends React.Component {
           sender:theMessageData.sender
       };
 
-          var theUrl = "api/messages/";
+          var theUrl = "/api/messages/";
 
       $.ajax({
         url: theUrl,
@@ -2305,7 +2305,7 @@ export class MessageThreadListItem extends React.Component {
                     };
                     $.ajax({
                         traditional: true,
-                        url: "api/messageThreads/" + this.state.thread.id + "/",
+                        url: "/api/messageThreads/" + this.state.thread.id + "/",
                         dataType: 'json',
                         headers: {
                             'Authorization': 'Token ' + localStorage.token
@@ -2341,7 +2341,7 @@ export class MessageThreadListItem extends React.Component {
 
                 $.ajax({
                     traditional:true,
-                    url: "api/messageThreads/" + this.state.thread.id + "/",
+                    url: "/api/messageThreads/" + this.state.thread.id + "/",
                     dataType: 'json',
                     headers: {
                         'Authorization': 'Token ' + localStorage.token
@@ -2585,7 +2585,7 @@ export class ContactListPane extends React.Component {
 
     createNewMessageThread() {
 
-        var theUrl = "api/messageThreads/";
+        var theUrl = "/api/messageThreads/";
 
         $.ajax({
             url: theUrl,
@@ -2625,7 +2625,7 @@ export class ContactListPane extends React.Component {
 
 
     connectToThread = (channelId) => {
-        var theUrl = "api/channels/" + channelId + "/messageThread";
+        var theUrl = "/api/channels/" + channelId + "/messageThread";
             $.ajax({
                 method: 'GET',
                 url: theUrl,
@@ -2879,7 +2879,7 @@ export class MessageThreadPane extends React.Component {
     }
 
   handleMessageSubmit (theMessageData) {
-      var theUrl = "api/messages/";
+      var theUrl = "/api/messages/";
       $.ajax({
         url: theUrl,
         dataType: 'json',

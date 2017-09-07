@@ -149,7 +149,7 @@ export class BrowseProgramsPage extends React.Component {
     }
 
     loadExistingProgramsFromServer () {
-        var theUrl = "api/browseablePrograms/";
+        var theUrl = "/api/browseablePrograms/";
 
       $.ajax({
       url: theUrl,

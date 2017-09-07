@@ -40,12 +40,12 @@ var notificationStyle = {
     },
 
   }
-}
+};
 
 export class Caller extends React.Component {
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
         }
@@ -55,7 +55,7 @@ export class Caller extends React.Component {
 
     handleCallSubmit (call, callback)  {
     $.ajax({
-        url: "api/sessions/",
+        url: "/api/sessions/",
         dataType: 'json',
         type: 'POST',
         data: call,
@@ -80,8 +80,8 @@ export class Caller extends React.Component {
 
 export class CallButton extends React.Component {
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
         }
@@ -89,7 +89,7 @@ export class CallButton extends React.Component {
 
     componentDidMount() {
         $.ajax({
-        url: "api/sessions/",
+        url: "/api/sessions/",
         dataType: 'json',
         type: 'GET',
         success: this.setState({
@@ -98,7 +98,7 @@ export class CallButton extends React.Component {
         error: function(xhr, status, err) {
             this.setState({
                 authenticated: false
-            })
+            });
             console.error(this.props.url, status, err.toString());
         }.bind(this)
     });
@@ -112,7 +112,7 @@ export class CallButton extends React.Component {
 
             var formData = {
                 userProfileBeingCalledId: userProfileBeingCalledId,
-            }
+            };
 
 
             this.props.onCallSubmit(formData,
@@ -127,7 +127,7 @@ export class CallButton extends React.Component {
             })
         }
 
-    }
+    };
 
 
     render() {
@@ -142,8 +142,8 @@ export class CallButton extends React.Component {
 
 export class Call extends React.Component {
     constructor (props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             callSessionId: "" ,
             callTokenId:"",
@@ -223,15 +223,15 @@ export class CallManager extends React.Component {
     }
 
     declineCall(notificationId, sessionId) {
-        event.preventDefault()
-        this._notificationSystem.removeNotification(notificationId)
-        this.removeNotification(notificationId)
+        event.preventDefault();
+        this._notificationSystem.removeNotification(notificationId);
+        this.removeNotification(notificationId);
         this.removeSessionForCall(sessionId)
     }
 
     removeNotification(notificationId) {
         $.ajax({
-        url: ("api/notifications/" + notificationId + "/"),
+        url: ("/api/notifications/" + notificationId + "/"),
         dataType: 'json',
         type: 'DELETE',
         //data: step,
@@ -248,7 +248,7 @@ export class CallManager extends React.Component {
 
     removeSessionForCall(sessionId) {
         $.ajax({
-        url: ("api/sessions/" + sessionId + "/"),
+        url: ("/api/sessions/" + sessionId + "/"),
         dataType: 'json',
         type: 'DELETE',
         //data: step,
@@ -262,9 +262,9 @@ export class CallManager extends React.Component {
     }
 
     acceptCall(notificationId,sessionId) {
-        event.preventDefault()
+        event.preventDefault();
         $.ajax({
-            url: "api/sessions/" + sessionId + "/",
+            url: "/api/sessions/" + sessionId + "/",
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -333,7 +333,7 @@ export class CallManager extends React.Component {
 
     loadObjectsFromServer = () => {
         $.ajax({
-          url: "api/notifications/",
+          url: "/api/notifications/",
           dataType: 'json',
           cache: false,
           success: function(data) {
@@ -347,10 +347,10 @@ export class CallManager extends React.Component {
             console.error("https://127.0.0.1:8000/api/notifications/", status, err.toString());
           }.bind(this)
         });
-      }
+      };
 
       updateNotifications() {
-          var notifications = this.state.data
+          var notifications = this.state.data;
           for (var i=0; i < notifications.length; i++) {
               this.createNotification(notifications[i].id, notifications[i].call)
           }
