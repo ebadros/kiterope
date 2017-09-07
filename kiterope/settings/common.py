@@ -130,7 +130,7 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
-MIDDLEWARE = [
+MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -139,8 +139,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_seo_js.middleware.EscapedFragmentMiddleware',  # If you're using #!
-    'django_seo_js.middleware.UserAgentMiddleware',
+
 
     #'kiterope.middleware.DisableCsrfCheck',
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',

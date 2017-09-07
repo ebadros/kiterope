@@ -1,8 +1,6 @@
 var path = require("path");
 var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
-var config = require('./webpack.base.config.js');
-
 
 
 module.exports = {
@@ -41,7 +39,7 @@ module.exports = {
           new webpack.NoErrorsPlugin(), // don't reload if there is an error
 
 
-    new BundleTracker({filename: './webpack-stats.json'}),
+    new BundleTracker({filename: './webpack-local-stats.json'}),
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',

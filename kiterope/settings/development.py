@@ -44,6 +44,28 @@ CHANNEL_LAYERS = {
     },
 }
 
+MIDDLEWARE_CLASSES = [
+    'django_seo_js.middleware.EscapedFragmentMiddleware',
+    'django_seo_js.middleware.UserAgentMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+
+    #'kiterope.middleware.DisableCsrfCheck',
+    #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    #'oauth2_provider.middleware.OAuth2TokenMiddleware',
+
+]
+
+SEO_JS_ENABLED = False
+
+
 DATABASES = {
 'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
