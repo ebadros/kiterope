@@ -67,9 +67,9 @@ ReactDOM.render((
         <Router history={browserHistory}>
             <div>
                 <Route path="/" component={ SplashPage }  />
-                <Route path="./blog" component={ BlogPage } />
+                <Route path="/blog" component={ BlogPage } />
 
-                <Route path="./daily" component={DailyList}
+                <Route path="/daily" component={DailyList}
                        onEnter={requireAuth}/>
 
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
@@ -109,9 +109,9 @@ ReactDOM.render((
                 <Route path="/profiles" component={() => (<ProfileListPage myContacts={false}/>)}
                        onEnter={requireAuth}/>
 
-                <Route path="./search/:search_query/" component={SearchPage}/>
+                <Route path="/search/:search_query/" component={SearchPage}/>
 
-                <Route path="./search" component={SearchPage}/>
+                <Route path="/search" component={SearchPage}/>
 
 
             </div>
