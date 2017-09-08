@@ -91,7 +91,7 @@ export class BlogPage extends React.Component {
         if (this.state.data != undefined) {
             return (
                 <div>
-                    <script> window.prerenderReady = true</script>
+                    <script> window.prerenderReady = true;</script>
                     <StandardSetOfComponents />
                     <div className="fullPageDiv">
                         <div className="ui  container footerAtBottom">
@@ -121,7 +121,7 @@ export class BlogPage extends React.Component {
         } else {
             return (
                 <div>
-                                        <script> window.prerenderReady = false</script>
+                                        <script> window.prerenderReady = false;</script>
 
                     <StandardSetOfComponents />
                     <div className="fullPageDiv">

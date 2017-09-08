@@ -109,6 +109,6 @@
     "author": "",
     "license": "ISC",
     "start": "node server.js",
-    "build-production": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors"
+    "build": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors"
   }
 }
