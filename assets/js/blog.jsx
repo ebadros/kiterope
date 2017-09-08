@@ -44,17 +44,18 @@ export class BlogPage extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            data: []
+            data: [],
+            prerenderReady: false
 
         }
     }
 
     componentDidMount() {
-        this.getPosts()
+        this.getPosts();;
+        this.setState({prerenderReady: false})
     }
 
     getPosts = () => {
-        console.log("getPosts");
         var theUrl = '/api/blogPosts/';
         $.ajax({
             method: 'GET',
@@ -65,8 +66,13 @@ export class BlogPage extends React.Component {
             success: function(data) {
                 console.log("getPosts results");
                 this.setState({
-                    data: data.results
+                    data: data.results,
+                    prerenderReady: true
+
+
                 })
+
+
 
 
             }.bind(this),
@@ -85,6 +91,7 @@ export class BlogPage extends React.Component {
         if (this.state.data != undefined) {
             return (
                 <div>
+                    <script> window.prerenderReady = true</script>
                     <StandardSetOfComponents />
                     <div className="fullPageDiv">
                         <div className="ui  container footerAtBottom">
