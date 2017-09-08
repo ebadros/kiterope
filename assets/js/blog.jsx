@@ -121,6 +121,8 @@ export class BlogPage extends React.Component {
         } else {
             return (
                 <div>
+                                        <script> window.prerenderReady = false</script>
+
                     <StandardSetOfComponents />
                     <div className="fullPageDiv">
                     </div>
