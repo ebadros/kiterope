@@ -22,7 +22,7 @@ module.exports = {
 
   plugins: [
 
-    new BundleTracker({filename: './webpack-stats-prod.json'}),
+    new BundleTracker({filename: './webpack-prod-stats.json'}),
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',
