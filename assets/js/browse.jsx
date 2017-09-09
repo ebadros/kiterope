@@ -86,7 +86,7 @@ export class IndividualProgram extends React.Component {
 
     render() {
         return (
-            <Link to={`/programs/${this.props.id}/steps`}>{this.props.title}</Link>
+            <Link to={`/plan/view/${this.props.id}/`}>{this.props.title}</Link>
 
         )
     }
@@ -154,9 +154,10 @@ export class BrowseProgramsPage extends React.Component {
       $.ajax({
       url: theUrl,
       dataType: 'json',
+          type:'GET',
       cache: false,
         headers: {
-                'Authorization': 'Token ' + localStorage.token
+               // 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
         this.setState({data: data}, this.getBrowseablePrograms(data)
