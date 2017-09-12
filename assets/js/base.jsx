@@ -40,6 +40,7 @@ function printObject(o) {
   }
   alert(out);
 }
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 const uuidv4 = require('uuid/v4');
 
@@ -1074,7 +1075,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
      goToAuthorPage() {
 
-         browserHistory.push("/profiles/" + this.state.data.author)
+         store.dispatch(push("/profiles/" + this.state.data.author))
 
      }
 
@@ -1110,7 +1111,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
     handleGetDetailOnPlan = () => {
         console.log("inside here");
-      browserHistory.push("/plan/view/" + this.props.id)
+      store.dispatch(push("/plan/view/" + this.props.id))
 
 };
 
@@ -1131,13 +1132,13 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              browserHistory.push("/search");
+              store.dispatch(push("/search"));
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              browserHistory.push("/goalEntry");
+              store.dispatch(push("/goalEntry"));
               break;
       }
   };
@@ -1442,7 +1443,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
      }
      goToAuthorPage() {
 
-         browserHistory.push("/profiles/" + this.state.data.author)
+         store.dispatch(push("/profiles/" + this.state.data.author))
 
      }
 
@@ -1450,13 +1451,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
      handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              browserHistory.push("/search");
+              store.dispatch(push("/search"));
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              browserHistory.push("/goalEntry");
+              store.dispatch(push("/goalEntry"));
               break;
       }
   };

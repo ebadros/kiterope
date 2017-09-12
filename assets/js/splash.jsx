@@ -13,6 +13,8 @@ import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, u
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+
 
 function printObject(o) {
   var out = '';
@@ -53,9 +55,11 @@ export class SplashPage extends React.Component {
                         user: theUser
                     });
                     store.dispatch(setCurrentUser(theUser));
-                    browserHistory.push("/daily/")
+                   store.dispatch(push("/daily/"))
                 } else {
-                   browserHistory.push("/search/")
+                                       store.dispatch(push("/daily/"));
+
+                   //browserHistory.push("/search/")
 
 
 
@@ -66,7 +70,7 @@ export class SplashPage extends React.Component {
                 //store.dispatch(push('/search/'))
                                    // props.history.push("/search/")
 
-                browserHistory.push("/search/");
+                store.dispatch(push("/search/"));
                 //history.push('/search/')
 
 

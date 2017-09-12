@@ -1923,7 +1923,7 @@ export class ProgramListNode extends React.Component {
 
     clearPage = () => {
 
-        browserHistory.push('/programs/' + this.props.program.id + '/steps')
+        store.dispatch(push('/programs/' + this.props.program.id + '/steps'))
 
 
     };
@@ -1992,10 +1992,10 @@ export class ProgramBasicView extends React.Component {
 
     goToDetail() {
         if (this.props.forSearch) {
-                    browserHistory.push("/plan/view/" + this.state.data.id + "/")
+                    store.dispatch(push("/plan/view/" + this.state.data.id + "/"))
 
         } else {
-            browserHistory.push("/programs/" + this.state.data.id + "/steps")
+            store.dispatch(push("/programs/" + this.state.data.id + "/steps") )
         }
 
 }

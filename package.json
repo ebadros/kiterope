@@ -66,6 +66,7 @@
     "react-rotating-text": "^1.1.2",
     "react-router": "^2.8.1",
     "react-router-dom": "^4.1.1",
+    "react-router-redux": "^4.0.8",
     "react-s3-uploader": "^4.2.0",
     "react-scrollbar": "^0.5.1",
     "react-select": "^1.0.0-rc.2",

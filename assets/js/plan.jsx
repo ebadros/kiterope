@@ -28,6 +28,7 @@ import { MessageWindowContainer } from './message'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions } from './constants'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -834,7 +835,7 @@ export class PlanListNode extends React.Component {
 
     clearPage = () => {
 
-        browserHistory.push('/plans/' + this.props.plan.id + '/steps')
+        store.dispatch(push('/plans/' + this.props.plan.id + '/steps'))
 
 
     };
@@ -902,7 +903,7 @@ export class PlanBasicView extends React.Component {
     }
 
     goToDetail() {
-        browserHistory.push("/plans/" + this.state.data.id + "/steps")
+        store.dispatch(push("/plans/" + this.state.data.id + "/steps"))
 
 }
     render() {

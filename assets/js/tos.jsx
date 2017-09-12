@@ -42,12 +42,13 @@ import { addPlan, removePlan, setPlan, addStep, deleteStep, setCurrentUser, redu
 
 import { theServer, times, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 export class TermsOfServicePage extends React.Component {
 
 constructor(props) {
-        super(props)
-        autobind(this)
+        super(props);
+        autobind(this);
         this.state = {
             data: [],
             activePage:1,
@@ -317,4 +318,4 @@ constructor(props) {
     }
 }
 
-module.exports={ TermsOfServicePage }
+module.exports={ TermsOfServicePage };

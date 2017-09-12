@@ -8,6 +8,7 @@ import autobind from 'class-autobind'
 import DatePicker  from 'react-datepicker';
 require('react-datepicker/dist/react-datepicker.css');
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 

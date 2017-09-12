@@ -16,6 +16,7 @@ import DatePicker  from 'react-datepicker';
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, notificationSendMethodOptions, customStepModalStyles } from './constants'
 import { Textfit } from 'react-textfit';
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 const customModalStyles2 = {
     overlay : {

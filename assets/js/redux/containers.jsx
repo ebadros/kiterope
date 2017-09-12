@@ -8,24 +8,25 @@ import { setCurrentUser, showSidebar, setOpenThreads, setCurrentThreads, reduxLo
 
 
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
   if (state != undefined) {
   return {
+
       storeRoot:{
-        user:state.user,
-        goals:state.goals,
-        plans:state.plans,
-        contacts:state.contacts,
-        programs:state.programs,
-        stepOccurrences:state.stepOccurrences,
-        messageThreads:state.messageThreads,
+        user:state.rootReducer.user,
+        goals:state.rootReducer.goals,
+        plans:state.rootReducer.plans,
+        contacts:state.rootReducer.contacts,
+        programs:state.rootReducer.programs,
+        stepOccurrences:state.rootReducer.stepOccurrences,
+        messageThreads:state.rootReducer.messageThreads,
         gui: {
-          shouldReload:state.shouldReload,
-          isSidebarVisible:state.isSidebarVisible,
-          isMessageWindowVisible: state.isMessageWindowVisible,
-          currentThread: state.currentThread,
-          openThreads: state.openThreads,
-          currentContact:state.currentContact
+          shouldReload:state.rootReducer.shouldReload,
+          isSidebarVisible:state.rootReducer.isSidebarVisible,
+          isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
+          currentThread: state.rootReducer.currentThread,
+          openThreads: state.rootReducer.openThreads,
+          currentContact:state.rootReducer.currentContact
 
 
         }

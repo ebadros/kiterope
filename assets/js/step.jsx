@@ -43,6 +43,7 @@ import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalS
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 function printObject(o) {
   var out = '';
@@ -576,7 +577,7 @@ export class StepBasicView extends React.Component {
 
     goToDetail() {
          if (this.state.data.id) {
-             browserHistory.push("/steps/" + this.state.data.id + "/updates")
+             store.dispatch(push("/steps/" + this.state.data.id + "/updates"))
          }
      }
     render() {

@@ -31,6 +31,7 @@ import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';
 
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 function printObject(o) {
   var out = '';
@@ -879,13 +880,13 @@ export class ClientDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              browserHistory.push("/search");
+              store.dispatch(push("/search"));
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              browserHistory.push("/goalEntry");
+              store.dispatch(push("/goalEntry"));
               break;
       }
   };
@@ -957,7 +958,7 @@ export class ProfileBasicView extends React.Component {
     }
 
     goToDetail() {
-        browserHistory.push("/plans/" + this.state.data.id + "/steps")
+        store.dispatch(push("/plans/" + this.state.data.id + "/steps"))
 
 }
     render() {

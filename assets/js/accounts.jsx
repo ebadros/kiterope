@@ -50,6 +50,7 @@ var UpdatesList = require('./update');
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 
@@ -119,14 +120,15 @@ export class ReduxDataGetter extends React.Component {
 
     componentDidMount = () => {
         store.dispatch(setMessageWindowVisibility(false));
+        if (this.props.storeRoot.user == undefined) {
 
-        this.loadUserData()
+            this.loadUserData()
+        }
 
 
     };
 
     loadUserData() {
-        console.log("loading user data");
         var theUrl =  '/api/users/i/';
         $.ajax({
             method: 'GET',
@@ -137,8 +139,6 @@ export class ReduxDataGetter extends React.Component {
             },
             success: function(userData) {
                 if (userData.id != null) {
-
-
                 store.dispatch(setCurrentUser(userData));
                 this.loadUniversalData();
 
@@ -578,19 +578,19 @@ export class Menubar extends React.Component {
 
 
     loginHandler() {
-        browserHistory.push('/account/login/')
+                      store.dispatch(push('/account/login/'))
     }
 
     joinKiteropeHandler() {
-        browserHistory.push('/joinKiterope')
+        store.dispatch(push('/joinKiterope'))
     }
 
     logoutHandler() {
+        console.log("logout");
         store.dispatch(reduxLogout());
 
         auth.logout();
-
-        browserHistory.push('/account/login/')
+                        store.dispatch(push('/account/login/'))
 
 
 
@@ -631,7 +631,7 @@ export class Menubar extends React.Component {
     }
 
     goToBlog() {
-                browserHistory.push('/blog')
+        store.dispatch(push('/blog'))
 
     }
 //
@@ -1086,7 +1086,8 @@ export class LoginForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          browserHistory.push(nextProps.location.state.nextPathname)
+          store.dispatch(push(nextProps.location.state.nextPathname));
+          //browserHistory.push(nextProps.location.state.nextPathname)
       }
   }
 
@@ -1112,18 +1113,20 @@ export class LoginForm extends React.Component {
 
 
       if (this.props.location) {
-          browserHistory.push(nextProps.location.state.nextPathname)
+          store.dispatch(push(nextProps.location.state.nextPathname));
+          //browserHistory.push(nextProps.location.state.nextPathname)
       } else {
-          browserHistory.push('/')
+          store.dispatch(push('/'))
       }
   };
 
   handleForgotPasswordClick() {
-      browserHistory.push("/account/password/reset/")
+      store.dispatch(push('/account/password/reset/'))
   }
 
   handleJoinClick() {
-      browserHistory.push("/joinKiterope/")
+      store.dispatch(push('/joinKiterope/'));
+      //browserHistory.push("/joinKiterope/")
   }
 
   handleSubmit = (e) => {
@@ -1282,7 +1285,8 @@ export class PasswordConfirmForm extends React.Component {
 
             complete: function (jqXHR, textStatus){
                 if (textStatus == "success"){
-                    browserHistory.push("/account/login")
+
+                    store.dispatch(push("/account/login"))
                 }
             }.bind(this)
         });
@@ -1384,7 +1388,7 @@ export class PasswordResetForm extends React.Component {
     };
 
     handleCompleted() {
-        browserHistory.push("/account/login/")
+        store.dispatch(push("/account/login/"))
     }
 
     handleEmailChange = (value) => {
@@ -1453,7 +1457,7 @@ export class JoinForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          browserHistory.push(nextProps.location.state.nextPathname)
+          store.dispatch(push(nextProps.location.state.nextPathname) )
       }
   }
 
@@ -1576,7 +1580,7 @@ export class JoinForm extends React.Component {
   };
 
   handleSignInClick = () => {
-      browserHistory.push("/account/login/")
+      store.dispatch(push("/account/login/"))
   };
 
   getServerErrors(fieldName) {
@@ -1760,7 +1764,7 @@ export class ModalLoginForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
       if (this.props.location != nextProps.location) {
-          browserHistory.push(nextProps.location.state.nextPathname)
+          store.dispatch(push(nextProps.location.state.nextPathname) )
       }
   }
 

@@ -17,6 +17,10 @@ import  {store} from "./redux/store";
 import {SearchPage} from './search'
 import {SplashPage} from './splash'
 import {BlogPage} from './blog'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import {rootReducer} from './redux/reducers'
+
+
 
 
 import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
@@ -24,10 +28,18 @@ import {PlanDetailPage} from './plan'
 import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
 import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
+
 import {createStore, combineReducers, applyMiddleware} from "redux";
 import {BrowseProgramsPage } from './browse'
 
 import auth from './auth'
+
+
+
+
+const history = syncHistoryWithStore(browserHistory, store);
+
+
 
 import {
     theServer,
@@ -64,7 +76,7 @@ ReactDOM.render((
     <Provider store={store}>
 
 
-        <Router history={browserHistory}>
+        <Router history={history}>
             <div>
                 <Route path="/" component={ SplashPage }  />
                 <Route path="/blog" component={ BlogPage } />

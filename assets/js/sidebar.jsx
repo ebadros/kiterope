@@ -18,6 +18,9 @@ var Select = require('react-select');
 import  { ValidatedInput } from './app'
 var auth = require('./auth');
 var Modal = require('react-modal');
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+
+
 
 import onClickOutside  from 'react-onclickoutside';
 import { setCurrentUser, reduxLogout, showSidebar } from './redux/actions'
@@ -33,7 +36,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         this.state = {
             visible: false,
             user:"",
-            view: "Switch to User View"
+            view: "User View"
 
 
         };
@@ -59,6 +62,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
     }
 
     handleClickOutside = (e) => {
+
         store.dispatch(showSidebar(false));
 
 
@@ -81,15 +85,23 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
              //$(document).bind('click', this.clickDocument);
 
-        if (this.props.storeRoot.gui.isSidebarVisible) {
+        if (this.props.storeRoot.gui != undefined) {
+            if (this.props.storeRoot.gui.isSidebarVisible) {
+               $(this.refs["ref_sidebar"]).show()
+            } else {
+                $(this.refs["ref_sidebar"]).hide()
+            }
+
             this.setState({
                 visible: this.props.storeRoot.gui.isSidebarVisible
             });
 
 
-            //$(this.refs["ref_sidebar"]).show()
+
+            //
         } else {
-            //$(this.refs["ref_sidebar"]).hide()
+            $(this.refs["ref_sidebar"]).hide()
+
         }
 
         this.setState({
@@ -117,8 +129,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         store.dispatch(reduxLogout());
 
         auth.logout();
-
-        browserHistory.push('/account/login/')
+                store.dispatch(push('/account/login/'))
 
 
 
@@ -126,26 +137,34 @@ export class SidebarWithoutClickingOutside extends React.Component {
     }
 
     switchView = () => {
-        if (this.state.view == "Switch to Coach View") {
+        if (this.state.view == "Coach View") {
             this.setState({
-                view: "Switch to User View"
+                view: "User View"
             })
         } else {
             this.setState({
-                view: "Switch to Coach View"
+                view: "Coach View"
             })
         }
     };
 
+    handleURLPush(theURL) {
+
+        store.dispatch(push(theURL))
+    }
     render() {
-                                       var style = {
+        var style = {
+                zIndex: 2000,
+                display:'none',
 
-            zIndex: 2000,
-            display:'none'
+            };
 
+        if (this.props.storeRoot.user != undefined) {
+            var style = {
+                zIndex: 2000,
+            };
 
-        };
-
+        }
 
         if (this.props.user != undefined) {
             if (this.props.user.isCoach) {
@@ -160,33 +179,21 @@ export class SidebarWithoutClickingOutside extends React.Component {
          if ($(this.refs["ref_sidebar"]).is(":visible")) {
             if (!this.state.visible) {
                 $(this.refs["ref_sidebar"]).hide("slide");
-                var style = {
 
-            zIndex: 2000,
-            display: 'block'
-
-
-        };
 
             }
         } else {
 
             if (this.state.visible) {
                 $(this.refs["ref_sidebar"]).show("slide");
-                var style = {
 
-            zIndex: 2000,
-            display: 'block'
-
-
-        };
 
             }
         }
 
 
         if (this.props.user != undefined) {
-            if ((this.props.user.isCoach) && (this.state.view == "Switch to User View")) {
+            if ((this.props.user.isCoach) && (this.state.view == "User View")) {
                 return (
                     <div ref="ref_sidebar"
                          className="ui right vertical inverted labeled visible icon large sidebar menu"
@@ -195,43 +202,43 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large close icon"></i>
                         </a>
 
-                        <a className="item" style={style} href="/">
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/')}>
                             <i className="large home icon"></i>
                             Home
                         </a>
                         {viewSwitcher}
 
-                        <a className="item" style={style} href="/programs">
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/programs')}  >
                             <i className="large cubes icon"/>
                             My Programs
                         </a>
-                        <a className="item" style={style} href="/contacts">
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/contacts')} >
                             <i className="large users icon"/>
                             My Contacts
                         </a>
 
                                 { this.props.user ?
-                                    <a className="item" style={style} href={`/profiles/${this.props.user.profileId}`}>
+                                    <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.user.profileId}`)}  >
                                         <i className="large user icon"/>
                                         My Profile
                                     </a> : <div></div>}
 
 
-                        <a className="item"  style={style} href="/search">
+                        <a className="item"  style={style} onClick={() => this.handleURLPush('/search')}>
                             <i className="large search icon"/>
                             Search
                         </a>
 
 
-                        <a className="item" href="/messages">
+                        <a className="item" style={style}onClick={() => this.handleURLPush('/messages')}>
                             <i className="large mail icon"/>
                             Messages
                         </a>
-                        <a className="item">
+                        <a className="item" style={style}>
                             <i className="large settings icon"/>
                             Settings
                         </a>
-                        <a className="item" style={style} href="/blog">
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>
@@ -243,44 +250,44 @@ export class SidebarWithoutClickingOutside extends React.Component {
             else return (
                 <div ref="ref_sidebar" className="ui right vertical inverted labeled visible icon large sidebar menu"
                      style={style}>
-<a className="item"  onClick={this.handleClose}>
+<a className="item"  style={style} onClick={this.handleClose}>
                             <i className="large close icon"></i>
                         </a>
 
-                    <a className="item" onClick={() => browserHistory.push("/")}>
+                    <a className="item"  style={style} onClick={() => this.handleURLPush('/')}>
                         <i className="large home icon"></i>
                         Home
                     </a>
                     {viewSwitcher}
 
-                    <a className="item" href="/goals">
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
                         <i className="large block layout icon"/>
                         My Goals
                     </a>
-                    <a className="item" href="/contacts">
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/contacts')}>
                         <i className="large users icon"/>
                         My Contacts
                     </a>
-                    { this.props.user ? <a className="item" href={`/profiles/${this.props.user.profileId}`}>
+                    { this.props.user ? <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.user.profileId}`)} >
                         <i className="large user icon"/>
                         My Profile
                     </a> : <div></div>}
 
-                    <a className="item" href="/search">
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/search')}>
                         <i className="large search icon"/>
                         Search
                     </a>
 
 
-                    <a className="item" href="/messages">
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/messages')}>
                         <i className="large mail icon"/>
                         Messages
                     </a>
-                    <a className="item">
+                    <a className="item" style={style}>
                         <i className="large settings icon"/>
                         Settings
                     </a>
-                    <a className="item" style={style} href="/blog">
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>

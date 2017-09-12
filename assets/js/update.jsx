@@ -23,6 +23,7 @@ import  {store} from "./redux/store";
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customStepModalStyles, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, metricFormatOptions} from './constants'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {

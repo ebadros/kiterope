@@ -44,6 +44,7 @@ InitialLoader,
     } from "searchkit";
 
 import { theServer, elasticSearchDomain } from './constants'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 var Searchkit = require('searchkit');
 var imageDirectory = "https://kiterope-static.s3.amazonaws.com/";
@@ -221,7 +222,7 @@ export class Search extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        browserHistory.push("/search/" + this.state.query + "/");
+        store.dispatch(push("/search/" + this.state.query + "/"));
 
         this.setState({
             queryUrl: this.state.query,
@@ -245,7 +246,7 @@ export class Search extends React.Component {
             },
                             //store.dispatch(push('/search/'))
 
-            browserHistory.push("/search/")
+            store.dispatch(push("/search/") )
 
 
 
@@ -583,12 +584,12 @@ export class SearchHitsGrid extends React.Component {
       handleWePlanClick() {
                           //store.dispatch(push('/goalEntry'))
 
-      browserHistory.push('/goalEntry')
+      store.dispatch(push('/goalEntry'))
       }
 
       handleYouPlanClick() {
           //store.dispatch(push('/goalEntry'))
-      browserHistory.push('/goalEntry')
+      store.dispatch(push('/goalEntry'))
       }
 
 

@@ -40,6 +40,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 function printObject(o) {
   var out = '';
@@ -57,10 +58,10 @@ export class ContactItemMenu extends React.Component {
 
      handleClick = (callbackData) => {
          this.props.click(callbackData)
-     }
+     };
 
      render () {
-         var myStyle = { display: "block"}
+         var myStyle = { display: "block"};
          return(
 
                   <div className="ui simple dropdown item" >
@@ -87,4 +88,4 @@ export class ContactItemMenu extends React.Component {
 
 }
 
-module.exports = { ContactItemMenu}
+module.exports = { ContactItemMenu};

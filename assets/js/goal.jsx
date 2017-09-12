@@ -37,6 +37,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 import PropTypes from 'prop-types';
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 export const isThisReasonableOptions = [
         {value:null, label: ""},
@@ -589,13 +590,13 @@ export class GoalDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              browserHistory.push("/search");
+              store.dispatch(push("/search"));
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              browserHistory.push("/goalEntry");
+              store.dispatch(push("/goalEntry"));
               break;
       }
   };
@@ -669,7 +670,7 @@ export class GoalNode extends React.Component {
 
     clearPage = () => {
 
-        browserHistory.push('/goals/' + this.props.goal.id + '/plans')
+        store.dispatch(push('/goals/' + this.props.goal.id + '/plans') )
 
 
     };

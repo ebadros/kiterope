@@ -203,7 +203,7 @@ case 'LOGIN':
 
 
   case 'LOGOUT':
-    state = undefined;
+    state = {};
     return state;
     break;
   }

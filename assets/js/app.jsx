@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 var ReactS3Uploader = require('react-s3-uploader');
 import Measure from 'react-measure'
 import {ImageUploader } from './base'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 
@@ -38,7 +39,7 @@ export class App extends React.Component {
     logoutHandler(){
         store.dispatch(reduxLogout());
         auth.logout();
-        browserHistory.push('/account/login/')
+        store.dispatch(push('/account/login/'))
 
     }
 
@@ -557,7 +558,12 @@ export class TestPage extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
-
+        this.state = {
+            dimensions: {
+                width: -1,
+                height: -1
+            }
+        }
 
         }
 
@@ -615,8 +621,10 @@ export class TestPage extends React.Component {
             <div>
                 <div className="ui row">&nbsp;</div>
 
-                 <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}><ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></Measure>
+                 <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
+                     <div>
+                     <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                         label="Select an image that will help motivate you." defaultImage=""/></div></Measure>
                 <div className="ui row">&nbsp;</div>
 
 

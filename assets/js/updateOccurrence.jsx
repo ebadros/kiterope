@@ -44,6 +44,7 @@ import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalS
     costFrequencyMetricOptions, times, durations,  } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 function printObject(o) {
   var out = '';

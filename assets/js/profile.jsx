@@ -39,6 +39,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 function printObject(o) {
@@ -932,13 +933,13 @@ export class ProfileDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              browserHistory.push("/search");
+              store.dispatch(push("/search"));
               break;
           case ("create"):
               this.handleOpenForm();
               break;
           case ("kiterope"):
-              browserHistory.push("/goalEntry");
+              store.dispatch(push("/goalEntry"));
               break;
 
       }
@@ -1019,7 +1020,7 @@ export class ProfileBasicView extends React.Component {
     }
 
     goToDetail() {
-        browserHistory.push("/profiles/" + this.state.data.id + "/")
+        store.dispatch(push("/profiles/" + this.state.data.id + "/"))
 
 }
     render() {

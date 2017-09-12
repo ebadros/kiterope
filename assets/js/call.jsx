@@ -20,6 +20,7 @@ import autobind from 'class-autobind'
 var NotificationSystem = require('react-notification-system');
 var Iframe = require("react-iframe");
 
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';

@@ -39,6 +39,8 @@ import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent } from './calendar'
 import { UpdatesList } from './update'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+
 var ReconnectingWebSocket = require('reconnecting-websocket');
 import Websocket from 'react-websocket';
 
