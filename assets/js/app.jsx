@@ -13,6 +13,9 @@ var auth = require('./auth');
 var Global = require('react-global');
 import Select from 'react-select'
 import PropTypes from 'prop-types';
+var ReactS3Uploader = require('react-s3-uploader');
+import Measure from 'react-measure'
+import {ImageUploader } from './base'
 
 
 
@@ -40,6 +43,7 @@ export class App extends React.Component {
     }
 
     loadUserData() {
+        console.log("loadUserData");
         $.ajax({
             method: 'GET',
             url: '/api/users/i/',
@@ -396,6 +400,23 @@ export class ValidatedInput extends React.Component{
 
     };
 
+    onUploadStart() {
+        console.log("onUploadStart")
+    }
+
+    onUploadProgress() {
+        console.log("onUploadProgress")
+    }
+    onUploadFinish() {
+        console.log("onUploadFinish")
+    }
+
+    onUploadError() {
+                console.log("onUploadError")
+
+
+    }
+
 
 
 
@@ -425,6 +446,55 @@ export class ValidatedInput extends React.Component{
                     <label htmlFor={this.props.id}>{this.props.label}</label>
                      <input type="text" placeholder={this.props.placeholder} name={this.props.name} id={this.props.id} value={this.state.value} onChange={this.validate} disabled={this.props.isDisabled}/>
                     </div>
+
+                )
+
+            }
+        } else if (this.props.type == "video") {
+
+            if (errorsHTML != "") {
+                return (
+                    <div className="field error">
+                        <label htmlFor={this.props.id}>{this.props.label}</label>
+                        <ReactS3Uploader
+                            signingUrl="signS3Upload/"
+                            signingUrlMethod="GET"
+                            accept="*"
+                            preprocess={this.onUploadStart}
+                            onProgress={this.onUploadProgress}
+                            onError={this.onUploadError}
+                            onFinish={this.onUploadFinish}
+
+                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
+                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
+                            contentDisposition="auto"
+                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
+                            server="http://127.0.0.1:8000"
+
+                             />
+                        <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
+                    </div>
+
+                )
+            }
+            else {
+                return (
+                    <div className="field">
+                    <label htmlFor={this.props.id}>{this.props.label}</label>
+                      <ReactS3Uploader
+                            signingUrl="signS3Upload/"
+                            signingUrlMethod="GET"
+                            accept="*"
+                            preprocess={this.onUploadStart}
+                            onProgress={this.onUploadProgress}
+                            onError={this.onUploadError}
+                            onFinish={this.onUploadFinish}
+                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
+                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
+                            contentDisposition="auto"
+                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
+                            server="http://127.0.0.1:8000"
+                              />  </div>
 
                 )
 
@@ -483,6 +553,78 @@ export class ValidatedInput extends React.Component{
 
 }
 
+export class TestPage extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+
+
+        }
+
+        onUploadStart() {
+        console.log("onUploadStart")
+    }
+
+    onUploadProgress() {
+        console.log("onUploadProgress")
+    }
+    onUploadFinish() {
+        console.log("onUploadFinish")
+    }
+
+    onUploadError() {
+                console.log("onUploadError")
+
+
+    }
+
+    handleImageChange() {
+        console.log("handleImageChange")
+    }
+
+
+        handleVideoChange() {
+            console.log("handlevideochange")
+        }
+    getTestHTML() {
+        return (
+        {/*<ReactS3Uploader
+                            signingUrl="signS3Upload/"
+                            signingUrlMethod="GET"
+                            accept="*"
+                            preprocess={this.onUploadStart}
+                            onProgress={this.onUploadProgress}
+                            onError={this.onUploadError}
+                            onFinish={this.onUploadFinish}
+
+                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
+                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
+                            contentDisposition="auto"
+                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
+                            server="http://127.0.0.1:8000"
+
+                             />*/}
+
+
+        )
+    }
+
+    render() {
+        var theTestHTML = this.getTestHTML();
+        return (
+            <div>
+                <div className="ui row">&nbsp;</div>
+
+                 <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}><ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></Measure>
+                <div className="ui row">&nbsp;</div>
+
+
+            </div>
+        )
+    }
+}
+
 ValidatedInput.propTypes = {
         stateCallback: PropTypes.func,
     };
@@ -491,4 +633,4 @@ App.contextTypes = {
   router: PropTypes.object.isRequired
 };
 
-module.exports =  { App, ValidatedInput, KSSelect, KRCheckBox };
+module.exports =  { App, ValidatedInput, KSSelect, KRCheckBox , TestPage};

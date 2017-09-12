@@ -1476,6 +1476,7 @@ def secret_page(request, *args, **kwargs):
 conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
+    print("sign_s3_upload")
     object_name = request.GET['objectName']
     extension = os.path.splitext(object_name)[1]
     object_name = str(uuid.uuid4()) + extension
@@ -1492,7 +1493,8 @@ def sign_s3_upload(request):
                    })
 
     return HttpResponse(json.dumps({'signedUrl': signed_url}))
-    
+
+
     
     
     

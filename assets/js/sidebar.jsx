@@ -37,7 +37,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 
         };
-                //setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
+                setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
 
     }
 
@@ -77,13 +77,19 @@ export class SidebarWithoutClickingOutside extends React.Component {
   }
 
     componentDidMount () {
-                //$(document).bind('click', this.clickDocument);
+
+
+             //$(document).bind('click', this.clickDocument);
 
         if (this.props.storeRoot.gui.isSidebarVisible) {
-            $(this.refs["ref_sidebar"]).show()
-        } else {
-            $(this.refs["ref_sidebar"]).hide()
+            this.setState({
+                visible: this.props.storeRoot.gui.isSidebarVisible
+            });
 
+
+            //$(this.refs["ref_sidebar"]).show()
+        } else {
+            //$(this.refs["ref_sidebar"]).hide()
         }
 
         this.setState({
@@ -93,8 +99,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     }
     componentWillReceiveProps (nextProps) {
+
         if (this.state.visible != nextProps.storeRoot.gui.isSidebarVisible) {
-            this.state.visible = nextProps.storeRoot.gui.isSidebarVisible
+            this.setState({
+                visible: nextProps.storeRoot.gui.isSidebarVisible
+            })
         }
         if (this.state.user != nextProps.user) {
             this.setState({
@@ -129,6 +138,15 @@ export class SidebarWithoutClickingOutside extends React.Component {
     };
 
     render() {
+                                       var style = {
+
+            zIndex: 2000,
+            display:'none'
+
+
+        };
+
+
         if (this.props.user != undefined) {
             if (this.props.user.isCoach) {
                 var viewSwitcher = <a className="item" onClick={this.switchView}>
@@ -139,25 +157,34 @@ export class SidebarWithoutClickingOutside extends React.Component {
             }
         }
 
-        if ($(this.refs["ref_sidebar"]).is(":visible")) {
-            if (!this.props.storeRoot.gui.isSidebarVisible) {
-                $(this.refs["ref_sidebar"]).hide("slide")
+         if ($(this.refs["ref_sidebar"]).is(":visible")) {
+            if (!this.state.visible) {
+                $(this.refs["ref_sidebar"]).hide("slide");
+                var style = {
+
+            zIndex: 2000,
+            display: 'block'
+
+
+        };
 
             }
         } else {
 
-            if (this.props.storeRoot.gui.isSidebarVisible) {
-                $(this.refs["ref_sidebar"]).show("slide")
+            if (this.state.visible) {
+                $(this.refs["ref_sidebar"]).show("slide");
+                var style = {
+
+            zIndex: 2000,
+            display: 'block'
+
+
+        };
 
             }
         }
 
-        var style = {
 
-            zIndex: 2000,
-
-
-        };
         if (this.props.user != undefined) {
             if ((this.props.user.isCoach) && (this.state.view == "Switch to User View")) {
                 return (

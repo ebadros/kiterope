@@ -119,13 +119,15 @@ export class ReduxDataGetter extends React.Component {
 
     componentDidMount = () => {
         store.dispatch(setMessageWindowVisibility(false));
+
         this.loadUserData()
 
 
     };
 
     loadUserData() {
-        var theUrl =  '/api/users/i';
+        console.log("loading user data");
+        var theUrl =  '/api/users/i/';
         $.ajax({
             method: 'GET',
             url: theUrl,

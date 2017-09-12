@@ -496,4 +496,23 @@ export class UpdateOccurrenceInput extends React.Component {
 
 }
 
+export class VideoOrAudioUploader extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+
+
+
+        }
+    }
+
+    render() {
+        return (
+            <div></div>
+        )
+    }
+}
+
+
 module.exports = { UpdateOccurrenceInput, UpdateOccurrenceList};

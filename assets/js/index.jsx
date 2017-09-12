@@ -7,7 +7,7 @@ var $ui = require('jquery-ui');
 var ObjectCreationPage = require('./plan');
 import { DailyList } from './daily'
 import {LoginPage, JoinPage, PasswordResetPage, PasswordConfirmPage, PasswordConfirmForm} from './accounts'
-import {App} from './app'
+import {App, TestPage} from './app'
 import {ProfileViewPage, ProfileViewAndEditPage, ProfileListPage, ProfileDetailPage} from './profile'
 import {ClientListPage, ClientDetailPage} from './client'
 import {Test} from './elements'
@@ -69,8 +69,7 @@ ReactDOM.render((
                 <Route path="/" component={ SplashPage }  />
                 <Route path="/blog" component={ BlogPage } />
 
-                <Route path="/daily" component={DailyList}
-                       onEnter={requireAuth}/>
+                <Route path="/daily" component={DailyList} onEnter={requireAuth}/>
 
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
                 <Route path="/browse" component={BrowseProgramsPage} />
@@ -112,6 +111,8 @@ ReactDOM.render((
                 <Route path="/search/:search_query/" component={SearchPage}/>
 
                 <Route path="/search" component={SearchPage}/>
+                <Route path="/test" component={TestPage}/>
+
 
 
             </div>
