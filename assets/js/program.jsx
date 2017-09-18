@@ -11,6 +11,7 @@ import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accou
 import autobind from 'class-autobind'
 import {StandardSetOfComponentsContainer} from './redux/containers'
 import Measure from 'react-measure'
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
 import { ValidatedInput, KSSelect } from './app'
@@ -42,7 +43,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, times, s3IconUrl, formats, s3ImageUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, times, s3IconUrl, formats, s3BaseUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
@@ -1367,7 +1368,7 @@ export class ProgramForm extends React.Component {
     handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;
             var urlForDatabase = fullUrl.split("?")[0];
-            urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
+            urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
             this.setState({image: urlForDatabase});
     }
 
@@ -1700,7 +1701,7 @@ export class SimpleProgramForm extends ProgramForm {
 
     getForm = () => {
 
-        var imageUrl = s3ImageUrl + this.state.image;
+        var imageUrl = s3BaseUrl + this.state.image;
         var startDate = moment(this.state.startDate).format("MMM DD, YYYY");
         return (
             <div className="ui page container">
@@ -1931,7 +1932,7 @@ export class ProgramListNode extends React.Component {
     render () {
 
         if (this.props.program.image) {
-            var theImage = <img className="clippedImage" src={s3ImageUrl + this.props.program.image}/>
+            var theImage = <img className="clippedImage" src={s3BaseUrl + this.props.program.image}/>
 
         } else {
             var theImage = <img className="clippedImage" src='http://semantic-ui.com/images/avatar2/large/kristy.png' />
@@ -2000,13 +2001,13 @@ export class ProgramBasicView extends React.Component {
 
 }
     render() {
-        var imageUrl = s3ImageUrl + "images/goalItem.svg";
+        var imageUrl = s3BaseUrl + "uploads/goalItem.svg";
         var theCost;
 
 
         if (this.state.data) {
             if (this.state.data.image) {
-                var imageUrl = s3ImageUrl + this.state.data.image
+                var imageUrl = s3BaseUrl + this.state.data.image
             }
             if (this.state.data.cost == 0.00 || this.state.data.costFrequencyMetric == "FREE") {
                 theCost = "Free"

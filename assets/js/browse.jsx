@@ -87,7 +87,9 @@ export class IndividualProgram extends React.Component {
 
     render() {
         return (
-            <Link to={`/plan/view/${this.props.id}/`}>{this.props.title}</Link>
+            <div>
+            <Link to={`/plan/view/${this.props.id}/`}>{this.props.title}</Link><br/>
+                </div>
 
         )
     }

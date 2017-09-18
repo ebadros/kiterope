@@ -40,7 +40,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 
         };
-                setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
+                this.timer = setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
 
     }
 
@@ -78,6 +78,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
   handleClose() {
       store.dispatch(showSidebar(false))
 
+  }
+  componentWillUnmount() {
+      clearTimeout(this.timer)
   }
 
     componentDidMount () {
@@ -260,7 +263,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </a>
                     {viewSwitcher}
 
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/goals')}>
                         <i className="large block layout icon"/>
                         My Goals
                     </a>

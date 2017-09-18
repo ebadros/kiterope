@@ -8,6 +8,7 @@ export const getTheServer = () => {
 export const theServer = getTheServer();
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope-static.s3.amazonaws.com:443/";
+export const s3BaseUrl = "https://kiterope-static.s3.amazonaws.com:443/";
 
 
 export const TINYMCE_CONFIG = {
@@ -272,5 +273,5 @@ function printObject(o) {
 
 
 
-module.exports = {  theServer, periodOptions, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {  theServer, s3BaseUrl, periodOptions, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };

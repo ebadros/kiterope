@@ -1014,6 +1014,7 @@ export class MessagePageLabelsList extends React.Component {
 
     componentWillUnmount () {
         clearInterval(this.state.intervalID)
+
     }
 
     handleClick = (selectedLabelId) => {
@@ -1143,7 +1144,7 @@ export class MessageWindow extends React.Component {
     }
 
     componentDidMount () {
-        setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
+        this.timer = setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
 
         if (this.props.storeRoot) {
             this.setState({
@@ -1304,6 +1305,10 @@ export class MessageWindow extends React.Component {
 
   handleMenuItemCloseClick() {
       store.dispatch(setMessageWindowVisibility(false))
+  }
+
+  componentWillUnmount() {
+      clearTimeout(this.timer)
   }
 
 
@@ -1989,14 +1994,17 @@ export class MessageInput extends React.Component {
             zIndex:1000,
             message: ""
         };
+        this.timer = false
 
 
     }
 
     componentDidMount () {
-                setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
+                this.timer = setTimeout(() => this.setState({ zIndex: 1000 }), 5000);
 
     }
+
+
 
     handleMessageChange = (e) => {
         this.setState({message:e.target.value})
@@ -2015,6 +2023,10 @@ export class MessageInput extends React.Component {
 
 
   };
+
+  componentWillUnmount() {
+      clearTimeout(this.timer)
+  }
 
     _handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -2726,7 +2738,7 @@ export class ContactItem extends React.Component {
             imageUrl = s3ImageUrl + this.props.contact.profilePhoto
         }
         else {
-            imageUrl = s3ImageUrl + "images/user.svg"
+            imageUrl = s3ImageUrl + "uploads/user.svg"
         }
 
         return (

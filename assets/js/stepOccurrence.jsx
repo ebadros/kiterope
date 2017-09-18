@@ -235,7 +235,7 @@ export class StepOccurrenceItem extends React.Component {
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
-                type: 'PUT',
+                type: 'PATCH',
                 data: updateOccurrence,
                 headers: {
                     'Authorization': 'Token ' + localStorage.token

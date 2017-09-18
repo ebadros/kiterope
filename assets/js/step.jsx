@@ -1043,7 +1043,7 @@ export class StepForm extends React.Component {
             title: "",
             description:"",
             frequency:"",
-                image:"images/stepDefaultImage.svg",
+                image:"uploads/stepDefaultImage.svg",
             day01:false,
             day02:false,
             day03:false,

@@ -286,12 +286,15 @@ export class UpdateAddAndEditItemForm extends React.Component {
         this.setState({measuringWhat: value});
     }
     handleMetricLabelChange(value) {
+
         this.setState({metricLabel: value});
     }
     handleUnitsChange(value) {
+
         this.setState({units: value});
     }
     handleFormatChange(option) {
+
         this.setState({format: option.value});
     }
 
@@ -371,13 +374,13 @@ return (
 
                             <div className="field">
                                 <label>Label:</label>
-                                <div>{this.state.data.metricLabel}</div>
+                                <div>{this.state.metricLabel}</div>
                             </div>
                             <div className="field">
 
                                 <label>Metric:</label>
 
-                                <div>{this.state.data.measuringWhat} in {this.state.data.units} using {this.state.data.format}</div>
+                                <div>{this.state.measuringWhat} {this.state.data.units != "" ? "in " + this.state.data.units : null} using {this.state.data.format}</div>
                             </div>
                         </div>
 

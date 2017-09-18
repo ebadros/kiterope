@@ -22,7 +22,8 @@ import autobind from 'class-autobind'
 
 import Pagination from "react-js-pagination";
 
-import { Provider, connect, store, dispatch } from 'react-redux'
+import { Provider, connect,  dispatch } from 'react-redux'
+import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import Measure from 'react-measure'

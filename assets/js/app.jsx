@@ -15,9 +15,8 @@ import Select from 'react-select'
 import PropTypes from 'prop-types';
 var ReactS3Uploader = require('react-s3-uploader');
 import Measure from 'react-measure'
-import {ImageUploader } from './base'
+import {ImageUploader, VideoUploader } from './base'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
-
 
 
 export class App extends React.Component {
@@ -418,6 +417,13 @@ export class ValidatedInput extends React.Component{
 
     }
 
+    handleVideoChange = (callbackData) => {
+        console.log("handleVideo change from validatedInput " + callbackData.video);
+        this.props.stateCallback(callbackData)
+
+    };
+
+
 
 
 
@@ -455,47 +461,28 @@ export class ValidatedInput extends React.Component{
 
             if (errorsHTML != "") {
                 return (
+                    <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
                     <div className="field error">
                         <label htmlFor={this.props.id}>{this.props.label}</label>
-                        <ReactS3Uploader
-                            signingUrl="signS3Upload/"
-                            signingUrlMethod="GET"
-                            accept="*"
-                            preprocess={this.onUploadStart}
-                            onProgress={this.onUploadProgress}
-                            onError={this.onUploadError}
-                            onFinish={this.onUploadFinish}
+                                     <VideoUploader videoReturned={this.handleVideoChange} dimensions={this.state.dimensions} label="Drag and Drop or Click to Add Video" />
 
-                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
-                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
-                            contentDisposition="auto"
-                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
-                            server="http://127.0.0.1:8000"
-
-                             />
                         <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
                     </div>
+                        </Measure>
 
                 )
             }
             else {
                 return (
+                    <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
                     <div className="field">
                     <label htmlFor={this.props.id}>{this.props.label}</label>
-                      <ReactS3Uploader
-                            signingUrl="signS3Upload/"
-                            signingUrlMethod="GET"
-                            accept="*"
-                            preprocess={this.onUploadStart}
-                            onProgress={this.onUploadProgress}
-                            onError={this.onUploadError}
-                            onFinish={this.onUploadFinish}
-                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
-                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
-                            contentDisposition="auto"
-                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
-                            server="http://127.0.0.1:8000"
-                              />  </div>
+                        <VideoUploader videoReturned={this.handleVideoChange} dimensions={this.state.dimensions} label="Drag and Drop or Click to Add Video" />
+  </div></Measure>
 
                 )
 
@@ -589,27 +576,41 @@ export class TestPage extends React.Component {
     }
 
 
-        handleVideoChange() {
-            console.log("handlevideochange")
-        }
+        handleVideoChange = (callbackData) => {
+        this.setState({
+            video: callbackData.video
+        })
+    };
+
     getTestHTML() {
         return (
-        {/*<ReactS3Uploader
-                            signingUrl="signS3Upload/"
+            <div className="ui four column grid">
+                <div className="ui row"> &nbsp;</div>
+                <div className="ui row">
+
+                <div className="ui column">
+        <ReactS3Uploader
+                            signingUrl="/s3/sign"
                             signingUrlMethod="GET"
                             accept="*"
-                            preprocess={this.onUploadStart}
                             onProgress={this.onUploadProgress}
                             onError={this.onUploadError}
                             onFinish={this.onUploadFinish}
 
-                            //signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
-                            uploadRequestHeaders= {{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}} // this is the default
+                            signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
+                            uploadRequestHeaders= {{'x-amz-acl': 'public-read'}} // this is the default
                             contentDisposition="auto"
                             scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
-                            server="http://127.0.0.1:8000"
 
-                             />*/}
+                             />
+                    </div>
+                                <div className="ui column">
+
+
+             <VideoUploader videoReturned={this.handleVideoChange} label="Drag and Drop or Click to Add Video" />
+                                    </div>
+                </div>
+                </div>
 
 
         )
@@ -619,13 +620,7 @@ export class TestPage extends React.Component {
         var theTestHTML = this.getTestHTML();
         return (
             <div>
-                <div className="ui row">&nbsp;</div>
-
-                 <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
-                     <div>
-                     <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage=""/></div></Measure>
-                <div className="ui row">&nbsp;</div>
+                {theTestHTML}
 
 
             </div>

@@ -33,7 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 
-ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1',]
 
 
 TWILIO_ACCOUNT_SID = 'AC8d2c5238f8d12bb1b382e57428af3c90'

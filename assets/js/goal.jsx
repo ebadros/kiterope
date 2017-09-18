@@ -22,7 +22,7 @@ import { PlanForm, PlanList } from './plan'
 import {ChoiceModal, IconLabelCombo} from './elements'
 import { Textfit } from 'react-textfit';
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, formats, s3BaseUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, userSharingOptions } from './constants'
 
 import Measure from 'react-measure'
@@ -678,11 +678,11 @@ export class GoalNode extends React.Component {
     render () {
 
         if (this.props.goal.image) {
-            var theImage =  <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3ImageUrl + this.props.goal.image} text={this.props.goal.title} /></Link>
+            var theImage =  <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + this.props.goal.image} text={this.props.goal.title} /></Link>
 
 
         } else {
-            var theImage = <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3ImageUrl + "icons/goalItem.svg"} text={this.props.goal.title} /></Link>
+            var theImage = <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + "icons/goalItem.svg"} text={this.props.goal.title} /></Link>
         }
         return(
             <div key={this.props.goal.id} className="column">
@@ -1387,7 +1387,7 @@ export class GoalSMARTForm extends React.Component {
                 var buttonText = "Create Goal"
             }
 
-            var imageUrl = s3ImageUrl + this.state.image;
+            var imageUrl = s3BaseUrl + this.state.image;
         return ( <div className="ui page container footerAtBottom">
                                 <div className="ui row">&nbsp;</div>
 
@@ -1649,13 +1649,13 @@ export class SimpleGoalForm extends GoalForm {
 
     getForm = () => {
 
-            var imageUrl = s3ImageUrl + this.state.image;
+            var imageUrl = s3BaseUrl + this.state.image;
         var theDeadline = moment(this.state.deadline).format("MMM DD, YYYY");
         return (
             <div className="ui page container footerAtBottom">
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui small image" src={s3ImageUrl + this.state.image}/></div>
+                        <img className="ui small image" src={s3BaseUrl + this.state.image}/></div>
 
                     <div className="eleven wide column">
                         <div className="ui row">
@@ -1789,13 +1789,13 @@ export class GoalBasicView extends React.Component {
             if (this.state.data.image != undefined){
                 var theImage = this.state.data.image
             } else {
-                var theImage = "images/goalItem.svg"
+                var theImage = "uploads/goalItem.svg"
 
             }
             return (
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui image" src={s3ImageUrl + theImage}></img>
+                        <img className="ui image" src={s3BaseUrl + theImage}></img>
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">

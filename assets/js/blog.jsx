@@ -65,17 +65,10 @@ export class BlogPage extends React.Component {
             headers: {
             },
             success: function(data) {
-                console.log("getPosts results");
                 this.setState({
                     data: data.results,
                     prerenderReady: true
-
-
                 })
-
-
-
-
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());
@@ -163,7 +156,7 @@ export class BlogPostList extends React.Component {
 
         theBlogPosts = this.state.data.map(function(post)  {
             return (
-                <BlogPost title={post.title} description={post.description} authorName={post.authorName} date={post.modified}/>
+                <BlogPost key={`ref_blogPost_${post.id}`} title={post.title} description={post.description} authorName={post.authorName} date={post.modified}/>
             )
         })}
         return theBlogPosts

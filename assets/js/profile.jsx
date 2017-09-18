@@ -566,8 +566,8 @@ if (this.state.user) {
                                       label="First Name"
                                       id="id_firstName"
                                       placeholder="First Name"
-                                      value={this.state.firstName}
-                                      initialValue={this.state.firstName}
+                                      value={this.state.firstName || ""}
+                                      initialValue={this.state.firstName || ""}
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleFirstNameChange}
@@ -580,8 +580,8 @@ if (this.state.user) {
                                       label="Last Name"
                                       id="id_lastName"
                                       placeholder="Last Name"
-                                      value={this.state.lastName}
-                                      initialValue={this.state.lastName}
+                                      value={this.state.lastName || ""}
+                                      initialValue={this.state.lastName || ""}
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleLastNameChange}
@@ -604,8 +604,8 @@ if (this.state.user) {
                                       label="Zip Code"
                                       id="id_zipCode"
                                       placeholder="Zip Code"
-                                      value={this.state.zipCode}
-                                      initialValue={this.state.zipCode}
+                                      value={this.state.zipCode || ""}
+                                      initialValue={this.state.zipCode || ""}
                                       validators='"!isEmpty(str)"'
                                       onChange={this.validate}
                                       stateCallback={this.handleZipCodeChange}

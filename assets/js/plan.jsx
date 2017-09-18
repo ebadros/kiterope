@@ -28,6 +28,11 @@ import { MessageWindowContainer } from './message'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions } from './constants'
+import { Provider, connect, dispatch } from 'react-redux'
+import  {store} from "./redux/store";
+
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 $.ajaxSetup({
@@ -390,6 +395,7 @@ export class ViewSelector extends React.Component {
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class PlanForm extends React.Component {
     constructor(props) {
         super(props);
@@ -428,17 +434,28 @@ export class PlanForm extends React.Component {
                 timeCommitment: nextProps.data.timeCommitment,
                 cost: nextProps.data.cost,
                 costFrequencyMetric: nextProps.data.costFrequencyMetric,
-                startDate: moment(nextProps.data.startDate, "YYYY-MM-DD"),
+                //startDate: moment(nextProps.data.startDate, "YYYY-MM-DD"),
                 scheduleLength:nextProps.data.scheduleLength,
 
 
-                viewableBy: nextProps.data.viewableBy,
+                //viewableBy: nextProps.data.viewableBy,
             })
             }
 
 
 
+
         }
+                if (this.state.occurrenceData != nextProps.occurrenceData) {
+                    if (nextProps.occurrenceData != undefined) {
+                        this.setState({
+                            startDate: moment(nextProps.occurrenceData.startDate, "YYYY-MM-DD"),
+                            viewableBy: nextProps.occurrenceData.viewableBy
+                        })
+
+                    }
+                }
+
 
         if (this.state.serverErrors != nextProps.serverErrors) {
             this.setState({
@@ -465,9 +482,8 @@ export class PlanForm extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        this.checkIfUser();
 
-        if (this.state.user) {
+        if (this.props.storeRoot.user) {
             var viewableBy = this.state.viewableBy;
             var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
 
@@ -530,9 +546,17 @@ export class PlanForm extends React.Component {
 
 
           return (
+              <div>
+                                            <ClippedImage item="plan" src={imageUrl} />
+
               <div className="ui page container">
                       <div className="ui three column grid">
-                          <div className="ui row">&nbsp;</div>
+
+
+
+                        <div className="planTitle">                {this.state.title}
+
+                        </div>
 
                             <div className="ui row">
                               <div className={smallColumnWidth}>
@@ -574,6 +598,7 @@ export class PlanForm extends React.Component {
                       </div>
 
               </div>
+                  </div>
           )
 
     };
@@ -752,11 +777,12 @@ export class PlanList extends React.Component {
     }
 
     loadFromServer = () => {
-        var theURL = "/api/goals/" + this.props.parentId + "/planOccurrences";
+        var theUrl = "/api/goals/" + this.props.parentId + "/planOccurrences/";
 
       $.ajax({
-      url: theURL,
+      url: theUrl,
       dataType: 'json',
+          type:'GET',
       cache: false,
         headers: {
                 'Authorization': 'Token ' + localStorage.token
@@ -769,7 +795,7 @@ export class PlanList extends React.Component {
             data: data.results});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
+        console.error(theUrl, status, err.toString());
       }.bind(this),
 
     });
@@ -801,7 +827,9 @@ export class PlanList extends React.Component {
                                             apiUrl="/api/plans/"
                                             id={planOccurrence.id}
                                             data={planOccurrence.programInfo}
-                                            currentView="Basic"/>
+                                            occurrenceData={planOccurrence}
+                                            currentView="Basic"
+                                            />
 
 );
 
@@ -870,18 +898,26 @@ export class PlanBasicView extends React.Component {
         autobind(this);
         this.state = {
             data:"",
+            occurrenceData:"",
         }
     }
 
     componentDidMount() {
         this.setState({
             data:this.props.data,
+                        occurrenceData:this.props.occurrenceData,
+
         })
     }
     componentWillReceiveProps (nextProps) {
         if (this.state.data != nextProps.data) {
             this.setState({
                 data:nextProps.data
+            })
+        }
+        if (this.state.occurrenceData != nextProps.occurrenceData) {
+            this.setState({
+                occurrenceData:nextProps.occurrenceData
             })
         }
     }
@@ -935,10 +971,13 @@ export class PlanBasicView extends React.Component {
                         <div className="row" >
                             <div className="ui two column grid">
                                 <div className="ui left aligned column">
-                                    <IconLabelCombo size="extramini" orientation="left" text="100% Success" icon="success" background="Light" link="/goalEntry" />
-</div>
+{this.state.occurrenceData != undefined ?
+                                                <IconLabelCombo size="extramini" orientation="left" text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
+:
+                                                <IconLabelCombo size="extramini" orientation="right" text="" icon="calendar" background="Light" />
+}</div>
                                 <div className="ui right aligned column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light" link="/goalEntry" />
+                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
 </div></div>
                             </div>
                         <div className="row" >
@@ -972,10 +1011,14 @@ export class PlanBasicView extends React.Component {
                         <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
                     </div>
                     <div className="right aligned six wide column">
-                        <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" link="/goalEntry" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
+                        {this.state.occurrenceData != undefined ?
+                                                <IconLabelCombo size="extramini" orientation="right" text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
+:
+                                                <IconLabelCombo size="extramini" orientation="right" text="" icon="calendar" background="Light" />
+}
+                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
+                                    <IconLabelCombo size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" />
+                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light"  />
 </div>
 
                 </div>

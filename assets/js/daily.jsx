@@ -149,6 +149,7 @@ export class DailyList extends React.Component{
             url: theUrl,
             dataType: 'json',
             cache: false,
+            type:'GET',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },

@@ -381,7 +381,7 @@ export class ProfileForm extends React.Component {
             var smallColumnWidth = "three wide column"
         }
             var theImage = s3ImageUrl + this.state.profilePhoto;
-            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/images/", "");
+            var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/uploads/", "");
 
             return (
                 <div className="ui row">

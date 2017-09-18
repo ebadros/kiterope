@@ -30,7 +30,7 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 
 
 
-import {ImageUploader,   ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader,   VideoUploader, AudioUploader, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
@@ -416,10 +416,47 @@ export class UpdateOccurrenceInput extends React.Component {
     getPictureInput () {
     }
 
+    handleVideoChange = (callbackData) => {
+        this.setState({
+            video: callbackData.video
+        })
+    };
+
+    handleAudioChange = (callbackData) => {
+        this.setState({
+            audio: callbackData.audio
+        })
+    };
+//! Need to deal with the validators on this
     getVideoInput () {
+        return(<div className="ui form">
+            <div className="field"><label>{this.state.metricLabel}</label></div>
+
+            <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
+        <div className="ui form  row">
+                            <VideoUploader video={this.state.video} videoReturned={this.handleVideoChange} dimensions={this.state.dimensions} label="Drag and Drop or Click to Add Video" />
+
+
+            </div></Measure></div>
+        )
     }
 
     getAudioInput () {
+        return(<div className="ui form">
+            <div className="field"><label>{this.state.metricLabel}</label></div>
+
+            <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
+        <div className="ui row">
+
+                            <AudioUploader audio={this.state.audio} audioReturned={this.handleAudioChange} dimensions={this.state.dimensions} label="Drag and Drop or Click to Add Audio" />
+
+
+            </div></Measure></div>
+        )
     }
 
     handleSubmit() {
@@ -452,6 +489,7 @@ export class UpdateOccurrenceInput extends React.Component {
 
 
     render() {
+
         switch (this.state.format) {
             case("text"):
                 var inputHTML = this.getTextInput();

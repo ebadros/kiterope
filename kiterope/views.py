@@ -83,7 +83,6 @@ from django.views.generic import TemplateView
 
 
 
-
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
 OPENTOK_API_SECRET  = "a2287c760107dbe1758d5bc9655ceb7135184cf9"
 
@@ -315,7 +314,7 @@ class MessageThreadChannelViewSet(viewsets.ModelViewSet):
 
 class BlogPostViewSet(viewsets.ModelViewSet):
     model = BlogPost
-    queryset = BlogPost.objects.all()
+    queryset = BlogPost.objects.all().order_by('-modified')
     permission_classes = [AllowAny]
     required_scopes = ['groups']
     serializer_class = BlogPostSerializer
@@ -593,6 +592,8 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
+
+
     def get_queryset(self):
 
         try:
@@ -610,8 +611,9 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 
@@ -758,6 +760,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
 
     def list(self, request, *args, **kwargs):
+        #print("list")
         #print(self.request.META)
         #print(self.request.user.is_authenticated())
 
@@ -769,18 +772,21 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print("inside list2")
             periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
             periodRangeEnd = datetime.date.strptime(periodRangeEnd, "%Y-%m-%d")
+            #print("inside list3")
+
             #print("periodRangeStart %s" % periodRangeStart)
-            #print("periodRangeStart %s" % periodRangeEnd)
+            #print("periodRangeEnd %s" % periodRangeEnd)
 
         except:
-            #periodRangeStart = str(datetime.datetime.now().date())
+            periodRangeStart = str(datetime.datetime.now().date())
             periodRangeStart = datetime.datetime.now().date() - datetime.timedelta(days=1) #+ datetime.timedelta(days=10)
 
             periodRangeEnd = periodRangeStart
             #print ("periodRangeStart " + periodRangeStart)
             #print ("periodRangeEnd " + periodRangeEnd)
 
-        currentUser = request.user.is_authenticated()
+        request.user.is_authenticated()
+        currentUser = request.user
 
 
 
@@ -801,7 +807,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def post(self, request, *args, **kwargs):
-        print(request)
+        #print(request)
 
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
@@ -809,8 +815,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
     def updateOccurrences(self, currentUser, periodRangeStart, periodRangeEnd):
         #print("updateOccurrences called")
         try:
-            #print("currentUser %s" % currentUser)
-            userPlanOccurrences = PlanOccurrence.objects.filter(user=currentUser.id)
+            userPlanOccurrences = PlanOccurrence.objects.filter(user=currentUser.id, isSubscribed='True')
             #print("userPlanOccurrences %d" % userPlanOccurrences.count())
 
             #print("before persisted occurrences")
@@ -820,8 +825,9 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #print("persistedOccurrences %d" % persistedOccurrences.count())
 
 
-            #print(userPlanOccurrences)
+            print(userPlanOccurrences)
             for aPlanOccurrence in userPlanOccurrences:
+
                 #print("aPlanOccurrence.startDate %s" % type(aPlanOccurrence.startDate))
                 #periodRangeStart = datetime.datetime.strftime(periodRangeStart, '%Y-%m-%d')
                 #print("periodRangeStart %s" % type(periodRangeStart))
@@ -831,7 +837,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
                 periodStart = periodRangeStart - aPlanOccurrence.startDate
 
                 periodStart = periodStart.days
-                #print("periodStart %s" % periodStart)
+                print("periodStart %s" % periodStart)
 
 
                 periodEnd = periodRangeEnd - aPlanOccurrence.startDate
@@ -1005,8 +1011,9 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        # user = self.request.user
-        # userPlanQueryset = user.plan_set.all()
+        print("get queryset")
+        #user = self.request.user
+        #userPlanQueryset = user.plan_set.all()
         try:
             #print("inside Get Queryset")
             periodRangeStart = self.kwargs['periodRangeStart']
@@ -1476,18 +1483,18 @@ def secret_page(request, *args, **kwargs):
 conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
-    print("sign_s3_upload")
     object_name = request.GET['objectName']
     extension = os.path.splitext(object_name)[1]
     object_name = str(uuid.uuid4()) + extension
-
     content_type = mimetypes.guess_type(object_name)[0]
+    if content_type == 'audio/x-wav':
+        content_type = 'audio/wav'
 
     signed_url = conn.generate_url(
         300,
         "PUT",
         settings.AWS_STORAGE_BUCKET_NAME,
-        'images/' + object_name,
+        'uploads/' + object_name,
         headers = {'Content-Type': content_type,
                    'x-amz-acl': 'public-read',
                    })
@@ -1495,8 +1502,33 @@ def sign_s3_upload(request):
     return HttpResponse(json.dumps({'signedUrl': signed_url}))
 
 
+
+
+
+
+
+# For react S3 uploader instead of dropzone
+'''def s3_sign_upload(request):
+    print("s3_sign_upload")
+    object_name = request.GET['objectName']
+    extension = os.path.splitext(object_name)[1]
+    #object_name = str(uuid.uuid4()) + extension
+
+    #content_type = mimetypes.guess_type(object_name)[0]
+
+    signed_url = conn.generate_url(
+        300,
+        "PUT",
+        settings.AWS_STORAGE_BUCKET_NAME,
+        'uploads/' + object_name,
+        headers = {'Content-Type': content_type,
+                   'x-amz-acl': 'public-read',
+                   })
+
+    return HttpResponse(json.dumps({'signedUrl': signed_url}))
+
     
-    
+    '''
     
     
 

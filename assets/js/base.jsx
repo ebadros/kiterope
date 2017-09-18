@@ -30,7 +30,7 @@ import Measure from 'react-measure'
 
 import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporter } from './accounts'
 
-import {  theServer, s3IconUrl, s3ImageUrl, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
+import {  theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
 
 import { ContactItemMenu } from './contact'
 function printObject(o) {
@@ -336,6 +336,157 @@ function getImageDimensions(imageNode) {
   return {width: imgClone.width, height: imgClone.height}
 }
 
+export class VideoDisplay extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+        fileUrl:"",
+        s3Url:"",
+        filename:"",
+        progress:"",
+        error:"",
+        videoStyle:""}
+    }
+
+
+
+    componentDidMount() {
+        this.setState({
+            fileUrl:this.props.fileUrl,
+        s3Url:this.props.s3Url,
+        filename:this.props.filename,
+        progress:this.props.progress,
+        error:this.props.error,
+        videoStyle:this.props.videoStyle
+
+        })
+    }
+
+    handleGetImage () {
+        var dom = ReactDOM.findDOMNode(this).children[0];
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.fileUrl != nextProps.fileUrl) {
+            this.setState({
+                fileUrl:nextProps.fileUrl,
+
+            })}
+        if (this.state.s3Url != nextProps.s3Url) {
+            this.setState({
+                s3Url:nextProps.s3Url,
+
+            })}
+        if (this.state.filename != nextProps.filename) {
+            this.setState({
+                filename:nextProps.filename,
+
+            })}
+        if (this.state.progress != nextProps.progress) {
+            this.setState({
+                progress:nextProps.progress,
+
+            })}
+        if (this.state.error != nextProps.error) {
+            this.setState({
+                error:nextProps.error,
+
+            })}
+        if (this.state.videoStyle != nextProps.videoStyle) {
+            this.setState({
+                videoStyle:nextProps.videoStyle,
+
+            })}
+
+    }
+    render() {
+        return (
+            <div>
+                <video  style={this.props.videoStyle}  src={this.state.s3Url + "/" + this.state.filename} controls />
+            </div>
+        )
+    }
+
+
+}
+
+export class AudioDisplay extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+        fileUrl:"",
+        s3Url:"",
+        filename:"",
+        progress:"",
+        error:"",
+        audioStyle:""}
+    }
+
+
+
+    componentDidMount() {
+        this.setState({
+            fileUrl:this.props.fileUrl,
+        s3Url:this.props.s3Url,
+        filename:this.props.filename,
+        progress:this.props.progress,
+        error:this.props.error,
+        audioStyle:this.props.audioStyle
+
+        })
+    }
+
+    handleGetImage () {
+        var dom = ReactDOM.findDOMNode(this).children[0];
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.fileUrl != nextProps.fileUrl) {
+            this.setState({
+                fileUrl:nextProps.fileUrl,
+
+            })}
+        if (this.state.s3Url != nextProps.s3Url) {
+            this.setState({
+                s3Url:nextProps.s3Url,
+
+            })}
+        if (this.state.filename != nextProps.filename) {
+            this.setState({
+                filename:nextProps.filename,
+
+            })}
+        if (this.state.progress != nextProps.progress) {
+            this.setState({
+                progress:nextProps.progress,
+
+            })}
+        if (this.state.error != nextProps.error) {
+            this.setState({
+                error:nextProps.error,
+
+            })}
+        if (this.state.audioStyle != nextProps.audioStyle) {
+            this.setState({
+                audioStyle:nextProps.audioStyle,
+
+            })}
+
+    }
+    render() {
+        return (
+            <div>
+                <audio  style={this.props.audioStyle}  src={this.state.s3Url + "/" + this.state.filename} controls />
+            </div>
+        )
+    }
+
+
+}
 
 export class ImageDisplay extends React.Component {
     constructor(props) {
@@ -413,6 +564,331 @@ export class ImageDisplay extends React.Component {
 
 }
 
+export class VideoUploader extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            video:"",
+            dimensions:{
+                width:"",
+                height:"",
+            }
+
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            //video: this.props.defaultVideoPosterImage,
+            dimensions:this.props.dimensions,
+            video:this.props.video
+
+        })
+    }
+
+    handleGetImage () {
+        var dom = ReactDOM.findDOMNode(this).children[0];
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.video != nextProps.video) {
+            this.setState({video: nextProps.video})
+        }
+
+
+
+
+        if (this.state.dimensions != nextProps.dimensions) {
+            this.setState({dimensions:nextProps.dimensions})
+        }
+
+
+
+
+    }
+
+    handleFinishedUpload (value) {
+            var fullUrl = value.signedUrl;
+            var fileUrl = fullUrl.split("?")[0];
+
+
+            var urlForDatabase = fileUrl.replace(s3BaseUrl, "");
+        this.setState({
+            video:urlForDatabase.replace("uploads/", ""),
+            fileUrl:fileUrl
+        });
+
+
+
+            this.setState({video: urlForDatabase});
+        this.props.videoReturned({
+            video:urlForDatabase
+        })
+    }
+
+
+
+
+
+
+    render() {
+        var theVideo = this.state.video;
+        var theFilename = theVideo.replace("uploads/", "");
+        if (this.state.dimensions) {
+            var {width, height} = this.state.dimensions
+        }
+        if (theFilename != "") {
+            var style = {
+            width: (width),
+            height: 'auto',
+
+            //minHeight:40,
+            //backgroundColor: '#2199e8',
+            //color: 'white',
+            //fontSize: '1rem',
+            //border: '1px solid #2199e8',
+            //borderRadius: '4px',
+            position: 'relative',
+            cursor: 'pointer',
+            textAlign:'center',
+            //lineHeight:'36px',
+        }
+
+        } else {
+            var style = {
+                width: (width),
+                height: "auto",
+
+                minHeight: 40,
+                backgroundColor: '#2199e8',
+                color: 'white',
+                fontSize: '1rem',
+                border: '1px solid #2199e8',
+                borderRadius: '4px',
+                position: 'relative',
+                cursor: 'pointer',
+                textAlign: 'center',
+                lineHeight: '36px',
+            };
+        }
+
+
+        //var theClipping = "rect(0px," + (width - 32) + "px," + ((9 * (width - 32) / 16) - 2) + "px, 0px)";
+
+        var videoStyle = {
+            width: (width),
+            textAlign:'center',
+            height: "auto",
+            //position: "absolute",
+            //clip: theClipping
+
+        };
+
+        var videoUploaderProps = {
+            style,
+            videoStyle,
+            maxFileSize: 1024 * 1024 * 50,
+            server: theServer,
+            s3Url: 'https://kiterope-static.s3.amazonaws.com/uploads',
+            signingUrlQueryParams: {uploadType: 'avatar'},
+            uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
+            signingUrl: "signS3Upload",
+
+        };
+
+        console.log("video " + this.state.video);
+
+
+        return (
+            <div>
+
+
+        { this.state.video != "" ?
+                    <div>
+                <DropzoneS3Uploader filename={theFilename}
+                                    onFinish={this.handleFinishedUpload} {...videoUploaderProps} >
+                    <VideoDisplay
+                        filename={theFilename} {...videoUploaderProps} /></DropzoneS3Uploader> </div >
+                        :
+
+                    <div>
+                        <DropzoneS3Uploader filename={theFilename}
+                                            onFinish={this.handleFinishedUpload} {...videoUploaderProps} >
+                            {this.props.label}
+
+                        </DropzoneS3Uploader></div>
+        }
+                </div>
+
+        )
+    }
+}
+
+export class AudioUploader extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            audio:"",
+            dimensions:{
+                width:"",
+                height:"",
+            }
+
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            //video: this.props.defaultVideoPosterImage,
+            dimensions:this.props.dimensions,
+            audio:this.props.audio
+
+        })
+    }
+
+    handleGetImage () {
+        var dom = ReactDOM.findDOMNode(this).children[0];
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.audio != nextProps.audio) {
+            this.setState({audio: nextProps.audio})
+        }
+
+
+
+
+        if (this.state.dimensions != nextProps.dimensions) {
+            this.setState({dimensions:nextProps.dimensions})
+        }
+
+
+
+
+    }
+
+    handleFinishedUpload (value) {
+            var fullUrl = value.signedUrl;
+            var fileUrl = fullUrl.split("?")[0];
+
+
+            var urlForDatabase = fileUrl.replace(s3BaseUrl, "");
+        this.setState({
+            audio:urlForDatabase.replace("uploads/", ""),
+            fileUrl:fileUrl
+        });
+
+
+
+            this.setState({audio: urlForDatabase});
+        this.props.audioReturned({
+            audio:urlForDatabase
+        })
+    }
+
+
+
+
+
+
+    render() {
+        var theAudio = this.state.audio;
+        var theFilename = theAudio.replace("uploads/", "");
+        if (this.state.dimensions) {
+            var {width, height} = this.state.dimensions
+        }
+        if (theFilename != "") {
+            var style = {
+            width: (width),
+            height: 'auto',
+
+            //minHeight:40,
+            //backgroundColor: '#2199e8',
+            //color: 'white',
+            //fontSize: '1rem',
+            //border: '1px solid #2199e8',
+            //borderRadius: '4px',
+            position: 'relative',
+            cursor: 'pointer',
+            textAlign:'center',
+            //lineHeight:'36px',
+        }
+
+        } else {
+            var style = {
+                width: (width),
+                height: "auto",
+
+                minHeight: 40,
+                backgroundColor: '#2199e8',
+                color: 'white',
+                fontSize: '1rem',
+                border: '1px solid #2199e8',
+                borderRadius: '4px',
+                position: 'relative',
+                cursor: 'pointer',
+                textAlign: 'center',
+                lineHeight: '36px',
+            };
+        }
+
+
+        //var theClipping = "rect(0px," + (width - 32) + "px," + ((9 * (width - 32) / 16) - 2) + "px, 0px)";
+
+        var audioStyle = {
+            width: (width),
+            textAlign:'center',
+            height: "auto",
+            //position: "absolute",
+            //clip: theClipping
+
+        };
+
+        var audioUploaderProps = {
+            style,
+            audioStyle,
+            maxFileSize: 1024 * 1024 * 50,
+            server: theServer,
+            s3Url: 'https://kiterope-static.s3.amazonaws.com/uploads',
+            //signingUrlQueryParams: {uploadType: 'avatar'},
+            uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
+            signingUrl: "signS3Upload",
+
+        };
+
+        console.log("audio " + this.state.audio);
+
+
+        return (
+            <div>
+
+
+        { this.state.audio != "" ?
+                    <div>
+                <DropzoneS3Uploader filename={theFilename}
+                                    onFinish={this.handleFinishedUpload} {...audioUploaderProps} >
+                    <AudioDisplay
+                        filename={theFilename} {...audioUploaderProps} /></DropzoneS3Uploader> </div >
+                        :
+
+                    <div>
+                        <DropzoneS3Uploader filename={theFilename}
+                                            onFinish={this.handleFinishedUpload} {...audioUploaderProps} >
+                            {this.props.label}
+
+                        </DropzoneS3Uploader></div>
+        }
+                </div>
+
+        )
+    }
+}
 
 
 export class ImageUploader extends React.Component {
@@ -465,9 +941,9 @@ export class ImageUploader extends React.Component {
             var fileUrl = fullUrl.split("?")[0];
 
 
-            var urlForDatabase = fileUrl.replace(s3ImageUrl, "");
+            var urlForDatabase = fileUrl.replace(s3BaseUrl, "");
         this.setState({
-            image:urlForDatabase.replace("images/", ""),
+            image:urlForDatabase.replace("uploads/", ""),
             fileUrl:fileUrl
         });
 
@@ -486,7 +962,7 @@ export class ImageUploader extends React.Component {
 
     render() {
         var theImage = this.state.image;
-        var theFilename = theImage.replace("images/", "");
+        var theFilename = theImage.replace("uploads/", "");
         if (this.state.dimensions) {
             var {width, height} = this.state.dimensions
         }
@@ -515,7 +991,7 @@ export class ImageUploader extends React.Component {
             imageStyle,
             maxFileSize: 1024 * 1024 * 50,
             server: theServer,
-            s3Url: 'https://kiterope-static.s3.amazonaws.com/images',
+            s3Url: 'https://kiterope-static.s3.amazonaws.com/uploads',
             signingUrlQueryParams: {uploadType: 'avatar'},
             uploadRequestHeaders: {'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'},
             signingUrl: "signS3Upload",
@@ -1428,6 +1904,7 @@ hideComponent = () => {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
     constructor(props) {
         super(props);
@@ -1435,15 +1912,34 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          this.state = {
              id:"",
              data:"",
+             occurrenceData:"",
              currentView:"Basic",
              serverErrors:"",
              openModal:false,
 
          }
      }
+
+     handleComponentDidMountSpecificActions() {
+     this.setState({
+         data:this.props.data,
+         occurrenceData:this.props.data,
+     })
+}
+    handleComponentWillReceivePropsSpecificActions(nextProps) {
+    if (this.state.occurrenceData != nextProps.occurrenceData) {
+        if (nextProps.occurrenceData != undefined) {
+            this.setState({
+                occurrenceData: nextProps.occurrenceData,
+            })
+
+        }
+    }
+
+}
      goToAuthorPage() {
 
-         store.dispatch(push("/profiles/" + this.state.data.author))
+         store.dispatch(push("/profiles/" + this.state.data.programInfo.author))
 
      }
 
@@ -1466,19 +1962,23 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
      handlePlanSubmit (planOccurrence, callback) {
 
-         if (plan.id != "") {
+         if (planOccurrence.id != "") {
+             var theUrl = "/api/planOccurrences/" + planOccurrence.id +"/";
+             console.log(planOccurrence);
+
 
              $.ajax({
-                 url: "/api/planOccurrences/" + planOccurrence.id +"/",
+                 url: theUrl,
                  dataType: 'json',
-                 type: 'PUT',
-                 data: plan,
+                 type: 'PATCH',
+                 data: planOccurrence,
                  headers: {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
                      this.setState({
-                         data: data,
+                         data: data.programInfo,
+                         occurrenceData: data,
                         serverErrors:"",
                          currentView:"Basic"
                      });
@@ -1490,7 +1990,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                     console.error(this.props.url, status, err.toString());
+                     console.error(theUrl, status, err.toString());
                      var serverErrors = xhr.responseJSON;
             this.setState({
                 serverErrors:serverErrors,
@@ -1509,8 +2009,11 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     this.setState({data: data});
+                     this.setState({
+                         data: data
+                     });
                      this.switchToBasicView();
+
                      callback
 
                  }.bind(this),
@@ -1539,7 +2042,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                         currentView={this.state.currentView}
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton}
-                                            extendedBasic={this.props.extendedBasic}
+                        extendedBasic={this.props.extendedBasic}
                         />
 
         )
@@ -1553,7 +2056,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
             return (
                 <div ref="ref_basic" >
 
-                    <PlanBasicView data={this.state.data} isListNode={this.props.isListNode}/>
+                    <PlanBasicView data={this.state.data} occurrenceData={this.state.occurrenceData} isListNode={this.props.isListNode}/>
                 </div>
             )
 
@@ -1569,6 +2072,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                   onSubmit={this.handlePlanSubmit}
                   cancelClicked={this.cancelClicked}
                   data={this.state.data}
+                  occurrenceData={this.state.occurrenceData}
                   serverErrors={this.state.serverErrors} />
                             </div>
         )
@@ -1584,8 +2088,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                     </div>
                 </div>
             )
-        }
-        else return (<div></div>)
+        } else return (<div></div>)
 
 
     };
@@ -1632,11 +2135,11 @@ hideComponent = () => {
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
-              program={this.state.data}
+              program={this.state.data.programInfo}
 />
 
                 <div className="ui segment noBottomMargin noTopMargin">
-                    <div>{basicView2}</div>
+                    <div>{basicView}</div>
                     {detailView}
                     {editView}
 
@@ -2755,6 +3258,8 @@ module.exports = {
     GoalViewEditDeleteItem,
     PlanViewEditDeleteItem,
     ProgramViewEditDeleteItem,
+    VideoUploader,
+    AudioUploader,
 
     StepViewEditDeleteItem,
     ProfileViewEditDeleteItem,
