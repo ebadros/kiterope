@@ -211,11 +211,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
                         {viewSwitcher}
 
-                        <a className="item" style={style} onClick={() => this.handleURLPush('/programs')}  >
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/programs/')}  >
                             <i className="large cubes icon"/>
                             My Programs
                         </a>
-                        <a className="item" style={style} onClick={() => this.handleURLPush('/contacts')} >
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/contacts/')} >
                             <i className="large users icon"/>
                             My Contacts
                         </a>
@@ -227,21 +227,21 @@ export class SidebarWithoutClickingOutside extends React.Component {
                                     </a> : <div></div>}
 
 
-                        <a className="item"  style={style} onClick={() => this.handleURLPush('/search')}>
+                        <a className="item"  style={style} onClick={() => this.handleURLPush('/search/')}>
                             <i className="large search icon"/>
                             Search
                         </a>
 
 
-                        <a className="item" style={style}onClick={() => this.handleURLPush('/messages')}>
+                        <a className="item" style={style}onClick={() => this.handleURLPush('/messages/')}>
                             <i className="large mail icon"/>
                             Messages
                         </a>
-                        <a className="item" style={style}>
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/settings/')}>
                             <i className="large settings icon"/>
                             Settings
                         </a>
-                        <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/blog/')}>
                             <i className="large heartbeat icon"/>
                             Blog
                         </a>
@@ -263,11 +263,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </a>
                     {viewSwitcher}
 
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/goals')}>
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/goals/')}>
                         <i className="large block layout icon"/>
                         My Goals
                     </a>
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/contacts')}>
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/contacts/')}>
                         <i className="large users icon"/>
                         My Contacts
                     </a>
@@ -286,7 +286,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         <i className="large mail icon"/>
                         Messages
                     </a>
-                    <a className="item" style={style}>
+                    <a className="item" style={style} onClick={() => this.handleURLPush('/settings/')}>
                         <i className="large settings icon"/>
                         Settings
                     </a>

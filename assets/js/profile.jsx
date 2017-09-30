@@ -16,11 +16,11 @@ var moment = require('moment');
 import { MessageWindowContainer } from './message'
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
-import { ValidatedInput}  from './app'
+import { ValidatedInput, KSSelect } from './app'
 import autobind from 'class-autobind'
 import { ClippedImage, ChoiceModal , IconLabelCombo } from './elements'
 import { ImageUploader, Header, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'
-import { StandardSetOfComponents, ErrorReporter, Menubar } from './accounts'
+import { StandardSetOfComponents, ErrorReporter, Menubar, Footer } from './accounts'
 
 import { PlanForm, PlanList } from './plan'
 import { Caller, CallManager } from './call'
@@ -360,12 +360,20 @@ export class ProfileForm extends React.Component {
 
 
     getDescriptionEditor () {
-         if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
-            } else {
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
 
 
             var wideColumnWidth = "sixteen wide column";
@@ -529,12 +537,20 @@ if (this.state.user) {
 
             var descriptionEditor = this.getDescriptionEditor();
 
-            if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
-            } else {
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
 
 
             var wideColumnWidth = "sixteen wide column";
@@ -986,6 +1002,8 @@ export class ProfileDetailPage extends React.Component {
                 <FormHeaderWithActionButton actionClick={this.handleFormActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
         <div ref="id_whichPlanForm">*/}
             </div>
+                    <Footer />
+
 
 
 
@@ -1080,10 +1098,10 @@ export class ProfileItemMenu extends React.Component {
          var myStyle = { display: "block"};
          return(
 
-                  <div className="ui simple dropdown item" >
+                  <div className="ui simple  dropdown  item" >
                       <div className="ui extramini image controlButtonMargin">
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
+                      <div className="menu" style={{right: '0',left: 'auto'}}>
 
                           <div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Add Contact" icon="goal" background="Light" click={this.handleClick} />
@@ -1301,6 +1319,7 @@ checkIfUser() {
 
 
             return (
+
                     <ProfileViewEditDeleteItem key={theData[key].id}
                                             isListNode={true}
                                             showCloseButton={false}
@@ -1321,7 +1340,7 @@ checkIfUser() {
     return (
                 <div className="centeredContent">
 
-          <div className='ui three column  stackable grid'>
+          <div className='ui three column stackable grid'>
         {profileList}
       </div>
                     </div>

@@ -20,6 +20,15 @@ export const rootReducer = (state = {}, action) => {
     return Object.assign({}, state, { user: action.user });
     break;
 
+      case 'SET_PROFILE':
+    return Object.assign({}, state, { profile: action.profile });
+    break;
+
+      case 'SET_SETTINGS':
+    return Object.assign({}, state, { settings: action.settings });
+    break;
+
+
     case 'SET_CURRENT_CONTACT':
     return Object.assign({}, state, { currentContact: action.contact });
     break;
@@ -191,6 +200,10 @@ case 'DELETE_CONTACT':
 
     case 'SET_MESSAGE_WINDOW_VISIBILITY':
     return Object.assign({}, state, { isMessageWindowVisible: action.visibility });
+    break;
+
+      case 'SET_FOR_MOBILE':
+    return Object.assign({}, state, { forMobile: action.forMobile });
     break;
 
 

@@ -143,10 +143,10 @@ export class ItemMenu extends React.Component {
          var myStyle = { display: "block"};
          return(
 
-                  <div className="ui simple dropdown item" >
+                  <div className="ui simple  dropdown  item" >
                       <div className="ui extramini image controlButtonMargin">
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
+                      <div className="menu" style={{right: '0',left: 'auto'}}>
 
                           {/* <div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Goals" icon="goal" background="Light" click={this.handleClick} />
@@ -209,6 +209,7 @@ export class ClippedImageOverlayedText extends React.Component {
          var containerStyle = {
              height: containerHeight,
 
+
          };
 
          var minWidthString = width + "px !important";
@@ -233,8 +234,6 @@ export class ClippedImageOverlayedText extends React.Component {
                          width: width,
                          position: position,
                          clip: rectString,
-
-
                          height: containerHeight,
                          background: 'black' ,
                      opacity: 0.6 ,

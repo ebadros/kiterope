@@ -15,6 +15,8 @@ import {MessagePage} from './message'
 import {Provider, connect, dispatch} from 'react-redux'
 import  {store} from "./redux/store";
 import {SearchPage} from './search'
+import {SettingsPage} from './settings'
+
 import {SplashPage} from './splash'
 import {BlogPage} from './blog'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
@@ -86,6 +88,8 @@ ReactDOM.render((
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
                 <Route path="/browse" component={BrowseProgramsPage} />
                 <Route path="/account/login" component={ LoginPage }/>
+                <Route path="/settings/" component={ SettingsPage }/>
+
                 <Route path="/joinKiterope" component={ JoinPage }/>
                 <Route path="/account/password/reset" component={ PasswordResetPage }/>
                 <Route path="/account/password/reset/confirm/:uid/:token/" component={PasswordConfirmPage}/>

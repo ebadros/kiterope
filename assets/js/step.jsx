@@ -507,6 +507,8 @@ export class StepBasicView extends React.Component {
         if (theData.day07) {
             theDaysPerWeek = theDaysPerWeek + "Su"
         }
+
+        return theDaysPerWeek
     }
 
 
@@ -537,12 +539,12 @@ export class StepBasicView extends React.Component {
                 break;
             case("WEEKLY"):
                 this.setState({
-                    dateInfo: this.getWeeklyDays(theData) + " Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo: this.getWeeklyDays(theData) + ", Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
                 });
                 break;
             case("MONTHLY"):
                 this.setState({
-                    dateInfo:  this.state.data.monthlyDates + " Monthly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo:  this.state.data.monthlyDates + ", Monthly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
                 });
                 break;
 
@@ -662,6 +664,7 @@ export class StepForm extends React.Component {
             monthlyDates:"",
             absoluteStartDate:moment(),
             absoluteEndDate:moment(),
+            useAbsoluteTime:false,
             startDate:0,
             endDate:0,
             startTime:"",
@@ -802,6 +805,7 @@ export class StepForm extends React.Component {
                     day07: nextProps.data.day07,
                     startDate: startDate,
                     endDate: endDate,
+                    useAbsoluteTime: nextProps.data.useAbsoluteTime,
                     absoluteStartDate: calculatedStartDate,
                     absoluteEndDate: calculatedEndDate,
                     startTime: nextProps.data.startTime,
@@ -854,6 +858,15 @@ export class StepForm extends React.Component {
     handleEndDateChange(date) {
         this.setState({endDate: date});
   }
+
+  handleUseAbsoluteTimeChange = (e) =>  {
+
+        this.setState({useAbsoluteTime: true});
+    };
+    handleUseRelativeTimeChange = (e) =>  {
+
+        this.setState({useAbsoluteTime: false});
+    };
 
 
     handleAbsoluteStartDateChange(date) {
@@ -986,6 +999,8 @@ export class StepForm extends React.Component {
         var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime");
         var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime");
         var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime");
+        var useAbsoluteTime = this.state.useAbsoluteTime;
+
         var startDate = this.state.startDate;
         var endDate = this.state.endDate;
         var updates = this.state.updates;
@@ -1012,6 +1027,7 @@ export class StepForm extends React.Component {
             monthlyDates:monthlyDates,
             absoluteStartDate:absoluteStartDate,
             absoluteEndDate:absoluteEndDate,
+            useAbsoluteTime: useAbsoluteTime,
             startDate:startDate,
             endDate:endDate,
             startTime:startTime,
@@ -1055,6 +1071,7 @@ export class StepForm extends React.Component {
             absoluteStartDate:moment(),
             absoluteEndDate:moment(),
             startDate:0,
+                useAbsoluteTime:false,
             endDate:0,
             startTime:"",
             duration:"",
@@ -1103,8 +1120,8 @@ export class StepForm extends React.Component {
 
 
             var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
         }
 
                 if (this.state.description == null) {
@@ -1179,7 +1196,7 @@ export class StepForm extends React.Component {
 <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
                                          label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
                           <div className="ui row">
-                            <div className={wideColumnWidth}>
+                            <div className={mediumColumnWidth}>
                                               <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
 
                                 <ValidatedInput
@@ -1242,7 +1259,7 @@ export class StepForm extends React.Component {
                                         </div>
                                     </div>
                         <div className="ui row">
-                            <div className={mediumColumnWidth}>
+                            <div className={smallColumnWidth}>
                                 <div className="field">
                                     <label>Start Time:</label>
                                     <Select value={this.state.startTime}
@@ -1258,8 +1275,22 @@ export class StepForm extends React.Component {
                                         <option value="PM">PM</option>
                                     </select>*/}
                                 </div>
-                            </div>
-                        </div>
+                            </div></div>
+                                                    <div className="ui row">
+
+                            <div className={mediumColumnWidth}>
+                                                                <div className="fluid field">
+
+                                                                                    <label>Subscribers on same schedule?</label>
+
+                                                                                    <div className="ui equal width buttons ">
+                                                                 <ToggleButton  id="id_useRelativeTime" label="Personalized Schedule" value={!this.state.useAbsoluteTime} callback={this.handleUseRelativeTimeChange.bind(this)} />
+<ToggleButton  id="id_useAbsoluteTime" label="Same Schedule" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
+
+
+</div>
+                                                                                    </div>
+                        </div></div>
                         <div className="ui row">
                             <div className={mediumColumnWidth}>
                                 <div className="field">
@@ -1277,6 +1308,7 @@ export class StepForm extends React.Component {
 
 
                             </div>
+
                         <div ref="ref_whichDays" className="ui row">
 
                             <div className={wideColumnWidth}>
@@ -1539,7 +1571,21 @@ export class SimpleStepForm extends StepForm {
                             </div>
 
 
+
                         </div>
+                <div ref="ref_useAbsoluteTime" className="ui row">
+                                            <div className="sixteen wide column">
+                                                                                <div className="field fluid">
+                                                                                    <label>Have subscribers all on same time schedule</label>
+
+                                                                                    <div className="ui equal width tiny buttons ">
+                            <ToggleButton id="id_useAbsoluteTime" label="Use Absolute Time" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
+</div>
+                                                                                    </div>
+                                                </div>
+                    </div>
+
+
                                             <div className="ui row">&nbsp;</div>
                         <div className="ui row">
                             <div className="field">
@@ -1668,7 +1714,7 @@ export class ToggleButton extends React.Component {
   render = () => {
     var btnClass = 'ui toggle button';
     if (this.state.checked == true) btnClass += ' active';
-    return <button className={btnClass}  onClick={this.handleToggleChange} >{this.props.label}</button>;
+    return <button className={btnClass}  style={this.props.style} onClick={this.handleToggleChange} >{this.props.label}</button>;
   }
 }
 
@@ -1728,10 +1774,10 @@ export class StepItemMenu extends React.Component {
          var myStyle = { display: "block"};
          return(
 
-                  <div className="ui simple dropdown item" >
+                  <div className="ui simple  dropdown item" >
                       <div className="ui extramini image controlButtonMargin">
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
+                      <div className="menu" style={{right: '0',left: 'auto'}}>
                           <div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Duplicate" icon="duplicate" background="Light" click={this.handleClick} />
                               </div>

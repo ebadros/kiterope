@@ -28,6 +28,8 @@ WEBPACK_LOADER = {
     }
 }
 
+LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfigDev'
+
 ''
 
 INSTALLED_APPS += [

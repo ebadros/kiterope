@@ -326,17 +326,25 @@ export class ProfileForm extends React.Component {
 
 
     getDescriptionEditor () {
-         if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
             var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+            var smallColumnWidth = "eight wide column";
 
-            } else {
+           } else {
 
 
-            var wideColumnWidth = "ten wide column";
-            var mediumColumnWidth = "four wide column";
-            var smallColumnWidth = "three wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
         }
                 if (this.state.bio == null) {
                     return ("")
@@ -368,17 +376,25 @@ export class ProfileForm extends React.Component {
 
     getImageEditSection() {
 
-        if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
+       if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
             var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+            var smallColumnWidth = "eight wide column";
 
-            } else {
+           } else {
 
 
-            var wideColumnWidth = "ten wide column";
-            var mediumColumnWidth = "four wide column";
-            var smallColumnWidth = "three wide column"
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
         }
             var theImage = s3ImageUrl + this.state.profilePhoto;
             var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/uploads/", "");

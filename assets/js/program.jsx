@@ -3,7 +3,7 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
@@ -276,7 +276,7 @@ componentWillUnmount() {
 <div>
     <StandardSetOfComponents  modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
         <div className="fullPageDiv">
-            <div className="ui  container footerAtBottom">
+            <div className="ui page container footerAtBottom">
 
 
             <div className="spacer">&nbsp;</div>
@@ -317,7 +317,7 @@ export class ProgramDetailPage extends React.Component {
             activePage:1,
             selectedView:"list",
             headerActionButtonLabel:"Add Step",
-            stepArray:[]
+            stepArray:[],
         }
     }
 
@@ -328,7 +328,9 @@ export class ProgramDetailPage extends React.Component {
           dataType: 'json',
           cache: false,
           success: function(data) {
-            this.setState({stepData: data.results});
+            this.setState({
+                stepData: data.results,
+            });
 
           }.bind(this),
           error: function(xhr, status, err) {
@@ -338,7 +340,7 @@ export class ProgramDetailPage extends React.Component {
       };
 
 
-    loadProgramsFromServer = () => {
+    /*loadProgramsFromServer = () => {
     $.ajax({
       url: "/api/programs/" + this.props.params.program_id + "/",
       dataType: 'json',
@@ -355,7 +357,7 @@ export class ProgramDetailPage extends React.Component {
       }.bind(this),
 
     });
-  };
+  };*/
 
   handleStepSubmit (step, callback) {
 
@@ -555,6 +557,7 @@ export class ProgramDetailPage extends React.Component {
 
 }
 
+
     render() {
 
 
@@ -571,6 +574,7 @@ export class ProgramDetailPage extends React.Component {
 
                         ]}/>
                         <div>&nbsp;</div>
+
 
                         <ProgramViewEditDeleteItem isListNode={false}
                                                 showCloseButton={false}
@@ -957,6 +961,18 @@ export class ProgramSubscriptionForm extends React.Component {
             goalsData: this.props.storeRoot.goals
         },     this.convertGoalDataToGoalOptions )
             }
+            if (this.props.storeRoot.settings) {
+                this.setState({
+                    notificationMethod: this.props.storeRoot.settings.defaultNotificationMethod,
+                    notificationPhone:this.props.storeRoot.settings.defaultNotificationPhone,
+                    notificationEmail:this.props.storeRoot.settings.defaultNotificationEmail,
+                    notificationSendTime:this.props.storeRoot.settings.defaultNotificationSendTime,
+
+
+
+                })
+
+            }
         }
     };
 
@@ -994,10 +1010,10 @@ export class ProgramSubscriptionForm extends React.Component {
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(theUrl, status, err.toString());
-            //var serverErrors = xhr.responseJSON;
-            //this.setState({
-            //    serverErrors:serverErrors,
-            //})
+            var serverErrors = xhr.responseJSON;
+            this.setState({
+                serverErrors:serverErrors,
+            })
         }
         })
 
@@ -1133,10 +1149,11 @@ export class ProgramSubscriptionForm extends React.Component {
                                             />
                     </div>
     </div>
-    <div className="ui four wide column" style={{paddingTop:'10px !important'}}>
-                <Link to="/goals" >Add Goal</Link>
+    <div className="ui four wide column" >                <div className="fluid field"><label>&nbsp;</label>
+
+            <div className="ui right floated fluid primary button" onClick={() => store.dispatch(push('/goals/'))} style={{marginTop:'-1px'}} >Add Goal</div>
         </div>
-    </div>
+    </div>     </div>
                 <div className="ui row">
                         <div className="ui sixteen wide column">
 
@@ -1153,7 +1170,7 @@ export class ProgramSubscriptionForm extends React.Component {
                     </div>
 
 
-                                { this.state.notificationMethod == "EMAIL" || this.state.notificationMethod == "EMAIL_AND_TEXT" ?
+                                { this.state.notificationMethod.includes("EMAIL") ?
 
                 <div className="ui row">
                             <div className="sixteen wide column">
@@ -1174,20 +1191,23 @@ export class ProgramSubscriptionForm extends React.Component {
                                 </div>
                     </div>:<div></div>}
 
-                                                { this.state.notificationMethod == "TEXT" || this.state.notificationMethod == "EMAIL_AND_TEXT" ?
+                                                { this.state.notificationMethod.includes("TEXT")  ?
 
                                 <div className="ui row">
-                            <div className="sixteen wide column">
+                            <div className="sixteen wide column">                <div className="fluid field"><label>At what phone number would you like to receive notification texts?</label>
+
                 <Phone placeholder="At what mobile phone number would like to receive notification texts?"
                        value={ this.state.notificationPhone }
                        onChange={this.handleNotificationPhoneChange} />
                                 </div>
-                                    </div>:<div></div>}
+                                    </div></div>:<div></div>}
+                                                            { this.state.notificationMethod.includes("NO") || this.state.notificationMethod == "" ? <div></div>:
+
                 <div className="ui row">
                         <div className="ui sixteen wide column">
 
                 <div className="fluid field">
-                <KSSelect value={this.state.notificationSendTimeChange}
+                <KSSelect value={this.state.notificationSendTime}
                                             valueChange={this.handleNotificationSendTimeChange}
                                             label="At what time would you like your notifications sent?"
                                             isClearable={false}
@@ -1196,7 +1216,7 @@ export class ProgramSubscriptionForm extends React.Component {
                                             />
 
                     </div></div>
-                    </div>
+                    </div>}
                 <div className="ui row">
                         <div className="ui sixteen wide column">
 
@@ -1327,18 +1347,26 @@ export class ProgramForm extends React.Component {
     }
 
     getDescriptionEditor () {
-         //if (this.props.isListNode) {
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
              var wideColumnWidth = "sixteen wide column";
             var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column";
 
-           // } else {
+           } else {
 
 
-           // var wideColumnWidth = "ten wide column"
-           // var mediumColumnWidth = "four wide column"
-          //  var smallColumnWidth = "three wide column"
-        //}
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
         if (this.state.description == null) {
             return ("")
         } else {
@@ -1488,12 +1516,20 @@ export class ProgramForm extends React.Component {
 
             var descriptionEditor = this.getDescriptionEditor();
 
-            if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
+           if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
-            } else{
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
 
 
             var wideColumnWidth = "sixteen wide column";
@@ -1902,7 +1938,7 @@ export class ProgramList extends React.Component {
 
     return (
         <div className="centeredContent">
-          <div className='three column stackable ui grid'>
+          <div className='ui three column stackable grid'>
         {programList}
       </div>
             </div>
@@ -1938,7 +1974,7 @@ export class ProgramListNode extends React.Component {
             var theImage = <img className="clippedImage" src='http://semantic-ui.com/images/avatar2/large/kristy.png' />
         }
         return(
-            <div  className="column">
+            <div  className="ui column">
                             <div className="ui fluid card overlayedImageContainer" onClick={this.clearPage}>
                                 <div className="image overlayedImage">{theImage}
                                     <div className="overlayText">{this.props.program.title}</div>
@@ -2230,10 +2266,10 @@ export class ProgramItemMenu extends React.Component {
          var myStyle = { display: "block"};
          return(
 
-                  <div className="ui simple dropdown item" >
+                  <div className="ui simple  dropdown item" >
                       <div className="ui extramini image controlButtonMargin">
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
+                      <div className="menu" style={{right: '0',left: 'auto'}}>
                           <div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Duplicate" icon="duplicate" background="Light" click={this.handleClick} />
                               </div>

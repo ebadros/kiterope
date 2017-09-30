@@ -285,7 +285,7 @@ export class StepOccurrenceItem extends React.Component {
                         <div className="ui center aligned middle aligned grid height-100">
 
 
-                            <div className="pretty success circle smooth huge-checkbox">
+                            <div className="pretty primary circle smooth huge-checkbox noRightPadding">
                                 <input type="checkbox" id="id_wasCompleted" checked={this.state.wasCompleted} onChange={this.handleWasCompletedChange} />
                                 <label><i className="mdi mdi-check"></i> </label>
                             </div>

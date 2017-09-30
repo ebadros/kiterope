@@ -1,13 +1,24 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
+import datetime, time
+from time import mktime
 from .celery_setup import app
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from django.contrib.auth.models import User
 from kiterope.views import PeriodViewSet
-from kiterope.models import StepOccurrence, PlanOccurrence, Program
 from datetime import date
 from kiterope.expoPushNotifications import send_push_message
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
+import json
+from datetime import timedelta
+from django.core.mail import send_mail
+from kiterope.send_sms import sendMessage
+
+
+
+
 
 
 app.conf.beat_schedule = {
@@ -15,11 +26,11 @@ app.conf.beat_schedule = {
     #    'task': 'kiterope.tasks.send_notification',
     #    'schedule': crontab(minute="*/1"),
     #},
-    'create_users_daily_step_occurrences': {
-        'task': 'kiterope.tasks.dailyUpdateStepOccurrences',
-        'schedule': crontab(minute=0, hour=0),
+    #'create_users_daily_step_occurrences': {
+    #    'task': 'kiterope.tasks.dailyUpdateStepOccurrences',
+    #    'schedule': crontab(hour=0, minute=0,),
 
-    }
+    #}
 }
 
 app.conf.timezone = 'UTC'
@@ -31,19 +42,81 @@ app.conf.timezone = 'UTC'
 #    pass
 
 @app.task()
-def send_notification():
-    send_push_message('ExponentPushToken[u9Rw6jBgLm9MVSKXYeSk3p]', "did you get this?")
+def send_app_notification(expoPushToken, message ):
+
+    print("send_notification called")
+    print(expoPushToken)
+    print(message)
+    send_push_message(expoPushToken, message)
+
+
+@app.task()
+def send_email_notification(emailAddress, subject, message ):
+    send_mail(
+        subject,
+        message,
+        'notifications@kiterope.com',
+        [emailAddress],
+        fail_silently=False,
+    )
+
+@app.task()
+def send_text_notification(phoneNumber, message ):
+    sendMessage(phoneNumber, message)
 
 
 
+@app.task()
+def updateOccurrencesAtUTCMidnight():
+
+    # Get users whose midnight is equal to utcMidnight of utcMidnightString e.g. '07:00' is equal to an offset of -07:00
+    # This gets all of the users who, regardless of what timezone they're in, have the same offset right now
+    userSet = User.objects.all()
+
+    periodRangeStart = datetime.datetime.now().date() + datetime.timedelta(days=2)
+    periodRangeEnd = periodRangeStart + datetime.timedelta(days=1)
+    periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
+
+    for theUser in userSet:
+
+        StepOccurrence.objects.updateStepOccurrences(theUser, periodRangeStart, periodRangeEnd)
 
 
 
 @app.task()
 def dailyUpdateStepOccurrences():
+    print("dailyUpdateStepOccurrences posted")
+    todaysUTCDate = datetime.datetime.now().date()
+    print(todaysUTCDate)
+    '''
     userSet = User.objects.all()
-    for theUser in userSet:
-        updateOccurrences(theUser, date.today(), date.today())
+    periodRangeStart = datetime.datetime.now().date()  # + datetime.timedelta(days=10)
+
+    periodRangeEnd = periodRangeStart + datetime.timedelta(days=10)
+    #for theUser in userSet:
+    #    updateOccurrences(theUser, periodRangeStart, periodRangeEnd)
+    #todaysStepOccurrences = StepOccurrence.objects.filter(date__gte=periodRangeStart, date__lt=periodRangeEnd)
+    #for aStepOccurrence in todaysStepOccurrences:
+    #theDate = aStepOccurrence.date.replace(tzinfo=timezone('UTC'))
+    theDate = datetime.datetime.now()
+    print(theDate)
+
+
+    theMonth = theDate.month
+    print(theMonth)
+    theDayOfTheMonth = theDate.day
+    print(theDayOfTheMonth)
+
+    theHour = theDate.hour
+    print(theHour)
+
+    theMinute = theDate.minute
+    inAFewMinutes = theMinute + 1
+    print(theMinute)
+
+    schedule = CrontabSchedule.objects.create(hour=theHour, minute=inAFewMinutes, month_of_year=theMonth, day_of_month=theDayOfTheMonth)
+    task = PeriodicTask.objects.create(crontab=schedule, name='StepEvent_SendNotification', task='kiterope.tasks.send_notification', args=json.dumps([66]))
+    '''
 
 
 def updateOccurrences(currentUser, periodRangeStart, periodRangeEnd):

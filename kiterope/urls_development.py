@@ -105,6 +105,8 @@ router.register(r'^updateOccurrences', views.UpdateOccurrenceViewSet, base_name=
 
 
 router.register(r'^clients', views.ClientViewSet, base_name='Profile')
+router.register(r'^settings', views.SettingsSetViewSet, base_name='SettingsSet')
+
 
 router.register(r'^profiles', views.ProfileViewSet, base_name='Profile')
 router.register(r'^program/search', views.ProgramSearchViewSet, base_name="program-search")

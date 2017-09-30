@@ -25,6 +25,7 @@ import ShowMore from 'react-show-more';
 import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
 import { MessageWindowContainer } from './message'
 
+import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions } from './constants'
@@ -550,13 +551,15 @@ export class PlanForm extends React.Component {
                                             <ClippedImage item="plan" src={imageUrl} />
 
               <div className="ui page container">
-                      <div className="ui three column grid">
+                      <div className="ui grid">
 
 
+                            <div className="sixteen wide column">
 
                         <div className="planTitle">                {this.state.title}
 
                         </div>
+                                </div>
 
                             <div className="ui row">
                               <div className={smallColumnWidth}>
@@ -762,91 +765,84 @@ export class SimplePlanForm extends PlanForm {
 
 
 }
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class PlanList extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
         this.state = {
-            data:[]
+            data: []
         }
     }
 
-    componentDidMount () {
-        this.loadFromServer()
+    componentDidMount() {
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.plans != undefined) {
+                this.setState({data: this.props.storeRoot.plans})
+
+            }
+
+        }
     }
-
-    loadFromServer = () => {
-        var theUrl = "/api/goals/" + this.props.parentId + "/planOccurrences/";
-
-      $.ajax({
-      url: theUrl,
-      dataType: 'json',
-          type:'GET',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-        this.setState({
-            count: data.count,
-            next:data.next,
-            previous:data.previous,
-            data: data.results});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
-      }.bind(this),
-
-    });
-  };
 
     componentWillReceiveProps(nextProps) {
-        if (this.state.data != nextProps.data && nextProps.data != null) {
+        if (nextProps.storeRoot != undefined) {
 
-            this.setState({
-                data:nextProps.data
-            })
+            if (this.state.data != nextProps.storeRoot.plans) {
+                this.setState({data: nextProps.storeRoot.plans})
+
+
+            }
+
+
         }
     }
 
-    render () {
+    render() {
         var placeholderImageStyle = {
             backgroundImage: "url('http://semantic-ui.com/images/avatar2/large/kristy.png')",
             width: '300px',
             height: '300px',
         };
 
-        if (this.state.data) {
+        if (this.state.data != undefined) {
+            var theData = this.state.data;
 
-        var planList = this.state.data.map((planOccurrence) => {
-            return (
-                    <PlanViewEditDeleteItem key={planOccurrence.id}
-                                            isListNode={true}
-                                            showCloseButton={false}
-                                            apiUrl="/api/plans/"
-                                            id={planOccurrence.id}
-                                            data={planOccurrence.programInfo}
-                                            occurrenceData={planOccurrence}
-                                            currentView="Basic"
-                                            />
+            var values = Object.keys(theData).map(function (key) {
+                return theData[key];
+            });
 
-);
 
-            //return (<PlanListNode key={plan.id} plan={plan}/>)
-        })
+            var planList = values.map((planOccurrence) => {
+                if ((planOccurrence.isSubscribed) && (planOccurrence.goal == this.props.goalId)) {
+                    return (
+                        <PlanViewEditDeleteItem key={planOccurrence.id}
+                                                isListNode={true}
+                                                showCloseButton={false}
+                                                apiUrl="/api/plans/"
+                                                id={planOccurrence.id}
+                                                data={planOccurrence.programInfo}
+                                                occurrenceData={planOccurrence}
+                                                currentView="Basic"
+                        />
+
+                    );
+                }
+
+                //return (<PlanListNode key={plan.id} plan={plan}/>)
+            })
+        }
+
+
+        return (
+            <div className="centeredContent">
+
+                <div className='ui three column doubling stackable grid'>
+                    {planList}
+                </div>
+            </div>
+        );
     }
-
-
-    return (
-                <div className="centeredContent">
-
-          <div className='ui three column doubling stackable grid'>
-        {planList}
-      </div>
-                    </div>
-    );
-  }
 
 }
 

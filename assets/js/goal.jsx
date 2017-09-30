@@ -398,7 +398,7 @@ export class GoalList extends React.Component {
     return (
                 <div className="centeredContent">
 
-          <div className='ui three column doubling stackable grid'>
+          <div className='ui three column stackable grid'>
         {goalNodes}
       </div>
                     </div>
@@ -445,7 +445,11 @@ export class GoalDetailPage extends React.Component {
        if (this.state.data != nextProps.storeRoot.goals) {
            if (nextProps.storeRoot.goals != undefined) {
                var theGoals = nextProps.storeRoot.goals;
-                         this.setState({data: theGoals[this.props.params.goal_id]});
+               var theGoal = theGoals[this.props.params.goal_id];
+                         this.setState({data: theGoal});
+               if (theGoal.user == this.props.storeRoot.user.id) {
+                   this.setState({editable:true})
+               }
 
                //var theGoal = getArrayObjectById(theGoals, nextProps.params.goal_id)
                //this.setState({data: theGoal })
@@ -479,26 +483,6 @@ export class GoalDetailPage extends React.Component {
 
   }
 
-    loadDetailFromServer = () => {
-        var theURL = "/api/goals/" + this.props.params.goal_id + "/";
-
-    $.ajax({
-      url: theURL,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-        this.setState({
-            data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this),
-
-    });
-  };
 
   handleActionClick = () => {
       if (this.state.formIsOpen == true) {
@@ -543,45 +527,16 @@ export class GoalDetailPage extends React.Component {
 
     };
 
-  determineOptions = () => {
-      var theUrl = "/api/goals/" + this.props.params.goal_id + "/";
 
-      $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-          type: 'OPTIONS',
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-          if (data.actions["PUT"]) {
-              this.setState({
-                  editable: true
-              });
-
-          }
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this),
-
-
-    });
-  };
 
   componentDidMount() {
            if (this.props.storeRoot.goals != undefined) {
-               console.log("inside goal componentDidMount");
                var theGoals = this.props.storeRoot.goals;
                          this.setState({data: theGoals[this.props.params.goal_id]});
 
-               //this.setState({data: getArrayObjectById(theGoals, this.props.params.goal_id)})
            }
 
-      this.determineOptions();
-      //this.loadDetailFromServer()
-              $(this.refs['id_whichPlanForm']).hide()
+      $(this.refs['id_whichPlanForm']).hide()
 
 
   }
@@ -602,6 +557,8 @@ export class GoalDetailPage extends React.Component {
   };
 
     render () {
+
+
         return (
             <div>
                 <ChoiceModal  closeModalClicked={this.handleCloseModalClicked} click={this.handleModalClick} modalIsOpen={this.state.openModal} header="Add a plan" description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you." buttons={[
@@ -636,7 +593,7 @@ export class GoalDetailPage extends React.Component {
         <div ref="id_whichPlanForm">
             <PlanForm onSubmit={this.handlePlanSubmit} serverErrors={this.state.serverErrors} />
             </div>
-                        <PlanList parentId={this.props.params.goal_id} />
+                        <PlanList goalId={this.props.params.goal_id} />
 
 
 
@@ -652,20 +609,29 @@ export class GoalDetailPage extends React.Component {
 
 
 
-GoalList.propTypes = {
-    data: PropTypes.array.isRequired
 
-};
 
 
 export class GoalNode extends React.Component {
     constructor(props) {
         super(props);
-        autobind(this)
+        autobind(this);
+        this.state = {
+            wasCompleted:""
+        }
 
     }
     componentDidMount() {
+        this.setState({wasCompleted: this.props.goal.wasCompleted})
 
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.wasCompleted != nextProps.goal.wasCompleted) {
+            this.setState({
+                wasCompleted: nextProps.goal.wasCompleted
+            })
+        }
     }
 
     clearPage = () => {
@@ -675,19 +641,45 @@ export class GoalNode extends React.Component {
 
     };
 
+    handleWasCompletedChange(e) {
+        if (this.state.wasCompleted) {
+            this.setState({
+                wasCompleted:false
+            })
+
+        } else {
+            this.setState({
+                wasCompleted:true
+            })
+
+        }
+    }
+
+
     render () {
 
         if (this.props.goal.image) {
-            var theImage =  <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + this.props.goal.image} text={this.props.goal.title} /></Link>
+            var theImage =  <Link to={`/goals/${this.props.goal.id}/plans/`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + this.props.goal.image} text={this.props.goal.title} /></Link>
 
 
         } else {
-            var theImage = <Link to={`/goals/${this.props.goal.id}/plans`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + "icons/goalItem.svg"} text={this.props.goal.title} /></Link>
+            var theImage = <Link to={`/goals/${this.props.goal.id}/plans/`}><ClippedImageOverlayedText item="goal" src={s3BaseUrl + "icons/goalItem.svg"} text={this.props.goal.title} /></Link>
         }
         return(
             <div key={this.props.goal.id} className="column">
-                {theImage}
+                                    <div className="ui segment noBottomMargin noTopMargin">
 
+                {theImage}
+                <div className="ui center aligned middle aligned grid height-75" style={{marginTop:20, marginBottom:10}}>
+
+
+                            <div className="pretty primary circle smooth huge-checkbox noRightPadding">
+                                <input type="checkbox" id="id_wasCompleted" checked={this.state.wasCompleted} onChange={this.handleWasCompletedChange} />
+                                <label><i className="mdi mdi-check"></i> </label>
+                            </div>
+                        </div>
+
+                </div>
                 </div>
 
         )
@@ -771,6 +763,7 @@ export class GoalStepsHeader extends React.Component {
 
 
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalForm extends React.Component {
     constructor(props) {
         super(props);
@@ -781,6 +774,7 @@ export class GoalForm extends React.Component {
             description: "",
             metric: "",
             why: "",
+            obstacles:"",
             image: "",
             viewableBy: "ONLY_ME",
             user: null,
@@ -790,7 +784,7 @@ export class GoalForm extends React.Component {
             plans: [],
             editable:true,
             data:"",
-            serverErrors: ""
+            serverErrors: "",
         }
     }
 
@@ -810,6 +804,7 @@ export class GoalForm extends React.Component {
                 description: nextProps.data.description,
                 metric: nextProps.data.metric,
                 why: nextProps.data.why,
+                obstacles: nextProps.data.obstacles,
                 image: nextProps.data.image,
                 viewableBy: nextProps.data.viewableBy,
                 wasAchieved: nextProps.data.wasAchieved,
@@ -849,6 +844,10 @@ export class GoalForm extends React.Component {
     handleWhyChange(value) {
         this.setState({why: value});
     }
+    handleObstaclesChange(value) {
+        this.setState({obstacles: value});
+    }
+
 
     handleImageChange = (callbackData) => {
         this.setState({
@@ -912,6 +911,8 @@ export class GoalForm extends React.Component {
 
 
             var why = this.state.why;
+            var obstacles = this.state.obstacles;
+
             var viewableBy = this.state.viewableBy;
             var goalData = {
                 title: title,
@@ -919,6 +920,7 @@ export class GoalForm extends React.Component {
                 description: description,
                 metric: metric,
                 why: why,
+                obstacles: obstacles,
                 image: image,
                 viewableBy: viewableBy,
                 coaches: [],
@@ -948,6 +950,7 @@ export class GoalForm extends React.Component {
                 description: "",
                 metric: "",
                 why: "",
+                obstacles:"",
                 image: null,
                 viewableBy: "ONLY_ME",
                 user: null,
@@ -962,13 +965,31 @@ export class GoalForm extends React.Component {
             if (this.state.id) {
                 var buttonText = "Save Goal"
 
-            } else
-            {
+            } else {
                 var buttonText = "Create Goal"
             }
-            var wideColumnWidth = "sixteen wide column";
+            var forMobile = false;
+
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
             var mediumColumnWidth = "sixteen wide column";
             var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
 
 
 
@@ -986,14 +1007,14 @@ export class GoalForm extends React.Component {
                     <div className="ui row">
                                                       <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-                        <div className={smallColumnWidth}>
+                        <div className={mediumColumnWidth}>
 
                         <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
                                        label="Select an image that will help motivate you." defaultImage={imageUrl}/>
                     </div></Measure></div>
 
                     <div className="ui row">
-                        <div className="ten wide column">
+                        <div className={mediumColumnWidth}>
                             <ValidatedInput
                                 type="text"
                                 name="title"
@@ -1012,12 +1033,12 @@ export class GoalForm extends React.Component {
                         </div>
                     </div>
                     <div className="ui row">
-                        <div className="ten wide column">
+                        <div className={mediumColumnWidth}>
 
                             <ValidatedInput
                                 type="textarea"
                                 name="why"
-                                label="Why do you want to achieve this goal? (Required)"
+                                label="Why do you want to achieve this goal? What good will happen if you achieve it? What bad will happen if you don't achieve it? (Required)"
                                 id="id_why"
                                 placeholder="I want to make something of myself, I want to be around to see my daughter graduate from college."
                                 value={this.state.why}
@@ -1036,7 +1057,31 @@ export class GoalForm extends React.Component {
 
                     </div>
                     <div className="ui row">
-                        <div className="ten wide column">
+                        <div className={mediumColumnWidth}>
+
+                            <ValidatedInput
+                                type="textarea"
+                                name="obstacles"
+                                label="What are some obstacles that could stand in your way? What obstacles do you envision encountering? (Required)"
+                                id="id_obstacles"
+                                placeholder="My family doesn't believe in me. I don't have the money"
+                                value={this.state.obstacles}
+                                initialValue={this.state.obstacles}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleObstaclesChange}
+                                rows={3}
+                                isDisabled={!this.state.editable}
+                                serverErrors={this.getServerErrors("obstacles")}
+
+
+                            />
+                        </div>
+
+
+                    </div>
+                    <div className="ui row">
+                        <div className={mediumColumnWidth}>
 
                             <ValidatedInput
                                 type="textarea"
@@ -1063,7 +1108,7 @@ export class GoalForm extends React.Component {
                     <div className="ui row">
 
 
-                        <div className="six wide column field">
+                        <div className={mediumColumnWidth + ' field'}>
 
                             <label htmlFor="id_deadline">What is your deadline for achieving this goal? (Required)</label>
 
@@ -1078,7 +1123,7 @@ export class GoalForm extends React.Component {
 
 
                     <div className="ui row">
-                        <div className="ten wide column">
+                        <div className={mediumColumnWidth}>
 
                             <ValidatedInput
                                 type="text"
@@ -1101,7 +1146,7 @@ export class GoalForm extends React.Component {
 
                     </div>
                     <div className="ui  row">
-                        <div className="ten wide column field">
+                        <div className={mediumColumnWidth + ' field'}>
                     <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
                     <Select value={this.state.viewableBy} clearable={false}
                                               onChange={this.handleViewableByChange} name="viewingOptions"
@@ -1173,6 +1218,7 @@ export class GoalSMARTForm extends React.Component {
             isThisReasonable: null,
             metric: "",
             why: "",
+            obstacles:"",
             image: null,
             viewableBy: "ONLY_ME",
             user: null,
@@ -1205,6 +1251,7 @@ export class GoalSMARTForm extends React.Component {
                 isThisReasonable: nextProps.data.isThisReasonable,
                 metric: nextProps.data.metric,
                 why: nextProps.data.why,
+                obstacles: nextProps.data.obstacles,
                 image: nextProps.data.image,
                 viewableBy: nextProps.data.viewableBy,
                 wasAchieved: nextProps.data.wasAchieved,
@@ -1253,6 +1300,10 @@ export class GoalSMARTForm extends React.Component {
 
     handleWhyChange(value) {
         this.setState({why: value});
+    }
+
+    handleObstaclesChange(value) {
+        this.setState({obstacles: value});
     }
 
     handleImageChange = (callbackData) => {
@@ -1308,6 +1359,7 @@ export class GoalSMARTForm extends React.Component {
                 isThisReasonable: false,
                 metric: "",
                 why: "",
+                obstacles: "",
                 image: null,
                 viewableBy: "ONLY_ME",
                 user: null,
@@ -1786,7 +1838,7 @@ export class GoalBasicView extends React.Component {
     render() {
         if (this.state.data) {
             var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY");
-            if (this.state.data.image != undefined){
+            if (this.state.data.image != "") {
                 var theImage = this.state.data.image
             } else {
                 var theImage = "uploads/goalItem.svg"

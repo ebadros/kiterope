@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, SettingsSet, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -15,6 +15,8 @@ from allauth.account import app_settings as allauth_settings
 from allauth.utils import email_address_exists
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
+from django.utils import six
+
 
 
 
@@ -37,6 +39,15 @@ def makeSerializer(serializerName, source, many,read_only):
         'Contact': lambda: ContactSerializer(source, many, read_only),
 
     }[serializerName]
+
+class TimezoneField(serializers.Field):
+    "Take the timezone object and make it JSON serializable"
+    def to_representation(self, obj):
+        return six.text_type(obj)
+
+
+    def to_internal_value(self, data):
+        return data
 
 class InterestSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -279,19 +290,36 @@ class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken' )
+        fields = ( 'id', 'bio', 'isCoach', 'utcMidnight', 'firstName', 'timezone', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken',  )
 
 
     bio = serializers.CharField(max_length=2000, required=False)
     notificationChannel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     notificationChannelLabel = serializers.SerializerMethodField(required=False, read_only=True)
+    timezone = TimezoneField()
+    utcMidnight = serializers.SerializerMethodField()
+
+    def get_timezone(self, obj):
+        return six.text_type(obj.timezone)
+
 
     def get_notificationChannelLabel(self, obj):
         try:
             return obj.get_notificationChannelLabel()
         except:
             return ""
+
+    def get_utcMidnight(self,obj):
+        try:
+            return obj.get_utcMidnight()
+        except:
+            return ""
+
+class SettingsSetSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SettingsSet
+        fields = ( 'id', 'defaultNotificationPhone', 'defaultNotificationMethod', 'defaultNotificationEmail', 'defaultNotificationSendTime')
 
 
 
@@ -685,10 +713,12 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences')
+        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000, required=False)
+    obstacles = serializers.CharField(max_length=2000)
+
     why = serializers.CharField(max_length=2000)
     metric = serializers.CharField(max_length=200)
     deadline = serializers.DateField()

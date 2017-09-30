@@ -68,9 +68,10 @@ export class Header extends React.Component {
 
     render() {
         return (
-            <div className="ui three column grid">
+            <div className="ui one column grid" >
 
         <div className="ui column header"><h1>{this.props.headerLabel}</h1></div>
+
 
                         </div>
         )
@@ -123,9 +124,10 @@ export class FormHeaderWithActionButton extends React.Component {
 
 
 
-    render() {
+render() {
+
         return (
-            <div className="ui three column grid">
+            <div className="ui three column stackable grid" >
 
         <div className="ui column header">
             <h1>{this.props.headerLabel}</h1>
@@ -135,7 +137,12 @@ export class FormHeaderWithActionButton extends React.Component {
                     </div>
                         </div>
         )
+
 }
+
+
+
+
 }
 
 
@@ -1204,13 +1211,17 @@ export class ViewEditDeleteItem extends React.Component {
 
     switchToDetailView = () => {
         $(this.refs["ref_form"]).hide();
-        $(this.refs["ref_detail"]).slideDown()
+        $(this.refs["ref_detail"]).slideDown();
+                         this.setState({currentView:'Detail'})
+
 
         };
 
     switchToEditView = () => {
         $(this.refs["ref_basic"]).hide();
-        $(this.refs["ref_form"]).slideDown()
+        $(this.refs["ref_form"]).slideDown();
+                 this.setState({currentView:'Edit'})
+
 
 
         };
@@ -1226,7 +1237,8 @@ export class ViewEditDeleteItem extends React.Component {
      switchToBasicView = () => {
          $(this.refs["ref_detail"]).hide();
          $(this.refs["ref_form"]).slideUp();
-         $(this.refs["ref_basic"]).slideDown()
+         $(this.refs["ref_basic"]).slideDown();
+         this.setState({currentView:'Basic'})
 
     };
 
@@ -1340,7 +1352,7 @@ deleteItem = () => {
                 {controlBar}
 
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     {basicView}
                     {detailView}
 
@@ -1509,7 +1521,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
                 {controlBar}
 
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div onClick={this.handleClick}>{basicView}</div>
                     {detailView}
 
@@ -1871,19 +1883,19 @@ hideComponent = () => {
 
         return (
 
-            <div ref={`ref_programItem_${this.props.id}`} className="column">
+            <div ref={`ref_programItem_${this.props.id}`} className="ui column" >
                 <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
 
                                 {this.props.hideControlBar ? null : controlBar}
 
-<ProgramSubscriptionModal  closeModalClicked={this.handleCloseModalClicked}
+                <ProgramSubscriptionModal  closeModalClicked={this.handleCloseModalClicked}
               click={this.handleModalClick}
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
               program={this.state.data}
 />
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div>{basicView}</div>
                     {detailView}
 
@@ -1931,6 +1943,15 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
         if (nextProps.occurrenceData != undefined) {
             this.setState({
                 occurrenceData: nextProps.occurrenceData,
+            })
+
+        }
+    }
+
+    if (this.state.data != nextProps.data) {
+        if (nextProps.data != undefined) {
+            this.setState({
+                data: nextProps.data,
             })
 
         }
@@ -2093,13 +2114,54 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
     };
 
-    handleUnsubscribeClick = () => {
-      if (this.state.openModal == false) {
-          this.setState({
-              openModal:true
-          })
+    handleSubscribeClick = () => {
+        if (this.props.storeRoot.user != undefined) {
+            this.setState({
+                    openModal: true
+                })
 
-      }
+            }
+         else {
+            this.setState({
+                    signInOrSignUpModalFormIsOpen: true
+                })
+        }
+
+    };
+
+    handleUnsubscribeClick = () => {
+        console.log("handleSubscribeclicke");
+        if (this.state.id) {
+            var theUrl = "/api/planOccurrences/" + this.state.id + "/";
+            var planOccurrence = {
+                isSubscribed: false,
+
+            };
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: planOccurrence,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.state.data.isSubscribed = false;
+                    store.dispatch(removePlan(this.state.id))
+
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    //var serverErrors = xhr.responseJSON;
+                    //   this.setState({
+                    //       serverErrors:serverErrors,
+                    //})
+
+                }.bind(this)
+            });
+        }
 
     };
 
@@ -2124,6 +2186,17 @@ hideComponent = () => {
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
         var editView = this.getEditView();
+        var subscribeButton = <div className="ui purple bottom attached large button"
+                                           onClick={this.handleSubscribeClick}>Subscribe</div>;
+
+        if (this.state.data) {
+            if (this.state.data.isSubscribed) {
+                 subscribeButton = <div className="ui purple bottom attached large button"
+                                           onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
+
+            }
+
+        }
 
 
         return (
@@ -2138,12 +2211,12 @@ hideComponent = () => {
               program={this.state.data.programInfo}
 />
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div>{basicView}</div>
                     {detailView}
                     {editView}
 
-                </div><div className="ui purple bottom attached large button" onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
+                </div>{subscribeButton}
 
             </div>
 
@@ -2151,6 +2224,8 @@ hideComponent = () => {
     }
 
 }
+
+
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
@@ -2320,12 +2395,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
              });
 
     };
-    switchToBasicView = () => {
-        $(this.refs["ref_detail"]).hide();
-        $(this.refs["ref_form"]).slideUp();
-        $(this.refs["ref_basic"]).slideDown();
 
-    };
 
 
 
@@ -2408,7 +2478,7 @@ hideComponent = () => {
         if (this.props.storeRoot.user) {
         return (
 
-            <div ref={`ref_profileItem_${this.props.id}`} className="ui column">
+            <div className="ui column" ref={`ref_profileItem_${this.props.id}`}  >
                 {controlBar}
 
 
@@ -2435,7 +2505,7 @@ hideComponent = () => {
                 {controlBar}
 
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div>{basicView}</div>
                     {detailView}
 
@@ -2699,7 +2769,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                 {controlBar}
 
 
-                <div className="ui segment noBottomMargin noTopMargin">
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div >{basicView}</div>
                     {detailView}
 
@@ -2880,10 +2950,10 @@ export class CancelControlBar extends ControlBarButtonConfiguration {
 
 
         return (
-            <div className="ui two column grid">
+<div style={{display:'inline-flex',  width:'100%', justifyContent:'space-between' }}>
 
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding">
+                <div >{this.props.label}</div>
+                <div>
 
                         {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_cancelButton" label="Cancel"
                                               click={this.handleCancelClicked}/>  }
@@ -2920,10 +2990,10 @@ export class DetailControlBar extends ControlBarButtonConfiguration {
 
 
         return (
-            <div className="ui two column grid">
+<div style={{display:'inline-flex',  width:'100%',  justifyContent:'space-between' }}>
 
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding"  >
+                <div >{this.props.label}</div>
+                <div  >
 
 
                     {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_detailButton" label="Detail"
@@ -2957,10 +3027,10 @@ export class MenuControlBar extends ControlBarButtonConfiguration {
 
 
         return (
-<div className="ui two column grid">
+<div style={{display:'inline-flex',  width:'100%',  justifyContent:'space-between' }}>
 
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding"  >
+                <div >{this.props.label}</div>
+                <div >
 
 
                     {menuButton}
@@ -2992,10 +3062,10 @@ export class EditDeleteControlBar extends ControlBarButtonConfiguration {
 
 
         return (
-<div className="ui two column grid">
+<div style={{display:'inline-flex',  width:'100%',  justifyContent:'space-between' }}>
 
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding"  >
+                <div>{this.props.label}</div>
+                <div>
 
                     <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked}/>
 
@@ -3029,14 +3099,16 @@ export class DetailEditDeleteControlBar extends ControlBarButtonConfiguration {
 
         }
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>;
+                                              click={this.handleMenuClicked} style={{display:'block', width:'100%'}}/>;
 
 
         return (
-<div className="ui two column grid">
 
-                <div className="column left aligned" >{this.props.label}</div>
-                <div   className="column right aligned noRightPadding"   >
+<div style={{display:'inline-flex',  width:'100%', justifyContent:'space-between' }}>
+
+                <div>{this.props.label}</div>
+
+                <div >
 
 
                     {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked}/>}
@@ -3175,7 +3247,7 @@ export class ItemControlBar extends React.Component {
 
 
         return (
-            <div ref={this.props.myRef} className={`ui top attached ${color} button`} >
+            <div ref={this.props.myRef} className={`ui top attached ${color} button`} style={{display:'flex',}}>
 
                     {buttonConfiguration}
 
@@ -3188,6 +3260,7 @@ export class ItemControlBar extends React.Component {
 }
 
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class Breadcrumb extends React.Component {
     constructor (props) {
         super(props);
@@ -3198,32 +3271,62 @@ export class Breadcrumb extends React.Component {
     }
 
     componentDidMount() {
-    this.setState({
-        values:this.props.values
-    })
+
+    }
+    handleGoToURL(theUrl) {
+        store.dispatch(push(theUrl))
     }
 
     buildBreadcrumb = () => {
-        var theBreadcrumb = '<div class="ui large breadcrumb"><a href="#/"><div class="section">Home</div></a>';
-        for (var i=0; i < this.state.values.length; i++) {
-            theBreadcrumb = theBreadcrumb + '<i class="right chevron icon divider"></i>';
-            theBreadcrumb = theBreadcrumb + '<a href=#' + this.state.values[i].url + ' >';
-            theBreadcrumb = theBreadcrumb + '<div class="section">' + this.state.values[i].label + '</div></a>'
+        //var theBreadcrumb = '<div class="ui large breadcrumb"><a href="/"><div class="section">Home</div></a>';
+        //for (var i = 0; i < this.state.values.length; i++) {
+          //  <BreadcrumbElement url={this.state.values[i].url} label={this.state.values[i].label} />
+            //theBreadcrumb = theBreadcrumb + '<i class="right chevron icon divider"></i>';
+            //theBreadcrumb = theBreadcrumb + '<a href=#' + this.state.values[i].url + ' >';
+            //theBreadcrumb = theBreadcrumb + '<div class="section">' + this.state.values[i].label + '</div></a>'
+        //}
+        //theBreadcrumb = theBreadcrumb + '</div>';
+        if (this.props.values != undefined) {
+
+            var theBreadcrumbs = this.props.values.map(function (value) {
+                return (<BreadcrumbElement key={value.url + value.label} url={value.url} label={value.label}/>)
+            });
+
+            return theBreadcrumbs
+        } else {
+            return (<div></div>)
         }
-        theBreadcrumb = theBreadcrumb + '</div>';
+    };
 
-        return theBreadcrumb
 
-        };
 
 
     render() {
-            var theBreadcrumb = this.buildBreadcrumb();
+            var theBreadcrumbs = this.buildBreadcrumb();
             return (
-                            <div dangerouslySetInnerHTML={{__html: theBreadcrumb}} />
-
+                <div className="ui large breadcrumb"><a href='javascript:;' onClick={() => this.handleGoToURL("/")}><div className="section">Home</div></a>
+                    {theBreadcrumbs}
+                    </div>
             )
     }
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class BreadcrumbElement extends React.Component {
+    constructor (props) {
+        super(props);
+        autobind(this);
+
+    }
+    handleGoToURL() {
+        store.dispatch(push(this.props.url))
+    }
+
+    render() {
+        return (
+         <a href='javascript:;' onClick={() => this.handleGoToURL("/")}><i className="right chevron icon divider"></i><div className='section' > {this.props.label}</div></a>
+     )
+}
 }
 
 export class ErrorWrapper extends React.Component {

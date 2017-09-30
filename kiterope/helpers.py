@@ -2,6 +2,9 @@ import datetime, time
 from time import mktime
 from datetime import datetime
 from datetime import timedelta
+import pytz
+from django.utils import timezone
+
 
 def formattime(time):
     # format to workweeks, workdays, hours and minutes
@@ -11,3 +14,8 @@ def formattime(time):
     weeks, days = divmod(days, 5)   # work weeks
     components = [str(v) + l for l, v in zip('wdhm', (weeks, days, hours, minutes)) if v]
     return ''.join(components) or '0m'
+
+#tz = timezone('US/Pacific')
+
+def toUTC(d, tz):
+    return tz.normalize(tz.localize(d)).astimezone(pytz.utc)

@@ -49,8 +49,8 @@ export const durations = [
     ];
 
 export const times = [
-    {value:'12:00', label: "12:00 am"},
-    {value:'12:30', label: "12:30 am"},
+    {value:'00:00', label: "12:00 am"},
+    {value:'00:30', label: "12:30 am"},
     {value:'01:00', label: "1:00 am"},
     {value:'01:30', label: "1:30 am"},
     {value:'02:00', label: "2:00 am"},
@@ -188,12 +188,17 @@ export const userSharingOptions = [
     //{value:'SHARED_WITH', label: "People I've shared with specifically"},
     {value:'ANYONE', label: "Anyone"}];
 
+
 export const notificationSendMethodOptions = [
-    {value:'EMAIL_AND_TEXT', label: "Email and Text"},
-    {value:'EMAIL', label: "Email Only"},
-    {value:'TEXT', label: "Text Only"},
+    {value:'APP_TEXT_EMAIL',label: "App, Text, and Email"},
+    {value:'APP_TEXT', label:"App and Text"},
+    {value:'APP_EMAIL',label:"App and Email"},
+    {value:'TEXT_EMAIL', label:"Text and Email"},
+    {value:'APP', label:"App Only"},
+    {value:'TEXT', label:"Text Only"},
+    {value:'EMAIL', label:"Email Only"},
     {value:'NO_NOTIFICATIONS', label: "I don't want any notifications"}
-];
+    ];
 
 export const metricFormatOptions = [
 

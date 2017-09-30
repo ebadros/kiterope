@@ -27,6 +27,9 @@ WEBPACK_LOADER = {
     }
 }
 
+LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
+
+
 REACT_SERVICE_URL = 'http://localhost:63578/render'
 
 MIDDLEWARE_CLASSES += (

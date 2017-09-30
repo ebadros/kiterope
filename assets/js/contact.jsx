@@ -64,10 +64,10 @@ export class ContactItemMenu extends React.Component {
          var myStyle = { display: "block"};
          return(
 
-                  <div className="ui simple dropdown item" >
+                  <div className="ui simple  dropdown  item" >
                       <div className="ui extramini image controlButtonMargin">
                       <img src={`${s3IconUrl}menuDark.svg`} /></div>
-                      <div className="menu">
+                      <div className="menu" style={{right: '0',left: 'auto'}}>
 
                           {/*<div className="ui item">
                               <IconLabelCombo size="extramini" orientation="left" text="Add Contact" icon="goal" background="Light" click={this.handleClick} />

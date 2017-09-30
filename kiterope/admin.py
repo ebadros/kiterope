@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from tinymce.widgets import TinyMCE
 
-from kiterope.models import Profile, User, Goal, Notification, Rate, Session, Review, Update, Post, Program, Step, Question, Answer, Interest, Participant
+from kiterope.models import Profile, User, Goal, Notification, SettingsSet, Rate, Session, Review, Update, Post, Program, Step, Question, Answer, Interest, Participant
 from kiterope.models import StepOccurrence, PlanOccurrence, BlogPost, MessageThread, UpdateOccurrence, Metric, Message, Label, KChannel, KChannelUser, KRMessage, Contact
 
 
@@ -26,6 +26,8 @@ admin.site.register(Notification)
 admin.site.register(Message)
 admin.site.register(Label)
 admin.site.register(MessageThread)
+admin.site.register(SettingsSet)
+
 
 
 

@@ -14,6 +14,8 @@ const mapStateToProps = (state, ownProps) => {
 
       storeRoot:{
         user:state.rootReducer.user,
+        profile:state.rootReducer.profile,
+        settings:state.rootReducer.settings,
         goals:state.rootReducer.goals,
         plans:state.rootReducer.plans,
         contacts:state.rootReducer.contacts,
@@ -21,6 +23,7 @@ const mapStateToProps = (state, ownProps) => {
         stepOccurrences:state.rootReducer.stepOccurrences,
         messageThreads:state.rootReducer.messageThreads,
         gui: {
+          forMobile:state.rootReducer.forMobile,
           shouldReload:state.rootReducer.shouldReload,
           isSidebarVisible:state.rootReducer.isSidebarVisible,
           isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
@@ -37,7 +40,9 @@ const mapStateToProps = (state, ownProps) => {
   else {
     return {
       storeRoot:{
-        gui:{isSidebarVisible:false,
+        gui:{
+          forMobile: false,
+          isSidebarVisible:false,
           isMessageWindowVisible: false}}
     }
   }
@@ -49,6 +54,19 @@ const mapDispatchToProps = (dispatch) => {
     setCurrentUser: (theUser) => {
       dispatch(setCurrentUser(theUser))
     },
+
+    setProfile: (theProfile) => {
+            dispatch(setProfile(theProfile))
+
+
+    },
+    setSettings: (theSettings) => {
+            dispatch(setSettings(theSettings))
+
+
+    },
+
+
 
     setCurrentContact: (theContact) => {
       dispatch(setCurrentContact(theContact))
@@ -153,6 +171,10 @@ const mapDispatchToProps = (dispatch) => {
     },
     setMessageWindowVisibility: (isMessageWindowVisible) => {
       dispatch(setMessageWindowVisibility(isMessageWindowVisible))
+    },
+
+    setForMobile: (forMobile) => {
+      dispatch(setForMobile(forMobile))
     }
 
 

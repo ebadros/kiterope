@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setPlans,  reduxLogout, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -113,6 +113,9 @@ export class ReduxDataGetter extends React.Component {
         super(props);
         autobind(this);
         this.state = {
+            width:'0',
+            height:'0'
+
 
 
         }
@@ -120,6 +123,10 @@ export class ReduxDataGetter extends React.Component {
 
     componentDidMount = () => {
         store.dispatch(setMessageWindowVisibility(false));
+          this.updateWindowDimensions();
+          window.addEventListener('resize', this.updateWindowDimensions);
+
+
         if (this.props.storeRoot.user == undefined) {
 
             this.loadUserData()
@@ -127,6 +134,20 @@ export class ReduxDataGetter extends React.Component {
 
 
     };
+
+    componentWillUnmount() {
+  window.removeEventListener('resize', this.updateWindowDimensions);
+}
+
+updateWindowDimensions() {
+  this.setState({ width: window.innerWidth, height: window.innerHeight });
+    if (window.innerWidth >= 768 ) {
+        store.dispatch(setForMobile(false))
+    } else {
+                store.dispatch(setForMobile(true))
+
+    }
+}
 
     loadUserData() {
         var theUrl =  '/api/users/i/';
@@ -141,14 +162,13 @@ export class ReduxDataGetter extends React.Component {
                 if (userData.id != null) {
                 store.dispatch(setCurrentUser(userData));
                 this.loadUniversalData();
+                    this.setUsersTimezone(userData.profileId);
 
                 if (userData.isCoach) {
                     this.loadCoachSpecificData()
 
                 }
             }
-
-
 
             }.bind(this),
             error: function(xhr, status, err) {
@@ -157,7 +177,78 @@ export class ReduxDataGetter extends React.Component {
         })
     }
 
+    loadProfileData() {
+        var theUrl =  '/api/profiles/me/';
+        $.ajax({
+            method: 'GET',
+            url: theUrl,
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(profileData) {
+                store.dispatch(setProfile(profileData));
+
+
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+        }
+        })
+
+    }
+
+    loadSettingsData() {
+        var theUrl =  '/api/settings/me/';
+        $.ajax({
+            method: 'GET',
+            url: theUrl,
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(settingsData) {
+                store.dispatch(setSettings(settingsData));
+
+
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+        }
+        })
+
+    }
+
+    setUsersTimezone(userProfileId) {
+        console.log("set users timezone");
+        var theUrl = '/api/profiles/' + userProfileId + "/";
+        var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        $.ajax({
+            method: 'PATCH',
+            url: theUrl,
+            datatype: 'json',
+            data:{timezone: timezone},
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(data) {
+
+
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+        }
+        })
+
+    }
+
     loadUniversalData() {
+        this.loadProfileData();
+        this.loadSettingsData();
         this.loadMessageThreadData();
         this.loadContactData();
         this.loadGoalData();
@@ -375,7 +466,13 @@ export class StandardSetOfComponents extends React.Component {
     }
 
     componentDidMount () {
-        $(this.refs["ref_messageWindowContainer"]).hide()
+        $(this.refs["ref_messageWindowContainer"]).hide();
+        var date = new Date();
+        console.log("date to string " + date.toString());
+                console.log("date to local string " + date.toLocaleString());
+
+        var offsetInHours = date.getTimezoneOffset() / 60;
+        console.log("offset is " + offsetInHours)
     }
 
 
@@ -449,18 +546,25 @@ export class Footer extends React.Component {
             <div>
                 <div className="footerSpacer">&nbsp;</div>
                 <div className="customFooter">
-                    <div className="ui center aligned grid">
+                    <div className="ui six column center aligned stackable grid">
 
-                        <div className="ui text menu">
-                            <a className="item">Contact Us</a>
-                            <a className="item">Privacy</a>
-                            <a className="item">Terms</a>
-                            <a className="item">Copyright © 2017 Kiterope Inc.</a>
+<div className="ui column">&nbsp;</div>
+                        <div className="ui column">&nbsp;</div>
+                        <div className="ui column"><a >Contact Us</a></div>
+                        <div className="ui column"><Link to="/tos">Terms</Link></div>
+
+                        <div className="ui column">&nbsp;</div>
+                        <div className="ui column">&nbsp;</div>
+                        </div>
+                                        <div className="ui one column center aligned stackable grid">
+
+
+                        <div className="ui column">Copyright © 2017 Kiterope Inc.</div>
+</div>
+
 
                         </div>
                     </div>
-                </div>
-            </div>
     )
     }
 }
@@ -669,7 +773,7 @@ export class Menubar extends React.Component {
 
         return (
 
-             <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0}}>
+             <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0,}}>
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}

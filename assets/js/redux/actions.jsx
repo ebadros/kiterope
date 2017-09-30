@@ -21,6 +21,13 @@ export const setPlans = (thePlans) => {
     }
 };
 
+export const setSettings = (theSettings) => {
+    return {
+        type: 'SET_SETTINGS',
+        settings: theSettings,
+    }
+};
+
 export const addPlan = (thePlan) => {
     return {
         type: 'ADD_PLAN',
@@ -35,7 +42,13 @@ export const removePlan = (thePlanId) => {
     }
 };
 
-
+export const setForMobile = (forMobile) => {
+    console.log("themobbile is " + forMobile);
+    return {
+        type: 'SET_FOR_MOBILE',
+        forMobile: forMobile
+    }
+};
 
 
 export const setMessageWindowVisibility = (isVisible) => {
@@ -48,6 +61,13 @@ export const setCurrentUser = (theUser) => {
     return {
         type: 'SET_CURRENT_USER',
         user: theUser
+    }
+};
+
+export const setProfile = (theProfile) => {
+    return {
+        type: 'SET_PROFILE',
+        profile: theProfile
     }
 };
 
@@ -249,4 +269,4 @@ export const showSidebar = (isSidebarVisible) => {
 
 
 
-module.exports = { setCurrentUser, shouldReload, deleteContact, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { setCurrentUser, setSettings, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
