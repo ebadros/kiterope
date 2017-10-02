@@ -162,7 +162,6 @@ updateWindowDimensions() {
                 if (userData.id != null) {
                 store.dispatch(setCurrentUser(userData));
                 this.loadUniversalData();
-                    this.setUsersTimezone(userData.profileId);
 
                 if (userData.isCoach) {
                     this.loadCoachSpecificData()
@@ -187,6 +186,7 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(profileData) {
+                console.log("gotProfileData");
                 store.dispatch(setProfile(profileData));
 
 
@@ -209,6 +209,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(settingsData) {
+                                console.log("gotSettingsData");
+
                 store.dispatch(setSettings(settingsData));
 
 
@@ -222,7 +224,6 @@ updateWindowDimensions() {
     }
 
     setUsersTimezone(userProfileId) {
-        console.log("set users timezone");
         var theUrl = '/api/profiles/' + userProfileId + "/";
         var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -235,6 +236,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(data) {
+                                console.log("gotUsersTimezone")
+
 
 
 
@@ -253,7 +256,9 @@ updateWindowDimensions() {
         this.loadContactData();
         this.loadGoalData();
         this.loadStepOccurrenceData();
-        this.loadPlanData()
+        this.loadPlanData();
+        this.setUsersTimezone(this.props.storeRoot.user.profileId)
+
     }
 
 
@@ -274,6 +279,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
+                          console.log("gotGoalData");
+
                   store.dispatch(setGoals(data))
 
       }.bind(this),
@@ -297,6 +304,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
+                          console.log("gotPlanData");
+
                   store.dispatch(setPlans(data))
 
       }.bind(this),
@@ -319,6 +328,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
+                                console.log("gotProgramData");
+
                 store.dispatch(setPrograms(data))
 
             }.bind(this),
@@ -346,6 +357,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
+                          console.log("gotMessageThreadData");
+
           store.dispatch(setMessageThreads(data));
           store.dispatch(setOpenThreads({}))
 
@@ -375,6 +388,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
+                                console.log("gotStepOccurrenceData");
+
           store.dispatch(setStepOccurrences(data.results))
 
             }.bind(this),
@@ -395,6 +410,8 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
       success: function(data) {
+                          console.log("gotContactData");
+
           this.organizeContacts(data)
 
       }.bind(this),
@@ -468,11 +485,8 @@ export class StandardSetOfComponents extends React.Component {
     componentDidMount () {
         $(this.refs["ref_messageWindowContainer"]).hide();
         var date = new Date();
-        console.log("date to string " + date.toString());
-                console.log("date to local string " + date.toLocaleString());
 
         var offsetInHours = date.getTimezoneOffset() / 60;
-        console.log("offset is " + offsetInHours)
     }
 
 

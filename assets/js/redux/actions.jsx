@@ -43,7 +43,6 @@ export const removePlan = (thePlanId) => {
 };
 
 export const setForMobile = (forMobile) => {
-    console.log("themobbile is " + forMobile);
     return {
         type: 'SET_FOR_MOBILE',
         forMobile: forMobile

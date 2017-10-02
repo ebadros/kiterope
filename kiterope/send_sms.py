@@ -14,4 +14,5 @@ client = Client(account_sid, auth_token)
 
 
 def sendMessage(toPhoneNumber, theBody):
+    print("sendmessage %s and %s" % (toPhoneNumber, theBody))
     message = client.api.account.messages.create(to=toPhoneNumber, messaging_service_sid="MG4e498e6f5301ba8e60ff05c05de5b288", body=theBody)

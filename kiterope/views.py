@@ -824,6 +824,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
         StepOccurrence.objects.updateStepOccurrences(currentUser, periodRangeStart, periodRangeEnd)
+        print("Stepoccurrence updateStepOccurrences")
         #print("occurrencesUpdated")
 
         queryset = self.filter_queryset(self.get_queryset())
