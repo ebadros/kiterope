@@ -64,7 +64,6 @@ $.ajaxSetup({
     }
 });
 
-import {LineGraph } from './dataVis/line'
 export class GoalEntryPage extends React.Component {
     constructor(props) {
         super(props);

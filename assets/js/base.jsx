@@ -30,7 +30,6 @@ import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import Measure from 'react-measure'
 
-import { VisualizationsList } from './dataVis/visualization'
 
 import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporter } from './accounts'
 
