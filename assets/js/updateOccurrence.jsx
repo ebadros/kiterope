@@ -292,6 +292,7 @@ export class UpdateOccurrenceInput extends React.Component {
             audio: "",
             boolean: false,
             doneSaving:true,
+            default: false
 
         }
     }
@@ -312,6 +313,8 @@ export class UpdateOccurrenceInput extends React.Component {
         units: this.state.data.update.units,
         format: this.state.data.update.format,
         metricLabel: this.state.data.update.metricLabel,
+                default:this.state.data.update.default,
+
         text: this.state.data.text,
         decimal: convertToDecimalIfAnInteger(this.props.data.decimal),
         longText: this.state.data.longText,
@@ -321,7 +324,7 @@ export class UpdateOccurrenceInput extends React.Component {
         picture: this.state.data.picture,
         video: this.state.data.video,
         audio: this.state.data.audio,
-        boolean: this.state.data.boolean
+        boolean: this.state.data.boolean,
     })
 
 }
@@ -465,24 +468,29 @@ export class UpdateOccurrenceInput extends React.Component {
 
     getIntegerInput () {
 
-        return (
-            <div className="ui form  row">
-                <ValidatedInput
-                                      type="text"
-                                      name="integer"
-                                      label={this.state.metricLabel}
-                                      placeholder=""
-                                      value={this.state.integer || ''}
-                                      initialValue={this.state.integer || ''}
-                                      validators='"!isEmpty(str)","isInt(str)"'
-                                      onChange={this.validate}
-                                      stateCallback={this.handleIntegerChange}
+        if (this.state.default != true) {
+            return (
+                <div className="ui form  row">
+                    <ValidatedInput
+                        type="text"
+                        name="integer"
+                        label={this.state.metricLabel}
+                        placeholder=""
+                        value={this.state.integer || ''}
+                        initialValue={this.state.integer || ''}
+                        validators='"!isEmpty(str)","isInt(str)"'
+                        onChange={this.validate}
+                        stateCallback={this.handleIntegerChange}
 
-                                  />
+                    />
 
 
-            </div>
-        )
+                </div>
+            )
+        }
+        else {
+            return (<div></div>)
+        }
     }
 
     handleUrlChange(e) {
@@ -664,7 +672,6 @@ export class UpdateOccurrenceInput extends React.Component {
         return (
             <div>
         {inputHTML}
-                {inputHTML ? <div className="ui row">&nbsp;</div>:null}
 
 
             </div>
