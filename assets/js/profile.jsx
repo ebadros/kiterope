@@ -26,7 +26,7 @@ import { PlanForm, PlanList } from './plan'
 import { Caller, CallManager } from './call'
 import TinyMCEInput from 'react-tinymce-input';
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, formats, s3BaseUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, } from './constants'
 
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';
@@ -414,7 +414,7 @@ export class ProfileForm extends React.Component {
     handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;
             var urlForDatabase = fullUrl.split("?")[0];
-            urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
+            urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
             this.setState({profilePhoto: urlForDatabase});
     }
 
@@ -447,6 +447,7 @@ export class ProfileForm extends React.Component {
     }
 
     handleImageChange = (callbackData) => {
+        console.log(callbackData.image)
         this.setState({
             profilePhoto: callbackData.image
         })
@@ -1045,8 +1046,7 @@ export class ProfileBasicView extends React.Component {
         if (this.props.isListNode) {
             return (
                 <div onClick={this.goToDetail}>
-                    <ClippedImage item="profile" src={s3ImageUrl + this.state.data.profilePhoto} />
-
+                    <ClippedImage item="profile" src={s3BaseUrl + this.state.data.profilePhoto} />
 
                 <div className="ui grid" >
                     <div className="sixteen wide column">
@@ -1063,7 +1063,7 @@ export class ProfileBasicView extends React.Component {
             return (
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui circular image" src={s3ImageUrl + this.state.data.profilePhoto}></img>
+                        <img className="ui circular image" src={s3BaseUrl + this.state.data.profilePhoto}></img>
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">
@@ -1072,9 +1072,10 @@ export class ProfileBasicView extends React.Component {
                         <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.bio}}/>
                     </div>
                     <div className="right aligned six wide column">
+                        {/* TODO: Include member since, # of clients, Location
                         <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success" background="Light" link="/goalEntry" />
                                     <IconLabelCombo size="extramini" orientation="right" text={this.state.data.zipCode} icon="deadline" background="Light" link="/goalEntry" />
-                                  </div>
+                              */}    </div>
 
                 </div>
 
@@ -1215,7 +1216,7 @@ export class UserLink extends React.Component {
                   <div style={{marginBottom:5, marginRight:-10}}>
 
                       <span>{this.props.fullName}</span><img className="ui mini avatar image"
-                           src={s3ImageUrl + this.props.profilePhoto} style={{marginLeft:'5px'}}/>
+                           src={s3BaseUrl + this.props.profilePhoto} style={{marginLeft:'5px'}}/>
 
                   </div>
               )
@@ -1225,7 +1226,7 @@ export class UserLink extends React.Component {
                   <div style={{marginBottom:5}}>
 
                       <img className="ui mini avatar image"
-                           src={s3ImageUrl + this.props.profilePhoto}/><span>{this.props.fullName}</span>
+                           src={s3BaseUrl + this.props.profilePhoto}/><span>{this.props.fullName}</span>
 
                   </div>
               )

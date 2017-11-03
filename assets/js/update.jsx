@@ -16,16 +16,22 @@ import Modal from 'react-modal'
 import autobind from 'class-autobind'
 import Select from 'react-select'
 
-import { addThread, addOpenThread, closeOpenThread, addMessage, setMessageWindowVisibility, setCurrentUser, setCurrentContact, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import  {store} from "./redux/store";
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customStepModalStyles, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, updateModalStyle, formats, s3ImageUrl, customStepModalStyles, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, metricFormatOptions} from './constants'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
+import { setUpdates, setUpdateModalData, addUpdateWithoutStep, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences } from './redux/actions'
+
+
+
+
 $.ajaxSetup({
+    // This traditional setting takes off the bracket on the variable name that can cause problems. This makes steps_ids[] => steps_ids
+    traditional: true,
     beforeSend: function(xhr) {
         xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
     }
@@ -39,53 +45,69 @@ function printObject(o) {
   alert(out);
 }
 
+function removeItem(array, item){
+    for(var i in array){
+        if(array[i]==item){
+            array.splice(i,1);
+            break;
+        }
+    }
+}
+
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class UpdatesList extends React.Component {
-
     constructor(props) {
         super(props);
         autobind(this);
         this.state = {
-            data: [],
-        modalIsOpen: false,
-            stepId:"",
+            data: {},
+            modalIsOpen: false,
+            stepId: "",
         }
     }
+
     componentDidMount = () => {
-        //this.loadObjectsFromServer(this.props.stepId)
         this.setState({stepId: this.props.stepId});
-
-      //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
-        //this.setState({intervalID:intervalID});
-
-    };
-
-    componentWillUnmount = () => {
-   // use intervalId from the state to clear the interval
-   //clearInterval(this.state.intervalId);
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.updates != undefined) {
+                if (this.state.data != this.props.storeRoot.updates) {
+                    this.setState({
+                        data: this.props.storeRoot.updates
+                    })
+                }
+            }
+        }
     };
 
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.stepId != nextProps.stepId) {
-            this.setState({ stepId: nextProps.stepId});
-
-           // this.setState({ stepId: nextProps.stepId}, this.loadObjectsFromServer(nextProps.stepId))
+            this.setState({stepId: nextProps.stepId});
 
         }
-        if ((this.state.data != nextProps.updates) && (nextProps.updates != undefined)) {
-            this.setState({data: nextProps.updates})
+
+        if (nextProps.storeRoot != undefined) {
+
+            if (nextProps.storeRoot.updates != undefined) {
+                if (this.state.data != nextProps.storeRoot.updates) {
+                    this.setState({
+                        data: nextProps.storeRoot.updates
+                    })
+                }
+            }
         }
+    }
+
+    add = (update) => {
+        store.dispatch(addUpdate(update))
     };
-    handleUpdateAdded= (data) => {
-        this.props.updateAdded(data)
-    };
 
 
-
-    handleFormSubmit = (update, callback) => {
-        if (this.props.updateId) {
-            var theUrl = "/api/updates/" + this.props.updateId + "/";
+/*handleFormSubmit = (update, callback) => {
+        console.log("handleFormSbumit in updatesList ")
+        if (update.id) {
+            var theUrl = "/api/updates/" + update.id + "/";
             var theType = 'PATCH';
 
         }
@@ -98,17 +120,33 @@ export class UpdatesList extends React.Component {
             dataType: 'json',
             type: theType,
             data: update,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
             success: function (data) {
-                this.props.updateAdded(data);
-                callback;
-                console.log("callback called")
+                if (update.id) {
+                    store.dispatch(addUpdate(data))
+                }
+                else {
+                    store.dispatch(editUpdate(data))
+                }
+
+
+                //this.props.updateAdded(data);
 
             }.bind(this),
-        error: function (xhr, status, err) {
+            error: function (xhr, status, err) {
+
                 console.error(theUrl, status, err.toString());
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
             }.bind(this)
-        });
-    };
+        })
+    };*/
+
 
     loadObjectsFromServer = (theStepId) => {
 
@@ -116,15 +154,15 @@ export class UpdatesList extends React.Component {
             var theUrl = "/api/steps/" + theStepId + "/updates/";
 
             $.ajax({
-                url: theUrl ,
+                url: theUrl,
                 dataType: 'json',
                 cache: false,
                 headers: {
-                'Authorization': 'Token ' + localStorage.token
+                    'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
                     this.setState({
-                        data:data
+                        data: data
                     })
 
                 }.bind(this),
@@ -133,49 +171,104 @@ export class UpdatesList extends React.Component {
                 }.bind(this)
             });
         }
-      };
-
-
-    handleReloadItem = () => {
-        //this.loadObjectsFromServer(this.state.stepId)
     };
 
 
 
+
     render = () => {
+//TODO: Clean this up
+        if (this.state.data) {
+            var theStepId = this.state.stepId
 
-    if (this.state.data) {
-        var objectNodes = this.state.data.map(function (objectData) {
+            if (theStepId != undefined) {
+                var theData = this.state.data;
 
-            return (
-<UpdateItem ref={`ref_update_${objectData.id}`} key={objectData.id} updateData={objectData} updateAdded={this.handleUpdateAdded} stepId={this.state.stepId} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem.bind(this)}/>
+                if (theData != undefined) {
+                    var values = Object.keys(theData).map(function (key) {
+                        return theData[key];
+                    });
 
-            )
-        }.bind(this));
-    }
+
+                    var objectNodes = values.map(function (objectData) {
+                        if (objectData != undefined) {
+
+                            var updateStepIds = objectData.steps_ids
+
+                            if (updateStepIds != undefined) {
+
+                                if (updateStepIds.indexOf(theStepId) >= 0) {
+
+                                    return (
+                                        <UpdateItem programId={this.props.programId} ref={`ref_update_${objectData.id}`}
+                                                    key={objectData.id} updateData={objectData}
+                                                    stepId={theStepId}
+                                        />
+
+                                    )
+                                }
+                        }
+                    }}.bind(this));
+                }
+
+            } else {
+                var theData = this.state.data.tempStep
+                if (theData != undefined) {
+                    var values = Object.keys(theData).map(function (key) {
+                        return theData[key];
+                    });
+
+
+                    var objectNodes = values.map(function (objectData) {
+                        if (objectData != undefined) {
+
+
+                                    return (
+                                        <UpdateItem programId={this.props.programId} ref={`ref_update_${objectData.id}`}
+                                                    key={objectData.id} updateData={objectData}
+                                                    stepId={theStepId}
+
+                                                    />
+
+                                    )
+
+                                }
+
+
+                    }.bind(this));
+                }
+            }
+
+
+        }
+
+
         return (
-        <div className="ui grid">
-            <div className="ui row">
-                <div className="ui header eight wide column">Updates</div>
-                <div className="four wide column">&nbsp;</div>
-                <div className="four wide column">
-                     <UpdateAddAndEditItemForm edit="true"  currentView="UpdateBasic" stepId={this.state.stepId} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem.bind(this)} />
+            <div className="ui grid">
+                <div className="ui row">
+                    <div className="ui header eight wide column">Updates</div>
+                    <div className="four wide column">&nbsp;</div>
+                    <div className="four wide column">
+                        <UpdateAddAndEditItemForm programId={this.props.programId}
+                                                  programUpdates={this.state.programUpdates} edit="true"
+                                                  currentView="UpdateBasic" stepId={this.state.stepId}
 
-                </div>
+                                                  />
+
+                    </div>
                 </div>
 
                 {objectNodes}
 
 
+            </div>
 
-        </div>
-
-    )
+        )
     }
 }
 
-
-export class UpdateAddAndEditItemForm extends React.Component {
+@connect(mapStateToProps, mapDispatchToProps)
+export class UpdateModalForm extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -186,66 +279,131 @@ export class UpdateAddAndEditItemForm extends React.Component {
             serverErrors: "",
             data: "",
             modalIsOpen: false,
+            name: "",
             units: "",
             metricLabel: "",
             measuringWhat: "",
             format: "",
-            updateData: ""
+            updateData: "",
+            programUpdates: [],
+            existingUpdate:"",
+            steps_ids:[],
+            stepId:"",
+                        nonDefaultProgramUpdates: [],
+
+            updateModalData:{}
 
 
         }
     }
+
     componentDidMount() {
-        this.setState({
-            data: this.props.updateData,
-        });
-        if (this.props.updateData != undefined) {
-            this.setState({
-                id: this.props.updateData.id,
-                units: this.props.updateData.units,
-                format: this.props.updateData.format,
-                metricLabel: this.props.updateData.metricLabel,
-                measuringWhat: this.props.updateData.measuringWhat,
-                currentView: this.props.currentView,
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.updateModalData != undefined) {
 
-            })
-
-
-        }
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        if (this.state.data != nextProps.updateData) {
-            this.setState({data: nextProps.updateData});
-            if (nextProps.updateData != undefined) {
                 this.setState({
-                    id: nextProps.updateData.id,
-                    units: nextProps.updateData.units,
-                    format: nextProps.updateData.format,
-                    metricLabel: nextProps.updateData.metricLabel,
-                    measuringWhat: nextProps.updateData.measuringWhat,
+                    updateModalData: this.props.storeRoot.updateModalData,
+                    existingUpdate:this.props.storeRoot.updateModalData.id,
+
+                    name: this.props.storeRoot.updateModalData.name,
+                    units: this.props.storeRoot.updateModalData.units,
+                    metricLabel: this.props.storeRoot.updateModalData.metricLabel,
+                    measuringWhat: this.props.storeRoot.updateModalData.measuringWhat,
+                    format: this.props.storeRoot.updateModalData.format,
+                    steps_ids: this.props.storeRoot.updateModalData.steps_ids,
+                    stepId: this.props.storeRoot.updateModalData.stepId,
+                    modalIsOpen: this.props.storeRoot.updateModalData.modalIsOpen,
+
+
                 })
             }
+            if (this.props.storeRoot.programs != undefined) {
+
+
+                var theProgramUpdates = []
+                theProgramUpdates = this.props.storeRoot.programs[this.props.programId].updates.slice()
+
+                theProgramUpdates.unshift({id: "CREATE_NEW", name: "Create New Update", default:false})
+
+                this.setState({
+                    programUpdates: theProgramUpdates
+                }, () => {this.createNonDefaultProgramUpdates()})
+            }
+
+
+        }
+    }
+
+    createNonDefaultProgramUpdates() {
+        var programUpdates = this.state.programUpdates
+        var nonDefaultProgramUpdates = []
+        programUpdates.map((theUpdate) =>{
+            if (!theUpdate.default) {
+                nonDefaultProgramUpdates.push(theUpdate)
+            }
+
+
+        })
+        this.setState({nonDefaultProgramUpdates: nonDefaultProgramUpdates})
+    }
+
+
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.storeRoot != undefined) {
+                                if (nextProps.storeRoot.updateModalData != undefined) {
+
+            if (this.state.updateModalData != nextProps.storeRoot.updateModalData) {
+                this.setState({
+                    updateModalData: nextProps.storeRoot.updateModalData,
+                    existingUpdate:nextProps.storeRoot.updateModalData.id,
+                    name: nextProps.storeRoot.updateModalData.name,
+                    units: nextProps.storeRoot.updateModalData.units,
+                    metricLabel: nextProps.storeRoot.updateModalData.metricLabel,
+                    measuringWhat: nextProps.storeRoot.updateModalData.measuringWhat,
+                    format: nextProps.storeRoot.updateModalData.format,
+                    steps_ids: nextProps.storeRoot.updateModalData.steps_ids,
+                    stepId: nextProps.storeRoot.updateModalData.stepId,
+                    modalIsOpen: nextProps.storeRoot.updateModalData.modalIsOpen,
+
+
+
+                })
+            }
+                                }
+                                if (nextProps.storeRoot.programs != undefined ) {
+                        var theProgramUpdates = []
+                theProgramUpdates = nextProps.storeRoot.programs[this.props.programId].updates.slice()
+                theProgramUpdates.unshift({id: "CREATE_NEW", name: "Create New Update", default:false})
+
+                this.setState({
+                    programUpdates: theProgramUpdates
+                }, () => {this.createNonDefaultProgramUpdates()})
+                    }
         }
 
 
-            if (this.state.currentView != nextProps.currentView) {
-                this.setState({currentView: nextProps.currentView})
-            }
 
-    };
+    }
 
     openModal() {
         this.setState({
-            modalIsOpen: true});
+            modalIsOpen: true
+        });
 
         if (this.state.data) {
             this.setState({
+                modalIsOpen: true,
+
+                existingUpdate: this.state.data.id,
                 id: this.state.data.id,
+                name: this.state.data.name,
                 units: this.state.data.units,
                 format: this.state.data.format,
                 metricLabel: this.state.data.metricLabel,
                 measuringWhat: this.state.data.measuringWhat,
+                steps_ids: this.state.data.steps_ids,
+
             })
         }
 
@@ -257,365 +415,621 @@ export class UpdateAddAndEditItemForm extends React.Component {
     }
 
     closeModal() {
+        //TODO: Clean this up
         if (this.props.edit == "true") {
-            this.setState({modalIsOpen:false});
+            this.setState({modalIsOpen: false});
             this.setState({
+                existingUpdate:"",
+
+                name: "",
                 format: "",
                 modalIsOpen: false,
                 units: "",
                 metricLabel: "",
                 measuringWhat: "",
-            });
+                steps_ids:[],
+            }, () => {store.dispatch(setUpdateModalData(this.state))});
         }
         else {
             this.setState({
+                existingUpdate:"",
+                name: "",
                 format: "",
                 modalIsOpen: false,
                 units: "",
                 metricLabel: "",
                 measuringWhat: "",
-            });
+                                steps_ids:[],
+
+            }, () => {store.dispatch(setUpdateModalData(this.state))});
         }
+
 
     }
 
 
+    handleNameChange(value) {
+        this.setState({name: value});
 
+    }
 
     handleMeasuringWhatChange(value) {
         this.setState({measuringWhat: value});
     }
+
     handleMetricLabelChange(value) {
 
         this.setState({metricLabel: value});
     }
+
     handleUnitsChange(value) {
 
         this.setState({units: value});
     }
+
     handleFormatChange(option) {
 
         this.setState({format: option.value});
     }
 
-    handleSubmit(e) {
-        e.preventDefault();
+    handleExistingUpdateChange(option) {
 
+        this.setState({existingUpdate: option.value});
+    }
+
+    handleSubmit(e) {
+        var name = this.state.name;
         var measuringWhat = this.state.measuringWhat;
         var metricLabel = this.state.metricLabel;
         var units = this.state.units;
         var format = this.state.format;
-        var step = this.props.stepId;
+        var program = this.props.programId;
 
-        this.props.onFormSubmit({
-            measuringWhat: measuringWhat,
-            metricLabel: metricLabel,
-            units: units,
-            format: format,
-            step:step,
+        //If the update is being edited
+        if (this.state.data != undefined) {
+            var steps_ids = []
+            steps_ids = this.state.updateModalData.steps_ids.slice()
 
-        },
-          this.finishSubmit());
+
+            if(steps_ids.indexOf(this.state.stepId) < 0) {
+                steps_ids.push(this.state.stepId)
+
+            }
+
+
+        }
+        //If this is a new update
+        else {
+            // If this is for an existing step
+            if (this.state.stepId != "") {
+                var steps_ids = this.state.stepId
+            }
+
+        }
+        var existingUpdate = this.state.existingUpdate
+
+
+////FIGURE OUT HOW TO EDIT AN UPDATE WITHOUT THE OTHER UPDATES NOT DISAPPEARING
+
+        // If this is an entirely new update that's been created from scratch
+        if (this.state.existingUpdate == "CREATE_NEW") {
+            this.submitToServer({
+                    name: name,
+                    measuringWhat: measuringWhat,
+                    metricLabel: metricLabel,
+                    units: units,
+                    format: format,
+                    steps_ids: steps_ids,
+                    program: program
+
+                },
+                this.finishSubmit());
+        }
+        // If this is an existing update that's being revised for all steps
+        // TODO: make sure there's a dialog that pops up that lets everyone know that this is going to change all of them
+        else if (this.state.id != "") {
+            this.submitToServer({
+                id: this.state.id,
+                name: name,
+                measuringWhat: measuringWhat,
+                metricLabel: metricLabel,
+                units: units,
+                format: format,
+                steps_ids: steps_ids,
+                program: program
+
+
+            }, this.finishSubmit());
+        }
+        // If this is an existing update that's just being added to a specific step
+        else {
+            this.submitToServer({
+                id: existingUpdate,
+                steps_ids: steps_ids,
+                program: program
+
+
+            }, this.finishSubmit());
+        }
+
 
     }
 
+     submitToServer = (update, callback) => {
+             if (update.id) {
+                 var theUrl = "/api/updates/" + update.id + "/";
+                 var theType = 'PATCH';
+
+             }
+             else {
+                 var theUrl = "/api/updates/";
+                 var theType = 'POST';
+             }
+             $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: theType,
+                 data: update,
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+                 },
+                 success: function (data) {
+                     if (this.state.stepId == undefined) {
+                         store.dispatch(addUpdateWithoutStep(data))
+
+                     }
+                     else if (update.id) {
+                         store.dispatch(editUpdate(data.id, data))
+                     }
+                     else {
+                         store.dispatch(addUpdate(data))
+                     }
+
+
+                     //this.props.updateAdded(data);
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                     this.setState({
+                         serverErrors: serverErrors,
+                     })
+
+                 }.bind(this)
+             })
+         }
+
     finishSubmit = () => {
-                this.closeModal();
-                this.props.reloadItem()
+        this.closeModal();
+        //this.props.reloadItem()
     };
+
+    render() {
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var updateModal = customStepModalStyles
+
+           } else {
+
+
+                         var updateModal = updateModalStyle
+
+        }
+        return(
+
+
+
+
+    <Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={updateModal}>
+
+                    <div className="ui grid">
+                        <div className="header sixteen wide column"><h2>Update</h2></div>
+
+                            {this.state.id != "" ? <div></div>:
+                                                        <div className="ui sixteen wide column form">
+
+                                <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <div className="field">
+                                            <label htmlFor="format">Choose an Update:</label>
+                                            <Select value={this.state.existingUpdate} valueKey="id" labelKey="name"
+                                                    onChange={this.handleExistingUpdateChange} name="existingUpdate"
+                                                    options={ this.state.nonDefaultProgramUpdates} clearable={false}/>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }</div>
+                    {this.state.existingUpdate == "CREATE_NEW" || this.state.id != "" ?
+                    <div ref="ref_create_update" className="ui grid">
+                                                <div className="ui sixteen wide column form">
+
+                                <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <ValidatedInput
+                                            type="text"
+                                            name="name"
+                                            label="Name of Update"
+                                            id="id_name"
+                                            placeholder="Distance x Date"
+                                            value={this.state.name || ''}
+                                            initialValue={this.state.name}
+                                            validators='"!isEmpty(str)"'
+                                            onChange={this.validate}
+                                            stateCallback={this.handleNameChange}
+                                        />
+
+                                    </div>
+                                </div>
+                                                                                                        <div className="ui row">&nbsp;</div>
+
+                                <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <ValidatedInput
+                                            type="text"
+                                            name="measuringWhat"
+                                            label="What are you measuring?"
+                                            id="id_measuringWhat"
+                                            placeholder="distance, weight, time, etc"
+                                            value={this.state.measuringWhat || ''}
+                                            initialValue={this.state.measuringWhat}
+                                            validators='"!isEmpty(str)"'
+                                            onChange={this.validate}
+                                            stateCallback={this.handleMeasuringWhatChange}
+                                        />
+                                    </div>
+                                </div>
+                                 <div className="ui row">&nbsp;</div>
+
+                                                    <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <ValidatedInput
+                                            type="text"
+                                            name="units"
+                                            placeholder="miles, pounds, hours, etc"
+                                            label="What units are you measuring?"
+                                            id="id_metricLabel"
+                                            value={this.state.units || ''}
+                                            initialValue={this.state.units}
+                                            validators='"!isEmpty(str)"'
+                                            onChange={this.validate}
+                                            stateCallback={this.handleUnitsChange}
+                                        />
+
+                                    </div>
+                                </div>
+
+                                <div className="ui row">&nbsp;</div>
+
+                                <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <div className="field">
+                                            <label htmlFor="format">What type of input?</label>
+                                            <Select value={this.state.format} onChange={this.handleFormatChange}
+                                                    name="format" options={metricFormatOptions} clearable={false}/>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="ui row">&nbsp;</div>
+
+                                <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <ValidatedInput
+                                            type="text"
+                                            name="metricLabel"
+                                            label="How do you want to label this measurement?"
+                                            placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
+                                            id="id_metricLabel"
+                                            value={this.state.metricLabel}
+                                            initialValue={this.state.metricLabel}
+                                            validators='"!isEmpty(str)"'
+                                            onChange={this.validate}
+                                            stateCallback={this.handleMetricLabelChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="ui row">&nbsp;</div>
+                                                    </div>
+                                                </div>:null}
+
+
+
+
+                                <div className="ui two column stackable grid">
+                                    <div className="ui row">
+                                        <div className="ui column">
+                                            <div className="ui fluid button" onClick={this.closeModal}>Cancel</div>
+                                        </div>
+                                        <div className="ui  column">
+                                            <div className="ui primary fluid button" onClick={this.handleSubmit}>Save
+                                            </div>
+                                        </div>
+                                        <div className="ui row">&nbsp;</div>
+                                    </div>
+                                </div>
+
+
+
+                </Modal>
+        )}
+
+
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class UpdateAddAndEditItemForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            currentView: "",
+            editable: false,
+            serverErrors: "",
+            data: "",
+            modalIsOpen: false,
+            name: "",
+            units: "",
+            metricLabel: "",
+            measuringWhat: "",
+            format: "",
+            updateData: "",
+            programUpdates: [],
+            existingUpdate:"",
+            steps_ids:[],
+            stepId:"",
+
+
+        }
+    }
+
+    componentDidMount() {
+
+
+        this.setState({
+            data: this.props.updateData,
+        });
+
+        this.setState({stepId: this.props.stepId})
+        if (this.props.updateData != undefined) {
+            this.setState({
+                id: this.props.updateData.id,
+                name: this.props.updateData.name,
+                units: this.props.updateData.units,
+                format: this.props.updateData.format,
+                metricLabel: this.props.updateData.metricLabel,
+                measuringWhat: this.props.updateData.measuringWhat,
+                steps_ids: this.props.updateData.steps_ids,
+                currentView: this.props.currentView,
+
+            })
+
+
+        }
+
+    }
+
+
+    componentWillReceiveProps = (nextProps) => {
+        if (this.state.data != nextProps.updateData) {
+            this.setState({data: nextProps.updateData});
+            if (nextProps.updateData != undefined) {
+                this.setState({
+                    id: nextProps.updateData.id,
+                    name: nextProps.updateData.name,
+
+                    units: nextProps.updateData.units,
+                    format: nextProps.updateData.format,
+                    metricLabel: nextProps.updateData.metricLabel,
+                    measuringWhat: nextProps.updateData.measuringWhat,
+                    steps_ids: nextProps.updateData.steps_ids,
+
+                })
+            }
+        }
+
+
+
+        if (this.state.currentView != nextProps.currentView) {
+            this.setState({currentView: nextProps.currentView})
+        }
+        if (this.state.stepId != nextProps.stepId) {
+            this.setState({stepId: nextProps.stepId})
+        }
+
+
+    };
+
+
+openModal() {
+        this.setState({
+            modalIsOpen: true
+        }, () => { store.dispatch(setUpdateModalData(this.state))});
+
+        if (this.state.data) {
+            this.setState({
+                modalIsOpen: true,
+
+                existingUpdate: this.state.data.id,
+                id: this.state.data.id,
+                name: this.state.data.name,
+                units: this.state.data.units,
+                format: this.state.data.format,
+                metricLabel: this.state.data.metricLabel,
+                measuringWhat: this.state.data.measuringWhat,
+                steps_ids: this.state.data.steps_ids,
+
+            }, () => { store.dispatch(setUpdateModalData(this.state))})
+        }
+
+    }
+
+
+
+
 
     deleteUpdate() {
 
         var theUrl = "/api/updates/" + this.state.data.id + "/";
 
         $.ajax({
-        url: theUrl,
-        dataType: 'json',
-        type: 'DELETE',
-        success: () => {
-            //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
+            url: theUrl,
+            dataType: 'json',
+            type: 'DELETE',
+            success: () => {
+                //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
 
-            this.props.reloadItem()
+                //this.props.reloadItem()
 
-        },
-        error: function(xhr, status, err) {
-            console.error(theUrl, status, err.toString());
-        }
-    });
+            },
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }
+        });
 
 
     }
-    handleClick (theClick) {
-        switch(theClick) {
+
+    removeUpdateFromStep() {
+
+        var theUrl = "/api/updates/" + this.state.data.id + "/";
+        var steps_ids
+        steps_ids = this.state.data.steps_ids.slice()
+        var program = this.props.updateData.program
+        removeItem(steps_ids, this.state.stepId)
+        if (steps_ids.length == 0) {
+            steps_ids = []
+        }
+
+        var updatedSteps = {program:program, steps_ids: steps_ids}
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'PATCH',
+            data: updatedSteps,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+                },
+
+            success: (data) => {
+                store.dispatch(removeStepFromUpdate(this.state.data.id, this.state.stepId))
+                //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
+
+                //this.props.reloadItem()
+
+            },
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }
+        });
+
+
+    }
+
+    handleClick(theClick) {
+        switch (theClick) {
             case ("Edit"):
                 this.openModal();
+
                 break;
             case ("Delete"):
-                this.deleteUpdate();
+                this.removeUpdateFromStep();
+                break;
+            case ("Remove from Step"):
+                this.removeUpdateFromStep();
                 break;
         }
 
+    }
+
+
+    getAdditionalUI() {
+        if (this.state.data) {
+            return (
+                <div>
+
+                    <ItemControlBar myRef="ref_itemControlBar"
+                                    label="Update" click={this.handleClick}
+                                    currentView="UpdateBasic"
+                                    editable={true}
+                                    showCloseButton={false}/>
+
+
+                    <div className="ui noTopMargin segment">
+                         <div className="field">
+                            <label>Name:</label>
+                            <div>{this.state.data.name}</div>
+                        </div>
+
+                        <div className="field">
+                            <label>Label:</label>
+                            <div>{this.state.data.metricLabel}</div>
+                        </div>
+                        <div className="field">
+
+                            <label>Metric:</label>
+
+                            <div>{this.state.data.measuringWhat}{this.state.data.units != "" ? " in " + this.state.data.units : null} using {this.state.data.format}</div>
+                        </div>
+                    </div>
+                </div>
+            )
+        } else {
+            return (
+                <div className="ui orange fluid button plus icon" onClick={this.openModal}>+</div>
+
+            )
+        }
     }
 
     render() {
- if (this.state.data ) {
-return (
-    <div>
-        <ItemControlBar myRef="ref_itemControlBar"
-                        label="Update" click={this.handleClick}
-                        currentView="UpdateBasic"
-                        editable={true}
-                        showCloseButton={false} />
+        var additionalUI = this.getAdditionalUI()
+
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
 
 
+            if ((this.props.isListNode) || (forMobile)) {
+             var updateModal = customStepModalStyles
 
-    <div className="ui noTopMargin segment">
-
-                            <div className="field">
-                                <label>Label:</label>
-                                <div>{this.state.metricLabel}</div>
-                            </div>
-                            <div className="field">
-
-                                <label>Metric:</label>
-
-                                <div>{this.state.measuringWhat} {this.state.data.units != "" ? "in " + this.state.data.units : null} using {this.state.data.format}</div>
-                            </div>
-                        </div>
-
-            {/*  <div className="ui two column grid">
-
-                <div className="column left aligned">{this.props.label}</div>
-                <div className="column right aligned noRightPadding">
-
-                        <ItemControlBarButton myRef="ref_cancelButton" label="Cancel"
-                                              click={this.handleCancelClicked}/>
-                    {menuButton}
-                    {closeButton}
-
-                    </div>
-                </div><div className="left aligned nine wide column">Update</div>
-            <div ref={`editButtonRef_${this.state.id}`} className="ui three wide column tiny smallPadding middle aligned purple-inverted button"  onClick={this.openModal}>Edit</div>
-            <div ref={`deleteButtonRef_${this.state.id}`} className="ui three wide column tiny smallPadding middle aligned purple-inverted button"  onClick={this.deleteUpdate}>Delete</div>*/}
-                     <Modal
-                            isOpen={this.state.modalIsOpen}
-                            onAfterOpen={this.afterOpenModal}
-                            onRequestClose={this.closeModal}
-                            style={customModalStyles} >
-
-                            <div className="ui grid">
-                                <div className="header sixteen wide column"><h2>Update</h2></div>
-
-<div className="ui sixteen wide column form">
-                            <form onSubmit={this.handleSubmit}>
-                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <input type="hidden" name="step" value={this.props.stepId}/>
-                                <ValidatedInput
-                                        type="text"
-                                        name="measuringWhat"
-                                        label="What are you measuring?"
-                                        id="id_measuringWhat"
-                                        placeholder="distance, weight, time, etc"
-                                        value={this.state.measuringWhat || ''}
-                                        initialValue={this.state.measuringWhat}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleMeasuringWhatChange}
-                                    />
-                                </div>
-                    </div>
-                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <ValidatedInput
-                                        type="text"
-                                        name="units"
-                                        placeholder="miles, pounds, hours, etc"
-                                        label="What units are you measuring?"
-                                        id="id_metricLabel"
-                                        value={this.state.units || ''}
-                                        initialValue={this.state.units}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleUnitsChange}
-                                    />
-                                </div>
-                    </div>
-                                                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <div className="field">
-                                <label htmlFor="format">What type of input?</label>
-                                    <Select value={this.state.format}  onChange={this.handleFormatChange} name="format" options={metricFormatOptions} clearable={false}/>
+           } else {
 
 
-                                </div>
-                                </div>
-                    </div>
-                                                                                                <div className="ui row">&nbsp;</div>
+                         var updateModal = updateModalStyle
 
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <ValidatedInput
-                                        type="text"
-                                        name="metricLabel"
-                                        label="How do you want to label this measurement?"
-                                        placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
-                                        id="id_metricLabel"
-                                        value={this.state.metricLabel}
-                                        initialValue={this.state.metricLabel}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleMetricLabelChange}
-                                    />
-                                </div>
-                    </div>
-                                                                <div className="ui row">&nbsp;</div>
+        }
 
+        return (
+            <div>
+                {additionalUI}
 
-                                                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui two column grid">
-                                    <div className="ui row">
-                                         <div className="ui column">
-                                             <a className="ui fluid button" onClick={this.closeModal}>Cancel</a>
-                                        </div>
-                                        <div className="ui  column">
-                                            <div className="ui primary fluid button" onClick={this.handleSubmit}>Save</div>
-                                        </div>
-                                    <div className="ui row">&nbsp;</div>
-                             </div>
-                         </div>
-
-
-                            </form>
-    </div>
-                                </div>
-                    </Modal>
-
-                </div>
-)} else
-
-
-            {
-
-
-    return (
-        <div>
-            <a className="ui orange fluid button plus icon" onClick={this.openModal}>+</a>
-
-                     <Modal
-                            isOpen={this.state.modalIsOpen}
-                            onAfterOpen={this.afterOpenModal}
-                            onRequestClose={this.closeModal}
-                            style={customModalStyles} >
-
-                            <div className="ui grid">
-                                <div className="header sixteen wide column"><h2>Update</h2></div>
-
-<div className="ui sixteen wide column form">
-                            <form onSubmit={this.handleSubmit}>
-                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <input type="hidden" name="step" value={this.props.stepId}/>
-                                <ValidatedInput
-                                        type="text"
-                                        name="measuringWhat"
-                                        label="What are you measuring?"
-                                        id="id_measuringWhat"
-                                        placeholder="distance, weight, time, etc"
-                                        value={this.state.measuringWhat}
-
-                                        initialValue={this.state.measuringWhat}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleMeasuringWhatChange}
-                                    />
-                                </div>
-                    </div>
-                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <ValidatedInput
-                                        type="text"
-                                        name="units"
-                                        placeholder="miles, pounds, hours, etc"
-                                        label="What units are you measuring?"
-                                        id="id_metricLabel"
-                                        value={this.state.units}
-
-                                        initialValue={this.state.units}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleUnitsChange}
-                                    />
-                                </div>
-                    </div>
-                                                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <div className="field">
-                                <label htmlFor="format">What type of input?</label>
-                                                                    <Select value={this.state.format}  onChange={this.handleFormatChange} name="format" options={metricFormatOptions} clearable={false}/>
-
-                                </div>
-                                </div>
-                    </div>
-                                                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                            <div className="sixteen wide column">
-                                <ValidatedInput
-                                        type="text"
-                                        name="metricLabel"
-                                        label="How do you want to label this measurement?"
-                                        placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
-                                        id="id_metricLabel"
-                                                                                value={this.state.metricLabel}
-
-                                        initialValue={this.state.metricLabel}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleMetricLabelChange}
-                                    />
-                                </div>
-                    </div>
-                                                                <div className="ui row">&nbsp;</div>
-
-
-                                                                                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui two column grid">
-                                    <div className="ui row">
-                                         <div className="ui column">
-                                             <a className="ui fluid button" onClick={this.closeModal}>Cancel</a>
-                                        </div>
-                                        <div className="ui  column">
-                                            <button type="submit" className="ui primary fluid button">Save</button>
-                                        </div>
-                                    <div className="ui row">&nbsp;</div>
-                             </div>
-                         </div>
-
-
-                            </form>
-    </div>
-                                </div>
-                    </Modal>
 
                 </div>
 
-
-
-    )
+        )
     }
-}}
+}
 
 
 
@@ -627,7 +1041,6 @@ var MetricSelectButton = React.createClass({
           cache: false,
           success: function(data) {
             this.setState({data: data.results});
-              console.log(data);
 
           }.bind(this),
           error: function(xhr, status, err) {
@@ -698,7 +1111,7 @@ export class UpdateItemMenu extends React.Component {
                       <div className="menu" style={{right: '0',left: 'auto'}}>
 
                           <div className="ui item">
-                              <IconLabelCombo size="extramini" orientation="left" text="Delete" icon="trash" background="Light" click={this.handleClick} />
+                              <IconLabelCombo size="extramini" orientation="left" text="Remove from Step" icon="trash" background="Light" click={this.handleClick} />
                               </div>
 
                       </div>
@@ -718,11 +1131,12 @@ export class UpdateItem extends React.Component{
         autobind(this);
         this.state = {
             id: "",
+            name:"",
             measuringWhat: "",
             units: "",
             format: "",
             metricLabel: "",
-            step: "",
+            stepId: "",
             updateData:{}
         }
     }
@@ -732,41 +1146,18 @@ export class UpdateItem extends React.Component{
 
         this.setState({
             id: this.props.updateData.id,
+            name: this.props.updateData.name,
             measuringWhat:this.props.updateData.measuringWhat,
             units:this.props.updateData.units,
             format: this.props.updateData.format,
             metricLabel: this.props.updateData.metricLabel,
-            step: this.props.stepId,
+            stepId: this.props.stepId,
         })
 
     }
 
-    handleFormSubmit = (update, callback) => {
-        if (this.state.id) {
-            var theUrl = "/api/updates/" + this.state.id + "/";
-            var theType = 'PATCH';
 
-        }
-        else {
-            var theUrl = "/api/updates/";
-            var theType = 'POST';
-        }
-        $.ajax({
-            url: theUrl,
-            dataType: 'json',
-            type: theType,
-            data: update,
-            success: function (data) {
-                this.props.updateAdded(data);
-                callback;
-                console.log("callback called")
 
-            }.bind(this),
-        error: function (xhr, status, err) {
-                console.error(theURL, status, err.toString());
-            }.bind(this)
-        });
-    };
 
     handleReloadItem() {
         this.props.reloadItem()
@@ -777,19 +1168,25 @@ export class UpdateItem extends React.Component{
             this.setState({updateData: nextProps.updateData})
         }
 
+        if (this.state.stepId != nextProps.stepId) {
+            this.setState({
+                stepId:nextProps.stepId
+            })
+        }
+
     };
 
 
 
     render () {
         return (
-            <div ref={`ref_update_${this.state.updateData.id}`} className="ui tinyPadding row">
+            <div ref={`ref_update_${this.state.stepId}`} className="ui tinyPadding row">
                     <div className="sixteen wide column">
 
                         {/*<div className="ui top attached orange large button " >*/}
 
 
-                        <UpdateAddAndEditItemForm edit="true" currentView="UpdateBasic" updateData={this.state.updateData} stepId={this.state.updateData.step} onFormSubmit={this.handleFormSubmit} reloadItem={this.handleReloadItem}/>
+                        <UpdateAddAndEditItemForm edit="true" currentView="UpdateBasic" updateData={this.state.updateData} stepId={this.state.stepId} />
 
                         {/*</div>*/}
 
@@ -822,4 +1219,4 @@ function getCookie(name) {
     return cookieValue;
 }
 
-module.exports = { UpdatesList, UpdateItemMenu };
+module.exports = { UpdatesList, UpdateItemMenu, setUpdateModalData, UpdateModalForm};

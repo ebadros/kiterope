@@ -534,4 +534,4 @@ export class SaveButton extends React.Component {
     }
 }
 
-module.exports = { SettingsPage, SettingsForm };
+module.exports = { SettingsPage, SettingsForm, SaveButton };

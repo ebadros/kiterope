@@ -45,6 +45,8 @@ router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 
 
 router.register(r'updates', views.UpdateViewSet)
+router.register(r'visualizations', views.VisualizationViewSet)
+
 router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
@@ -89,7 +91,11 @@ router.register(r'^plans', views.PlanOccurrenceViewSet, base_name='PlanOccurrenc
 
 router.register(r'^period/(?P<periodRangeStart>[\w\-]+)/(?P<periodRangeEnd>[\w\-]+)', views.PeriodViewSet, base_name="StepOccurrence")
 #router.register(r'period', views.GoalViewSet, base_name='Goal')
+router.register(r'^programs/(?P<program_id>\w+)/updates', views.ProgramUpdateViewSet, base_name='Update')
+
 router.register(r'^steps/(?P<step_id>\w+)/updates', views.UpdateViewSet, base_name='Update')
+router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationViewSet, base_name='Visualization')
+
 
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
@@ -142,6 +148,7 @@ if settings.DEBUG:
 
 urlpatterns = [
       url(r'^', include('django.contrib.auth.urls')),
+
 
 
                   # django-rest-auth (Login and registration via React)

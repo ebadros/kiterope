@@ -34,7 +34,7 @@ import {ImageUploader,   VideoUploader, AudioUploader, ViewEditDeleteItem, StepV
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
+import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
 import { Provider, connect, store, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -106,6 +106,7 @@ export class UpdateOccurrenceList extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
+        this.children = []
         this.state = {
             id: "",
             measuringWhat: "",
@@ -113,7 +114,10 @@ export class UpdateOccurrenceList extends React.Component {
             format: "",
             metricLabel: "",
             data:[],
-            doneSaving:true
+            doneSaving:true,
+            saved: this.props.saved,
+            needsSavingArray:[],
+            saved: "Saved"
 
         }
     }
@@ -121,46 +125,141 @@ export class UpdateOccurrenceList extends React.Component {
     componentDidMount () {
         this.setState({
             data: this.props.data,
-            doneSaving:true
+            doneSaving:true,
+            saved: "Saved"
 
-
-        })
+        }, () => {this.setNeedsSavingArray()})
     }
+
+
 
     componentWillReceiveProps (nextProps) {
         if (this.state.data != nextProps.data) {
              this.setState({
-            data: nextProps.data,
+            data: nextProps.data}, () => {this.setNeedsSavingArray()}
+             )}
+    }
+
+    handleNeedsSaving(theNeedsSavingIndex) {
+        console.log("handleNeedsSaving " + theNeedsSavingIndex)
+    this.setState({
+    saved:"Save"}
+    )
+        var theNeedsSavingArray = this.state.needsSavingArray
+        theNeedsSavingArray[theNeedsSavingIndex] = true
+        this.setState({needsSavingArray: theNeedsSavingArray})
+
+}
+
+ handleHasBeenSaved(theNeedsSavingIndex) {
+        console.log("handle has been saved " + theNeedsSavingIndex)
+    this.setState({
+    saved:"Save"}
+    )
+        var theNeedsSavingArray = this.state.needsSavingArray
+        theNeedsSavingArray[theNeedsSavingIndex] = false
+        this.setState({needsSavingArray: theNeedsSavingArray}, () => {this.isEverythingSaved()})
+
+}
+
+setNeedsSavingArray() {
+    var theData = this.state.data
+    var theNeedsSavingArray = []
+    for (var i=0; i < theData.length; i++) {
+        theNeedsSavingArray.unshift(false)
+
+    }
+    this.setState({needsSavingArray: theNeedsSavingArray})
 
 
+}
 
+isEverythingSaved() {
+
+    if (this.state.needsSavingArray.indexOf(true) > -1) {
+        this.setState({
+            doneSaving:false
         })
+    } else {
+        this.setState({
+            doneSaving:true
+        })
+    }
+}
 
+
+
+handleSubmit(updateOccurrence, theNeedsSavingIndex) {
+        this.setState({doneSaving:false});
+        this.setState({
+            saved: "Saving"
+        });
+
+        if (updateOccurrence != undefined) {
+            var theUrl = "/api/updateOccurrences/" + updateOccurrence.id + "/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: updateOccurrence,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.handleHasBeenSaved(theNeedsSavingIndex)
+                    if (this.state.doneSaving) {
+                        this.setState({
+                        saved: "Saved",
+                    })}
+
+
+                    //if (this.state.stepOccurrenceDoneSaving) {
+                    //    this.setState({doneSaving: true})
+                    //}
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                        saved: "Unsaved",
+                    })
+
+                }.bind(this)
+            });
         }
 
-        if (this.state.doneSaving != nextProps.doneSaving) {
-            this.setState({doneSaving: nextProps.doneSaving})
+    }
+    callChildrenHandleSubmit() {
+
+        for (var i=0; i < this.children.length; i++ ) {
+            if (this.children[i] != undefined) {
+                this.children[i].handleSubmit()
+            }
         }
     }
 
 
-    handleSubmit(updateOccurrenceData) {
-        this.props.handleSubmit(updateOccurrenceData)
-    }
 
 
     render() {
-        var updateOccurrences = this.state.data.map((occurrence) => {
+        var updateOccurrences = this.state.data.map((occurrence, index) => {
             return (
-                <UpdateOccurrenceInput key={occurrence.id} data={occurrence} handleSubmit={this.handleSubmit} ref={instance => { this.child = instance; }}/>
+                <UpdateOccurrenceInput key={occurrence.id} needsSavingIndex={index} data={occurrence} needsSaving={this.handleNeedsSaving}
+                                       handleSubmit={this.handleSubmit} ref={instance => {this.children[index] = instance}}/>
             )
         });
 
         return (<div>
             <div>
                 {updateOccurrences}</div>
+                                                                    <div className="row">&nbsp;</div>
+
             <div className="ui row">
-                    {this.state.doneSaving ? <div className="ui fluid purple button" onClick={() => { this.child.handleSubmit(); }}>Save</div>:<div className="ui fluid purple loading button" ></div> }
+                    <div className={`ui large fluid ${ this.state.saved == "Saved" ? "grey": "purple"} ${ this.state.doneSaving ? null: "loading"} button`} onClick={this.callChildrenHandleSubmit}>{this.state.saved}</div>
+
 
                     </div>
             </div>
@@ -169,6 +268,7 @@ export class UpdateOccurrenceList extends React.Component {
     }
 
 }
+
 
 export class UpdateOccurrenceInput extends React.Component {
     constructor(props) {
@@ -190,6 +290,7 @@ export class UpdateOccurrenceInput extends React.Component {
             picture: "",
             video: "",
             audio: "",
+            boolean: false,
             doneSaving:true,
 
         }
@@ -197,46 +298,37 @@ export class UpdateOccurrenceInput extends React.Component {
 
     componentDidMount () {
         this.setState({
-            data: this.props.data,
-            id: this.props.data.id,
-            measuringWhat: this.props.data.update.measuringWhat,
-            units: this.props.data.update.units,
-            format: this.props.data.update.format,
-            metricLabel: this.props.data.update.metricLabel,
-            text: this.props.data.text,
-            decimal: convertToDecimalIfAnInteger(this.props.data.decimal),
-            longText: this.props.data.longText,
-            integer: this.props.data.integer,
-            time: this.props.data.time,
-            url: this.props.data.url,
-            picture: this.props.data.picture,
-            video: this.props.data.video,
-            audio: this.props.data.audio,
+            data: this.props.data}, () => {this.setStateToData()})
 
-        })
+
+
 
     }
 
+    setStateToData(){
+    this.setState({
+        id: this.state.data.id,
+        measuringWhat: this.state.data.update.measuringWhat,
+        units: this.state.data.update.units,
+        format: this.state.data.update.format,
+        metricLabel: this.state.data.update.metricLabel,
+        text: this.state.data.text,
+        decimal: convertToDecimalIfAnInteger(this.props.data.decimal),
+        longText: this.state.data.longText,
+        integer: this.state.data.integer,
+        time: this.state.data.time,
+        url: this.state.data.url,
+        picture: this.state.data.picture,
+        video: this.state.data.video,
+        audio: this.state.data.audio,
+        boolean: this.state.data.boolean
+    })
+
+}
+
     componentWillReceiveProps (nextProps) {
         if (this.state.data != nextProps.data) {
-             this.setState({
-            data: nextProps.data,
-            id: nextProps.data.id,
-            measuringWhat: nextProps.data.update.measuringWhat,
-            units: nextProps.data.update.units,
-            format: nextProps.data.update.format,
-            metricLabel: nextProps.data.update.metricLabel,
-                 text: nextProps.data.update.text,
-            decimal: convertToDecimalIfAnInteger(nextProps.data.decimal),
-            longText: nextProps.data.longText,
-            integer: nextProps.data.integer,
-            time: nextProps.data.time,
-            url: nextProps.data.url,
-            picture: nextProps.data.picture,
-            video: nextProps.data.video,
-            audio: nextProps.data.audio,
-
-        })
+             this.setState({data: nextProps.data}, () => {this.setStateToData()})
 
 
 
@@ -306,12 +398,14 @@ export class UpdateOccurrenceInput extends React.Component {
             audio:""
         })
     }
+
 }
 
 
 
     handleTextChange(e) {
         this.setState({text: e});
+        this.props.needsSaving(this.props.needsSavingIndex)
     }
     getTextInput () {
 
@@ -337,6 +431,7 @@ export class UpdateOccurrenceInput extends React.Component {
 
     handleDecimalChange(e) {
         this.setState({decimal: e});
+        this.props.needsSaving(this.props.needsSavingIndex)
 
     }
 
@@ -364,6 +459,8 @@ export class UpdateOccurrenceInput extends React.Component {
 
     handleIntegerChange(e) {
         this.setState({integer: e});
+        this.props.needsSaving(this.props.needsSavingIndex)
+
     }
 
     getIntegerInput () {
@@ -390,6 +487,8 @@ export class UpdateOccurrenceInput extends React.Component {
 
     handleUrlChange(e) {
         this.setState({url: e});
+        this.props.needsSaving(this.props.needsSavingIndex)
+
     }
 
     getUrlInput () {
@@ -420,17 +519,50 @@ export class UpdateOccurrenceInput extends React.Component {
         this.setState({
             video: callbackData.video
         })
+        this.props.needsSaving(this.props.needsSavingIndex)
+
     };
 
     handleAudioChange = (callbackData) => {
         this.setState({
             audio: callbackData.audio
         })
+                        this.props.needsSaving(this.props.needsSavingIndex)
+
+
     };
+
+    handleBooleanChange(e) {
+        this.setState({
+            boolean:e.target.checked
+        },         this.props.needsSaving(this.props.needsSavingIndex)
+ )
+
+
+
+    }
+
+    getBooleanInput () {
+        return (
+            <div>
+             <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
+            <div className="ui center aligned middle aligned grid height-100">
+                            <div className="pretty primary circle smooth huge-checkbox noRightPadding">
+                                <input type="checkbox" id="id_wasCompleted" checked={this.state.boolean} onChange={this.handleBooleanChange} />
+                                <label><i className="mdi mdi-check"></i> </label>
+                            </div>
+                        </div></Measure>
+                </div>
+        )
+    }
 //! Need to deal with the validators on this
     getVideoInput () {
         return(<div className="ui form">
-            <div className="field"><label>{this.state.metricLabel}</label></div>
+            <div className="field">
+                <label>{this.state.metricLabel}</label>
+            </div>
 
             <Measure onMeasure={(dimensions) => {
                 this.setState({dimensions})
@@ -461,6 +593,8 @@ export class UpdateOccurrenceInput extends React.Component {
 
     handleSubmit() {
         var id = this.state.id;
+        var theBoolean = this.state.boolean;
+
         var text = this.state.text;
         var decimal = this.state.decimal;
         var longText = this.state.longText;
@@ -482,8 +616,9 @@ export class UpdateOccurrenceInput extends React.Component {
             picture: picture,
             video: video,
             audio: audio,
+            boolean: theBoolean ,
         };
-        this.props.handleSubmit(updateOccurrence)
+        this.props.handleSubmit(updateOccurrence, this.props.needsSavingIndex)
 
         }
 
@@ -515,16 +650,21 @@ export class UpdateOccurrenceInput extends React.Component {
             case("audio"):
                 var inputHTML = this.getAudioInput();
                 break;
+            case("boolean"):
+                var inputHTML = this.getBooleanInput();
+                break;
+            case("datetime"):
+                var inputHTML= () => {return null}
+                break;
             default:
-                var inputHTML = () => {return (<div></div>)};
+                var inputHTML = () => {return (null)};
                 break;
 
         }
         return (
-            <div>                <div className="ui row">&nbsp;</div>
-
+            <div>
         {inputHTML}
-                                            <div className="ui row">&nbsp;</div>
+                {inputHTML ? <div className="ui row">&nbsp;</div>:null}
 
 
             </div>

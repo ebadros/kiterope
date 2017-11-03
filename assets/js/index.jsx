@@ -16,13 +16,14 @@ import {Provider, connect, dispatch} from 'react-redux'
 import  {store} from "./redux/store";
 import {SearchPage} from './search'
 import {SettingsPage} from './settings'
+import {Page404} from './Page404'
 
 import {SplashPage} from './splash'
 import {BlogPage} from './blog'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 import {rootReducer} from './redux/reducers'
 
-
+import {VisualizationsPage} from './visualization'
 
 
 import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
@@ -89,6 +90,8 @@ ReactDOM.render((
                 <Route path="/browse" component={BrowseProgramsPage} />
                 <Route path="/account/login" component={ LoginPage }/>
                 <Route path="/settings/" component={ SettingsPage }/>
+                <Route path="/visualizations/" component={ VisualizationsPage } />
+
 
                 <Route path="/joinKiterope" component={ JoinPage }/>
                 <Route path="/account/password/reset" component={ PasswordResetPage }/>
@@ -128,6 +131,7 @@ ReactDOM.render((
 
                 <Route path="/search" component={SearchPage}/>
                 <Route path="/test" component={TestPage}/>
+                <Route path="/:path" component={Page404} />
 
 
 

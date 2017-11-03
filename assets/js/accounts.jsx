@@ -22,8 +22,9 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setPlans,  reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import  {store} from "./redux/store";
+import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 //var sb = new SendBird({
@@ -64,6 +65,7 @@ $.ajaxSetup({
 
     }
 });
+
 
 const customStyles = {
     overlay : {
@@ -114,7 +116,18 @@ export class ReduxDataGetter extends React.Component {
         autobind(this);
         this.state = {
             width:'0',
-            height:'0'
+            height:'0',
+            userDataLoaded:false,
+            profileDataLoaded:false,
+            settingsDataLoaded:false,
+            goalDataLoaded:false,
+            planDataLoaded:false,
+            programDataLoaded: false,
+            contactDataLoaded:false,
+            stepOccurrenceDataLoaded:false,
+            updateOccurrenceDataLoaded:false,
+            updateDataLoaded:false,
+            messageThreadDataLoaded:false,
 
 
 
@@ -127,16 +140,22 @@ export class ReduxDataGetter extends React.Component {
           window.addEventListener('resize', this.updateWindowDimensions);
 
 
-        if (this.props.storeRoot.user == undefined) {
+        //if (this.props.storeRoot.user == undefined) {
 
-            this.loadUserData()
-        }
+        //    this.loadUserData()
+        //}
+        var intervalID = setInterval(this.loadUserData, 2000);
+        this.setState({intervalID: intervalID});
 
 
     };
 
+
+
+
     componentWillUnmount() {
   window.removeEventListener('resize', this.updateWindowDimensions);
+        clearInterval(this.state.intervalID);
 }
 
 updateWindowDimensions() {
@@ -150,77 +169,85 @@ updateWindowDimensions() {
 }
 
     loadUserData() {
-        var theUrl =  '/api/users/i/';
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(userData) {
-                if (userData.id != null) {
-                store.dispatch(setCurrentUser(userData));
-                this.loadUniversalData();
+        if (!this.state.userDataLoaded) {
+            var theUrl = '/api/users/i/';
+            $.ajax({
+                method: 'GET',
+                url: theUrl,
+                datatype: 'json',
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (userData) {
+                    this.setState({userDataLoaded:true})
+                    if (userData.id != null) {
+                        store.dispatch(setCurrentUser(userData));
+                        this.loadUniversalData();
 
-                if (userData.isCoach) {
-                    this.loadCoachSpecificData()
+                        if (userData.isCoach) {
+                            this.loadCoachSpecificData()
 
+                        }
+                    }
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
                 }
-            }
-
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
+            })
         }
-        })
     }
 
     loadProfileData() {
-        var theUrl =  '/api/profiles/me/';
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(profileData) {
-                console.log("gotProfileData");
-                store.dispatch(setProfile(profileData));
+                if (!this.state.profileDataLoaded) {
+
+                    var theUrl = '/api/profiles/me/';
+                    $.ajax({
+                        method: 'GET',
+                        url: theUrl,
+                        datatype: 'json',
+                        headers: {
+                            'Authorization': 'Token ' + localStorage.token
+                        },
+                        success: function (profileData) {
+                    this.setState({profileDataLoaded:true})
+                            store.dispatch(setProfile(profileData));
 
 
-
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-        }
-        })
+                        }.bind(this),
+                        error: function (xhr, status, err) {
+                            console.error(theUrl, status, err.toString());
+                        }
+                    })
+                }
 
     }
 
     loadSettingsData() {
-        var theUrl =  '/api/settings/me/';
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(settingsData) {
-                                console.log("gotSettingsData");
-
-                store.dispatch(setSettings(settingsData));
+                    if (!this.state.settingsDataLoaded) {
 
 
+                        var theUrl = '/api/settings/me/';
+                        $.ajax({
+                            method: 'GET',
+                            url: theUrl,
+                            datatype: 'json',
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (settingsData) {
+                                                    this.setState({settingsDataLoaded:true})
 
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-        }
-        })
 
+                                store.dispatch(setSettings(settingsData));
+
+
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+                            }
+                        })
+                    }
     }
 
     setUsersTimezone(userProfileId) {
@@ -236,6 +263,7 @@ updateWindowDimensions() {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function(data) {
+
                                 console.log("gotUsersTimezone")
 
 
@@ -250,13 +278,19 @@ updateWindowDimensions() {
     }
 
     loadUniversalData() {
+        this.loadStepOccurrenceData();
+
+        this.loadGoalData();
+        this.loadPlanData();
+        this.loadUpdateOccurrenceData();
+        this.loadVisualizationData();
+
+
         this.loadProfileData();
         this.loadSettingsData();
-        this.loadMessageThreadData();
+        //this.loadMessageThreadData();
         this.loadContactData();
-        this.loadGoalData();
-        this.loadStepOccurrenceData();
-        this.loadPlanData();
+
         this.setUsersTimezone(this.props.storeRoot.user.profileId)
 
     }
@@ -265,165 +299,338 @@ updateWindowDimensions() {
 
     loadCoachSpecificData() {
         this.loadProgramData()
+        this.loadUpdateData()
+
+    }
+
+    loadUpdateData() {
+                    if (!this.state.updateDataLoaded) {
+
+
+                        var theUrl = "/api/updates/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (data) {
+                                                    this.setState({updateDataLoaded:true})
+
+
+                                store.dispatch(setUpdates(data))
+
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
 
     }
 
     loadGoalData() {
+                    if (!this.state.goalDataLoaded) {
 
-        var theUrl = "/api/goals/";
-        $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-                          console.log("gotGoalData");
 
-                  store.dispatch(setGoals(data))
+                        var theUrl = "/api/goals/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (data) {
+                                                    this.setState({goalDataLoaded:true})
 
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
 
-      }.bind(this),
+                                store.dispatch(setGoals(data))
 
-    });
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
 
     }
 
     loadPlanData() {
+                    if (!this.state.planDataLoaded) {
 
-        var theUrl = "/api/planOccurrences/";
-        $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-                          console.log("gotPlanData");
 
-                  store.dispatch(setPlans(data))
+                        var theUrl = "/api/planOccurrences/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (data) {
+                                                    this.setState({planDataLoaded:true})
 
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
 
-      }.bind(this),
+                                store.dispatch(setPlans(data))
 
-    });
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
 
     }
 
     loadProgramData() {
-        var theUrl = "/api/programs/";
-        $.ajax({
-            url: theUrl,
-            dataType: 'json',
-            cache: false,
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function (data) {
-                                console.log("gotProgramData");
+                    if (!this.state.programDataLoaded) {
 
-                store.dispatch(setPrograms(data))
 
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(theUrl, status, err.toString());
+                        var theUrl = "/api/programs/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (data) {
+                                                    this.setState({programDataLoaded:true})
 
-            }.bind(this),
 
-        });
+                                store.dispatch(setPrograms(data))
+
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
     }
 
-    loadMessageThreadData ()  {
+    loadMessageThreadData (){
+            if (!this.state.messageThreadDataLoaded) {
 
 
-        //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
 
 
-        var theUrl = '/api/messageThreads/';
-
-    $.ajax({
-      url: theUrl ,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-                          console.log("gotMessageThreadData");
-
-          store.dispatch(setMessageThreads(data));
-          store.dispatch(setOpenThreads({}))
+                //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
 
 
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
-      }.bind(this),
+                var theUrl = '/api/messageThreads/';
 
-    });
+                $.ajax({
+                    url: theUrl,
+                    dataType: 'json',
+                    cache: false,
+                    headers: {
+                        'Authorization': 'Token ' + localStorage.token
+                    },
+                    success: function (data) {
+                                            this.setState({messageThreadDataLoaded:true})
+
+
+                        store.dispatch(setMessageThreads(data));
+                        store.dispatch(setOpenThreads({}))
+
+
+                    }.bind(this),
+                    error: function (xhr, status, err) {
+                        console.error(theUrl, status, err.toString());
+                    }.bind(this),
+
+                });
+            }
   }
 
 
 
     loadStepOccurrenceData() {
-        var periodRangeStart = new Date();
-        var periodRangeEnd = new Date();
-        periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
-        periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
+        if (!this.state.stepOccurrenceDataLoaded) {
 
-        $.ajax({
-            url: theUrl,
-            dataType: 'json',
-            cache: false,
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function (data) {
-                                console.log("gotStepOccurrenceData");
 
-          store.dispatch(setStepOccurrences(data.results))
+            var periodRangeStart = new Date();
+            var periodRangeEnd = new Date();
+            periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
+            periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+            var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-            }.bind(this)
-        });
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                                        this.setState({stepOccurrenceDataLoaded:true})
+
+
+                    store.dispatch(setStepOccurrences(data.results))
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this)
+            });
+        }
+
+
+    }
+
+    loadUpdateOccurrenceData() {
+        if (!this.state.updateOccurrenceDataLoaded) {
+
+
+
+            var theUrl = "/api/updateOccurrences/"
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.formatUpdateOccurrenceData(data)
+                                        this.setState({updateOccurrenceDataLoaded:true})
+
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this)
+            });
+        }
+
+
+    }
+
+    formatUpdateOccurrenceData(theUpdateOccurrences) {
+        console.log("formatUpdateOccurrenceData")
+            var theData = []
+            var uniqueStepOccurrenceIds = []
+
+            for (var i=0; i < theUpdateOccurrences.length; i++) {
+
+                //Compile all unique step occurrences
+                var theStepOccurrenceId = theUpdateOccurrences[i].stepOccurrence
+
+                if (uniqueStepOccurrenceIds.indexOf(theStepOccurrenceId) < 0) {
+                                        uniqueStepOccurrenceIds.push(theStepOccurrenceId)
+
+                }
+
+            }
+
+
+            for (var i=0; i < uniqueStepOccurrenceIds.length; i++) {
+                var theStepOccurrenceId = uniqueStepOccurrenceIds[i]
+                                    var theStepOccurrenceSetOfData = {}
+
+                for (var j=0; j < theUpdateOccurrences.length; j++) {
+                    var theCurrentUpdateOccurrence = theUpdateOccurrences[j]
+                    var theCurrentUpdateOccurrenceStepId = theCurrentUpdateOccurrence.stepOccurrence
+                    if (theStepOccurrenceId == theCurrentUpdateOccurrenceStepId) {
+                        var measuringWhat = theCurrentUpdateOccurrence.update.measuringWhat
+                        var theFormat = theCurrentUpdateOccurrence.update.format
+                        if (theFormat == 'datetime') {
+                             var theConvertedTime = convertDate(theCurrentUpdateOccurrence[theFormat], 0, "dateFormat", "absoluteTime")
+                            var updateOccurrenceValue = theConvertedTime
+
+                        } else {
+                            var updateOccurrenceValue = theCurrentUpdateOccurrence[theFormat]
+
+                        }
+
+
+                        theStepOccurrenceSetOfData[measuringWhat] = updateOccurrenceValue
+
+                    }
+                }
+                theData.push(theStepOccurrenceSetOfData)
+
+
+
+            }
+                                store.dispatch(setUpdateOccurrences(theData))
+
+
+
     }
 
 
-    loadContactData() {
-        var theUrl = "/api/contacts/";
-        $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-                          console.log("gotContactData");
-
-          this.organizeContacts(data)
-
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
-
-      }.bind(this),
-
-    });
+    loadContactData()
+        {
+            if (!this.state.contactDataLoaded) {
 
 
+            var theUrl = "/api/contacts/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                                        this.setState({contactDataLoaded:true})
 
+
+                    this.organizeContacts(data)
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+
+                }.bind(this),
+
+            });
+
+
+        }
+    }
+
+    loadVisualizationData()
+        {
+            if (!this.state.visualizationDataLoaded) {
+
+
+            var theUrl = "/api/visualizations/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({visualizationDataLoaded:true})
+                    store.dispatch(setVisualizations(data))
+
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+
+                }.bind(this),
+
+            });
+
+
+        }
     }
 
     organizeContacts(theContactData) {
@@ -537,8 +744,8 @@ export class StandardSetOfComponents extends React.Component {
             <div>
                 <ReduxDataGetter />
 
-                <div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
-                <MessageButton />
+                {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
+                <MessageButton />*/}
 
 
             <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
@@ -555,12 +762,17 @@ export class Footer extends React.Component {
 
         }
     }
+
+
+
+
     render() {
         return (
             <div>
                 <div className="footerSpacer">&nbsp;</div>
                 <div className="customFooter">
                     <div className="ui six column center aligned stackable grid">
+
 
 <div className="ui column">&nbsp;</div>
                         <div className="ui column">&nbsp;</div>

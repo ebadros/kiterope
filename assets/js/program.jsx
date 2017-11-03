@@ -4,7 +4,7 @@ var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import {ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
-import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
+import {PlanHeader, StepList, StepModalForm, ToggleButton} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
@@ -28,12 +28,14 @@ import Modal from 'react-modal';
 import Phone from 'react-phone-number-input'
 import rrui from 'react-phone-number-input/rrui.css'
 import rpni from 'react-phone-number-input/style.css'
+import {VisualizationsList, VisualizationModalForm} from './visualization'
 
 import {UserLink } from './profile'
 
+import { UpdateModalForm } from './update'
 
 
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
+import { makeEditable,   } from './calendar'
 import { MessageWindowContainer } from './message'
 
 import { Provider, connect, dispatch } from 'react-redux'
@@ -41,7 +43,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
-import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addVisualization, deleteVisualization, editVisualization, addPlan, removePlan, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, times, s3IconUrl, formats, s3BaseUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
@@ -169,6 +171,8 @@ export class ProgramListPage extends React.Component {
 
 
 handleToggleForm = () => {
+
+
         $(this.refs['ref_whichProgramForm']).slideToggle()
     };
 
@@ -250,13 +254,18 @@ handleCancelClicked = () => {
     };
 
   handleActionClick = () => {
+      console.log("handleActionClick")
+                  store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
+
+      /*
       if (this.state.formIsOpen == true) {
+
         this.handleCloseForm()
 
       }
       else {
           this.handleOpenForm()
-      }
+      }*/
     };
 
 
@@ -340,51 +349,8 @@ export class ProgramDetailPage extends React.Component {
       };
 
 
-    /*loadProgramsFromServer = () => {
-    $.ajax({
-      url: "/api/programs/" + this.props.params.program_id + "/",
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(programData) {
-        this.setState({
-            data: programData});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error( "/api/programs/" + this.props.params.program_id + "/", status, err.toString());
-      }.bind(this),
 
-    });
-  };*/
 
-  handleStepSubmit (step, callback) {
-
-             $.ajax({
-                 url: "/api/steps/",
-                 dataType: 'json',
-                 type: 'POST',
-                 data: step,
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
-                 },
-                 success: function (data) {
-                     store.dispatch(addStep(data.program, data));
-
-                     callback;
-                     this.handleCancelClicked()
-
-                 }.bind(this),
-                 error: function (xhr, status, errors) {
-                    var serverErrors = xhr.responseJSON;
-                     this.setState({
-                         serverErrors: errors,
-                     })
-
-                 }.bind(this)
-             });
-         }
 
     componentWillUnmount = () => {
         //clearInterval(this.state.stepsIntervalId);
@@ -451,6 +417,7 @@ export class ProgramDetailPage extends React.Component {
 
 
     handleViewClick = (selectedView) => {
+
         this.setState({
             selectedView:selectedView
         });
@@ -472,9 +439,12 @@ export class ProgramDetailPage extends React.Component {
 
           //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
           this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray()
+
 )
 
       }
+
+
 
 
       this.determineOptions();
@@ -482,13 +452,24 @@ export class ProgramDetailPage extends React.Component {
       //var stepsIntervalId = setInterval(this.loadStepsFromServer, 800)
       //this.setState({stepsIntervalId:stepsIntervalId})
       //this.loadStepsFromServer()
-      $(this.refs['ref_whichStepForm']).hide();
+      //$(this.refs['ref_whichStepForm']).hide();
     this.selectView(this.state.selectedView);
 
         $(".fullPageDiv").hide();
         $(".fullPageDiv").slideToggle();
 
   }
+
+  buildOptionsForProgramUpdates (programUpdatesData) {
+        var theData = []
+        theData.push({value:null, label:"Create New Update"})
+        programUpdatesData.map(function (programUpdate) {
+            var theDatum = {value:programUpdate.id, label:programUpdate.name}
+            theData.push(theDatum)
+        })
+
+        return theData
+    }
 
   componentWillReceiveProps(nextProps) {
        if (this.state.data != nextProps.storeRoot.programs) {
@@ -501,48 +482,30 @@ export class ProgramDetailPage extends React.Component {
        }
 
 
+
+
+
         }
 
 
-  handleCancelClicked = () => {
-      $(this.refs['ref_whichStepForm']).slideUp();
-      this.setState({
-          formIsOpen:false,
-          headerActionButtonLabel: "Add Step"
-      })
-
-  };
-  handleOpenForm = () => {
-        this.setState({
-            openModal:false,
-            headerActionButtonLabel: "Close Form",
-            formIsOpen:true,
-        }, () => {$(this.refs['ref_whichStepForm']).slideDown()} )
 
 
-    };
     handleReloadItem = () => {
         //this.loadStepsFromServer()
     };
 
 
 
-  handleCloseForm = () => {
-        this.setState({
-            headerActionButtonLabel: "Add Step",
-            formIsOpen:false,
-        }, () => $(this.refs['ref_whichStepForm']).slideUp())
-
-    };
-
   handleActionClick = () => {
-      if (this.state.formIsOpen == true) {
+      console.log("handle action click")
+                  store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
+      /*if (this.state.formIsOpen == true) {
         this.handleCloseForm()
 
       }
       else {
           this.handleOpenForm()
-      }
+      }*/
     };
 
     convertStepsIntoArray(theSteps) {
@@ -606,25 +569,23 @@ export class ProgramDetailPage extends React.Component {
                         </div>
                         <div ref="ref_listView">
                             <FormHeaderWithActionButton actionClick={this.handleActionClick}
-                                                        showingForm={this.state.formIsOpen} headerLabel=""
-                                                        color="raspberry" buttonLabel={this.state.headerActionButtonLabel}
-                                                        closeForm={this.handleCloseForm}
-                                                        openForm={this.handleOpenForm}/>
+                                                        headerLabel=""
+                                                        color="red" buttonLabel={this.state.headerActionButtonLabel}/>
 
-                            <div ref="ref_whichStepForm">
-
-                                <StepForm parentId={this.props.params.program_id}
-                                          onSubmit={this.handleStepSubmit}
-                                          cancelClicked={this.handleCancelClicked}
-                                            serverErrors={this.state.serverErrors} />
-
-                            </div>
                             <div>&nbsp;</div>
                             <div>&nbsp;</div>
 
-                            <StepList programId={this.props.params.program_id} data={this.state.data.steps} reloadItem={this.handleReloadItem} />
+                            <StepList programId={this.props.params.program_id}  data={this.state.data.steps} reloadItem={this.handleReloadItem} />
 
                         </div>
+                        <StepModalForm
+                                parentId={this.props.params.program_id}
+                              isListNode={false}
+                              myRef="ref_form"
+                              data={this.state.data}
+                              serverErrors={this.state.serverErrors}/>
+<UpdateModalForm programId={this.props.params.program_id} />
+                        <VisualizationModalForm programId={this.props.params.program_id} />
 
 
 
@@ -713,8 +674,6 @@ export class ProgramDetailPageNoSteps extends React.Component {
 
             if (this.props.storeRoot) {
                 if (this.props.storeRoot.plans) {
-                                                  console.log("determineIfSubscribed");
-
                     for (var key in this.props.storeRoot.plans) {
                         if ((this.props.storeRoot.plans[key].program == this.state.data.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
                             var theStateData = this.state.data;
@@ -742,6 +701,15 @@ export class ProgramDetailPageNoSteps extends React.Component {
 
 
     render() {
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+
+                var listNodeOrMobile = true}
 
 
         return (
@@ -757,13 +725,13 @@ export class ProgramDetailPageNoSteps extends React.Component {
                         ]}/>
                         <div>&nbsp;</div>
 
-                        <ProgramViewEditDeleteItem isListNode={false}
+                        <ProgramViewEditDeleteItem isListNode={listNodeOrMobile}
                                                 showCloseButton={false}
                                                 apiUrl="/api/programs/"
                                                 id={this.props.params.program_id}
                                                 data={this.state.data}
                                                 currentView="Basic"
-                                                   userPlanOccurrenceId = {this.state.data.userPlanOccurrenceId}
+                                                   userPlanOccurrenceId = {this.state.userPlanOccurrenceId}
 
                                                    extendedBasic={true}
                         />
@@ -814,12 +782,12 @@ export class ViewSelector extends React.Component {
     render = () => {
 
         if (this.state.selectedView == "calendar") {
-            var calendarSelected = "active raspberry  item";
+            var calendarSelected = "active red  item";
             var listSelected = " item ";
             var calendarIconColor = "Dark";
             var listIconColor = "Light"
         } else if (this.state.selectedView == "list") {
-            var listSelected = "active raspberry  item ";
+            var listSelected = "active red  item ";
             var calendarSelected = " item ";
                         var calendarIconColor = "Light";
                         var listIconColor = "Dark"
@@ -1232,6 +1200,8 @@ export class ProgramSubscriptionForm extends React.Component {
         )
     }
 }
+
+
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramForm extends React.Component {
@@ -1667,6 +1637,8 @@ export class ProgramForm extends React.Component {
 
 
                   </div>
+                                    <VisualizationsList programId={this.state.id} />
+
 
                       <div className="ui three column stackable grid">
                           <div className="column">&nbsp;</div>
@@ -2053,6 +2025,9 @@ export class ProgramBasicView extends React.Component {
             }
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
+                        var startDate = moment(this.state.data.startDate).format("MMM DD YYYY")
+
+
             if (this.state.data.author_id) {
                             var authorLink = "/profiles/" + this.state.data.author_id;
 
@@ -2060,6 +2035,7 @@ export class ProgramBasicView extends React.Component {
                                             var authorLink = "/profiles/" + this.state.data.author
 
             }
+
 
             if (this.props.isListNode) {
 
@@ -2091,7 +2067,7 @@ export class ProgramBasicView extends React.Component {
                                             :
                                             <div className="ui left aligned column">
                                             <IconLabelCombo size="extramini" orientation="left"
-                                                            text={theScheduleLength} icon="deadline" background="Light"
+                                                            text={startDate} icon="deadline" background="Light"
                                                             link="/goalEntry"/>
                                         </div>
 
@@ -2099,8 +2075,8 @@ export class ProgramBasicView extends React.Component {
 
                                             }
                                             <div className="ui right aligned column">
-                                            <IconLabelCombo size="extramini" orientation="right" text="100% Success"
-                                                            icon="success" background="Light" link="/goalEntry"/>
+                                            <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
+                                                            icon="calendar" background="Light" />
                                         </div>
 
 
@@ -2146,8 +2122,6 @@ export class ProgramBasicView extends React.Component {
                             <Link to={authorLink} >
                                             <UserLink orientation="right" fullName={this.state.data.authorName}
                                                             profilePhoto={this.state.data.authorPhoto} /></Link>
-                            <IconLabelCombo size="extramini" orientation="right" text="100% Success" icon="success"
-                                            background="Light" link="/goalEntry"/>
                             <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
                                             icon="deadline" background="Light" link="/goalEntry"/>
                             <IconLabelCombo size="extramini" orientation="right" text={theCost} icon="cost"

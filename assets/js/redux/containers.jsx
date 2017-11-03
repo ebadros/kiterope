@@ -21,15 +21,26 @@ const mapStateToProps = (state, ownProps) => {
         contacts:state.rootReducer.contacts,
         programs:state.rootReducer.programs,
         stepOccurrences:state.rootReducer.stepOccurrences,
+        updateOccurrences:state.rootReducer.updateOccurrences,
+        visualizations:state.rootReducer.visualizations,
         messageThreads:state.rootReducer.messageThreads,
+        updates: state.rootReducer.updates,
+        updateModalData: state.rootReducer.updateModalData,
+        stepModalData: state.rootReducer.stepModalData,
+        visualizationModalData:state.rootReducer.visualizationModalData,
         gui: {
+          searchQuery:state.rootReducer.searchQuery,
+          searchHitsVisibility:state.rootReducer.searchHitsVisibility,
+
+
           forMobile:state.rootReducer.forMobile,
           shouldReload:state.rootReducer.shouldReload,
           isSidebarVisible:state.rootReducer.isSidebarVisible,
           isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
           currentThread: state.rootReducer.currentThread,
           openThreads: state.rootReducer.openThreads,
-          currentContact:state.rootReducer.currentContact
+          currentContact:state.rootReducer.currentContact,
+          dailyPeriod:state.rootReducer.dailyPeriod
 
 
         }
@@ -39,11 +50,21 @@ const mapStateToProps = (state, ownProps) => {
   }}
   else {
     return {
-      storeRoot:{
-        gui:{
+      storeRoot: {
+        gui: {
+          searchQuery:state.rootReducer.searchQuery,
+          searchHitsVisibility:state.rootReducer.searchHitsVisibility,
+
           forMobile: false,
-          isSidebarVisible:false,
-          isMessageWindowVisible: false}}
+          isSidebarVisible: false,
+          isMessageWindowVisible: false
+        },
+        dailyPeriod: {
+          selection: 'TODAY',
+          periodStart: "",
+          periodEnd: "",
+        },
+      }
     }
   }
 
@@ -65,6 +86,23 @@ const mapDispatchToProps = (dispatch) => {
 
 
     },
+
+    setDailyPeriod: (theDailyPeriod) => {
+            dispatch(setDailyPeriod(theDailyPeriod))
+
+
+    },
+
+
+
+    setSearchQuery: (theSearchQuery) => {
+            dispatch(setSearchQuery(theSearchQuery))
+
+
+    },
+    //setUpdateModalData: (theUpdateModalData) => {
+    //  dispatch(setUpdateModalData(theUpdateModalData))
+    //},
 
 
 

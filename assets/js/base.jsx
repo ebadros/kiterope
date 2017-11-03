@@ -7,26 +7,30 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 
 import autobind from 'class-autobind'
 import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
-import { GoalForm, GoalBasicView, SimpleGoalForm } from './goal'
+import { GoalForm, GoalBasicView } from './goal'
 import { UpdateItemMenu } from './update'
+
+
+import { VisualizationItemMenu, VisualizationBasicView } from './visualization'
+
 
 import { PlanForm, PlanBasicView, SimplePlanForm } from './plan'
 import { ProgramForm, ProgramBasicView, SimpleProgramForm, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionForm } from './program'
 
-import { StepForm, StepBasicView, StepDetailView, SimpleStepForm, StepItemMenu } from './step'
+import { StepModalForm, StepBasicView, StepDetailView, StepItemMenu } from './step'
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
 
 import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, removePlan, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setStepModalData, removePlan, deleteContact, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import Measure from 'react-measure'
 
-
+import { VisualizationsList } from './dataVis/visualization'
 
 import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporter } from './accounts'
 
@@ -1277,12 +1281,16 @@ export class ViewEditDeleteItem extends React.Component {
     };
 
     getDetailView = () => {
-        return (
-            <div ref="ref_detail">
-        <SimpleGoalForm  editable={false} data={this.state.data} />
+         if (this.state.data != null) {
+            return (
+                <div ref="ref_detail">
+                    <div className="itemDetailSmall">
+                        <div dangerouslySetInnerHTML={{__html: this.state.data.description}}></div>
+                    </div>
                 </div>
-        )
-
+            )
+        }
+        else return (<div></div>)
 
     };
 
@@ -1500,11 +1508,16 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     getDetailView = () => {
-        return (
-            <div ref="ref_detail">
-        <SimpleGoalForm  editable={false} data={this.state.data} />
+          if (this.state.data != null) {
+            return (
+                <div ref="ref_detail">
+                    <div className="itemDetailSmall">
+                        <div dangerouslySetInnerHTML={{__html: this.state.data.description}}></div>
+                    </div>
                 </div>
-        )
+            )
+        }
+        else return (<div></div>)
 
 
     };
@@ -2525,6 +2538,8 @@ hideComponent = () => {
     }
 
 }
+
+@connect(mapStateToProps, mapDispatchToProps)
 export class StepViewEditDeleteItem extends ViewEditDeleteItem {
     constructor(props) {
         super(props);
@@ -2569,16 +2584,20 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
     }
 
     switchToEditView = () => {
-        $(this.refs["ref_basic"]).hide();
-        $(this.refs["ref_form"]).slideDown();
-        this.props.currentViewChanged("Edit")
+
+        this.setState({
+            modalIsOpen:true,
+        }, () => {store.dispatch(setStepModalData(this.state))})
+        //$(this.refs["ref_basic"]).hide();
+        //$(this.refs["ref_form"]).slideDown();
+        //this.props.currentViewChanged("Edit")
 
 
     };
 
     switchToBasicView = () => {
         $(this.refs["ref_detail"]).hide();
-        $(this.refs["ref_form"]).slideUp();
+        //$(this.refs["ref_form"]).slideUp();
         $(this.refs["ref_basic"]).slideDown();
         this.props.currentViewChanged("Basic")
 
@@ -2586,7 +2605,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
     componentDidMount = () => {
 
-        $(this.refs["ref_form"]).hide();
+        //$(this.refs["ref_form"]).hide();
         $(this.refs["ref_detail"]).hide();
 
         if (this.props.currentView != undefined) {
@@ -2615,6 +2634,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         this.props.reloadItem()
     };
 
+    /*
     handleStepSubmit = (step, callback) => {
         if (step.id != undefined) {
 
@@ -2678,7 +2698,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         }
 
 
-    };
+    };*/
 
     switchToClosedView = () => {
         this.props.closeClicked();
@@ -2719,7 +2739,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         )
     };
 
-    getEditView = () => {
+/*getEditView = () => {
 
             return (
                 <div ref="ref_form">
@@ -2735,7 +2755,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
                 </div>
             )
 
-    };
+    };*/
 
 
     getDetailView = () => {
@@ -2761,7 +2781,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
-        var editView = this.getEditView();
+        //var editView = this.getEditView();
 
 
         return (
@@ -2770,18 +2790,186 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
 
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
-                    <div >{basicView}</div>
+                    <div>{basicView}</div>
                     {detailView}
 
                     <div className="sixteen wide row">
 
                         <div>
 
-                            {editView}
+                            {/*{editView}*/}
                         </div>
                     </div>
 
                 </div>
+
+
+            </div>
+        )
+
+
+    }
+}
+
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class VisualizationViewEditDeleteItem extends ViewEditDeleteItem {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            data: "",
+            currentView: "",
+            editable: false,
+            serverErrors: ""
+
+        }
+    }
+
+    duplicateItem = () => {
+        var theUrl = this.props.apiUrl + this.props.id + "/duplicate/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            type: 'GET',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addVisualization(this.props.parentId, data));
+
+                this.reload()
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }.bind(this),
+
+
+        });
+
+    };
+
+    callDeleteReducer() {
+        store.dispatch(deleteVisualization(this.props.parentId, this.props.id))
+    }
+
+    switchToEditView = () => {
+
+        this.setState({
+            modalIsOpen:true,
+        }, () => {store.dispatch(setVisualizationModalData(this.state))})
+        //$(this.refs["ref_basic"]).hide();
+        //$(this.refs["ref_form"]).slideDown();
+        //this.props.currentViewChanged("Edit")
+
+
+    };
+
+    switchToBasicView = () => {
+        //$(this.refs["ref_form"]).slideUp();
+        $(this.refs["ref_basic"]).slideDown();
+        this.props.currentViewChanged("Basic")
+
+    };
+
+    componentDidMount = () => {
+
+
+        if (this.props.currentView != undefined) {
+            this.setState({
+                data: this.props.data,
+                currentView: this.props.currentView,
+
+            })
+        }
+        else {
+            this.setState({
+                data: this.props.data,
+                currentView: "Basic",
+                serverErrors: this.props.serverErrors
+
+            })
+
+        }
+
+        this.showHideUIElements(this.props.currentView)
+
+    };
+
+
+    reload = () => {
+        this.props.reloadItem()
+    };
+
+
+
+    switchToClosedView = () => {
+        this.props.closeClicked();
+        this.switchToBasicView();
+
+        //$(this.refs["ref_basic"]).show()
+
+
+        //$(this.refs["ref_form"]).slideUp()
+    };
+
+
+    getControlBar = () => {
+
+        var thePermissions = false;
+        if (this.state.data) {
+            thePermissions = this.state.data.permissions
+        }
+
+        return (
+            <ItemControlBar myRef="ref_itemControlBar"
+                            label="Visualization"
+                            click={this.handleClick}
+                            currentView="UpdateBasic"
+                            editable={thePermissions}
+                            showCloseButton={this.props.showCloseButton}/>
+        )
+    };
+
+
+    getBasicView = () => {
+        return (
+            <div ref="ref_basic" >
+
+                <VisualizationBasicView data={this.state.data}
+                               isListNode={this.props.isListNode}/>
+            </div>
+        )
+    };
+
+
+
+    render() {
+        var controlBar = this.getControlBar();
+        var basicView = this.getBasicView();
+        //var editView = this.getEditView();
+
+
+        return (
+            <div ref={`ref_stepItem_${this.props.id}`} className="column">
+                {controlBar}
+
+
+                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                    <div>{basicView}</div>
+
+                    <div className="sixteen wide row">
+
+                        <div>
+
+                        </div>
+                    </div>
+
+                </div>
+
 
             </div>
         )
@@ -2831,6 +3019,8 @@ export class ItemControlBarButton extends React.Component {
                         return (<StepItemMenu click={this.handleClick}/>);
                     case("Update"):
                         return (<UpdateItemMenu click={this.handleClick}/>)
+                    case("Visualization"):
+                        return (<VisualizationItemMenu click={this.handleClick}/>)
 
 
                 }
@@ -3234,13 +3424,16 @@ export class ItemControlBar extends React.Component {
                 var color = "green";
                 break;
             case("Step"):
-                var color = "raspberry";
+                var color = "red";
                 break;
             case("Profile"):
                 var color = "cyan";
                 break;
             case("Update"):
                 var color = "orange";
+                break;
+            case("Visualization"):
+                var color = "raspberry"
                 break;
 
         }
@@ -3360,9 +3553,15 @@ module.exports = {
     DynamicSelectButton2,
     GoalViewEditDeleteItem,
     PlanViewEditDeleteItem,
+    Breadcrumb,
+
+
     ProgramViewEditDeleteItem,
     VideoUploader,
     AudioUploader,
+    ItemControlBar,
+        VisualizationViewEditDeleteItem,
+
 
     StepViewEditDeleteItem,
     ProfileViewEditDeleteItem,

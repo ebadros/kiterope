@@ -33,11 +33,11 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import  {store} from "./redux/store";
 
 import {ImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
-import {PlanHeader, StepList , SimpleStepForm} from './step';
+import {PlanHeader, StepList } from './step';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent } from './calendar'
+import { makeEditable,  } from './calendar'
 import { UpdatesList } from './update'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 

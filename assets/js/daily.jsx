@@ -32,6 +32,8 @@ import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 import { theServer, periodOptions, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 var moment = require('moment');
+import { updateStep, removePlan, setDailyPeriod, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+
 import {
   ShareButtons,
   ShareCounts,
@@ -105,6 +107,7 @@ export class DailyList extends React.Component{
             period:"TODAY",
             periodRangeStartString: new Date().toDateString(),
             periodRangeEndString: new Date().toDateString(),
+            loading:false,
 
 
 
@@ -112,11 +115,14 @@ export class DailyList extends React.Component{
     }
 
     loadObjectsFromServer (periodValue) {
+                        this.setState({loading:true})
+
 
         switch (periodValue) {
             case("TODAY"):
                 var periodRangeStart = new Date();
-                var periodRangeEnd = new Date();
+                var periodRangeEnd = new Date() ;
+
                 break;
             case("NEXT7"):
                 var periodRangeStart = new Date();
@@ -154,44 +160,91 @@ export class DailyList extends React.Component{
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
-                this.setState({data: data});
+                this.setState({
+                    loading:false,
+                    data: data});
 
             }.bind(this),
             error: function (xhr, status, err) {
+                this.setState({
+                    loading:false
+                })
                 console.error(theUrl, status, err.toString());
             }.bind(this)
         });
     }
 
     componentDidMount () {
-        this.loadObjectsFromServer("TODAY");
+        this.setState({loading:true})
+
+    this.loadObjectsFromServer(this.state.period)
+        /*
+        if (this.props.storeRoot.gui) {
+            if(this.props.storeRoot.gui.dailyPeriod) {
+                this.setState({
+                    period: this.props.storeRoot.gui.dailyPeriod.selection,
+                    startDate: this.props.storeRoot.gui.dailyPeriod.periodStart,
+                    endDate: this.props.storeRoot.gui.dailyPeriod.periodEnd,
+
+
+
+                },   this.loadObjectsFromServer(this.state.period))
+            }
+        }
+
+
 
         //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID: intervalID});
+        */
 
     }
+/*
+    componentWillReceiveProps(nextProps) {
+         if (nextProps.storeRoot.gui) {
+            if(nextProps.storeRoot.gui.dailyPeriod) {
+                this.setState({
+                    period: nextProps.storeRoot.gui.dailyPeriod.selection,
+                    startDate: nextProps.storeRoot.gui.dailyPeriod.periodStart,
+                    endDate: nextProps.storeRoot.gui.dailyPeriod.periodEnd,
+
+
+
+                },  this.loadObjectsFromServer(this.state.period))
+            }
+        }
+
+    }*/
 
     handleStartDateChange(date)   {
-        this.setState({startDate: date});
+        this.setState({startDate: date}, )
         if (date > this.state.endDate) {
-            this.setState({endDate:date})
+            this.setState({endDate:date},  )
         }
+
+
 
   }
   handleEndDateChange(date)   {
-        this.setState({endDate: date});
+        this.setState({
+            endDate: date},
+);
       if (date < this.state.startDate) {
-            this.setState({startDate:date})
+            this.setState({
+                    startDate:date},
+)
         }
+
   }
 
   handlePeriodChange(option){
-        this.setState({period: option.value});
+                      this.setState({loading:true})
+
+       this.setState({period: option.value});
 
       if (option.value != "CUSTOM") {
-          this.loadObjectsFromServer(option.value)
+         this.loadObjectsFromServer(option.value)
       }
-
 
     }
 
@@ -235,11 +288,11 @@ export class DailyList extends React.Component{
                                     </Link>
                                 </div>
                                 <div>&nbsp;</div>
-                                <div className="ui grid">
+                                <div className="ui three column grid">
                                     <div className="ui row">
                                 <div className="ui eight wide column header"> {this.state.periodRangeStartString != this.state.periodRangeEndString ? <h1>{this.state.periodRangeStartString} to {this.state.periodRangeEndString}</h1>: <h1>{this.state.periodRangeStartString}</h1>}</div>
 
-                                    <div className="ui right floated four wide column form ">
+                                    <div className="ui right floated column form ">
 
 
                                         <KSSelect value={this.state.period}
@@ -254,7 +307,7 @@ export class DailyList extends React.Component{
                         {this.state.period == "CUSTOM" ?
 <div className="ui row smallVerticalPaddingNoMargin">
 
-    <div className="ui right floated four wide column form">
+    <div className="ui right floated column form">
         <div className="ui two column grid">
                             <div  className="column field absolutelyNoMargin">
                                 <DatePicker  selected={this.state.startDate}
@@ -268,7 +321,7 @@ export class DailyList extends React.Component{
                                     {this.state.period == "CUSTOM" ?
 <div className="ui row smallVerticalPaddingNoMargin">
 
-    <div className="ui right floated four wide column form "><div className="ui fluid purple medium button" onClick={this.handleSubmitCustom}>Update</div>
+    <div className="ui right floated  column form "><div className="ui fluid purple medium button" onClick={this.handleSubmitCustom}>Update</div>
        </div></div>: <div></div>}
                                                             </div>
 
@@ -365,7 +418,7 @@ export class UpdateOccurrenceList extends React.Component {
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({data: data.results});
+                this.setState({data: data});
 
 
             }.bind(this),

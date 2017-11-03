@@ -34,7 +34,9 @@ LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfigDev'
 
 INSTALLED_APPS += [
     'sslserver',
+
 ]
+
 
 CHANNEL_LAYERS = {
     "default": {

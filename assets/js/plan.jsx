@@ -3,8 +3,8 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, PlanOccurrenceViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
-import {PlanHeader, StepList, ToggleButton, StepForm, SimpleStepForm} from './step';
+import {ImageUploader, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import {PlanHeader, StepList, ToggleButton, } from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
@@ -22,7 +22,7 @@ import { IconLabelCombo, ClippedImage } from './elements'
 import { Textfit } from 'react-textfit';
 import ShowMore from 'react-show-more';
 
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent,  } from './calendar'
+import { makeEditable,  } from './calendar'
 import { MessageWindowContainer } from './message'
 
 import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
@@ -213,7 +213,7 @@ export class PlanDetailPage extends React.Component {
       //var stepsIntervalId = setInterval(this.loadStepsFromServer, 800)
       //this.setState({stepsIntervalId:stepsIntervalId})
       this.loadStepsFromServer();
-      $(this.refs['ref_whichStepForm']).hide();
+      //$(this.refs['ref_whichStepForm']).hide();
     this.selectView(this.state.selectedView);
 
         $(".fullPageDiv").hide();
@@ -222,7 +222,7 @@ export class PlanDetailPage extends React.Component {
   }
 
   handleCancelClicked = () => {
-      $(this.refs['ref_whichStepForm']).slideUp();
+      //$(this.refs['ref_whichStepForm']).slideUp();
       this.setState({
           formIsOpen:false,
           headerActionButtonLabel: "Add Step"
@@ -278,7 +278,7 @@ export class PlanDetailPage extends React.Component {
                         ]}/>
                         <div>&nbsp;</div>
 
-                        <PlanOccurrenceViewEditDeleteItem isListNode={false}
+                        <PlanViewEditDeleteItem isListNode={false}
                                                 showCloseButton={false}
                                                 apiUrl="/api/plans/"
                                                 id={this.props.params.plan_id}
@@ -312,18 +312,23 @@ export class PlanDetailPage extends React.Component {
                                                         closeForm={this.handleCloseForm}
                                                         openForm={this.handleOpenForm}/>
 
-                            <div ref="ref_whichStepForm">
+                            {/*<div ref="ref_whichStepForm">
+
 
                                 <StepForm parentId={this.props.params.plan_id}
                                           onSubmit={this.handleStepSubmit}
                                           cancelClicked={this.handleCancelClicked}
                                             serverErrors={this.state.serverErrors} />
 
-                            </div>
+                            </div>*/}
                             <div>&nbsp;</div>
                             <div>&nbsp;</div>
 
                             <StepList planId={this.props.params.plan_id} reloadItem={this.handleReloadItem} />
+                             <StepModalForm
+                                parentId={this.props.params.plan_id}
+                              isListNode={false}
+                              serverErrors={this.state.serverErrors}/>
 
                         </div>
 

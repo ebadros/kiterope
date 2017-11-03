@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, SettingsSet, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, SettingsSet, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -65,6 +65,7 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
     absoluteEndDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
     updates = serializers.SerializerMethodField(required=False, read_only=True)
+    visualizations = serializers.SerializerMethodField(required=False, read_only=True)
 
     def get_absoluteStartDateForCalendar(self,obj):
         #date_1 = datetime.datetime.strptime(obj.absoluteStartDate, "%y-%m-%d")
@@ -86,6 +87,10 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
         serializer = UpdateSerializer(obj.get_updates(), many=True)
         return serializer.data
 
+    def get_visualizations(self,obj):
+        serializer = VisualizationSerializer(obj.get_visualizations(), many=True)
+        return serializer.data
+
 
 
     def get_senderName(self, obj):
@@ -100,7 +105,13 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Step
-        fields = ('id', 'program', 'image', 'updates','absoluteStartDate', 'absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
+        fields = ('id', 'program', 'image', 'type','updates','absoluteStartDate', 'visualizations','absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
+
+
+class StepLimitedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Step
+        fields = ('id', )
 
 class KChannelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -251,24 +262,74 @@ class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-class UpdateSerializer(serializers.HyperlinkedModelSerializer):
+class UpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Update
-        fields = ('id','measuringWhat', 'units','format','metricLabel', 'step' )
+        fields = ('id','name', 'measuringWhat', 'units','format','metricLabel', 'steps_ids' , 'program', 'default')
+    #steps = StepLimitedSerializer(many=True, read_only=True)
+    steps_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Step.objects.all(), source='steps')
+    program = serializers.PrimaryKeyRelatedField(many=False, required=False, queryset=Program.objects.all())
 
-    step = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Step.objects.all())
+
+class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Visualization
+        fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'updateOccurrences', 'plan','user', 'permissions')
+
+    program = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Program.objects.all())
+    plan = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=PlanOccurrence.objects.all())
+
+    updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    dependentVariable = UpdateSerializer(read_only=True)
+    independentVariable = UpdateSerializer(read_only=True)
+    mediatorVariable = UpdateSerializer(read_only=True)
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_permissions(self,obj):
+        #return obj.get_permissions()
+        #serializer = self.request.user
+        #if serializer == obj.program.author:
+        if obj.program:
+            if self.context['request'].user == obj.program.author :
+                return True
+            else:
+                return False
+        elif obj.plan:
+            if self.context['request'].user == obj.plan.user :
+                return True
+            else:
+                return False
+
+        else:
+            return True
+
+
+
+    def get_updateOccurrences(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = UpdateOccurrenceSerializer(obj.get_updateOccurrences(), many=True, context=serializer_context)
+        # data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+        return
 
 class UpdateOccurrenceSerializer(serializers.ModelSerializer):
 
     #update = UpdateSerializer()
     stepOccurrence = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     update = UpdateSerializer(read_only=True)
-    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    author = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 
+    stepOccurrenceDate = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_stepOccurrenceDate(self, obj):
+        return obj.get_stepOccurrenceDate()
 
     class Meta:
         model = UpdateOccurrence
-        fields = ('id','update', 'stepOccurrence', 'author', 'integer', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
+        fields = ('id','update', 'stepOccurrence', 'author', 'integer', 'boolean', 'datetime','stepOccurrenceDate', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
 
 
 class ContactListingField(serializers.RelatedField):
@@ -549,10 +610,25 @@ class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
+class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Update
+        fields = ('value','label', 'measuringWhat', 'units', 'format', 'metricLabel')
+
+    value = serializers.SerializerMethodField(required=False, read_only=True)
+    label = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_value(self, obj):
+        return obj.id
+
+    def get_label(self, obj):
+        return obj.name
+
+
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -571,6 +647,24 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+    updates = serializers.SerializerMethodField(required=False, read_only=True)
+    visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+    def get_updates(self, obj):
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = UpdateSerializer(obj.get_updates(), many=True, context=serializer_context)
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+    def get_visualizations(self, obj):
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = VisualizationSerializer(obj.get_visualizations(), many=True, context=serializer_context)
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
 
 
     def get_userPlanOccurrenceId(self,obj):
@@ -647,11 +741,13 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = PlanOccurrence
-        fields=('id', 'program', 'goal', 'programInfo', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
+        fields=('id', 'program', 'goal', 'programInfo', 'programTitle', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
     #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     programInfo = serializers.SerializerMethodField()
+    programTitle = serializers.SerializerMethodField()
+
 
 
     goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
@@ -663,6 +759,9 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
         serializer = PlanProgramSerializer(obj.program, many=False, context=serializer_context)
         return serializer.data
+
+    def get_programTitle(self, obj):
+        return obj.program.title
 
 
 

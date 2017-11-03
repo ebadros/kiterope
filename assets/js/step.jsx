@@ -27,40 +27,26 @@ require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
-
-
-
+import {SaveButton} from './settings'
 import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
-import { UpdatesList } from './update'
+import { makeEditable,  ProgramCalendar } from './calendar'
+import { UpdatesList, UpdateModalForm } from './update'
 
 
-import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
-    costFrequencyMetricOptions, times, durations,  } from './constants'
+import { TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+    costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
 
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
-
-function printObject(o) {
-  var out = '';
-  for (var p in o) {
-    out += p + ': ' + o[p] + '\n';
-  }
-  alert(out);
-}
-
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
-
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
-
-import { addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
-
-
+import { addStep, deleteStep, clearTempStep, addUpdate, updateStep, setUpdateModalData, setStepModalData, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { VisualizationsList } from './dataVis/visualization'
 
 
 $.ajaxSetup({
@@ -101,6 +87,7 @@ export class StepList extends React.Component {
     handleReloadItem = () => {
         this.props.reloadItem()
     };
+
 
     componentDidMount () {
         this.setState({
@@ -202,6 +189,7 @@ export class StepList extends React.Component {
                                             reloadItem={this.handleReloadItem}
                                             currentView="Basic"
                     />
+
 
 );
 
@@ -597,7 +585,6 @@ export class StepBasicView extends React.Component {
                     <div className="ui grid">
                         <div className="sixteen wide column">
                             <div className="planTitle"> {theTitle}</div>
-                            <div className="row">&nbsp;</div>
 
                         <div className="row" >
                             <div className="ui one column grid">
@@ -640,1025 +627,6 @@ export class StepBasicView extends React.Component {
 
 }
 
-
-
-@connect(mapStateToProps, mapDispatchToProps)
-export class StepForm extends React.Component {
-    constructor(props) {
-        super(props);
-        autobind(this);
-        this.state = {
-           files:[],
-            id:"",
-            image:"icons/stepDefaultImage.svg",
-            title: "",
-            description:" ",
-            frequency:"ONCE",
-            day01:false,
-            day02:false,
-            day03:false,
-            day04:false,
-            day05:false,
-            day06:false,
-            day07:false,
-            monthlyDates:"",
-            absoluteStartDate:moment(),
-            absoluteEndDate:moment(),
-            useAbsoluteTime:false,
-            startDate:0,
-            endDate:0,
-            startTime:"",
-            duration:"",
-            program:this.props.parentId,
-            data:"",
-            serverErrors:{},
-            updates:[],
-        }
-    }
-
-
-
-    handleFinishedUpload (value) {
-            var fullUrl = value.signedUrl;
-            var urlForDatabase = fullUrl.split("?")[0];
-            urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
-            this.setState({image: urlForDatabase});
-    }
-
-    showAndHideUIElements (frequencyValue) {
-        if (frequencyValue == "WEEKLY") {
-            $(this.refs['ref_whichDays']).show();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
-
-
-        } else if (frequencyValue == "ONCE" || frequencyValue == "") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).hide();
-            $(this.refs['ref_date']).show();
-
-
-        } else if (frequencyValue == "MONTHLY") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).show();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
-
-
-        } else if (frequencyValue == "DAILY") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
-
-        }
-    }
-
-
-
-    loadParentFromServer = () => {
-     var theUrl = "/api/programs/" + this.props.parentId;
-
-      $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-        this.setState({
-            parentData: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theUrl, status, err.toString());
-      }.bind(this),
-
-    });
-  };
-
-
-    componentDidMount() {
-        this.resetForm();
-        this.setState({
-            serverErrors:this.props.serverErrors
-        });
-
-        if (!this.state.editFormIsOpen) {
-            //$(this.refs["ref_stepForm" + this.props.stepData.id]).hide();
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).hide();
-
-
-        }
-        this.showAndHideUIElements(this.state.frequency)
-    }
-
-    componentWillReceiveProps(nextProps) {
-
-        if (this.state.serverErrors != nextProps.serverErrors) {
-            this.setState({serverErrors: nextProps.serverErrors})
-        }
-        if (this.state.parentData != nextProps.data) {
-            if (nextProps.data != undefined) {
-                this.showAndHideUIElements(nextProps.data.frequency);
-
-                var startDate = nextProps.data.startDate;
-
-                var endDate = nextProps.data.endDate;
-
-                var programStartDateInStringForm = nextProps.data.programStartDate;
-                var programStartDateInMomentForm = moment(programStartDateInStringForm);
-
-
-                //var calculatedStartDate = moment(programStartDateInMomentForm, "MM-DD-YYYY").add(startDateInIntegerForm, 'days');
-
-                //var calculatedEndDate = moment(programStartDateInMomentForm, "MM-DD-YYYY").add(endDateInIntegerForm, 'days');
-
-
-
-                var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
-                var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
-                calculatedStartDate = moment(calculatedStartDate);
-                                calculatedEndDate = moment(calculatedEndDate);
-
-
-
-
-
-
-                this.setState({
-                    id: nextProps.data.id,
-                    image:nextProps.data.image,
-                    title: nextProps.data.title,
-                    description: nextProps.data.description,
-                    frequency: nextProps.data.frequency,
-                    day01: nextProps.data.day01,
-                    day02: nextProps.data.day02,
-                    day03: nextProps.data.day03,
-                    day04: nextProps.data.day04,
-                    day05: nextProps.data.day05,
-                    day06: nextProps.data.day06,
-                    day07: nextProps.data.day07,
-                    startDate: startDate,
-                    endDate: endDate,
-                    useAbsoluteTime: nextProps.data.useAbsoluteTime,
-                    absoluteStartDate: calculatedStartDate,
-                    absoluteEndDate: calculatedEndDate,
-                    startTime: nextProps.data.startTime,
-                    duration: nextProps.data.duration,
-                    monthlyDates: nextProps.data.monthlyDates,
-                    programStartDate: nextProps.data.programStartDate,
-                    updates:nextProps.data.updates,
-                });
-
-                if (nextProps.data.description == undefined) {
-                    this.setState({
-                        description: ""
-                    })
-                }
-                if (nextProps.data.frequency == undefined) {
-                    this.setState({
-                        frequency: "ONCE",
-                    })
-                }
-            }
-
-
-        }
-
-
-    }
-
-    handleFrequencyChange = (e) => {
-        this.setState({frequency: e.value});
-        this.showAndHideUIElements(e.value)
-
-    };
-
-
-    handleTitleChange = (value) => {
-        //if (validator.isEmail(e.target.value)) {
-        //} else {
-            this.setState({title: value});
-
-        //}
-    };
-
-    handleDescriptionChange(value) {
-        this.setState({description: value});
-    }
-
-   handleStartDateChange(date) {
-        this.setState({startDate: date});
-  }
-    handleEndDateChange(date) {
-        this.setState({endDate: date});
-  }
-
-  handleUseAbsoluteTimeChange = (e) =>  {
-
-        this.setState({useAbsoluteTime: true});
-    };
-    handleUseRelativeTimeChange = (e) =>  {
-
-        this.setState({useAbsoluteTime: false});
-    };
-
-
-    handleAbsoluteStartDateChange(date) {
-
-        this.setState({
-            absoluteStartDate: date,
-            startDate: daysBetweenDates(this.state.programStartDate, date)
-        });
-
-        if (this.state.frequency == 'ONCE') {
-            this.setState({
-                absoluteEndDate: date
-            })
-        }
-        if (this.state.absoluteEndDate < date) {
-            this.setState({
-                absoluteEndDate: date
-            })
-        }
-
-  }
-    handleAbsoluteEndDateChange(date) {
-    this.setState({
-            absoluteEndDate: date,
-            endDate: daysBetweenDates(this.state.programStartDate, date)
-        });
-
-        if (this.state.absoluteStartDate > date) {
-            this.setState({
-                absoluteStartDate: date,
-
-            })
-        }
-  }
-    setTitle(stateValueFromChild) {
-        this.state.title = stateValueFromChild;
-    }
-
-    handleEditorChange(e)  {
-
-        this.setState({description: e});
-  }
-    handleDay01Change = (e) =>  {
-
-        this.setState({day01: e});
-    };
-
-    handleDay02Change = (e) =>  {
-
-        this.setState({day02: e});
-    };
-
-    handleDay03Change = (e) =>  {
-
-        this.setState({day03: e});
-    };
-
-    handleDay04Change = (e) =>  {
-
-        this.setState({day04: e});
-    };
-
-    handleDay05Change = (e) =>  {
-
-
-        this.setState({day05: e});
-    };
-
-    handleDay06Change = (e) => {
-
-        this.setState({day06: e});
-    };
-
-    handleDay07Change = (e) => {
-
-
-        this.setState({day07: e});
-    };
-
-    handleStartTimeChange = (e) =>  {
-
-        this.setState({startTime:e.value});
-    };
-    handleDurationChange(e) {
-
-        this.setState({duration: e.value});
-    }
-
-
-
-    handleMonthlyDatesChange(e) {
-        this.setState({monthlyDates: e.target.value});
-    }
-
-
-    handleCancelClicked() {
-        this.props.cancelClicked()
-    }
-
-    getServerErrors(fieldName) {
-        if (this.state.serverErrors == undefined) {
-            return ""
-        } else {
-            return this.state.serverErrors[fieldName]
-        }
-    }
-
-    handleSubmit(e) {
-        e.preventDefault();
-
-
-    if (this.props.storeRoot.user) {
-
-        var title = this.state.title;
-        var image = this.state.image;
-        var description = this.state.description;
-        var frequency = this.state.frequency;
-        var day01 = this.state.day01;
-        var day02 = this.state.day02;
-        var day03 = this.state.day03;
-        var day04 = this.state.day04;
-        var day05 = this.state.day05;
-        var day06 = this.state.day06;
-        var day07 = this.state.day07;
-        var startTime = this.state.startTime;
-        var duration = this.state.duration;
-        var monthlyDates = this.state.monthlyDates;
-        var theProgram = this.props.parentId;
-
-        var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime");
-        var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime");
-        var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime");
-        var useAbsoluteTime = this.state.useAbsoluteTime;
-
-        var startDate = this.state.startDate;
-        var endDate = this.state.endDate;
-        var updates = this.state.updates;
-        var updatesIds = [];
-        var i;
-        for (i=0; i < updates.length; i++ ) {
-            updatesIds.push(updates[i].id)
-        }
-
-
-        var stepData = {
-            id:"",
-            image:image,
-            title: title,
-            description:description,
-            frequency:frequency,
-            day01:day01,
-            day02:day02,
-            day03:day03,
-            day04:day04,
-            day05:day05,
-            day06:day06,
-            day07:day07,
-            monthlyDates:monthlyDates,
-            absoluteStartDate:absoluteStartDate,
-            absoluteEndDate:absoluteEndDate,
-            useAbsoluteTime: useAbsoluteTime,
-            startDate:startDate,
-            endDate:endDate,
-            startTime:startTime,
-            duration:duration,
-            program:theProgram,
-            'updatesIds[]': updatesIds,
-        };
-
-        if (this.state.id != "" ) {
-            stepData.id = this.state.id
-        }
-
-        this.props.onSubmit(stepData, this.resetForm)
-
-
-        }
-    else {
-            this.setState({
-                    signInOrSignUpModalFormIsOpen: true,
-                }
-            )
-
-            }
-        }
-
-        resetForm = () => {
-            this.setState({
-                id:"",
-            title: "",
-            description:"",
-            frequency:"",
-                image:"uploads/stepDefaultImage.svg",
-            day01:false,
-            day02:false,
-            day03:false,
-            day04:false,
-            day05:false,
-            day06:false,
-            day07:false,
-            monthlyDates:"",
-            absoluteStartDate:moment(),
-            absoluteEndDate:moment(),
-            startDate:0,
-                useAbsoluteTime:false,
-            endDate:0,
-            startTime:"",
-            duration:"",
-            durationMetric:"",
-            program:this.props.parentId,
-                updates:[],
-            }
-
-            );
-        };
-
-        handleUpdateAdded = (theUpdateData) => {
-            var i;
-            var alreadyAdded = false;
-            var updatesArray = this.state.updates;
-            for (i=0; i < updatesArray.length; i++) {
-                if (theUpdateData.id == updatesArray[i].id) {
-                    updatesArray[i] = theUpdateData;
-                    this.setState({updates: updatesArray});
-                    var alreadyAdded = true
-                }
-
-            }
-            if (alreadyAdded != true) {
-                this.setState({updates: this.state.updates.concat(theUpdateData)})
-            }
-
-
-        };
-
-        handleImageChange = (callbackData) => {
-        this.setState({
-            image: callbackData.image
-        })
-    };
-
-
-
-        getDescriptionEditor () {
-            if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
-
-            } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "four wide column"
-        }
-
-                if (this.state.description == null) {
-                    return ("")
-                } else {
-                    return (<div className="ui row">
-                        <div className={mediumColumnWidth}>
-                            <div className="field fluid">
-                                <label htmlFor="id_description">Description:</label>
-                                <TinyMCEInput name="description"
-                                      value={this.state.description}
-                                      tinymceConfig={TINYMCE_CONFIG}
-                                      onChange={this.handleEditorChange}
-                        />
-
-
-                            </div>
-                        </div>
-                        <div className="six wide column">&nbsp;</div>
-
-                    </div>)
-                }
-            }
-
-
-
-
-        getForm = () => {
-            if (this.state.id) {
-                var buttonText = "Save"
-
-            } else
-            {
-                var buttonText = "Create"
-            }
-                        if (this.state.image) {
-                var imageUrl = this.state.image
-
-
-            } else {
-                var imageUrl = "stepDefaultImage.svg"
-            }
-
-
-        var descriptionEditor = this.getDescriptionEditor();
-
-    if (this.props.isListNode) {
-                var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column"
-
-            } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "eight wide column"
-        }
-          return (
-              <div className="ui page container">
-                  <div>{this.props.programHeaderErrors}</div>
-                  <div className="ui row">&nbsp;</div>
-
-
-                      <div className="ui grid">
-                          <div className="ui row">
-                              <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
-
-<div className={mediumColumnWidth}>
-
-
-<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
-                          <div className="ui row">
-                            <div className={mediumColumnWidth}>
-                                              <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
-
-                                <ValidatedInput
-                                        type="text"
-                                        name="title"
-                                        label="Title"
-                                        id="id_title"
-                                        value={this.state.title}
-                                        initialValue={this.state.title}
-                                        validators='"!isEmpty(str)"'
-                                        onChange={this.validate}
-                                        stateCallback={this.handleTitleChange}
-                                        serverErrors={this.getServerErrors("title")}
-
-
-                                    />
-
-
-
-
-
-                            </div>
-                        </div>
-                          { descriptionEditor }
-
-
-                        <div className="ui row">
-                            <div className={mediumColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
-
-
-                                        </div>
-                            </div>
-                        </div>
-                         <div ref="ref_dateSet" className="ui row">
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteStartDate">Start Date:</label>
-
-                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
-                                            </div>
-                                        </div>
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteEndDate">End Date:</label>
-
-                                            <DatePicker selected={this.state.absoluteEndDate} onChange={this.handleAbsoluteEndDateChange} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                <div ref="ref_date" className="ui row">
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteStartDate">Date:</label>
-
-                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
-                                            </div>
-                                        </div>
-                                    </div>
-                        <div className="ui row">
-                            <div className={smallColumnWidth}>
-                                <div className="field">
-                                    <label>Start Time:</label>
-                                    <Select value={this.state.startTime}
-                                            onChange={this.handleStartTimeChange}
-                                            name="startTime"
-                                            options={times}
-                                            clearable={false}/>
-
-
-                                    {/* <select className="ui massive input middle aligned" name="amOrPm" id="id_amOrPm"
-                                            onChange={this.handleStartTimeChange}>
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>*/}
-                                </div>
-                            </div></div>
-                                                    <div className="ui row">
-
-                            <div className={mediumColumnWidth}>
-                                                                <div className="fluid field">
-
-                                                                                    <label>Subscribers on same schedule?</label>
-
-                                                                                    <div className="ui equal width buttons ">
-                                                                 <ToggleButton  id="id_useRelativeTime" label="Personalized Schedule" value={!this.state.useAbsoluteTime} callback={this.handleUseRelativeTimeChange.bind(this)} />
-<ToggleButton  id="id_useAbsoluteTime" label="Same Schedule" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
-
-
-</div>
-                                                                                    </div>
-                        </div></div>
-                        <div className="ui row">
-                            <div className={mediumColumnWidth}>
-                                <div className="field">
-                                    <label htmlFor="id_duration">For how long:</label>
-                                    <Select value={this.state.duration}
-                                            onChange={this.handleDurationChange}
-                                            name="duration"
-                                            options={durations}
-                                            clearable={false}/>
-
-                                </div>
-                                                            </div>
-
-
-
-
-                            </div>
-
-                        <div ref="ref_whichDays" className="ui row">
-
-                            <div className={wideColumnWidth}>
-                                <div className="field fluid">
-                                    <label>Select which days to schedule each week (based on
-                                        a Monday start):</label>
-
-                                    <div className="ui equal width tiny buttons ">
-                                        <ToggleButton id="id_day01" label="M" value={this.state.day01} callback={this.handleDay01Change.bind(this)} />
-                                        <ToggleButton id="id_day02" label="T" value={this.state.day02} callback={this.handleDay02Change.bind(this)} />
-                                        <ToggleButton id="id_day03" label="W" value={this.state.day03} callback={this.handleDay03Change.bind(this)} />
-                                        <ToggleButton id="id_day04" label="Th" value={this.state.day04} callback={this.handleDay04Change.bind(this)} />
-                                        <ToggleButton id="id_day05" label="F" value={this.state.day05} callback={this.handleDay05Change.bind(this)} />
-                                        <ToggleButton id="id_day06" label="Sa" value={this.state.day06} callback={this.handleDay06Change.bind(this)} />
-                                        <ToggleButton id="id_day07" label="Su" value={this.state.day07} callback={this.handleDay07Change.bind(this)} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div ref="ref_whichDates" className="ui row">
-
-                            <div className={smallColumnWidth}>
-
-                                <div className="field fluid">
-
-                                    <label htmlFor="id_date">What date(s) in a month would you like this to occur
-                                        (1-30)?</label>
-                                    <input type="text" name="monthlyDates" id="id_monthlyDates" value={this.state.monthlyDates} onChange={this.handleMonthlyDatesChange}/>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-
-
-
-                          </div>
-
-                    <UpdatesList stepId={this.state.id} updateAdded={this.handleUpdateAdded} updates={this.state.updates}/>
-
-
-                      <div className="ui three column stackable grid">
-                                                    <div className="ui row">&nbsp;</div>
-
-                          <div className="column">&nbsp;</div>
-                          <div className="column">
-                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
-                          </div>
-                          <div className="column">
-                              <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
-                          </div>
-                      </div>
-
-              </div>
-          )
-
-    };
-
-
-
-
-
-    render() {
-    var theForm = this.getForm();
-
-            return(
-                <div >
-                    <form className="ui form" onSubmit={this.handleSubmit}>
-                        {theForm}
-                    </form>
-                </div>
-
-            )
-        }
-
-
-
-}
-
-export class SimpleStepForm extends StepForm {
-    constructor(props) {
-        super(props);
-        autobind(this);
-        this.state = {
-           files:[],
-            id:"",
-            title: "",
-            description:"",
-            frequency:"",
-            day01:false,
-            day02:false,
-            day03:false,
-            day04:false,
-            day05:false,
-            day06:false,
-            day07:false,
-            monthlyDates:"",
-            absoluteStartDate:moment(),
-            absoluteEndDate:moment(),
-            startDate:0,
-            endDate:0,
-            startTime:"",
-            duration:"",
-            durationMetric:"",
-            program:this.props.parentId,
-            data:"",
-        }
-    }
-    findLabel (theValue, theArray) {
-        var returnValue = "Not available";
-        if (theValue) {
-            for (var i = 0; i < theArray.length; i++) {
-                if (theValue == theArray[i].value) {
-                    returnValue =  theArray[i].label;
-                    return returnValue
-                }
-            }
-            return returnValue
-        }
-        else {
-            return returnValue
-        }
-    }
-
-
-    componentWillReceiveProps(nextProps) {
-        if (this.state.parentData != nextProps.data) {
-            if (nextProps.data != undefined) {
-                this.showAndHideUIElements(nextProps.data.frequency);
-
-                var startDateInIntegerForm = nextProps.data.startDate;
-                var endDateInIntegerForm = nextProps.data.endDate;
-
-                var programStartDateInDateForm = nextProps.data.programStartDate;
-                var programStartDateInMomentForm = moment(programStartDateInDateForm);
-                var calculatedStartDate = moment(programStartDateInMomentForm, "DD-MM-YYYY").add(startDateInIntegerForm, 'days');
-                var calculatedEndDate = moment(programStartDateInMomentForm, "DD-MM-YYYY").add(endDateInIntegerForm, 'days');
-
-
-                this.setState({
-                    id: nextProps.data.id,
-                    title: nextProps.data.title,
-                    description: nextProps.data.description,
-                    frequency: nextProps.data.frequency,
-                    day01: nextProps.data.day01,
-                    day02: nextProps.data.day02,
-                    day03: nextProps.data.day03,
-                    day04: nextProps.data.day04,
-                    day05: nextProps.data.day05,
-                    day06: nextProps.data.day06,
-                    day07: nextProps.data.day07,
-                    startDate: calculatedStartDate,
-                    endDate: calculatedEndDate,
-                    absoluteStartDate: calculatedStartDate,
-                    absoluteEndDate: calculatedEndDate,
-                    startTime: nextProps.data.startTime,
-                    duration: nextProps.data.duration,
-                    monthlyDates: nextProps.data.monthlyDates,
-                })
-            }
-
-
-        }
-
-    }
-
-
-
-
-
-    getDateInfo = () => {
-        var theAbsoluteStartDate = this.state.absoluteStartDate;
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YYYY");
-
-        var theAbsoluteEndDate = this.state.absoluteEndDate;
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YYYY");
-        if (this.state.frequency == "ONCE") {
-            return(
-
-            <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_absoluteStartDate">Date:</label>
-                                <div>{theAbsoluteStartDate}</div>
-                            </div>
-                </div>
-                )
-
-        } else {
-            return(
-                <div className="ui two column grid">
-
-                <div className="column">
-                    <div className="field">
-                                <label htmlFor="id_absoluteStartDate">Start Date:</label>
-                                <div className="fluid">{theAbsoluteStartDate}</div>
-                            </div>
-                </div>
-                                <div className="column">
-                                    <div className="field">
-
-                                <label htmlFor="id_absoluteEndDate">End Date:</label>
-                                <div className="fluid">{theAbsoluteEndDate}</div>
-                                    </div>
-                            </div>
-                </div>
-                )
-        }
-
-};
-
-
-    getForm = () => {
-
-        var dateInfo = this.getDateInfo();
-                if (this.state.frequency) {
-
-                    var theFrequency = this.findLabel(this.state.frequency, frequencyOptions)
-                } else {
-                    theFrequency = "Not available"
-                }
-
-        if (this.state.duration) {
-            var theDuration = this.findLabel(this.state.duration, durations)
-        } else {
-            theDuration = "Not available"
-        }
-        return (
-            <div>
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_description">Description</label>
-                                <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.description}}/>
-                            </div>
-
-
-                        </div>
-
-
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_startDate">Frequency:</label>
-                                <div>{theFrequency}</div>
-                            </div>
-
-
-                        </div>
-                        <div className="ui row">&nbsp;</div>
-                                            {dateInfo}
-
-
-
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_startTime">Start Time:</label>
-                                <div>{this.state.startTime}</div>
-                            </div>
-
-
-
-                        </div>
-                <div ref="ref_useAbsoluteTime" className="ui row">
-                                            <div className="sixteen wide column">
-                                                                                <div className="field fluid">
-                                                                                    <label>Have subscribers all on same time schedule</label>
-
-                                                                                    <div className="ui equal width tiny buttons ">
-                            <ToggleButton id="id_useAbsoluteTime" label="Use Absolute Time" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
-</div>
-                                                                                    </div>
-                                                </div>
-                    </div>
-
-
-                                            <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_duration">Duration:</label>
-                                <div>{theDuration}</div>
-                            </div>
-            <div ref={`ref_whichDays`} className="ui row">
-
-                            <div className="sixteen wide column">
-                                <div className="field fluid">
-                                    <label>Select which days to schedule each week (based on
-                                        a Monday start):</label>
-
-                                    <div className="ui equal width tiny buttons ">
-                                        <ToggleButton disabled={true} id="id_day01" label="M" value={this.state.day01} callback={this.handleDay01Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day02" label="T" value={this.state.day02} callback={this.handleDay02Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day03" label="W" value={this.state.day03} callback={this.handleDay03Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day04" label="Th" value={this.state.day04} callback={this.handleDay04Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day05" label="F" value={this.state.day05} callback={this.handleDay05Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day06" label="Sa" value={this.state.day06} callback={this.handleDay06Change.bind(this)} />
-                                        <ToggleButton disabled={true} id="id_day07" label="Su" value={this.state.day07} callback={this.handleDay07Change.bind(this)} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div ref={`ref_whichDates`} className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_timeCommitment">Monthly Dates:</label>
-                                <div>{this.state.monthlyDates}</div>
-                            </div>
-
-
-                        </div>
-                            <div className="ui row">&nbsp;</div>
-
-<UpdatesList stepId={this.props.data.id} updates={this.state.updates} />
-
-
-              </div>
-</div>
-
-
-
-        )};
-
-    render() {
-    var theForm = this.getForm();
-
-        if (this.state.editable) {
-            return(
-                <div >
-                    <form className="ui form" onSubmit={this.handleSubmit}>
-                        {theForm}
-                    </form>
-                </div>
-
-            )
-        }
-
-        else {
-            return (
-                <div >
-                    <div className="ui form disabledForm">
-                        {theForm}
-                    </div>
-                </div>
-)
-        }
-
-    }
-
-
-}
 
 
 
@@ -1820,6 +788,1045 @@ var TimePicker = React.createClass({
     }
 });
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class StepModalForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+           files:[],
+            id:"",
+            image:"uploads/stepDefaultImage.svg",
+            title: "",
+            description:" ",
+            type:"COMPLETION",
+            frequency:"ONCE",
+            day01:false,
+            day02:false,
+            day03:false,
+            day04:false,
+            day05:false,
+            day06:false,
+            day07:false,
+            monthlyDates:"",
+            absoluteStartDate:moment(),
+            absoluteEndDate:moment(),
+            useAbsoluteTime:false,
+            startDate:0,
+            endDate:0,
+            startTime:"09:00",
+            duration:"",
+            program:this.props.parentId,
+            data:"",
+            serverErrors:{},
+            updates:[],
+            modalIsOpen:false,
+        }
+    }
 
 
-module.exports = {StepForm, TimeInput, ToggleButton, StepList, SimpleStepForm, StepDetailView, StepBasicView, StepItemMenu};
+
+    handleFinishedUpload (value) {
+            var fullUrl = value.signedUrl;
+            var urlForDatabase = fullUrl.split("?")[0];
+            urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
+            this.setState({image: urlForDatabase});
+    }
+
+    showAndHideFrequencyUIElements (frequencyValue) {
+        if (frequencyValue == "WEEKLY") {
+            $(this.refs['ref_whichDays']).show();
+            $(this.refs['ref_whichDates']).hide();
+            $(this.refs['ref_dateSet']).show();
+            $(this.refs['ref_date']).hide();
+
+
+        } else if (frequencyValue == "ONCE" || frequencyValue == "") {
+            $(this.refs['ref_whichDays']).hide();
+            $(this.refs['ref_whichDates']).hide();
+            $(this.refs['ref_dateSet']).hide();
+            $(this.refs['ref_date']).show();
+
+
+        } else if (frequencyValue == "MONTHLY") {
+            $(this.refs['ref_whichDays']).hide();
+            $(this.refs['ref_whichDates']).show();
+            $(this.refs['ref_dateSet']).show();
+            $(this.refs['ref_date']).hide();
+
+
+        } else if (frequencyValue == "DAILY") {
+            $(this.refs['ref_whichDays']).hide();
+            $(this.refs['ref_whichDates']).hide();
+            $(this.refs['ref_dateSet']).show();
+            $(this.refs['ref_date']).hide();
+
+        }
+    }
+
+    showAndHideTypeUIElements (typeValue) {
+         if (typeValue == "COMPLETION" || typeValue == "") {
+            $(this.refs['ref_dateUI']).hide();
+
+
+
+        } else if (typeValue == "TIME" ) {
+             $(this.refs['ref_dateUI']).show();
+
+
+
+        } else if (typeValue == "ORDERED_COMPLETION") {
+             $(this.refs['ref_dateUI']).hide();
+         }
+
+    }
+
+
+
+    loadParentFromServer = () => {
+     var theUrl = "/api/programs/" + this.props.parentId;
+
+      $.ajax({
+      url: theUrl,
+      dataType: 'json',
+      cache: false,
+        headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+      success: function(data) {
+        this.setState({
+            parentData: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(theUrl, status, err.toString());
+      }.bind(this),
+
+    });
+  };
+
+
+    componentDidMount() {
+        $(this.refs['ref_whichDays']).hide();
+            $(this.refs['ref_whichDates']).hide();
+            $(this.refs['ref_dateSet']).hide();
+        $(this.refs['ref_dateUI']).hide();
+
+        this.resetForm();
+        this.setState({
+            serverErrors:this.props.serverErrors,
+        });
+
+
+
+
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.stepModalData != undefined) {
+                this.setState({stepModalData:this.props.storeRoot.stepModalData})
+                    this.setStateToData(this.props.storeRoot.stepModalData)
+
+
+            }
+        }
+    }
+
+    setStateToData (stepModalData) {
+        this.setState({
+            modalIsOpen: stepModalData.modalIsOpen,
+
+        })
+        if (stepModalData.data != undefined ) {
+
+            var data = stepModalData.data
+            var startDate = data.startDate;
+
+            var endDate = data.endDate;
+
+            var programStartDateInStringForm = data.programStartDate;
+            var programStartDateInMomentForm = moment(programStartDateInStringForm);
+            var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            calculatedStartDate = moment(calculatedStartDate);
+            calculatedEndDate = moment(calculatedEndDate);
+            var description = ""
+            var type="COMPLETION"
+            var frequency="ONCE"
+
+             if (data.description != undefined) {
+                description=data.description
+            }
+
+            if (data.frequency != undefined) {
+               frequency=data.frequency
+            }
+            if (data.type != undefined) {
+                type = data.type
+            }
+
+            if (data.id != undefined) {
+                this.setState({
+                    id: data.id,
+                    saved:"Saved"
+                })
+            } else {
+                this.setState({
+                    id:"",
+                    saved:"Create"
+                })
+            }
+
+            this.setState({
+                id: data.id,
+
+                image: data.image,
+                title: data.title,
+                description: description,
+                type: type,
+                frequency: frequency,
+                day01: data.day01,
+                day02: data.day02,
+                day03: data.day03,
+                day04: data.day04,
+                day05: data.day05,
+                day06: data.day06,
+                day07: data.day07,
+                startDate: startDate,
+                endDate: endDate,
+                useAbsoluteTime: data.useAbsoluteTime,
+                absoluteStartDate: calculatedStartDate,
+                absoluteEndDate: calculatedEndDate,
+                startTime: data.startTime,
+                duration: data.duration,
+                monthlyDates: data.monthlyDates,
+                programStartDate: data.programStartDate,
+                updates: data.updates,
+            },() => {
+                this.showAndHideTypeUIElements(this.state.type)
+                this.showAndHideFrequencyUIElements(this.state.frequency)
+            });
+
+
+
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
+        }
+
+        if (nextProps.storeRoot.stepModalData != undefined ) {
+            if (this.state.stepModalData != nextProps.storeRoot.stepModalData) {
+                this.setState({stepModalData:nextProps.storeRoot.stepModalData })
+
+                    this.setStateToData(nextProps.storeRoot.stepModalData)
+
+                }
+
+
+            }
+
+
+
+    }
+
+    handleFrequencyChange = (e) => {
+        this.setState({frequency: e.value,
+                            saved: "Save"
+});
+        this.showAndHideFrequencyUIElements(e.value)
+
+    };
+
+    handleTypeChange = (e) => {
+        this.setState({type: e.value,
+                            saved: "Save"});
+        this.showAndHideTypeUIElements(e.value)
+
+    };
+
+
+    handleTitleChange = (value) => {
+        //if (validator.isEmail(e.target.value)) {
+        //} else {
+            this.setState({title: value,
+                            saved: "Save"});
+
+        //}
+    };
+
+    handleDescriptionChange(value) {
+        this.setState({description: value,
+                            saved: "Save"});
+    }
+
+
+
+   handleStartDateChange(date) {
+        this.setState({startDate: date,
+                            saved: "Save"});
+  }
+    handleEndDateChange(date) {
+        this.setState({endDate: date,
+                            saved: "Save"});
+  }
+
+  handleUseAbsoluteTimeChange = (e) =>  {
+
+        this.setState({useAbsoluteTime: true,
+                            saved: "Save"});
+    };
+
+
+    handleUseRelativeTimeChange = (e) =>  {
+
+        this.setState({useAbsoluteTime: false,
+                            saved: "Save"});
+    };
+
+
+    handleAbsoluteStartDateChange(date) {
+
+        this.setState({
+            absoluteStartDate: date,
+            startDate: daysBetweenDates(this.state.programStartDate, date),
+                            saved: "Save"
+        });
+
+        if (this.state.frequency == 'ONCE') {
+            this.setState({
+                absoluteEndDate: date,
+                            saved: "Save"
+            })
+        }
+        if (this.state.absoluteEndDate < date) {
+            this.setState({
+                absoluteEndDate: date,
+                            saved: "Save"
+            })
+        }
+
+  }
+    handleAbsoluteEndDateChange(date) {
+    this.setState({
+            absoluteEndDate: date,
+            endDate: daysBetweenDates(this.state.programStartDate, date),
+                            saved: "Save"
+        });
+
+        if (this.state.absoluteStartDate > date) {
+            this.setState({
+                absoluteStartDate: date,
+
+            })
+        }
+  }
+    setTitle(stateValueFromChild) {
+        this.state.title = stateValueFromChild;
+    }
+
+    handleEditorChange(e)  {
+
+        this.setState({description: e,
+                            saved: "Save"});
+  }
+    handleDay01Change = (e) =>  {
+
+        this.setState({day01: e,
+                            saved: "Save"});
+    };
+
+    handleDay02Change = (e) =>  {
+
+        this.setState({day02: e,
+                            saved: "Save"});
+    };
+
+    handleDay03Change = (e) =>  {
+
+        this.setState({day03: e,
+                            saved: "Save"});
+    };
+
+    handleDay04Change = (e) =>  {
+
+        this.setState({day04: e,
+                            saved: "Save"});
+    };
+
+    handleDay05Change = (e) =>  {
+
+
+        this.setState({day05: e,
+                            saved: "Save"});
+    };
+
+    handleDay06Change = (e) => {
+
+        this.setState({day06: e,
+                            saved: "Save"});
+    };
+
+    handleDay07Change = (e) => {
+
+
+        this.setState({day07: e,
+                            saved: "Save"});
+    };
+
+    handleStartTimeChange = (e) =>  {
+
+        this.setState({startTime:e.value,
+                            saved: "Save"});
+    };
+    handleDurationChange(e) {
+
+        this.setState({duration: e.value,
+                            saved: "Save"});
+    }
+
+
+
+    handleMonthlyDatesChange(e) {
+        this.setState({monthlyDates: e.target.value,
+                            saved: "Save"});
+    }
+
+
+    handleCancelClicked() {
+        this.closeModal()
+    }
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
+    handleSubmit(e) {
+        this.setState({saved:"Saving"})
+
+
+    if (this.props.storeRoot.user) {
+
+        var title = this.state.title;
+        var image = this.state.image;
+        var description = this.state.description;
+        var type = this.state.type;
+        var frequency = this.state.frequency;
+        var day01 = this.state.day01;
+        var day02 = this.state.day02;
+        var day03 = this.state.day03;
+        var day04 = this.state.day04;
+        var day05 = this.state.day05;
+        var day06 = this.state.day06;
+        var day07 = this.state.day07;
+        var startTime = this.state.startTime;
+        var duration = this.state.duration;
+        var monthlyDates = this.state.monthlyDates;
+        var theProgram = this.props.parentId;
+
+        var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime");
+        var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime");
+        var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime");
+        var useAbsoluteTime = this.state.useAbsoluteTime;
+
+        var startDate = this.state.startDate;
+        var endDate = this.state.endDate;
+        var updates = this.state.updates;
+        var updatesIds = [];
+
+        var i;
+        if ( updates != undefined ) {
+            for (i = 0; i < updates.length; i++) {
+                updatesIds.push(updates[i].id)
+            }
+        }
+
+
+
+        var stepData = {
+            id:"",
+            image:image,
+            title: title,
+            description:description,
+            type: type,
+            frequency:frequency,
+            day01:day01,
+            day02:day02,
+            day03:day03,
+            day04:day04,
+            day05:day05,
+            day06:day06,
+            day07:day07,
+            monthlyDates:monthlyDates,
+            absoluteStartDate:absoluteStartDate,
+            absoluteEndDate:absoluteEndDate,
+            useAbsoluteTime: useAbsoluteTime,
+            startDate:startDate,
+            endDate:endDate,
+            startTime:startTime,
+            duration:duration,
+            program:theProgram,
+            'updatesIds[]': updatesIds,
+        };
+
+        if (this.state.id != undefined )  {
+            stepData.id = this.state.id
+        }
+
+        this.handleStepSubmit(stepData)
+
+
+        }
+    else {
+            this.setState({
+                    signInOrSignUpModalFormIsOpen: true,
+                }
+            )
+
+            }
+        }
+
+        resetForm = () => {
+            this.setState({
+                    id: "",
+                    title: "",
+                    description: "",
+                    type: "COMPLETION",
+                    frequency: "",
+                    image: "uploads/stepDefaultImage.svg",
+                    day01: false,
+                    day02: false,
+                    day03: false,
+                    day04: false,
+                    day05: false,
+                    day06: false,
+                    day07: false,
+                    monthlyDates: "",
+                    absoluteStartDate: moment(),
+                    absoluteEndDate: moment(),
+                    startDate: 0,
+                    useAbsoluteTime: false,
+                    endDate: 0,
+                    startTime: "",
+                    duration: "",
+                    durationMetric: "",
+                    program: this.props.parentId,
+                    updates: [],
+
+                    modalIsOpen: false,
+                },            () =>        { store.dispatch(setStepModalData(this.state))}
+
+
+            );
+        };
+
+
+        handleImageChange = (callbackData) => {
+        this.setState({
+            image: callbackData.image,
+            saved: "Save"
+        })
+    };
+
+
+
+        getDescriptionEditor () {
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+
+                if (this.state.description == null) {
+                    return ("")
+                } else {
+                    return (<div className="ui row">
+                        <div className={mediumColumnWidth}>
+                            <div className="field fluid">
+                                <label htmlFor="id_description">Description:</label>
+                                <TinyMCEInput name="description"
+                                      value={this.state.description}
+                                      tinymceConfig={TINYMCE_CONFIG}
+                                      onChange={this.handleEditorChange}
+                        />
+
+
+                            </div>
+                        </div>
+                        <div className="six wide column">&nbsp;</div>
+
+                    </div>)
+                }
+            }
+
+
+
+
+        getForm = () => {
+
+                        if (this.state.image) {
+                var imageUrl = this.state.image
+
+
+            } else {
+                var imageUrl = "uploads/stepDefaultImage.svg"
+            }
+
+
+        var descriptionEditor = this.getDescriptionEditor();
+
+   if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+          return (
+              <div className="ui page container form">
+                  <div>{this.props.programHeaderErrors}</div>
+                  <div className="ui row">&nbsp;</div>
+                                            <Header headerLabel={this.state.id != ""? "Edit Step": "Create Step"} />
+
+
+
+                      <div className="ui grid">
+                          <div className="ui row">
+                              <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
+
+<div className={mediumColumnWidth}>
+
+
+<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
+                          <div className="ui row">
+                            <div className={mediumColumnWidth}>
+                                              <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="title"
+                                        label="Title"
+                                        id="id_title"
+                                        value={this.state.title}
+                                        initialValue={this.state.title}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleTitleChange}
+                                        serverErrors={this.getServerErrors("title")}
+
+
+                                    />
+
+
+
+
+
+                            </div>
+                        </div>
+                          { descriptionEditor }
+
+                          <div className="ui row">
+                            <div className={mediumColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">What type of step is this?</label>
+                                    <Select value={this.state.type}  onChange={this.handleTypeChange} name="type" options={stepTypeOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                        </div>
+                          </div>
+
+                        <div ref="ref_dateUI" className="ui grid">
+
+
+                        <div className="ui row">
+                            <div className={mediumColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                        </div>
+                         <div ref="ref_dateSet" className="ui row">
+                                    <div className={smallColumnWidth}>
+                                        <div className="field">
+                                            <label htmlFor="id_absoluteStartDate">Start Date:</label>
+
+                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
+                                            </div>
+                                        </div>
+                                    <div className={smallColumnWidth}>
+                                        <div className="field">
+                                            <label htmlFor="id_absoluteEndDate">End Date:</label>
+
+                                            <DatePicker selected={this.state.absoluteEndDate} onChange={this.handleAbsoluteEndDateChange} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                <div ref="ref_date" className="ui row">
+                                    <div className={smallColumnWidth}>
+                                        <div className="field">
+                                            <label htmlFor="id_absoluteStartDate">Date:</label>
+
+                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
+                                            </div>
+                                        </div>
+                                    </div>
+                        <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                    <label>Start Time:</label>
+                                    <Select value={this.state.startTime}
+                                            onChange={this.handleStartTimeChange}
+                                            name="startTime"
+                                            options={times}
+                                            clearable={false}/>
+
+
+                                    {/* <select className="ui massive input middle aligned" name="amOrPm" id="id_amOrPm"
+                                            onChange={this.handleStartTimeChange}>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>*/}
+                                </div>
+                            </div></div>
+                                                    <div className="ui row">
+
+                            <div className={mediumColumnWidth}>
+                                                                <div className="fluid field">
+
+                                                                                    <label>Subscribers on same schedule?</label>
+
+                                                                                    <div className="ui equal width buttons ">
+                                                                 <ToggleButton  id="id_useRelativeTime" label="Personalized Schedule" value={!this.state.useAbsoluteTime} callback={this.handleUseRelativeTimeChange.bind(this)} />
+<ToggleButton  id="id_useAbsoluteTime" label="Same Schedule" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
+
+
+</div>
+                                                                                    </div>
+                        </div></div>
+                        <div className="ui row">
+                            <div className={mediumColumnWidth}>
+                                <div className="field">
+                                    <label htmlFor="id_duration">For how long:</label>
+                                    <Select value={this.state.duration}
+                                            onChange={this.handleDurationChange}
+                                            name="duration"
+                                            options={durations}
+                                            clearable={false}/>
+
+                                </div>
+                                                            </div>
+
+
+
+
+                            </div>
+
+                        <div ref="ref_whichDays" className="ui row">
+
+                            <div className={wideColumnWidth}>
+                                <div className="field fluid">
+                                    <label>Select which days to schedule each week (based on
+                                        a Monday start):</label>
+
+                                    <div className="ui equal width tiny buttons ">
+                                        <ToggleButton id="id_day01" label="M" value={this.state.day01} callback={this.handleDay01Change.bind(this)} />
+                                        <ToggleButton id="id_day02" label="T" value={this.state.day02} callback={this.handleDay02Change.bind(this)} />
+                                        <ToggleButton id="id_day03" label="W" value={this.state.day03} callback={this.handleDay03Change.bind(this)} />
+                                        <ToggleButton id="id_day04" label="Th" value={this.state.day04} callback={this.handleDay04Change.bind(this)} />
+                                        <ToggleButton id="id_day05" label="F" value={this.state.day05} callback={this.handleDay05Change.bind(this)} />
+                                        <ToggleButton id="id_day06" label="Sa" value={this.state.day06} callback={this.handleDay06Change.bind(this)} />
+                                        <ToggleButton id="id_day07" label="Su" value={this.state.day07} callback={this.handleDay07Change.bind(this)} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div ref="ref_whichDates" className="ui row">
+
+                            <div className={smallColumnWidth}>
+
+                                <div className="field fluid">
+
+                                    <label htmlFor="id_date">What date(s) in a month would you like this to occur
+                                        (1-30)?</label>
+                                    <input type="text" name="monthlyDates" id="id_monthlyDates" value={this.state.monthlyDates} onChange={this.handleMonthlyDatesChange}/>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+</div>
+
+                    <UpdatesList programId={this.props.parentId} stepId={this.state.id}/>
+
+
+
+                      <div className="ui three column stackable grid">
+                                                    <div className="ui row">&nbsp;</div>
+
+                          <div className="column">&nbsp;</div>
+                          <div className="column">
+                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                          </div>
+                          <div className="column">
+                              <SaveButton saved={this.state.saved} clicked={this.handleSubmit} />
+                          </div>
+                      </div>
+
+              </div>
+          )
+
+    };
+
+    openModal() {
+        this.setState({
+            modalIsOpen: true
+        });
+
+        if (this.state.data) {
+            this.setState({
+                modalIsOpen: true,
+
+
+            })
+        }
+
+    }
+
+    afterOpenModal() {
+        // references are now sync'd and can be accessed.
+        //this.refs.subtitle.style.color = '#f00';
+    }
+
+    closeModal() {
+            this.setState({modalIsOpen: false});
+            this.resetForm()
+        store.dispatch(clearTempStep());
+
+
+        }
+
+        handleStepSubmit = (step) => {
+
+        if (step.id != "") {
+
+            var theUrl = "/api/steps/" + step.id + "/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: step,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                        updates:[],
+                         saved: "Saved"
+                    });
+                    store.dispatch(updateStep(data.program, data));
+
+
+
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+        else {
+
+            $.ajax({
+                url: "/api/steps/",
+                dataType: 'json',
+                type: 'POST',
+                data: step,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    store.dispatch(addStep(data.program, data));
+                    this.submitUpdates(data.id)
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+
+
+    };
+
+    submitUpdates(theStepId) {
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.updates != undefined) {
+                if (this.props.storeRoot.updates.tempStep != undefined) {
+                    var theData = this.props.storeRoot.updates.tempStep
+
+                    var values = Object.keys(theData).map(function (key) {
+                        return theData[key];
+                    });
+                    values.map(function (update) {
+                            var steps_ids = []
+                            steps_ids = update.steps_ids.slice()
+
+
+                            if (steps_ids.indexOf(theStepId) < 0) {
+                                steps_ids.push(theStepId)
+
+                            }
+                            if (update.id) {
+                                var theUrl = "/api/updates/" + update.id + "/";
+                                var theType = 'PATCH';
+
+                            }
+                            else {
+                                var theUrl = "/api/updates/";
+                                var theType = 'POST';
+                            }
+                            update.steps_ids = steps_ids
+                            $.ajax({
+                                url: theUrl,
+                                dataType: 'json',
+                                type: theType,
+                                data: update,
+                                headers: {
+                                    'Authorization': 'Token ' + localStorage.token
+                                },
+                                success: function (data) {
+                                    if (update.id) {
+                                        store.dispatch(addUpdate(data))
+                                    }
+                                    else {
+                                        store.dispatch(editUpdate(data))
+                                    }
+
+
+                                    //this.props.updateAdded(data);
+
+                                }.bind(this),
+                                error: function (xhr, status, err) {
+
+                                    console.error(theUrl, status, err.toString());
+                                    var serverErrors = xhr.responseJSON;
+                                    this.setState({
+                                        serverErrors: serverErrors,
+                                    })
+
+                                }.bind(this)
+                            })
+                        }
+                    )
+
+
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+    render() {
+    var theForm = this.getForm();
+
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var modalStyle = stepModalStyle
+
+           } else {
+
+
+                var modalStyle = stepModalStyle
+
+        }
+
+            return(
+                <div ><Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={modalStyle}>
+                        {theForm}
+
+                    </Modal>
+                </div>
+
+            )
+        }
+
+
+
+}
+
+
+module.exports = {StepModalForm, TimeInput, ToggleButton, StepList, StepDetailView, StepBasicView, StepItemMenu};

@@ -7,7 +7,7 @@ const middleware = routerMiddleware(browserHistory);
 
 import { rootReducer } from "./reducers";
 
-const store2 = createStore(rootReducer);
+//const store2 = createStore(rootReducer);
 
 const reducer = combineReducers({
       rootReducer: rootReducer,

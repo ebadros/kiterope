@@ -434,6 +434,9 @@ input.inline-edit:focus{
     font-size:8rem;
 }
 
+.mobileSpacer {
+    height:120px;
+}
 .small-checkbox {
     font-size:3rem;
 }
@@ -645,6 +648,28 @@ label.NLtextinput {
 
 }
 
+.mobileSearchInput {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #2185d0 !important;
+
+    color: #2185d0;
+    display:inline-block;
+    float:left;
+    padding:0 0 !important;
+    margin:0 0 !important;
+    font-size:5vw !important;
+    line-height:5vw;
+    width:calc(100%);
+    outline:none;
+    text-align:center;
+
+
+
+
+
+}
+
 
 .noRightPadding {
     padding-right:0 !important;
@@ -671,6 +696,13 @@ label.NLtextinput {
     position:absolute;
     left:calc(100% - 40px);
     top: 18px;
+
+}
+
+.mobileSearchCloseButton {
+    position:absolute;
+    left:calc(100% - 40px);
+    top: -5px;
 
 }
 

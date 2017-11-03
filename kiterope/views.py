@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, SettingsSet, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -42,6 +42,7 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from kiterope.expoPushNotifications import send_push_message
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
+from kiterope.helpers import toUTC
 
 
 import requests
@@ -60,7 +61,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -113,6 +114,8 @@ def schema_view(request):
 
 class React(TemplateView):
     template_name = 'index.html'
+
+
 
 
 
@@ -223,7 +226,6 @@ class MessageThreadMessageViewSet(viewsets.ModelViewSet):
             aQueryset = Message.objects.none()
 
         return aQueryset
-
 
 class KChannelViewSet(viewsets.ModelViewSet):
     model = KChannel
@@ -545,15 +547,12 @@ class StepViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        #print(self.request.data)
-        #print("update")
+        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
-        #api.send_sms(body='I can haz txt', from_phone='+3107703042', to=['+3107703042'])
 
         return Response(serializer.data)
 
@@ -663,7 +662,7 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
     permission_classes = [AllowAny]
     required_scopes = ['groups']
-    pagination_class = StandardResultsSetPagination
+    #pagination_class = StandardResultsSetPagination
 
 
 
@@ -673,21 +672,37 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
 
 class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
     queryset = UpdateOccurrence.objects.all()
+    permission_classes = [AllowAny]
     required_scopes = ['groups']
     serializer_class = UpdateOccurrenceSerializer
+
 
     def get_queryset(self):
 
         try:
             stepOccurrence_id = self.kwargs['stepOccurrence_id']
             aQueryset = UpdateOccurrence.objects.filter(stepOccurrence=stepOccurrence_id)
-            print("aQueryset %s" % aQueryset.count())
         except:
             aQueryset = UpdateOccurrence.objects.all()
 
         return aQueryset
 
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+        if instance.update.measuringWhat == "Absolute Date/Time":
+            print("inside the dated")
+            print(instance.stepOccurrence.planOccurrence.startDate)
+            instance.datetime = datetime.datetime.now()
+        if instance.update.measuringWhat == "Relative Date":
+            instance.integer = instance.stepOccurrence.planOccurrence.startDate - datetime.datetime.now()
 
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -701,8 +716,7 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
-class UpdateViewSet(viewsets.ModelViewSet):
+class ProgramUpdateViewSet(viewsets.ModelViewSet):
     queryset = Update.objects.all()
     required_scopes = ['groups']
     permission_classes = [AllowAny]
@@ -711,12 +725,42 @@ class UpdateViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         try:
-            step_id = self.kwargs['step_id']
-            aQueryset = Update.objects.filter(step=step_id)
+            program_id = self.kwargs['program_id']
+            aQueryset = Update.objects.filter(program=program_id)
         except:
             aQueryset = Update.objects.all()
 
         return aQueryset
+
+class UpdateViewSet(viewsets.ModelViewSet):
+    queryset = Update.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [AllowAny]
+    serializer_class = UpdateSerializer
+
+    def get_queryset(self):
+        try:
+            self.request.user.is_authenticated
+            currentUser = self.request.user
+
+            aQueryset = Update.objects.filter(program__author=currentUser )
+        except:
+            aQueryset = Update.objects.none()
+
+        return aQueryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        #page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        data = {i['id']: i for i in serializer.data}
+
+        return Response(data)
 
     def create(self, request, *args, **kwargs):
         print(request.data)
@@ -729,6 +773,49 @@ class UpdateViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
+        print(request.data)
+
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+
+        return Response(serializer.data)
+
+
+'''
+class UpdateViewSet(viewsets.ModelViewSet):
+    queryset = Update.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [AllowAny]
+    serializer_class = UpdateSerializer
+
+    def get_queryset(self):
+
+        try:
+            step_id = self.kwargs['step_id']
+            aQueryset = Update.objects.filter(steps__id=step_id)
+        except:
+            aQueryset = Update.objects.all()
+
+        return aQueryset
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        print(request.data)
+
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
@@ -756,7 +843,29 @@ class UpdateViewSet(viewsets.ModelViewSet):
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
 
+'''
 
+class VisualizationViewSet(viewsets.ModelViewSet):
+    queryset = Visualization.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [AllowAny]
+    serializer_class = VisualizationSerializer
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+
+        self.create(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 class PeriodViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrNone]
@@ -768,63 +877,25 @@ class PeriodViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
 
     def list(self, request, *args, **kwargs):
-        '''theDate = datetime.datetime.now()
-        print(theDate)
-
-        theMonth = theDate.month
-        print(theMonth)
-        theDayOfTheMonth = theDate.day
-        print(theDayOfTheMonth)
-
-        theHour = theDate.hour
-        print(theHour)
-
-        theMinute = theDate.minute
-        inAFewMinutes = theMinute + 1
-        print(theMinute)
-        print(theDate.strftime)
-        theDateString = theDate.strftime("%Y-%m-%d-%H:%M:%S.%f")
-        schedule = CrontabSchedule.objects.create(hour=theHour, minute=inAFewMinutes, month_of_year=theMonth,
-                                                  day_of_month=theDayOfTheMonth)
-        task = PeriodicTask.objects.create(crontab=schedule, name=theDateString,
-                                           task='kiterope.tasks.send_notification', args=json.dumps(['ExponentPushToken[A8Xg__J5oKIZtFo65N2604]', 'This is the message sent to you']))
-        #send_push_message('ExponentPushToken[u9Rw6jBgLm9MVSKXYeSk3p]', "Listing")
-        '''
-
-        #print("list")
-        #print(self.request.META)
-        #print(self.request.user.is_authenticated())
 
         try:
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
-            print("periodRangeStart %s" % periodRangeStart)
-            print("periodRangeEnd %s" % periodRangeEnd)
-
-
-            print("inside list2")
-            periodRangeStart = datetime.datetime.strptime(periodRangeStart, "%Y-%m-%d").date()
-            periodRangeEnd = datetime.datetime.strptime(periodRangeEnd, "%Y-%m-%d").date()
-            print("inside list3")
-
-            print("periodRangeStart %s" % periodRangeStart)
-            print("periodRangeEnd %s" % periodRangeEnd)
+            periodRangeStart = datetime.datetime.strptime(periodRangeStart, "%Y-%m-%d")
+            periodRangeEnd = datetime.datetime.strptime(periodRangeEnd, "%Y-%m-%d")
+            periodRangeEnd = periodRangeEnd + datetime.timedelta(days=1)
+            periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
 
         except:
-            periodRangeStart = str(datetime.datetime.now().date())
             periodRangeStart = datetime.datetime.now().date()  #+ datetime.timedelta(days=10)
-
             periodRangeEnd = periodRangeStart + datetime.timedelta(days=1)
-            #print ("periodRangeStart " + periodRangeStart)
-            #print ("periodRangeEnd " + periodRangeEnd)
+            periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
+
 
         request.user.is_authenticated()
-        currentUser = request.user
-
-
+        currentUser = self.request.user
 
         StepOccurrence.objects.updateStepOccurrences(currentUser, periodRangeStart, periodRangeEnd)
-        print("Stepoccurrence updateStepOccurrences")
         #print("occurrencesUpdated")
 
         queryset = self.filter_queryset(self.get_queryset())
@@ -860,34 +931,40 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        print("get queryset")
-        #user = self.request.user
         #userPlanQueryset = user.plan_set.all()
         try:
-            #print("inside Get Queryset")
+            self.request.user.is_authenticated()
+            currentUser = self.request.user
+
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
-            #print("inside Get Queryset2")
 
-            #periodRangeStart = datetime.date.strptime(periodRangeStart, "%Y-%m-%d")
-            #periodRangeEnd = datetime.date.strptime(periodRangeEnd, "%Y-%m-%d")
+            periodRangeStart = datetime.datetime.strptime(periodRangeStart, "%Y-%m-%d")
+            periodRangeEnd = datetime.datetime.strptime(periodRangeEnd, "%Y-%m-%d")
+            periodRangeEnd = periodRangeEnd + datetime.timedelta(days=1)
+            periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
 
-            #print("getQueryset periodRangeStart %s periodRangeEnd %s" % (periodRangeStart, periodRangeEnd))
-            #querySet = Contact.objects.filter((Q(sender=theUser) | Q(receiver=theUser)))
-            #theQueryset = StepOccurrence.objects.filter(Q(date__lte=periodRangeEnd))
-            userIsCurrentUser = Q(user=self.request.user)
-            dateLessThanEnd = Q(date__lte=periodRangeEnd)
+            theUserProfile = Profile.objects.get(user=currentUser)
+
+            periodRangeStart = toUTC(periodRangeStart, theUserProfile.timezone)
+            periodRangeEnd = toUTC(periodRangeEnd, theUserProfile.timezone)
+
             dateLaterThanStart = Q(date__gte=periodRangeStart)
+            dateLessThanEnd = Q(date__lte=periodRangeEnd)
             isSubscribed = Q(planOccurrence__isSubscribed=True)
+            userIsCurrentUser = Q(user=currentUser)
 
 
-            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & dateLessThanEnd & dateLaterThanStart).order_by('date')
+            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
-            periodRangeStart = datetime.datetime.now().date()
+            #periodRangeStart = datetime.datetime.now().date()
+            #print("inside get queryste periodRangeStart %s" % periodRangeStart)
 
-            periodRangeEnd = periodRangeStart
+#            periodRangeEnd = periodRangeStart
+ #           print("inside get queryste periodRangeEnd %s" % periodRangeEnd)
+
 
 
             theQueryset = StepOccurrence.objects.none()
@@ -1077,9 +1154,20 @@ class ProfileViewSet(viewsets.ModelViewSet):
         data = {i['id']: i for i in serializer.data}
         return Response(data)
 
+    def update(self, request, *args, **kwargs):
+        print(self.request.data)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
     def retrieve(self, request, pk=None):
         if pk == 'me':
-            currentUser = self.request.user.is_authenticated()
+            self.request.user.is_authenticated()
+            currentUser = self.request.user
             theProfile = Profile.objects.get(user=currentUser)
             # send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]', "did you get this?")
             # print(request.user.username)
@@ -1384,7 +1472,9 @@ def secret_page(request, *args, **kwargs):
 
 
 
-    
+def twitter(request, *args, **kwargs):
+    return HttpResponse('Secret contents!', status=200)
+
     
 conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 

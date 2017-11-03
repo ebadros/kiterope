@@ -46,6 +46,8 @@ router.register(r'users', views.UserViewSet)
 router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 
 router.register(r'updates', views.UpdateViewSet)
+router.register(r'visualizations', views.VisualizationViewSet)
+
 router.register(r'steps', views.StepViewSet)
 router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
@@ -91,7 +93,10 @@ router.register(r'^plans', views.PlanOccurrenceViewSet, base_name='PlanOccurrenc
 
 router.register(r'^period/(?P<periodRangeStart>[\w\-]+)/(?P<periodRangeEnd>[\w\-]+)', views.PeriodViewSet, base_name="StepOccurrence")
 #router.register(r'period', views.GoalViewSet, base_name='Goal')
+router.register(r'^programs/(?P<program_id>\w+)/updates', views.ProgramUpdateViewSet, base_name='Update')
+
 router.register(r'^steps/(?P<step_id>\w+)/updates', views.UpdateViewSet, base_name='Update')
+router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationViewSet, base_name='Visualization')
 
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
@@ -161,6 +166,8 @@ urlpatterns = [
       url(r'^admin/', admin.site.urls),
       url(r'^accounts/', include('allauth.urls')),
       url(r'^secret', views.secret_page, name='secret'),
+      url(r'^twitter', views.twitter, name='twitter'),
+
       url(r'^tinymce/', include('tinymce.urls')),
       #url(r'^s3/sign$', views.s3_sign_upload, name='s3_sign_upload'),
       url(r'^signS3Upload$', views.sign_s3_upload, name='sign_s3_upload'),

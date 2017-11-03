@@ -47,7 +47,16 @@ export const durations = [
     {value:'150', label: "2.5 hours"},
     {value:'180', label: "3 hours"},
     ];
-
+export const stepTypeOptions = [
+    {value:'COMPLETION', label: "Completion-Based Step"},
+    {value:'TIME', label: "Time-Based Step"},
+    //{value:'ORDERED_COMPLETION', label: "Ordered, Completion-Based Step"},
+    ]
+export const visualizationChoices = [
+    {value:"SPREADSHEET", label: "Spreadsheet"},
+    {value:"LINE", label:"Line Graph"},
+    {value:"BAR", label: "Bar Graph"},
+]
 export const times = [
     {value:'00:00', label: "12:00 am"},
     {value:'00:30', label: "12:30 am"},
@@ -122,6 +131,8 @@ export const customModalStyles = {
 };
 
 
+
+
 export const programCategoryOptions = [
     {value:"UNCATEGORIZED", label:"Uncategorized"},
 {value:"HEALTH_AND_FITNESS", label:"Health & Fitness"},
@@ -159,18 +170,18 @@ export const programScheduleLengths = [
     {value:'1y', label: "1 year"}];
 
 export const timeCommitmentOptions = [
-    {value:'10m', label: "10 minutes a day"},
-    {value:'20m', label: "20 minutes a day"},
-    {value:'30m', label: "30 minutes a day"},
-    {value:'40m', label: "40 minutes a day"},
-    {value:'50m', label: "50 minutes a day"},
+    {value:'10m', label: "10 minutes per day"},
+    {value:'20m', label: "20 minutes per day"},
+    {value:'30m', label: "30 minutes per day"},
+    {value:'40m', label: "40 minutes per day"},
+    {value:'50m', label: "50 minutes per day"},
 
-    {value:'1h', label: "1 hour a day"},
-    {value:'2h', label: "2 hours a day"},
-    {value:'3h', label: "3 hours a day"},
-    {value:'4h', label: "4 hours a day"},
-    {value:'5h', label: "5 hours a day"},
-    {value:'8h', label: "8 hours a day"}];
+    {value:'1h', label: "1 hour per day"},
+    {value:'2h', label: "2 hours per day"},
+    {value:'3h', label: "3 hours per day"},
+    {value:'4h', label: "4 hours per day"},
+    {value:'5h', label: "5 hours per day"},
+    {value:'8h', label: "8 hours per day"}];
 
 export const costFrequencyMetricOptions = [
     {value:'MONTH', label: "Per Month"},
@@ -232,7 +243,9 @@ export const formats = {
 export const customStepModalStyles = {
     overlay : {
 
-    backgroundColor   : 'rgba(0, 0, 0, 0.75)'
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+                        zIndex: 30,
+
   },
 
   content : {
@@ -245,6 +258,48 @@ export const customStepModalStyles = {
     outline                    : 'none',
     padding                    : '40px',
       paddingTop                :'10px',
+  }
+};
+
+export const stepModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '10%',
+    left                  : '10%',
+    right                 : '10%',
+    bottom                : '5%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '40px',
+      paddingTop                :'10px',
+  }
+};
+
+
+export const updateModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+                zIndex: 30,
+
+  },
+
+  content : {
+    top                   : '15%',
+    left                  : '30%',
+    right                 : '30%',
+    bottom                : '10%',
+
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '30px 30px 30px 30px',
   }
 };
 
@@ -278,5 +333,5 @@ function printObject(o) {
 
 
 
-module.exports = {  theServer, s3BaseUrl, periodOptions, s3IconUrl, programCategoryOptions, s3ImageUrl, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
-    TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, notificationSendMethodOptions,metricFormatOptions, elasticSearchDomain };
+module.exports = {  theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+    TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

@@ -233,10 +233,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
 
 
-                        <a className="item" style={style}onClick={() => this.handleURLPush('/messages/')}>
+                        {/*<a className="item" style={style}onClick={() => this.handleURLPush('/messages/')}>
                             <i className="large mail icon"/>
                             Messages
-                        </a>
+                        </a>*/}
                         <a className="item" style={style} onClick={() => this.handleURLPush('/settings/')}>
                             <i className="large settings icon"/>
                             Settings
@@ -282,10 +282,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </a>
 
 
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/messages')}>
+                    {/*<a className="item" style={style} onClick={() => this.handleURLPush('/messages')}>
                         <i className="large mail icon"/>
                         Messages
-                    </a>
+                    </a>*/}
                     <a className="item" style={style} onClick={() => this.handleURLPush('/settings/')}>
                         <i className="large settings icon"/>
                         Settings

@@ -231,8 +231,123 @@ export const deleteContact = (theContactId) => {
     }
 };
 
+export const setDailyPeriod = (theDailyPeriod) => {
+    return {
+        type: 'SET_DAILY_PERIOD',
+        dailyPeriod: theDailyPeriod,
+    }
+};
 
+export const setSearchQuery = (theSearchQuery) => {
+    return {
+        type: 'SET_SEARCH_QUERY',
+        searchQuery: theSearchQuery,
+    }
+}
 
+export const setSearchHitsVisibility = (theSearchHitsVisibility) => {
+    return {
+        type: 'SET_SEARCH_HITS_VISIBILITY',
+        searchHitsVisibility: theSearchHitsVisibility,
+    }
+}
+
+export const setUpdates = (theUpdates) => {
+    return {
+        type: 'SET_UPDATES',
+        updates: theUpdates,
+    }
+}
+
+export const removeStepFromUpdate = (theUpdateId, theStepId) => {
+    return {
+        type: 'REMOVE_STEP_FROM_UPDATE',
+        updateId: theUpdateId,
+        stepId: theStepId,
+    }
+}
+
+export const addStepToUpdate = (theUpdateId, theStepId) => {
+    return {
+        type:'ADD_STEP_TO_UPDATE',
+        updateId: theUpdateId,
+        stepId: theStepId,
+    }
+
+}
+
+export const clearTempStep = () => {
+    return {
+        type:'CLEAR_TEMP_STEP',
+    }
+
+}
+
+export const editUpdate = (theUpdateId, theUpdate) => {
+    return {
+        type: 'EDIT_UPDATE',
+        updateId: theUpdateId,
+        update: theUpdate,
+    }
+}
+
+export const addUpdate = (theUpdate) => {
+    return {
+        type: 'ADD_UPDATE',
+        update: theUpdate,
+    }
+}
+
+export const addUpdateWithoutStep = (theUpdate) => {
+    console.log("addUpdateWithoutStep")
+    return {
+        type: 'ADD_UPDATE_WITHOUT_STEP',
+        update: theUpdate,
+    }
+}
+
+export const setUpdateModalData = (theUpdateModalData) => {
+    return {
+        type: 'SET_UPDATE_MODAL_DATA',
+        updateModalData: theUpdateModalData,
+    }
+};
+
+export const setStepModalData = (theStepModalData) => {
+    return {
+        type: 'SET_STEP_MODAL_DATA',
+        stepModalData: theStepModalData,
+    }
+};
+
+export const setVisualizationModalData = (theVisualizationModalData) => {
+    return {
+        type: 'SET_VISUALIZATION_MODAL_DATA',
+        visualizationModalData: theVisualizationModalData,
+    }
+};
+
+export const editVisualization = (theVisualizationId, theVisualization) => {
+    return {
+        type: 'EDIT_VISUALIZATION',
+        visualizationId: theVisualizationId,
+        visualization: theVisualization,
+    }
+}
+
+export const addVisualization = (theVisualization) => {
+    return {
+        type: 'ADD_VISUALIZATION',
+        visualization: theVisualization,
+    }
+}
+
+export const deleteVisualization = (theVisualizationId) => {
+    return {
+        type: 'DELETE_VISUALIZATION',
+        visualizationId: theVisualizationId,
+    }
+}
 
 
 
@@ -240,6 +355,20 @@ export const setStepOccurrences = (theStepOccurrences) => {
     return {
         type: 'SET_STEP_OCCURRENCES',
         stepOccurrences: theStepOccurrences,
+    }
+};
+
+export const setVisualizations = (theVisualizations) => {
+    return {
+        type: 'SET_VISUALIZATIONS',
+        visualizations: theVisualizations,
+    }
+};
+
+export const setUpdateOccurrences = (theUpdateOccurrences) => {
+    return {
+        type: 'SET_UPDATE_OCCURRENCES',
+        updateOccurrences: theUpdateOccurrences,
     }
 };
 
@@ -268,4 +397,4 @@ export const showSidebar = (isSidebarVisible) => {
 
 
 
-module.exports = { setCurrentUser, setSettings, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { clearTempStep, setUpdateOccurrences, setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

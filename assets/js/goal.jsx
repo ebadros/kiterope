@@ -64,7 +64,7 @@ $.ajaxSetup({
     }
 });
 
-
+import {LineGraph } from './dataVis/line'
 export class GoalEntryPage extends React.Component {
     constructor(props) {
         super(props);
@@ -594,6 +594,8 @@ export class GoalDetailPage extends React.Component {
             <PlanForm onSubmit={this.handlePlanSubmit} serverErrors={this.state.serverErrors} />
             </div>
                         <PlanList goalId={this.props.params.goal_id} />
+                        <div className="ui three column grid">
+                        <LineGraph /></div>
 
 
 
@@ -1673,7 +1675,7 @@ export class GoalSMARTForm extends React.Component {
 
 }
 
-export class SimpleGoalForm extends GoalForm {
+/*export class SimpleGoalForm extends GoalForm {
     constructor(props) {
         super(props);
         autobind(this);
@@ -1810,7 +1812,7 @@ export class SimpleGoalForm extends GoalForm {
     }
 
 
-}
+}*/
 export class GoalBasicView extends React.Component {
     constructor(props) {
         super(props);
@@ -1890,4 +1892,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView, SimpleGoalForm, };
+module.exports = { GoalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView,  };

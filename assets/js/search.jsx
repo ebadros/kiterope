@@ -28,6 +28,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'
+import { updateStep, removePlan, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import {
     SearchBox,
@@ -109,7 +110,7 @@ beforeSend: function (xhr, type) {
 
 const placeholderText = [
     "run a mile in under 6 minutes",
-    "learn to play the guitar like Jimmy Page",
+    "learn to play the guitar",
     "learn to speak Chinese",
     "increase my income by 80% this year",
     "become a better parent",
@@ -126,39 +127,57 @@ export class SearchPage extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
+        this.state = {
+            searchQuery:''
+        }
     }
 
     handleFormSubmit(query) {
+                    store.dispatch(setSearchQuery(query["query"]))
+
         $.ajax({
         url: ("/api/searchQuery/"),
         dataType: 'json',
         type: 'POST',
         data: query,
-        success: console.log("success"),
+        success:console.log("success"),
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
         }.bind(this)
     });
 
     }
+    componentDidMount = () => {
+        if (this.props.params.search_query != undefined) {
+            this.setState({searchQuery:this.props.params.search_query })
+            store.dispatch(setSearchQuery(this.props.params.search_query))
+            if (this.props.params.search_query != "") {
+                //store.dispatch(setSearchHitsVisibility(true))
+
+
+            } else {
+                //store.dispatch(setSearchHitsVisibility(false))
+
+            }
+
+        }
+
+
+
+    }
+
+
+
 
 
     render() {
-        if (this.props.params.search_query) {
-            return (
-                <div>
-                <Search query={this.props.params.search_query} onFormSubmit={this.handleFormSubmit}/>
-                                        <Footer /></div>
-
-            )
-        } else {
             return (
                 <div>
                 <Search onFormSubmit={this.handleFormSubmit}/>
                                         <Footer /></div>
 
             )
-        }
+
     }
 }
 
@@ -187,17 +206,29 @@ export class Search extends React.Component {
     componentDidMount = () => {
         var intervalID = setInterval(this.changePlaceholderText, 2000);
         this.setState({intervalID:intervalID});
-        if (this.props.query != null) {
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.gui.searchQuery != undefined)
             this.setState({
-                query: this.props.query,
-                queryUrl:this.props.query,
-                resultsVisible: true,
+                query: this.props.storeRoot.gui.searchQuery,
+                queryUrl:this.props.storeRoot.gui.searchQuery,
             })
         }
 
 
 
     };
+
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.gui.searchQuery != undefined) {
+                this.setState({
+                    query: nextProps.storeRoot.gui.searchQuery,
+                    queryUrl: nextProps.storeRoot.gui.searchQuery,
+                })
+            }
+        }
+
+    }
 
 
 
@@ -223,6 +254,8 @@ export class Search extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
+        store.dispatch(setSearchQuery(this.state.query))
+
         store.dispatch(push("/search/" + this.state.query + "/"));
 
         this.setState({
@@ -239,19 +272,11 @@ export class Search extends React.Component {
     };
 
     handleCloseButtonClicked = () => {
-        this.setState({
-            query:"",
-            queryUrl:"",
-            resultsVisible:"false",
 
-            },
-                            //store.dispatch(push('/search/'))
+        store.dispatch(setSearchQuery(""))
+        store.dispatch(setSearchHitsVisibility(false))
+                    store.dispatch(push("/search/") )
 
-            store.dispatch(push("/search/") )
-
-
-
-        )
 
     };
     handleNeedsLogin = () => {
@@ -289,6 +314,15 @@ _handleKeyPress = (e) => {
             $(this.refs["ref_closeButton"]).show();
 
         }
+
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+                        if (!forMobile) {
+
     return (
         <div>
             <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
@@ -340,15 +374,14 @@ _handleKeyPress = (e) => {
                     <div className="ui grid">
                         <div className="ui eleven wide column">&nbsp;</div>
                         <div className="ui four wide column center aligned noPaddingTop">
-                            <div className="ui fluid"><Link to="browse">Browse
+                            <div className="ui fluid"><Link to="/browse/">Browse
                                 Plans</Link></div>
                         </div>
 
                     </div>
 
 
-                    <SearchHitsGrid url={this.state.queryUrl} visible={this.state.resultsVisible}
-                                    needsLogin={this.handleNeedsLogin}/>
+                    <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
 
                 </div>
                 <div className="spacer">&nbsp;</div>
@@ -403,7 +436,103 @@ _handleKeyPress = (e) => {
 
 
 
+    )} else {
+                            return (
+        <div>
+            <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
+                                     modalShouldClose={this.handleModalClosed}/>
+            <div className="ui page container">
+                <div className="ui mobileSpacer">&nbsp;</div>
+
+                    <div className="ui grid">
+
+                        <div className="ui centered row header"><h2>What do you want to do?</h2></div>
+
+
+                        <div className="ui centered row">
+                            <div className="ui column">
+
+
+                                    <input placeholder={this.state.placeholder} className="mobileSearchInput"
+                                           type="text" value={this.state.query} onKeyPress={this._handleKeyPress}
+                                           onChange={this.handleChangeQuery}/>
+                                    <div className="mobileSearchCloseButton" ref="ref_closeButton"
+                                         onClick={this.handleCloseButtonClicked}>
+                                        <i className="large close icon"></i></div>
+
+                                </div>
+                            </div>
+                        <div className="ui row">&nbsp;</div>
+
+                        <div className="ui row">
+                                                        <div className="ui column">
+
+                            <div className="ui fluid purple left floated medium button"
+                                 onClick={this.handleSubmit} style={{paddingBottom: "0 !important"}}>Search Plans
+                            </div>
+                                                            </div>
+                        </div>
+                <div className="ui centered row">
+                                                             <Link to="/browse/">Browse
+                                Plans</Link>
+                                                            </div>
+                    </div>
+
+
+
+
+
+
+
+                    <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
+<div className="mobileSpacer">&nbsp;</div>
+                </div>
+
+
+                <div className="blue">
+                    <div className="centered header topPadding"><h3>Kiterope helps you get things done</h3></div>
+
+                    <div className="ui page container">
+                        <div className="ui center aligned four column grid">
+                            <div className="ui row">&nbsp;</div>
+                            <div className="ui row">
+                                <div className="column">
+                                    <img width="70%" src="/static/images/goal.svg"></img>
+                                </div>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/strategy.svg"></img>
+                                </div>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/bar-chart.svg"></img>
+                                </div>
+                                <div className="column">
+                                    <img width="70%" src="/static/images/checked.svg"></img>
+                                </div>
+                            </div>
+
+                            <div className="ui row">
+
+                                <div className="column mediumResponsiveText">Keeps you focused on achieving your goals
+                                </div>
+                                <div className="column mediumResponsiveText">Offers step-by-step plans
+                                </div>
+                                <div className="column mediumResponsiveText">Tracks your progress
+                                </div>
+                                <div className="column mediumResponsiveText">Keeps you motivated
+                                </div>
+                            </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+
+
+
     )
+                        }
     }
 
 }
@@ -416,53 +545,23 @@ export class SearchHitsGrid extends React.Component {
         this.state = {
             data: [],
             url: "",
-            visible:"false",
             activePage: 1,
             count:"",
-            plans:{}
+            plans:{},
+            query:"",
         }
     }
 
-/*
-    loadObjectsFromServerHaystack = () =>  {
-        if (this.state.url != "") {
-            if (this.state.activePage != 1) {
-                var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
-            } else {
-                var theUrl = elasticSearchDomain + "haystack/_search/?q=" + this.state.url
-            }
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                xhrFields: {
-        },
-                headers: {
-                    'Access-Control-Allow-Origin': 'http://localhost:8000'
-                },
-                crossDomain: true,
-                success: function (data) {
-                    this.setState({
 
-                        data: data.hits.hits,
-
-                    }, this.showSearchHits)
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-                }.bind(this)
-            });
-
-        }
-      }
-*/
       loadObjectsFromServer = () =>  {
-        if (this.state.url != "") {
+          console.log("loadObjectsFromServer ")
+        if (this.state.query != "") {
+                      console.log("loadObjectsFromServer " + this.state.query)
+
             if (this.state.activePage != 1) {
-                var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.url
+                var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.query
             } else {
-                var theUrl = "https://hyjeadr7z5.execute-api.us-west-1.amazonaws.com/beta/?q=" + this.state.url
+                var theUrl = "https://hyjeadr7z5.execute-api.us-west-1.amazonaws.com/beta/?q=" + this.state.query
             }
             $.ajax({
                 url: theUrl,
@@ -474,7 +573,8 @@ export class SearchHitsGrid extends React.Component {
 
                         data: data.hits.hits,
 
-                    }, this.showSearchHits)
+                    }, )
+                    store.dispatch(setSearchHitsVisibility(true))
 
                 }.bind(this),
                 error: function (xhr, status, err) {
@@ -484,49 +584,24 @@ export class SearchHitsGrid extends React.Component {
 
         }
       };
-/*
-      loadObjectsFromServerLocal = () =>  {
-        if (this.state.url != "") {
-            if (this.state.activePage != 1) {
-                var theUrl = "/api/program/search?page=" + this.state.activePage + "&text__contains=" + this.state.url
-            } else {
-                var theUrl = "/api/program/search/?text__contains=" + this.state.url
-            }
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    this.setState({
-                        count: data.count,
-                        next:data.next,
-                        previous:data.previous,
-                        data: data.results,
 
-                    }, this.showSearchHits)
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-                }.bind(this)
-            });
-
-        }
-      }*/
-
-      showSearchHits = () => {
-          this.setState({
-              visible:"true",
-          });
-
-            $(this.refs["ref_searchHits"]).slideDown();
-                    //clearInterval(this.state.intervalID)
-
-    };
 
       componentDidMount = () => {
           $(this.refs["ref_searchHits"]).hide();
-         // this.loadObjectsFromServer
+          if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.gui.searchQuery != undefined) {
+                this.setState({
+                    query: this.props.storeRoot.gui.searchQuery,
+                    queryUrl: this.props.storeRoot.gui.searchQuery,
+                    url: this.props.storeRoot.gui.searchQuery
+
+                },          this.loadObjectsFromServer)
+
+            }
+        }
+
+          //this.showOrHideSearchHits(this.props.visible)
+
           //var intervalID = setInterval(this.loadObjectsFromServer, 2000);
         //this.setState({intervalID:intervalID});
 
@@ -537,26 +612,52 @@ export class SearchHitsGrid extends React.Component {
           clearInterval(this.state.intervalID)
       }
 
-      componentWillReceiveProps(nextProps) {
+      showOrHideSearchHits = (shouldBeVisible)=> {
+          console.log("showOrHideSearchHits " + shouldBeVisible)
 
-            if (this.props.url != nextProps.url ) {
-                this.setState({
-                    url: nextProps.url,
-                    visible: nextProps.visible,
+          if (shouldBeVisible) {
+              console.log("showing ref_searchHits")
+              $(this.refs["ref_searchHits"]).slideDown();
+          } else {
+                            console.log("hiding ref_searchHits")
 
-                }, this.loadObjectsFromServer)
+              $(this.refs["ref_searchHits"]).slideUp();
+
+          }
+
+      }
+
+      componentWillReceiveProps = (nextProps) => {
+          if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.gui.searchQuery != undefined) {
+                if (this.state.query != nextProps.storeRoot.gui.searchQuery) {
+
+                    this.setState({
+                        query: nextProps.storeRoot.gui.searchQuery,
+                        queryUrl: nextProps.storeRoot.gui.searchQuery,
+                        url: nextProps.storeRoot.gui.searchQuery
+
+                    }, this.loadObjectsFromServer)
+                }
 
             }
 
-            if (this.props.visible != nextProps.visible) {
-                this.setState({
-                    visible: nextProps.visible,
-                    count:"",
-                })
+                        if (nextProps.storeRoot.gui.searchHitsVisibility != undefined) {
 
-            }
+                            if (this.state.visible != nextProps.storeRoot.gui.searchHitsVisibility) {
+                                this.setState({
+                                    visible: nextProps.storeRoot.gui.searchHitsVisibility,
+                                })
+                                this.showOrHideSearchHits(nextProps.storeRoot.gui.searchHitsVisibility)
+                            }
+                        }
 
-            if (nextProps.storeRoot != undefined) {
+
+
+
+
+
+
                 if (nextProps.storeRoot.plans) {
                     if (this.state.plans != this.props.storeRoot.plans) {
                         this.setState({plans: nextProps.storeRoot.plans})
@@ -603,18 +704,21 @@ export class SearchHitsGrid extends React.Component {
   };
 
     render () {
-        if (this.state.visible == 'true') {
-            $(this.refs["ref_searchHits"]).slideDown();
 
-        } else {
-            $(this.refs["ref_searchHits"]).slideUp();
 
-        }
+
+
+
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
 
          if (this.state.data ) {
             var objectNodes = this.state.data.map(function (objectData) {
-                        var theUserPlanOccurrenceId = "";
+                var theUserPlanOccurrenceId = "";
 
                 if (this.props.storeRoot) {
                     if (this.props.storeRoot.plans) {
@@ -657,27 +761,65 @@ export class SearchHitsGrid extends React.Component {
 
         }
         if (this.state.count == 0) {
+            if (!forMobile) {
+
             var noResultsFoundText = (
                 <div className="ui grid largeType">
                     <div className="ui row">
                         <div className="ui two wide column">&nbsp;</div>
-                        <div className="ui center aligned ten wide column">We didn't find any existing plans that seem to match.</div>
+                        <div className="ui center aligned ten wide column">We didn't find any existing plans that seem
+                            to match.
                         </div>
-                        <div className="ui row">
-                            <div className="ui two wide column">&nbsp;</div>
+                    </div>
+                    <div className="ui row">
+                        <div className="ui two wide column">&nbsp;</div>
 
-                    <div className="ui center aligned ten wide column">
-                        <div className="ui two column grid">
-                            <div className="column">
+                        <div className="ui center aligned ten wide column">
+                            <div className="ui two column grid">
+                                <div className="column">
 
-                            <div className="ui fluid  large purple button" onClick={this.handleWePlanClick}>Let Us Design a Plan for You</div>
+                                    <div className="ui fluid  large purple button" onClick={this.handleWePlanClick}>Let
+                                        Us Design a Plan for You
+                                    </div>
+                                </div>
+                                <div className="column">
+
+                                    <div className="ui fluid  large purple button" onClick={this.handleYouPlanClick}>
+                                        Design Your Own Plan
+                                    </div>
+                                </div>
                             </div>
-                            <div className="column">
-
-                             <div className="ui fluid  large purple button" onClick={this.handleYouPlanClick}>  Design Your Own Plan</div>
                         </div>
-                        </div>    </div>   </div></div>
-                    )
+                    </div>
+                </div>
+            )
+        } else {
+                var noResultsFoundText = (
+                    <div>
+                <div className="ui grid">
+                    <div className="ui centered row header"><h4>
+                        We didn't find any existing plans that
+                            match.</h4>
+                        </div>
+                    </div>
+                            <div className="ui two column grid">
+                                <div className="ui column">
+
+                                    <div className="ui fluid  medium purple button" onClick={this.handleWePlanClick}>Let
+                                        Us Design a Plan for You
+                                    </div>
+                                </div>
+                                <div className="ui column">
+
+                                    <div className="ui fluid  medium purple button" onClick={this.handleYouPlanClick}>
+                                        Design Your Own Plan
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+
+            )
+            }
 
         }
         var pagination = this.getPagination();

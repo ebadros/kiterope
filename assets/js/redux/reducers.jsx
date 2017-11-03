@@ -14,8 +14,30 @@ function printObject(o) {
   alert(out);
 }
 
+function removeItem(array, item){
+    for(var i in array){
+        if(array[i]==item){
+            array.splice(i,1);
+            break;
+        }
+    }
+}
+
+
 export const rootReducer = (state = {}, action) => {
   switch(action.type) {
+
+      case 'SET_UPDATE_MODAL_DATA':
+          return Object.assign({}, state, {updateModalData: action.updateModalData});
+          break;
+      case 'SET_STEP_MODAL_DATA':
+          return Object.assign({}, state, {stepModalData: action.stepModalData});
+          break;
+
+      case 'SET_VISUALIZATION_MODAL_DATA':
+          return Object.assign({}, state, {visualizationModalData: action.visualizationModalData});
+          break;
+
   case 'SET_CURRENT_USER':
     return Object.assign({}, state, { user: action.user });
     break;
@@ -61,11 +83,20 @@ export const rootReducer = (state = {}, action) => {
       var initialGoals = state.goals;
 
        delete initialGoals[action.goalId];
-
-
-
-      return Object.assign({}, state,  {goals : initialGoals});
+          return Object.assign({}, state,  {goals : initialGoals});
       break;
+
+      case 'SET_DAILY_PERIOD':
+              return Object.assign({}, state, { dailyPeriod: action.dailyPeriod });
+
+case 'SET_SEARCH_QUERY':
+              return Object.assign({}, state, { searchQuery: action.searchQuery });
+
+    case 'SET_SEARCH_HITS_VISIBILITY':
+              return Object.assign({}, state, { searchHitsVisibility: action.searchHitsVisibility });
+
+
+
   case 'SET_PROGRAMS':
     return Object.assign({}, state, { programs: action.programs });
     break;
@@ -123,6 +154,113 @@ export const rootReducer = (state = {}, action) => {
   case 'SET_STEP_OCCURRENCES':
     return Object.assign({}, state, { stepOccurrences: action.stepOccurrences });
     break;
+
+      case 'SET_VISUALIZATIONS':
+    return Object.assign({}, state, { visualizations: action.visualizations });
+    break;
+
+      case 'SET_UPDATE_OCCURRENCES':
+    return Object.assign({}, state, { updateOccurrences: action.updateOccurrences });
+    break;
+
+      case 'SET_UPDATES':
+    return Object.assign({}, state, { updates: action.updates });
+    break;
+      case 'CLEAR_TEMP_STEP':
+          var theUpdates = state.updates
+          delete theUpdates["tempStep"]
+
+    return Object.assign({}, state, { updates: theUpdates });
+    break;
+
+      case 'ADD_STEP_TO_UPDATE':
+       var theUpdates = state.updates
+          var theUpdate = theUpdates[action.updateId]
+            theUpdate.steps_ids.push(action.stepId)
+    return Object.assign({}, state, { updates: theUpdate });
+            break;
+
+
+      case 'REMOVE_STEP_FROM_UPDATE':
+      var theUpdates = state.updates;
+          var theUpdate = theUpdates[action.updateId]
+          removeItem(theUpdate.steps_ids, action.stepId)
+
+          if (state.updates["tempStep"] != undefined) {
+
+              var theTempStepUpdates = state.updates["tempStep"]
+              delete theTempStepUpdates[action.updateId]
+              theUpdates["tempStep"] = theTempStepUpdates
+          }
+
+      return Object.assign({}, state,  {updates : theUpdates});
+      break;
+
+      case 'EDIT_UPDATE':
+          var theUpdates = state.updates;
+          console.log("edit update " + action.updateId + " " + action.update)
+          theUpdates[action.updateId] = action.update
+          return Object.assign({}, state,  {updates : theUpdates});
+      break;
+
+      case 'ADD_UPDATE':
+
+        var theUpdates = state.updates;
+
+        theUpdates[action.update.id] = action.update;
+
+          var thePrograms = state.programs
+
+          var theProgram = thePrograms[action.update.program]
+          var theProgramUpdates = theProgram.updates
+          theProgramUpdates.push(action.update)
+
+
+
+      return Object.assign({}, state, { updates: theUpdates, programs:thePrograms });
+      break;
+
+      case 'ADD_UPDATE_WITHOUT_STEP':
+
+        var theUpdates = state.updates;
+          var tempStepUpdates = {}
+          if (theUpdates["tempStep"] != undefined) {
+              tempStepUpdates = theUpdates["tempStep"]
+          }
+          tempStepUpdates[action.update.id] = action.update
+
+        theUpdates["tempStep"] = tempStepUpdates
+      return Object.assign({}, state, { updates: theUpdates });
+      break;
+
+      case 'ADD_VISUALIZATION':
+          var theVisualization = action.visualization
+
+          var thePrograms = state.programs
+          var theVisualizations = state.programs[action.visualization.program].visualizations
+        theVisualizations[action.visualization.id] = action.visualization;
+      return Object.assign({}, state, { programs:thePrograms });
+      break;
+
+      case 'EDIT_VISUALIZATION':
+          var thePrograms = state.programs
+          var theVisualizations = thePrograms[action.visualization.program].visualizations
+        theVisualizations[action.visualizationId] = action.visualization;
+      return Object.assign({}, state, { programs:thePrograms });
+      break;
+
+      case 'DELETE_VISUALIZATION':
+          var thePrograms = state.programs
+          var theProgram = thePrograms[action.visualization.program]
+          var theVisualizations = theProgram.visualizations
+
+         delete theVisualizations[action.visualizationId]
+
+      return Object.assign({}, state, { programs:thePrograms });
+      break;
+
+
+
   case 'SET_CONTACTS':
     return Object.assign({}, state, { contacts: action.contacts });
     break;

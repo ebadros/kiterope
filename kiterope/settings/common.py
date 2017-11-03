@@ -386,6 +386,7 @@ REST_FRAMEWORK = {
 
     ),
 
+
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
 
     #'DEFAULT_PAGINATION_CLASS': 'kiterope.views.StandardResultsSetPagination',

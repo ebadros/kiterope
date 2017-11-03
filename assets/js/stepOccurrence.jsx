@@ -28,13 +28,14 @@ import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 import {UpdateOccurrenceList } from './updateOccurrence'
+import {SaveButton } from './settings'
 
 
 import {ImageUploader,   ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
-import { makeEditable, StepCalendarComponent, StepEditCalendarComponent, ProgramCalendar } from './calendar'
+import { makeEditable, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
@@ -118,10 +119,13 @@ export class StepOccurrenceItem extends React.Component {
             image:"",
             title:"",
             id:"",
+            date:"",
             updateOccurrences:[],
             doneSaving: true,
             stepOccurrenceDoneSaving:true,
             updateOccurrenceDoneSaving:true,
+            saved: "Saved",
+
 
 
 
@@ -150,7 +154,8 @@ export class StepOccurrenceItem extends React.Component {
             title: this.props.stepOccurrenceData.step.title,
             image:this.props.stepOccurrenceData.step.image,
             description: this.props.stepOccurrenceData.step.description,
-            wasCompleted: this.props.stepOccurrenceData.wasCompleted,
+                            date: moment(this.props.stepOccurrenceData.date).format("MM/DD/YYYY HH:mm:SS"),
+
             updateOccurrences: this.props.stepOccurrenceData.updateOccurrences,
             data:this.props.stepOccurrenceData,
 
@@ -170,36 +175,28 @@ export class StepOccurrenceItem extends React.Component {
             this.setState({data: nextProps.stepOccurrenceData,
             id: nextProps.stepOccurrenceData.id,
             title: nextProps.stepOccurrenceData.step.title,
+                date: moment(nextProps.stepOccurrenceData.date).format("MM/DD/YYYY hh:mm:ss"),
             image:nextProps.stepOccurrenceData.step.image,
             description: nextProps.stepOccurrenceData.step.description,
                 updateOccurrences: nextProps.stepOccurrenceData.updateOccurrences,
 
-            wasCompleted: nextProps.stepOccurrenceData.wasCompleted,})
+            })
         }
     }
 
 
 
 
-    handleWasCompletedChange(e) {
-        if (this.state.wasCompleted) {
-            this.setState({
-                wasCompleted:false
-            })
 
-        } else {
-            this.setState({
-                wasCompleted:true
-            })
-
-        }
-    }
 
 
 
     handleSubmit(updateOccurrence) {
         this.setState({doneSaving:false});
-        var stepOccurrence = {
+        this.setState({
+            saved: "Saving"
+        });
+        /*var stepOccurrence = {
             id:this.state.id,
             wasCompleted: this.state.wasCompleted
         };
@@ -214,24 +211,28 @@ export class StepOccurrenceItem extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({stepOccurrenceDoneSaving:true});
+                    this.setState({
+                        stepOccurrenceDoneSaving:true,
+                    saved: "Saved"});
                     if (this.state.updateOccurrenceDoneSaving) {
                         this.setState({doneSaving:true})
                     }
 
 
 
+
                 }.bind(this),
                 error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,
+                        saved:"Unsaved",
                     })
 
                 }.bind(this)
-            });
-        var theUrl = "/api/updateOccurrences/" + updateOccurrence.id + "/";
+            });*/
+        if (updateOccurrence != undefined) {
+            var theUrl = "/api/updateOccurrences/" + updateOccurrence.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -241,12 +242,14 @@ export class StepOccurrenceItem extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({updateOccurrenceDoneSaving:true});
-                    if (this.state.stepOccurrenceDoneSaving) {
-                        this.setState({doneSaving:true})
-                    }
-
-
+                    this.setState({
+                        updateOccurrenceDoneSaving: true,
+                        saved: "Saved",
+                        doneSaving: true
+                    });
+                    //if (this.state.stepOccurrenceDoneSaving) {
+                    //    this.setState({doneSaving: true})
+                    //}
 
 
                 }.bind(this),
@@ -255,16 +258,36 @@ export class StepOccurrenceItem extends React.Component {
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,
+                        saved: "Unsaved",
                     })
 
                 }.bind(this)
             });
+        }
 
+    }
+
+    getInputs() {
+        if ((this.state.updateOccurrences != undefined) && (this.state.updateOccurrences.length != 0)){
+
+            return (
+                <div>
+<UpdateOccurrenceList data={this.state.updateOccurrences} />
+                    </div>)
+        } else {
+            return(
+            <div>
+            </div>
+            )
+
+        }
     }
 
 
 
     render () {
+
+        var theInputs = this.getInputs()
             return (
                 <div key={`ref_stepOccurrenceItem_${this.state.data.id}`}
                      className="column">
@@ -275,25 +298,12 @@ export class StepOccurrenceItem extends React.Component {
                         <div className="stepOccurrenceTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
 </div>
                         <div ref="ref_detail">
+                            {this.state.data.type == "TIME" ? <div>{this.state.date}</div>:null}
                             <div className="itemDetailSmall">
                                 <div dangerouslySetInnerHTML={{__html: this.state.description}}></div>
                             </div>
                         </div>
-                        <div className="ui row">&nbsp;</div>
-
-
-                        <div className="ui center aligned middle aligned grid height-100">
-
-
-                            <div className="pretty primary circle smooth huge-checkbox noRightPadding">
-                                <input type="checkbox" id="id_wasCompleted" checked={this.state.wasCompleted} onChange={this.handleWasCompletedChange} />
-                                <label><i className="mdi mdi-check"></i> </label>
-                            </div>
-                        </div>
-                                                    <div className="row">&nbsp;</div>
-<UpdateOccurrenceList data={this.state.updateOccurrences} handleSubmit={this.handleSubmit} doneSaving={this.state.doneSaving}/>
-
-
+                        {theInputs}
 
 
                 </div></div>
