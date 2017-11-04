@@ -393,8 +393,34 @@ updateWindowDimensions() {
     loadProgramData() {
                     if (!this.state.programDataLoaded) {
 
+                        fetch("/api/programs/", {
+                            method: 'GET',
+                            credentials: "same-origin",
 
-                        var theUrl = "/api/programs/";
+                            headers: {
+
+                                'Authorization': 'Token ' + localStorage.token,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+
+
+                        })
+                            .then(response => {
+
+                                return response.json()
+                            })
+                            .then(data => {
+                                //console.log("here's the plan data " + data)
+                                store.dispatch(setPrograms(data))
+                                this.setState({programDataLoaded:true})
+
+
+                            })
+                            .catch(error => console.log(error));
+
+
+                        /*var theUrl = "/api/programs/";
                         $.ajax({
                             url: theUrl,
                             dataType: 'json',
@@ -414,7 +440,7 @@ updateWindowDimensions() {
 
                             }.bind(this),
 
-                        });
+                        });*/
                     }
     }
 

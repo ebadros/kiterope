@@ -556,8 +556,8 @@ export class UpdateOccurrenceInput extends React.Component {
              <Measure onMeasure={(dimensions) => {
                 this.setState({dimensions})
             }}>
-            <div className="ui center aligned middle aligned grid height-100">
-                            <div className="pretty primary circle smooth huge-checkbox noRightPadding">
+            <div className="ui center aligned middle aligned grid height-100" style={{marginTop:10, marginBottom:10}}>
+                            <div className="pretty primary circle smooth huge-checkbox noRightPadding" >
                                 <input type="checkbox" id="id_wasCompleted" checked={this.state.boolean} onChange={this.handleBooleanChange} />
                                 <label><i className="mdi mdi-check"></i> </label>
                             </div>
