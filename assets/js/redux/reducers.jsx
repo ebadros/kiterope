@@ -1,5 +1,6 @@
 
 import { createStore, combineReducers } from 'redux';
+import {REHYDRATE} from 'redux-persist/constants'
 
 
 
@@ -26,6 +27,16 @@ function removeItem(array, item){
 
 export const rootReducer = (state = {}, action) => {
   switch(action.type) {
+
+      case REHYDRATE:
+          console.log("REHYDRATING")
+    var rootReducerPayload = action.payload.rootReducer
+  if (rootReducerPayload) {
+                console.log(rootReducerPayload)
+
+      return Object.assign({}, state, rootReducerPayload)
+  }
+    break;
 
       case 'SET_UPDATE_MODAL_DATA':
           return Object.assign({}, state, {updateModalData: action.updateModalData});

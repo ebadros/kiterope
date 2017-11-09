@@ -96,7 +96,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
             }
 
             this.setState({
-                visible: this.props.storeRoot.gui.isSidebarVisible
+                visible: false
             });
 
 

@@ -938,17 +938,64 @@ return thePlans
         var programUpdates = this.state.updates
         var uniqueProgramUpdates = []
         var uniqueProgramUpdatesTester = []
-        var programUpdatesArray = Object.keys(programUpdates).map((key) => {
-            return programUpdates[key]
-        })
+        if (programUpdates != undefined ) {
+            var programUpdatesArray = Object.keys(programUpdates).map((key) => {
+                return programUpdates[key]
+            })
 
-        programUpdatesArray.map((theUpdate) => {
-            if (this.state.programId != undefined) {
-                console.log("programId is not undefined " + theUpdate.program)
-                if (this.state.programId == theUpdate.program) {
-                    console.log("theUpdate.program is " + theUpdate.program)
+            programUpdatesArray.map((theUpdate) => {
+                if (this.state.programId != undefined) {
+                    console.log("programId is not undefined " + theUpdate.program)
+                    if (this.state.programId == theUpdate.program) {
+                        console.log("theUpdate.program is " + theUpdate.program)
 
 
+                        if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            })) == -1) {
+                            uniqueProgramUpdates.push(theUpdate)
+                            uniqueProgramUpdatesTester.push(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            }))
+
+                        }
+                    }
+                } else if ((this.state.planId != undefined) && (this.state.planId != 'ALL')) {
+                    var theProgramId
+                    if (this.props.storeRoot != undefined) {
+                        if (this.props.storeRoot.plans != undefined) {
+                            theProgramId = this.props.storeRoot.plans[this.state.planId].program
+                            if (theProgramId == theUpdate.program) {
+
+                                if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    })) == -1) {
+                                    uniqueProgramUpdates.push(theUpdate)
+                                    uniqueProgramUpdatesTester.push(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    }))
+                                }
+
+                            }
+                        }
+                    }
+                } else {
                     if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
                             name: theUpdate.name,
                             measuringWhat: theUpdate.measuringWhat,
@@ -967,58 +1014,12 @@ return thePlans
 
                     }
                 }
-            } else if ((this.state.planId != undefined) && (this.state.planId != 'ALL')) {
-                var theProgramId
-                if (this.props.storeRoot != undefined) {
-                    if (this.props.storeRoot.plans != undefined) {
-                        theProgramId = this.props.storeRoot.plans[this.state.planId].program
-                        if (theProgramId == theUpdate.program) {
-
-                            if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
-                                    name: theUpdate.name,
-                                    measuringWhat: theUpdate.measuringWhat,
-                                    units: theUpdate.units,
-                                    metricLabel: theUpdate.metricLabel,
-                                    format: theUpdate.format
-                                })) == -1) {
-                                uniqueProgramUpdates.push(theUpdate)
-                                uniqueProgramUpdatesTester.push(JSON.stringify({
-                                    name: theUpdate.name,
-                                    measuringWhat: theUpdate.measuringWhat,
-                                    units: theUpdate.units,
-                                    metricLabel: theUpdate.metricLabel,
-                                    format: theUpdate.format
-                                }))
-                            }
-
-                        }
-                    }
-                }
-            } else {
-                if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
-                        name: theUpdate.name,
-                        measuringWhat: theUpdate.measuringWhat,
-                        units: theUpdate.units,
-                        metricLabel: theUpdate.metricLabel,
-                        format: theUpdate.format
-                    })) == -1) {
-                    uniqueProgramUpdates.push(theUpdate)
-                    uniqueProgramUpdatesTester.push(JSON.stringify({
-                        name: theUpdate.name,
-                        measuringWhat: theUpdate.measuringWhat,
-                        units: theUpdate.units,
-                        metricLabel: theUpdate.metricLabel,
-                        format: theUpdate.format
-                    }))
-
-                }
-            }
 
 
-
-        })
-        this.setState({uniqueProgramUpdatesTester: uniqueProgramUpdatesTester})
-        this.setState({programUpdates: uniqueProgramUpdates})
+            })
+            this.setState({uniqueProgramUpdatesTester: uniqueProgramUpdatesTester})
+            this.setState({programUpdates: uniqueProgramUpdates})
+        }
     }
 
 

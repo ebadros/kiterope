@@ -42,7 +42,7 @@ var ReconnectingWebSocket = require('reconnecting-websocket');
 var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
 import { Provider, connect, dispatch } from 'react-redux'
-
+import {persistStore, autoRehydrate} from 'redux-persist'
 
 // Be sure to include styles at some point, probably during your bootstrapping
 import 'react-select/dist/react-select.css';
@@ -52,7 +52,7 @@ var UpdatesList = require('./update');
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
-
+import {REHYDRATE} from 'redux-persist/constants'
 
 
 $.ajaxSetup({
@@ -65,6 +65,7 @@ $.ajaxSetup({
 
     }
 });
+
 
 
 const customStyles = {
@@ -128,6 +129,7 @@ export class ReduxDataGetter extends React.Component {
             updateOccurrenceDataLoaded:false,
             updateDataLoaded:false,
             messageThreadDataLoaded:false,
+            rehydrated:false
 
 
 
@@ -144,12 +146,18 @@ export class ReduxDataGetter extends React.Component {
 
         //    this.loadUserData()
         //}
-        var intervalID = setInterval(this.loadUserData, 2000);
-        this.setState({intervalID: intervalID});
+        //var intervalID = setInterval(this.loadUserData, 2000);
+        //this.setState({intervalID: intervalID});
 
+        persistStore(store, {blacklist: ['routing', 'gui']}, () => {
+      this.setState({rehydrated: true}, () => {this.getAllData()})
 
+    })
     };
-
+    getAllData() {
+        var intervalID = setInterval(this.loadUserData, 2000);
+        this.setState({intervalID: intervalID})
+    }
 
 
 
@@ -182,12 +190,13 @@ updateWindowDimensions() {
                     this.setState({userDataLoaded:true})
                     if (userData.id != null) {
                         store.dispatch(setCurrentUser(userData));
-                        this.loadUniversalData();
-
-                        if (userData.isCoach) {
+                         if (userData.isCoach) {
                             this.loadCoachSpecificData()
 
                         }
+                        this.loadUniversalData();
+
+
                     }
 
                 }.bind(this),
@@ -393,7 +402,7 @@ updateWindowDimensions() {
     loadProgramData() {
                     if (!this.state.programDataLoaded) {
 
-                        fetch("/api/programs/", {
+                        /*} fetch("/api/programs/", {
                             method: 'GET',
                             credentials: "same-origin",
 
@@ -417,10 +426,10 @@ updateWindowDimensions() {
 
 
                             })
-                            .catch(error => console.log(error));
+                            .catch(error => console.log(error));*/
 
 
-                        /*var theUrl = "/api/programs/";
+                        var theUrl = "/api/programs/";
                         $.ajax({
                             url: theUrl,
                             dataType: 'json',
@@ -440,7 +449,7 @@ updateWindowDimensions() {
 
                             }.bind(this),
 
-                        });*/
+                        });
                     }
     }
 
@@ -691,11 +700,15 @@ updateWindowDimensions() {
     }
 
     render() {
-        return (<div></div>)
+        if (!this.state.rehydrated) {
+            return (<div>Loading...</div>)
+
+        } else {
+            return (<div></div>)
+        }
+
+
     }
-
-
-
 
 }
 
@@ -942,8 +955,9 @@ export class Menubar extends React.Component {
     }
 
     logoutHandler() {
-        console.log("logout");
         store.dispatch(reduxLogout());
+                persistStore(store, undefined).purge()
+
 
         auth.logout();
                         store.dispatch(push('/account/login/'))

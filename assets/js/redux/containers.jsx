@@ -31,8 +31,6 @@ const mapStateToProps = (state, ownProps) => {
         gui: {
           searchQuery:state.rootReducer.searchQuery,
           searchHitsVisibility:state.rootReducer.searchHitsVisibility,
-
-
           forMobile:state.rootReducer.forMobile,
           shouldReload:state.rootReducer.shouldReload,
           isSidebarVisible:state.rootReducer.isSidebarVisible,

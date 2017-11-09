@@ -3,6 +3,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'rea
 import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 
 const middleware = routerMiddleware(browserHistory);
+import {persistStore, autoRehydrate} from 'redux-persist'
 
 
 import { rootReducer } from "./reducers";
@@ -16,7 +17,6 @@ const reducer = combineReducers({
 
 const store = createStore(
     reducer,
-    applyMiddleware(middleware)
-);
+    applyMiddleware(middleware), autoRehydrate());
 
 module.exports = {  store };
