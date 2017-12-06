@@ -1043,7 +1043,7 @@ export class Menubar extends React.Component {
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}
-                 <SidebarWithoutClickingOutside sidebarVisibilityChange={this.handleSidebarVisibilityChange} visible={this.props.storeRoot.gui.isSidebarVisible} user={this.props.storeRoot.user} />
+                 <SidebarWithoutClickingOutside  />
 
       </div>
         )

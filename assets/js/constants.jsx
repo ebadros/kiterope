@@ -57,6 +57,13 @@ export const visualizationChoices = [
     {value:"LINE", label:"Line Graph"},
     {value:"BAR", label: "Bar Graph"},
 ]
+
+export const stepOccurrenceTypeOptions = [
+    {value:"TODO", label: "To Do"},
+    {value:"COMPLETED", label:"Completed"},
+    {value:"NEVER_COMPLETED", label:"Never Completed"},
+
+]
 export const times = [
     {value:'00:00', label: "12:00 am"},
     {value:'00:30', label: "12:30 am"},
@@ -334,4 +341,4 @@ function printObject(o) {
 
 
 module.exports = {  theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
-    TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };
+    TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

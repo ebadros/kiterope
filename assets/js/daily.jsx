@@ -29,7 +29,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
 import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 
-import { theServer, periodOptions, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, periodOptions, stepOccurrenceTypeOptions, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 var moment = require('moment');
 import { updateStep, removePlan, setDailyPeriod, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
@@ -108,6 +108,7 @@ export class DailyList extends React.Component{
             periodRangeStartString: new Date().toDateString(),
             periodRangeEndString: new Date().toDateString(),
             loading:false,
+            stepOccurrenceType:"TODO",
 
 
 
@@ -148,7 +149,7 @@ export class DailyList extends React.Component{
 
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
+        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/" + this.state.stepOccurrenceType + "/";
 
 
         $.ajax({
@@ -248,6 +249,12 @@ export class DailyList extends React.Component{
 
     }
 
+    handleStepOccurrenceTypeChange(option) {
+        this.setState({stepOccurrenceType: option.value}, () => { this.loadObjectsFromServer(this.state.period)})
+
+
+    }
+
     handleSubmitCustom() {
         this.loadObjectsFromServer("CUSTOM")
     }
@@ -264,6 +271,17 @@ export class DailyList extends React.Component{
         if (this.state.periodRangeStart != undefined) {
             readableStartDate = this.state.periodRangeStartString;
             readableEndDate = this.state.periodRangeEndString
+        }
+
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+
+                var listNodeOrMobile = true
         }
 
                 if (this.state.data != undefined) {
@@ -288,11 +306,33 @@ export class DailyList extends React.Component{
                                     </Link>
                                 </div>
                                 <div>&nbsp;</div>
-                                <div className="ui three column grid">
+                                <div className="ui three column stackable grid">
                                     <div className="ui row">
-                                <div className="ui eight wide column header"> {this.state.periodRangeStartString != this.state.periodRangeEndString ? <h1>{this.state.periodRangeStartString} to {this.state.periodRangeEndString}</h1>: <h1>{this.state.periodRangeStartString}</h1>}</div>
-
+                                        {listNodeOrMobile ? <div
+                                            className="ui column"> {this.state.periodRangeStartString != this.state.periodRangeEndString ?
+                                            <h3>{this.state.periodRangeStartString} to {this.state.periodRangeEndString}</h3> :
+                                            <h3>{this.state.periodRangeStartString}</h3>}</div>
+                                            :
+                                            <div
+                                                className="ui ten wide column header"> {this.state.periodRangeStartString != this.state.periodRangeEndString ?
+                                                <h1>{this.state.periodRangeStartString} to {this.state.periodRangeEndString}</h1> :
+                                                <h1>{this.state.periodRangeStartString}</h1>}</div>
+                                        }
                                     <div className="ui right floated column form ">
+                                                <div className="ui two column grid">
+                            <div  className="column field absolutelyNoMargin">
+
+
+                                        <KSSelect value={this.state.stepOccurrenceType}
+                                            valueChange={this.handleStepOccurrenceTypeChange}
+                                            label=""
+                                            isClearable={false}
+                                            name="period"
+                                                  searchable={false}
+                                            options={stepOccurrenceTypeOptions}
+                                            />
+                                </div>
+                            <div  className="column field absolutelyNoMargin">
 
 
                                         <KSSelect value={this.state.period}
@@ -303,6 +343,8 @@ export class DailyList extends React.Component{
                                                   searchable={false}
                                             options={periodOptions}
                                             />
+                                </div>
+                                                    </div>
                                     </div></div>
                         {this.state.period == "CUSTOM" ?
 <div className="ui row smallVerticalPaddingNoMargin">
@@ -384,7 +426,22 @@ export class StepOccurrenceList2 extends React.Component {
                 )
             }.bind(this));
         } else {
+
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+
+            var objectNodes = () => {return (<div style={{fontSize:'1.5em;'}}>You don't have any steps to accomplish today.</div>)}
+        } else {
             var objectNodes = () => {return (<div>You don't have any steps to accomplish today.</div>)}
+
+
+        }
+
         }
         return (
             //<div className="ui divided link items">

@@ -654,38 +654,38 @@ class StepOccurrenceManager(models.Manager):
         schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth, day_of_month=theUTCDayOfTheMonth)
         thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
 
-        '''
+
         if 'EMAIL' in thePlanOccurrence.notificationMethod:
-            print("inside EMAIL")
+            #print("inside EMAIL")
             periodicTaskString1 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
                                                task='kiterope.tasks.send_email_notification',
                                                args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title, theStep.description]))
-            print("email section done")
+            #print("email section done")
 
         if 'APP' in thePlanOccurrence.notificationMethod:
-            print("inside APP")
+            #print("inside APP")
             periodicTaskString2 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
 
-            print("expoToekn")
+            #print("expoToekn")
             print(theUserProfile.expoPushToken)
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
                                                task='kiterope.tasks.send_app_notification',
                                                args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
-            print("app section done")
+            #print("app section done")
 
 
         if 'TEXT' in thePlanOccurrence.notificationMethod:
-            print("inside TEXT")
+            #print("inside TEXT")
             periodicTaskString3 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
             phoneNumber = "%s" % thePlanOccurrence.notificationPhone
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
                                                task='kiterope.tasks.send_text_notification',
                                                args=json.dumps([phoneNumber, theStep.title]))
-            print("text section done")
-        '''
+            #print("text section done")
+
 
 
         occurrence = self.create(step_id=aStepId, date = theUTCDatetime, type=theStep.type, planOccurrence_id = aPlanOccurrenceId, wasCompleted=False, user_id = theUserId)
@@ -869,6 +869,7 @@ class StepOccurrence(models.Model):
     wasCompleted = models.BooleanField(default=False)
     user = models.ForeignKey(User, null=True, blank = True)
     posts = models.ManyToManyField('Post', blank=True, )
+    previouslySaved = models.BooleanField(default=False)
 
 
 

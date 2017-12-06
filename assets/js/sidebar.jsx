@@ -28,6 +28,7 @@ import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 import  {store} from "./redux/store";
 
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class SidebarWithoutClickingOutside extends React.Component {
     constructor(props) {
@@ -40,11 +41,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 
         };
-                this.timer = setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
+                //this.timer = setTimeout(() => this.setState({ zIndex: 2000 }), 6000);
 
     }
 
-    clickDocument (e) {
+    /*clickDocument (e) {
         var component = ReactDOM.findDOMNode(this.refs.ref_sidebar);
         if (e.target == component || $(component).has(e.target).length ) {
             // Inside of the component.
@@ -55,7 +56,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
             // Outside of the component.
         }
 
-    }
+    }*/
 
     componentWillUnmount() {
         //$(document).unbind('click', this.clickDocument);
@@ -83,36 +84,32 @@ export class SidebarWithoutClickingOutside extends React.Component {
       clearTimeout(this.timer)
   }
 
+
     componentDidMount () {
+        //$(this.refs["ref_sidebar"]).hide()
+        if (this.props.storeRoot != undefined) {
+            //$(document).bind('click', this.clickDocument);
 
+            if (this.props.storeRoot.gui != undefined) {
+                this.setState({visible: this.props.storeRoot.gui.isSidebarVisible})
 
-             //$(document).bind('click', this.clickDocument);
-
-        if (this.props.storeRoot.gui != undefined) {
-            if (this.props.storeRoot.gui.isSidebarVisible) {
-               $(this.refs["ref_sidebar"]).show()
+                }
             } else {
                 $(this.refs["ref_sidebar"]).hide()
+
             }
 
-            this.setState({
-                visible: false
-            });
+            if (this.props.storeRoot.user != undefined) {
+                this.setState({
+                    user: this.props.storeRoot.user,
+                })
+            }
 
 
-
-            //
-        } else {
-            $(this.refs["ref_sidebar"]).hide()
 
         }
 
-        this.setState({
-            user: this.props.user,
-        })
 
-
-    }
     componentWillReceiveProps (nextProps) {
 
         if (this.state.visible != nextProps.storeRoot.gui.isSidebarVisible) {
@@ -120,9 +117,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
                 visible: nextProps.storeRoot.gui.isSidebarVisible
             })
         }
-        if (this.state.user != nextProps.user) {
+        if (this.state.user != nextProps.storeRoot.user) {
             this.setState({
-                user: nextProps.user,
+                user: nextProps.storeRoot.user,
             })
         }
 
@@ -156,47 +153,45 @@ export class SidebarWithoutClickingOutside extends React.Component {
         store.dispatch(push(theURL))
     }
     render() {
+
+        if (this.state.visible) {
+                    //if ($(this.refs["ref_sidebar"]).is(":visible")) {
+                    //} else {
+                                        $(this.refs["ref_sidebar"]).show("slide");
+
+                    //}
+
+
+        } else {
+           // if ($(this.refs["ref_sidebar"]).is(":visible")) {
+                $(this.refs["ref_sidebar"]).hide("slide");
+           //}
+        }
+
+
+
+
+
         var style = {
-                zIndex: 2000,
-                display:'none',
-
-            };
-
-        if (this.props.storeRoot.user != undefined) {
-            var style = {
-                zIndex: 2000,
-            };
+            zIndex: 2000,
 
         }
 
-        if (this.props.user != undefined) {
-            if (this.props.user.isCoach) {
-                var viewSwitcher = <a className="item" onClick={this.switchView}>
-                    <i className="large street view icon"></i>
+        if (this.state.user != undefined) {
+            if (this.state.user.isCoach) {
+                var viewSwitcher = <a className="item" onClick={this.switchView} >
+                    <i className="large street view icon" ></i>
                     {this.state.view}
                 </a>
 
             }
         }
 
-         if ($(this.refs["ref_sidebar"]).is(":visible")) {
-            if (!this.state.visible) {
-                $(this.refs["ref_sidebar"]).hide("slide");
 
 
-            }
-        } else {
 
-            if (this.state.visible) {
-                $(this.refs["ref_sidebar"]).show("slide");
-
-
-            }
-        }
-
-
-        if (this.props.user != undefined) {
-            if ((this.props.user.isCoach) && (this.state.view == "User View")) {
+        if (this.state.user != undefined) {
+            if ((this.state.user.isCoach) && (this.state.view == "User View")) {
                 return (
                     <div ref="ref_sidebar"
                          className="ui right vertical inverted labeled visible icon large sidebar menu"
@@ -312,4 +307,4 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 export const Sidebar = SidebarWithoutClickingOutside;
 
-module.exports = { Sidebar, SidebarWithoutClickingOutside };
+module.exports = {  Sidebar, SidebarWithoutClickingOutside };

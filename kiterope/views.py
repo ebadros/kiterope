@@ -689,7 +689,9 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         print(self.request.data)
+        print("inside update")
         instance = self.get_object()
+
         if instance.update.measuringWhat == "Absolute Date/Time":
             print("inside the dated")
             print(instance.stepOccurrence.planOccurrence.startDate)
@@ -698,9 +700,34 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
             instance.integer = instance.stepOccurrence.planOccurrence.startDate - datetime.datetime.now()
 
 
+
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        try:
+            self.perform_update(serializer)
+
+            print("inside theStepOccurrence")
+            print(instance.stepOccurrence)
+
+            theStepOccurrence = StepOccurrence.objects.get(id=instance.stepOccurrence.id)
+            theStepOccurrence.previouslySaved = True
+            theStepOccurrence.save()
+
+            print("inside theStepOccurrence2")
+
+            theUpdate = Update.objects.get(id=instance.update.id)
+
+
+            if theUpdate.default and instance.boolean == True:
+                theStepOccurrence.wasCompleted = True
+                theStepOccurrence.save()
+            elif theUpdate.default and instance.boolean == False:
+                theStepOccurrence.wasCompleted = False
+                theStepOccurrence.save()
+        except:
+            pass
+
+
 
         return Response(serializer.data)
 
@@ -938,6 +965,8 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
+            whichStepOccurrences = self.kwargs['whichStepOccurrences']
+            print(whichStepOccurrences)
 
             periodRangeStart = datetime.datetime.strptime(periodRangeStart, "%Y-%m-%d")
             periodRangeEnd = datetime.datetime.strptime(periodRangeEnd, "%Y-%m-%d")
@@ -954,8 +983,41 @@ class PeriodViewSet(viewsets.ModelViewSet):
             isSubscribed = Q(planOccurrence__isSubscribed=True)
             userIsCurrentUser = Q(user=currentUser)
 
+            if whichStepOccurrences == 'TODO' or whichStepOccurrences == 'NOT_COMPLETED' :
+                print("1")
+                stepOccurrenceStatusFilter = Q(wasCompleted=False)
+            elif whichStepOccurrences == 'COMPLETED':
+                print("2")
 
-            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
+                stepOccurrenceStatusFilter = Q(wasCompleted=True)
+            print("3")
+
+            if whichStepOccurrences == 'TODO':
+                isStepOccurrenceActive = Q(date__gte = datetime.datetime.now().date() )
+                print("4")
+
+            elif whichStepOccurrences == 'NEVER_COMPLETED':
+                isStepOccurrenceActive = Q(date__lt = datetime.datetime.now().date())
+
+            elif whichStepOccurrences == 'COMPLETED':
+                isStepOccurrenceActive = Q(date__gte = periodRangeStart)
+
+
+
+
+
+            typeIsCompletionFilter = Q(type="COMPLETION")
+            typeIsTimeBasedFilter = Q(type="TIME")
+
+
+            # COMPLETION BASED
+            #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & stepOccurrenceStatusFilter & typeIsCompletionFilter).order_by('date')
+
+            # TIME-BASED
+            theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
+
+
+            #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())

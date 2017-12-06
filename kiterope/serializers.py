@@ -256,7 +256,7 @@ class StepOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = StepOccurrence
-        fields=('id', 'date', 'step', 'planOccurrence', 'wasCompleted', 'posts', 'updateOccurrences',  )
+        fields=('id', 'date', 'step', 'planOccurrence', 'wasCompleted', 'previouslySaved','posts', 'updateOccurrences',  )
 
 
 

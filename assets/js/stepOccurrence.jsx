@@ -59,6 +59,7 @@ function printObject(o) {
   alert(out);
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class StepOccurrenceList extends React.Component {
     constructor(props) {
         super(props);
@@ -92,9 +93,24 @@ export class StepOccurrenceList extends React.Component {
                 )
             }.bind(this));
         } else {
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+var objectNodes = <div style={{padding:'0px'}}><div className="largeItalic" style={{fontSize:'1.25em', lineHeight:'1.25em'}}>You don't have any steps to accomplish today.<Link to={"/search/"}> Find a program that fits your needs.</Link></div>
+</div>
+
+
+
+        } else {
             var objectNodes = <div><div className="largeItalic">You don't have any steps to accomplish today.<Link to={"/search/"}> Find a program that fits your needs.</Link></div>
                 </div>
         }
+        }
+
         return (
             //<div className="ui divided link items">
                     <div className="centeredContent">
@@ -149,6 +165,11 @@ export class StepOccurrenceItem extends React.Component {
 
 
     componentDidMount = () => {
+        if (this.props.stepOccurrenceData.previouslySaved == true) {
+            this.setState({saved:"Saved"})
+        } else {
+            this.setState({saved:"Save"})
+        }
         this.setState({
             id: this.props.stepOccurrenceData.id,
             title: this.props.stepOccurrenceData.step.title,
