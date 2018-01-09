@@ -32,8 +32,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
-AWS_IS_GZIPPED = True
-AWS_S3_SECURE_URLS = True
 
 ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1',]
 

@@ -7,7 +7,7 @@ DEBUG = False
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
-ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'kiterope-dev.us-west-1.elasticbeanstalk.com', '54.183.105.27']
+ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'https://kiterope.com', 'http://kiterope.com','kiterope-dev.us-west-1.elasticbeanstalk.com', '54.183.105.27']
 
 #STATIC_ROOT ='/opt/python/current/app/kiterope/static/'
 
