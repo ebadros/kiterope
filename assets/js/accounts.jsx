@@ -538,7 +538,7 @@ updateWindowDimensions() {
                 },
                 success: function (data) {
                     this.formatUpdateOccurrenceData(data)
-                                        this.setState({updateOccurrenceDataLoaded:true})
+                    this.setState({updateOccurrenceDataLoaded:true})
 
 
 

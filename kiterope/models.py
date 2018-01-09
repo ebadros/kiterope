@@ -365,7 +365,7 @@ class Program(models.Model):
     startDate = models.DateField(null=True, blank=True)
     timeCommitment = models.CharField(max_length=100, choices=TIME_COMMITMENT_CHOICES, blank=True, default="1h")
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="PER MONTH")
+    costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
 
 
@@ -516,10 +516,11 @@ class Update(models.Model):
                 ThroughModel.objects.bulk_create([ThroughModel(step_id=instance.pk, update_id=defaultUpdate.pk)])
 
 
+    @receiver(post_save, sender=Program)
     def create_program_default_updates(sender, instance, created, **kwargs):
         if created:
             completionUpdate = Update.objects.create(measuringWhat="Completion", format="boolean",metricLabel="Was the step completed?", program=instance, default=True)
-            absoluteDateTimeUpdate = Update.objects.create(measuringWhat="Absolute Date/Time", format="datetime",metricLabel="Was the step completed?", program=instance,default=True)
+            absoluteDateTimeUpdate = Update.objects.create(measuringWhat="Absolute Date/Time", format="datetime", metricLabel="What was the absolute start date?", program=instance,default=True)
             relativeDateTimeUpdate = Update.objects.create(measuringWhat="Relative Date/Time", units="days", format="integer", metricLabel="What was the date in relation to plan start date?", program=instance, default=True)
 
 
@@ -729,8 +730,7 @@ class StepOccurrenceManager(models.Manager):
             for persistentOccurrence in persistedOccurrences:
 
                 if aStep.id == persistentOccurrence.step.id:
-                    if (beginningUTCDateTime <= persistentOccurrence.date) & (
-                        persistentOccurrence.date < endUTCDateTime):
+                    if (beginningUTCDateTime <= persistentOccurrence.date) & (persistentOccurrence.date < endUTCDateTime):
                         if aPlanOccurrence.id == persistentOccurrence.planOccurrence.id:
                             stepOccurrenceExists = True
                             break
@@ -796,6 +796,10 @@ class StepOccurrenceManager(models.Manager):
                             iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
 
                         for dateIterator in rrule(DAILY, dtstart=iterationStart, until=iterationEnd):
+                            print("iterationstart")
+                            print(iterationStart)
+                            print("iterationEnd")
+                            print(iterationEnd)
 
                             stepOccurrenceExists = False
                             beginningUTCDateTime = toUTC(dateIterator, userTimezone)
@@ -804,8 +808,7 @@ class StepOccurrenceManager(models.Manager):
                             for persistentOccurrence in persistedOccurrences:
 
                                 if aStep.id == persistentOccurrence.step.id:
-                                    if (beginningUTCDateTime <= persistentOccurrence.date) & (
-                                                persistentOccurrence.date < endUTCDateTime):
+                                    if (beginningUTCDateTime <= persistentOccurrence.date) & (persistentOccurrence.date < endUTCDateTime):
                                         if aPlanOccurrence.id == persistentOccurrence.planOccurrence.id:
                                             stepOccurrenceExists = True
                                             break
@@ -853,10 +856,10 @@ class StepOccurrenceManager(models.Manager):
 
 
     def create_update_occurrences(self, theStepId, theStepOccurrence):
-        print("create update occurrence")
         currentStepUpdates = Update.objects.filter(steps=theStepId)
+        print("inside create update occurrences")
+        print(currentStepUpdates.count())
         for currentStepUpdate in currentStepUpdates:
-            print(currentStepUpdate.name)
             anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(theStepOccurrence.id, currentStepUpdate.id)
 
 

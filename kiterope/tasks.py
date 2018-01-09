@@ -43,10 +43,6 @@ app.conf.timezone = 'UTC'
 
 @app.task()
 def send_app_notification(expoPushToken, message ):
-
-    print("send_notification called")
-    print(expoPushToken)
-    print(message)
     send_push_message(expoPushToken, message)
 
 
@@ -62,7 +58,6 @@ def send_email_notification(emailAddress, subject, message ):
 
 @app.task()
 def send_text_notification(phoneNumber, message ):
-    print("send_text_notification task called")
     sendMessage(phoneNumber, message)
 
 

@@ -24,7 +24,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setStepModalData, removePlan, deleteContact, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
@@ -1583,6 +1583,18 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
       store.dispatch(deleteProgram(this.props.id))
 
   }
+
+  switchToEditView = () => {
+
+        this.setState({
+            modalIsOpen:true,
+        }, () => {store.dispatch(setProgramModalData(this.state))})
+        //$(this.refs["ref_basic"]).hide();
+        //$(this.refs["ref_form"]).slideDown();
+        //this.props.currentViewChanged("Edit")
+
+
+    };
 
   duplicateItem = () => {
         var theUrl = this.props.apiUrl + this.props.id + "/duplicate/";

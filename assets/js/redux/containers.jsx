@@ -27,6 +27,7 @@ const mapStateToProps = (state, ownProps) => {
         updates: state.rootReducer.updates,
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
+        programModalData: state.rootReducer.programModalData,
         visualizationModalData:state.rootReducer.visualizationModalData,
         gui: {
           searchQuery:state.rootReducer.searchQuery,

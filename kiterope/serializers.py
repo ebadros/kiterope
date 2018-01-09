@@ -323,13 +323,18 @@ class UpdateOccurrenceSerializer(serializers.ModelSerializer):
     author = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 
     stepOccurrenceDate = serializers.SerializerMethodField(required=False, read_only=True)
+    previouslySaved = serializers.SerializerMethodField(required=False, read_only=True)
+
 
     def get_stepOccurrenceDate(self, obj):
         return obj.get_stepOccurrenceDate()
 
+    def get_previouslySaved(self, obj):
+        return obj.stepOccurrence.previouslySaved
+
     class Meta:
         model = UpdateOccurrence
-        fields = ('id','update', 'stepOccurrence', 'author', 'integer', 'boolean', 'datetime','stepOccurrenceDate', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
+        fields = ('id','update', 'previouslySaved', 'stepOccurrence', 'author', 'integer', 'boolean', 'datetime','stepOccurrenceDate', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
 
 
 class ContactListingField(serializers.RelatedField):

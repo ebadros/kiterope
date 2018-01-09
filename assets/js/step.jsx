@@ -1457,7 +1457,6 @@ export class StepModalForm extends React.Component {
                             </div>
                         </div>
                           { descriptionEditor }
-
                           <div className="ui row">
                             <div className={mediumColumnWidth}>
                                 <div className="field">

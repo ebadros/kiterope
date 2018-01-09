@@ -45,6 +45,10 @@ export const rootReducer = (state = {}, action) => {
           return Object.assign({}, state, {stepModalData: action.stepModalData});
           break;
 
+      case 'SET_PROGRAM_MODAL_DATA':
+          return Object.assign({}, state, {programModalData: action.programModalData});
+          break;
+
       case 'SET_VISUALIZATION_MODAL_DATA':
           return Object.assign({}, state, {visualizationModalData: action.visualizationModalData});
           break;
@@ -155,6 +159,8 @@ case 'SET_SEARCH_QUERY':
       return Object.assign({}, state, { programs: thePrograms });
       break;
 
+
+
     case 'DELETE_STEP':
       var initialPrograms = state.programs;
        delete initialPrograms[action.programId].steps[action.stepId];
@@ -183,6 +189,8 @@ case 'SET_SEARCH_QUERY':
 
     return Object.assign({}, state, { updates: theUpdates });
     break;
+
+
 
       case 'ADD_STEP_TO_UPDATE':
        var theUpdates = state.updates

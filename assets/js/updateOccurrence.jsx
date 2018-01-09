@@ -117,7 +117,7 @@ export class UpdateOccurrenceList extends React.Component {
             doneSaving:true,
             saved: this.props.saved,
             needsSavingArray:[],
-            saved: "Saved"
+            saved: "Save"
 
         }
     }
@@ -126,9 +126,15 @@ export class UpdateOccurrenceList extends React.Component {
         this.setState({
             data: this.props.data,
             doneSaving:true,
-            saved: "Saved"
+            saved: "Save"
 
         }, () => {this.setNeedsSavingArray()})
+        if (this.props.data[0].previouslySaved) {
+                this.setState({saved:"Saved"})
+            } else {
+            this.setState({saved:"Save"})
+
+            }
     }
 
 
@@ -137,7 +143,14 @@ export class UpdateOccurrenceList extends React.Component {
         if (this.state.data != nextProps.data) {
              this.setState({
             data: nextProps.data}, () => {this.setNeedsSavingArray()}
-             )}
+             )
+            if (nextProps.data[0].previouslySaved) {
+                this.setState({saved:"Saved"})
+            } else {
+                                this.setState({saved:"Save"})
+
+            }
+        }
     }
 
     handleNeedsSaving(theNeedsSavingIndex) {

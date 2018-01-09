@@ -43,9 +43,9 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 
-import { addVisualization, deleteVisualization, editVisualization, addPlan, removePlan, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addVisualization, deleteVisualization, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, times, s3IconUrl, formats, s3BaseUrl, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
@@ -54,7 +54,7 @@ $.ajaxSetup({
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.setRequestHeader('Connection', 'keep-alive');
-        xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
+        //xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
 
     }
 });
@@ -76,6 +76,751 @@ function getArrayObjectById(theArray, theId) {
         }
     }
     return returnObject
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class ProgramModalForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+           files:[],
+            image: "",
+            title: "",
+            description: "",
+            startDate:moment(),
+            scheduleLength:"3m",
+            viewableBy: "ONLY_ME",
+            timeCommitment: "1h",
+            cost: "0.0",
+            costFrequencyMetric: "MONTH",
+            editable:false,
+            data:"",
+            category:"UNCATEGORIZED",
+            serverErrors:{},
+            modalIsOpen:false,
+
+        }
+
+
+    }
+
+
+
+
+    componentDidMount () {
+
+        $(this.refs['ref_whichProgramForm']).hide();
+        this.setState({
+            serverErrors: this.props.serverErrors,
+
+            })
+
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.programModalData != undefined) {
+                this.setState({programModalData:this.props.storeRoot.programModalData})
+                    this.setStateToData(this.props.storeRoot.programModalData)
+
+
+            }
+        }
+
+
+    }
+
+    setStateToData (programModalData) {
+        this.setState({
+            modalIsOpen: programModalData.modalIsOpen,
+
+        })
+        if (programModalData.data != undefined ) {
+
+            var data = programModalData.data
+
+
+             if (data.image != undefined) {
+                var image = data.image
+            }
+            else {
+                var image = this.state.image
+            }
+
+            if (data.title != undefined) {
+                var title = data.title
+            }
+            else {
+                var title = this.state.title
+            }
+
+            if (data.description != undefined) {
+                var description = data.description
+            }
+            else {
+                var description = this.state.description
+            }
+
+
+            if (data.startDate != null) {
+                var startDate = moment(data.startDate, "YYYY-MM-DD")
+            }
+            else {
+                var startDate = moment()
+            }
+
+             if (data.scheduleLength != undefined) {
+                var scheduleLength = data.scheduleLength
+            }
+            else {
+                var scheduleLength = this.state.scheduleLength
+            }
+
+            if (data.viewableBy != undefined) {
+                var viewableBy = data.viewableBy
+            }
+            else {
+                var viewableBy = this.state.viewableBy
+            }
+
+
+            if (data.timeCommitment != undefined) {
+                var timeCommitment = data.timeCommitment
+            }
+            else {
+                var timeCommitment = this.state.timeCommitment
+            }
+
+
+            if (data.cost != undefined) {
+                var cost = data.cost
+            }
+            else {
+                var cost = this.state.cost
+            }
+
+            if (data.costFrequencyMetric != undefined) {
+                var costFrequencyMetric = data.costFrequencyMetric
+            }
+            else {
+                var costFrequencyMetric = this.state.costFrequencyMetric
+            }
+
+            if (data.category != undefined) {
+                var category = data.category
+            }
+            else {
+                var category = this.state.category
+            }
+
+
+            //var startDate = data.startDate;
+
+            ///var endDate = data.endDate;
+
+            //var programStartDateInStringForm = data.programStartDate;
+            //var programStartDateInMomentForm = moment(programStartDateInStringForm);
+            //var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            //var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            //calculatedStartDate = moment(calculatedStartDate);
+            //calculatedEndDate = moment(calculatedEndDate);
+
+
+
+            if (data.id != undefined) {
+                this.setState({
+                    id: data.id,
+                    saved:"Saved"
+                })
+            } else {
+                this.setState({
+                    id:"",
+                    saved:"Create"
+                })
+            }
+
+            this.setState({
+                image: image,
+                title: title,
+                description: description,
+                startDate: startDate,
+                scheduleLength: scheduleLength,
+                viewableBy: viewableBy,
+                timeCommitment: timeCommitment,
+                cost: cost,
+                costFrequencyMetric: costFrequencyMetric,
+                category: category,
+
+            },() => {
+                ///this.showAndHideTypeUIElements(this.state.type)
+                //this.showAndHideFrequencyUIElements(this.state.frequency)
+            });
+
+
+
+        }
+    }
+
+
+    componentWillReceiveProps(nextProps) {
+
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors: nextProps.serverErrors
+            })
+        }
+
+         if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
+        }
+
+        if (nextProps.storeRoot.programModalData != undefined ) {
+            if (this.state.programModalData != nextProps.storeRoot.programModalData) {
+                this.setState({programModalData:nextProps.storeRoot.programModalData })
+
+                    this.setStateToData(nextProps.storeRoot.programModalData)
+
+                }
+
+
+            }
+
+    }
+
+    handleStartDateChange(date)   {
+        this.setState({startDate: date});
+  }
+
+
+
+
+    handleEditorChange(e)  {
+
+        this.setState({description: e});
+  }
+
+    handleCostChange (newValue){
+        this.setState({cost: newValue});
+    }
+
+    handleScheduleLengthChange (option) {
+        this.setState({scheduleLength: option.value});
+    }
+
+    handleCostFrequencyMetricChange(option) {
+
+            this.setState({costFrequencyMetric: option.value})
+    }
+
+    handleViewableByChange(option) {
+
+            this.setState({viewableBy: option.value})
+    }
+
+
+
+    handleTimeCommitmentChange(option){
+        this.setState({timeCommitment: option.value});
+    }
+
+    handleCategoryChange(option){
+        this.setState({category: option.value});
+    }
+
+    getDescriptionEditor () {
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+
+            return (<div className="ui row">
+                <div className={wideColumnWidth}>
+                    <div className="field fluid">
+                        <label htmlFor="id_description">Description:</label>
+                        <TinyMCEInput name="description"
+                                      value={this.state.description}
+                                      tinymceConfig={TINYMCE_CONFIG}
+                                      onChange={this.handleEditorChange}
+                        />
+
+
+                    </div>
+                </div>
+                <div className="six wide column">&nbsp;</div>
+
+            </div>)
+
+    }
+
+
+
+
+
+    handleFinishedUpload (value) {
+            var fullUrl = value.signedUrl;
+            var urlForDatabase = fullUrl.split("?")[0];
+            urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
+            this.setState({image: urlForDatabase});
+    }
+
+
+    handleTitleChange(value) {
+
+            this.setState({title: value})
+    }
+
+
+
+closeModal() {
+            this.setState({modalIsOpen: false});
+            this.resetForm()
+
+
+        }
+
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
+
+    handleCancelClicked() {
+this.closeModal()
+    }
+
+    handleProgramSubmitOld (program, callback) {
+
+            var theUrl = "/api/programs/";
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'POST',
+                data: program,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.handleCloseForm();
+                    store.dispatch(addProgram(data));
+
+                    //this.loadProgramsFromServer()
+                    callback
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                    })
+
+                }.bind(this)
+            });
+
+
+  }
+
+    handleProgramSubmit = (program) => {
+
+        if ((program.id != "" ) &&  (program.id != undefined )){
+
+            var theUrl = "/api/programs/" + program.id + "/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: program,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                        updates:[],
+                         saved: "Saved"
+                    });
+                    store.dispatch(updateProgram(data));
+
+
+
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+        else {
+
+            $.ajax({
+                url: "/api/programs/",
+                dataType: 'json',
+                type: 'POST',
+                data: program,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    store.dispatch(addProgram(data));
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+
+
+    };
+
+    handleSubmit() {
+        this.setState({saved:"Saving"})
+
+
+        if (this.props.storeRoot.user) {
+            var author = this.props.storeRoot.user.id;
+            var title = this.state.title;
+            var description = this.state.description;
+            var viewableBy = this.state.viewableBy;
+            var image = this.state.image;
+            var scheduleLength = this.state.scheduleLength;
+            var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
+            var timeCommitment = this.state.timeCommitment;
+            var cost = this.state.cost;
+            var costFrequencyMetric = this.state.costFrequencyMetric;
+            var category = this.state.category;
+
+            var programData = {
+                author: author,
+                title: title,
+                image: image,
+                description: description,
+                viewableBy: viewableBy,
+                scheduleLength: scheduleLength,
+                timeCommitment: timeCommitment,
+                cost: cost,
+                startDate:startDate,
+                costFrequencyMetric: costFrequencyMetric,
+                category : category
+            };
+
+            if (this.state.id != "") {
+                programData.id = this.state.id
+            }
+            //this.props.onProgramSubmit(programData, this.resetForm)
+            this.handleProgramSubmit(programData)
+
+
+        }
+        else {
+            this.setState({
+                    signInOrSignUpModalFormIsOpen: true,
+                }
+            )
+
+        }
+        }
+
+        resetForm = () => {
+            this.setState({
+                    image: "",
+                    title: "",
+                    description: "",
+                    startDate: moment(),
+                    scheduleLength: "3m",
+                    viewableBy: "ONLY_ME",
+                    timeCommitment: "1h",
+                    cost: "0.0",
+                    costFrequencyMetric: "MONTH",
+                    editable: false,
+                    serverErrors:"",
+                    data: "",
+                    category:"UNCATEGORIZED",
+                    modalIsOpen: false,
+
+                },            () =>        { store.dispatch(setProgramModalData(this.state))}
+
+
+            );
+
+        };
+
+        handleImageChange = (callbackData) => {
+        this.setState({
+            image: callbackData.image
+        })
+    };
+
+
+
+
+        getForm = () => {
+
+
+            if (this.state.id) {
+                var buttonText = "Save"
+
+            } else {
+                var buttonText = "Create"
+            }
+
+
+            if (this.state.image) {
+                var imageUrl = this.state.image
+
+
+            } else {
+                var imageUrl = "goalItem.svg"
+            }
+
+
+            var descriptionEditor = this.getDescriptionEditor();
+
+           if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+          return (
+              <div className="ui page container form">
+
+                  <div>{this.props.programHeaderErrors}</div>
+                  <div className="ui row">&nbsp;</div>
+
+
+                      <div className="ui three column grid">
+
+                          <div className="ui row">
+                              <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
+
+<div className={mediumColumnWidth}>
+
+
+<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
+                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
+
+
+                          <div className="ui field row">
+                              <div className={wideColumnWidth}>
+
+                                  <ValidatedInput
+                                      type="text"
+                                      name="title"
+                                      label="Title"
+                                      id="id_title"
+                                      placeholder="Program's title"
+                                      value={this.state.title}
+                                      initialValue={this.state.title}
+                                      validators='"!isEmpty(str)"'
+                                      onChange={this.validate}
+                                      stateCallback={this.handleTitleChange}
+                                      serverErrors={this.getServerErrors("title")}
+
+                                  />
+ </div>
+                              </div>
+
+
+                          {descriptionEditor}
+
+
+                          <div className="ui row">
+                              <div className={smallColumnWidth}>
+                                  <div className="field"><label htmlFor="id_lengthOfSchedule">Length of
+                                      Schedule:</label>
+
+                                      <Select value={this.state.scheduleLength}
+                                              onChange={this.handleScheduleLengthChange} name="scheduleLength"
+                                              options={programScheduleLengths}   clearable={false}/>
+                                  </div>
+                              </div>
+
+                              <div className={smallColumnWidth}>
+                                  <div className="field">
+
+                                      <label className="tooltip" htmlFor="id_startDate">Start Date:<i
+                                          className="info circle icon"></i>
+                                          <span className="tooltiptext">A start date for your program makes scheduling its steps easier. Your users can choose whatever start date they would like.</span>
+                                      </label>
+
+                                      <DatePicker selected={this.state.startDate}
+                                                  onChange={this.handleStartDateChange}/>
+                                  </div>
+                              </div>
+                          </div>
+                          <div className="ui row">
+                              <div className={smallColumnWidth}>
+                                  <KSSelect value={this.state.timeCommitment}
+                                            valueChange={this.handleTimeCommitmentChange}
+                                            label="Time Commitment:"
+                                            isClearable={false}
+                                            name="timeCommitment"
+                                            options={timeCommitmentOptions}
+                                            />
+                                  </div>
+                              </div>
+
+
+                          <div className="ui row">
+                              <div className={smallColumnWidth}>
+                                  <div className="field">
+                                      <label htmlFor="id_startDate">Cost (in US dollars):</label>
+
+                                      <CurrencyInput value={this.state.cost} onChange={this.handleCostChange}/>
+                                  </div>
+                              </div>
+
+                              <div className={smallColumnWidth}>
+                                  <div className="field">
+
+                                      <label htmlFor="id_costFrequencyMetric">Frequency:</label>
+                                      <Select value={this.state.costFrequencyMetric}
+                                              onChange={this.handleCostFrequencyMetricChange} name="costFrequencyMetric"
+                                              options={costFrequencyMetricOptions} clearable={false}/>
+
+
+                                  </div>
+                              </div>
+
+                              </div>
+
+                          <div className="ui row">
+                              <div className={mediumColumnWidth}>
+                                  <div className='field'>
+                                      <label>Who should be able to see this?:</label>
+
+                                      <Select value={this.state.viewableBy} onChange={this.handleViewableByChange}
+                                              name="viewableBy" options={viewableByOptions} clearable={false}/>
+
+
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div className="ui row">
+                              <div className={mediumColumnWidth}>
+                                  <KSSelect value={this.state.category}
+                                            valueChange={this.handleCategoryChange}
+                                            label="Category:"
+                                            isClearable={false}
+                                            name="programCategory"
+                                            options={programCategoryOptions}
+                                            />
+                                  </div>
+                              </div>
+
+
+
+                  </div>
+                                    <VisualizationsList programId={this.state.id} />
+
+
+                      <div className="ui three column stackable grid">
+                          <div className="column">&nbsp;</div>
+                          <div className="column">
+                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                          </div>
+                          <div className="column">
+                              <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
+                          </div>
+                      </div>
+
+              </div>
+          )
+
+    };
+
+
+
+
+
+    render() {
+
+    var theForm = this.getForm();
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var modalStyle = stepModalStyle
+
+           } else {
+
+
+                var modalStyle = stepModalStyle
+
+        }
+
+            return(
+
+
+                 <div className="ui form"><Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={modalStyle}>
+                        {theForm}
+
+                    </Modal>
+                </div>
+
+            )
+        }
+
+
+
 }
 
 
@@ -254,8 +999,11 @@ handleCancelClicked = () => {
     };
 
   handleActionClick = () => {
-      console.log("handleActionClick")
-                  store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
+
+      console.log("setProgrmaModalData")
+      store.dispatch(setProgramModalData({modalIsOpen:true, data:{}}))
+
+      //store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
 
       /*
       if (this.state.formIsOpen == true) {
@@ -298,6 +1046,7 @@ componentWillUnmount() {
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
         <div ref="ref_whichProgramForm">
+             <ProgramModalForm />
             <ProgramForm cancelClicked={this.handleCancelClicked} onProgramSubmit={this.handleProgramSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
@@ -586,6 +1335,8 @@ export class ProgramDetailPage extends React.Component {
                               serverErrors={this.state.serverErrors}/>
 <UpdateModalForm programId={this.props.params.program_id} />
                         <VisualizationModalForm programId={this.props.params.program_id} />
+                                     <ProgramModalForm />
+
 
 
 
@@ -2074,10 +2825,19 @@ export class ProgramBasicView extends React.Component {
 
 
                                             }
+                                        {this.props.forSearch ?
+
                                             <div className="ui right aligned column">
-                                            <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
-                                                            icon="calendar" background="Light" />
-                                        </div>
+                                                <IconLabelCombo size="extramini" orientation="right"
+                                                                text={this.state.data.scheduleLength}
+                                                                icon="calendar" background="Light"/>
+                                            </div> :
+                                            <div className="ui right aligned column">
+                                                <IconLabelCombo size="extramini" orientation="right"
+                                                                text={theScheduleLength}
+                                                                icon="calendar" background="Light"/>
+                                            </div>
+                                        }
 
 
 
@@ -2090,11 +2850,19 @@ export class ProgramBasicView extends React.Component {
                                             <IconLabelCombo size="extramini" orientation="left" text={theCost}
                                                             icon="cost" background="Light" link="/goalEntry"/>
                                         </div>
-                                        <div className="ui right aligned column">
-                                            <IconLabelCombo size="extramini" orientation="right"
-                                                            text={theTimeCommitment} icon="timeCommitment"
-                                                            background="Light" link="/goalEntry"/>
-                                        </div>
+                                        {this.props.forSearch ?
+                                            <div className="ui right aligned column">
+                                                <IconLabelCombo size="extramini" orientation="right"
+                                                                text={this.state.data.timeCommitment} icon="timeCommitment"
+                                                                background="Light" link="/goalEntry"/>
+                                            </div> :
+                                            <div className="ui right aligned column">
+                                                <IconLabelCombo size="extramini" orientation="right"
+                                                                text={theTimeCommitment} icon="timeCommitment"
+                                                                background="Light" link="/goalEntry"/>
+                                            </div>
+                                        }
+
                                     </div>
                                 </div>
 
@@ -2280,4 +3048,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, SimpleProgramForm, ProgramForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, SimpleProgramForm, ProgramForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};

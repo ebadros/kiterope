@@ -446,7 +446,8 @@ export class GoalDetailPage extends React.Component {
                var theGoals = nextProps.storeRoot.goals;
                var theGoal = theGoals[this.props.params.goal_id];
                          this.setState({data: theGoal});
-               if (theGoal.user == this.props.storeRoot.user.id) {
+
+               if (theGoal.user == nextProps.storeRoot.user.id) {
                    this.setState({editable:true})
                }
 
@@ -594,7 +595,6 @@ export class GoalDetailPage extends React.Component {
             </div>
                         <PlanList goalId={this.props.params.goal_id} />
                         <div className="ui three column grid">
-                        <LineGraph /></div>
 
 
 
@@ -603,6 +603,7 @@ export class GoalDetailPage extends React.Component {
                 </div>
 
             </div>
+                </div>
 
             )
     }

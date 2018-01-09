@@ -72,7 +72,12 @@ export class StepOccurrenceList extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({data: this.props.data})
+        this.setState({
+            data: this.props.data,
+            status: this.props.status,
+        })
+
+
 
 
     }
@@ -81,16 +86,35 @@ export class StepOccurrenceList extends React.Component {
         if (this.state.data != nextProps.data) {
             this.setState({data: nextProps.data})
         }
+
+        if (this.state.status != nextProps.status) {
+            this.setState({
+            status: nextProps.status,
+        })
+        }
     }
 
     render() {
         if ((this.state.data != undefined) && (this.state.data.length != 0 )){
 
             var objectNodes = this.state.data.map(function (objectData) {
+                if ((this.state.status == "COMPLETED") && (objectData.wasCompleted == true)) {
 
-                return (
-                        <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`} stepOccurrenceData={objectData}/>
-                )
+                    return (
+                        <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
+                                            stepOccurrenceData={objectData}/>
+                    )
+                } else if ((this.state.status == "TODO") && (objectData.wasCompleted == false)) {
+                    return (
+                        <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
+                                            stepOccurrenceData={objectData}/>
+                    )
+                } else if ((this.state.status == "NEVER_COMPLETED") && (objectData.wasCompleted == false) && (objectData.date < moment())) {
+                    return (
+                        <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
+                                            stepOccurrenceData={objectData}/>
+                    )
+                }
             }.bind(this));
         } else {
             if (this.props.storeRoot != undefined ) {
@@ -140,7 +164,7 @@ export class StepOccurrenceItem extends React.Component {
             doneSaving: true,
             stepOccurrenceDoneSaving:true,
             updateOccurrenceDoneSaving:true,
-            saved: "Saved",
+            saved: "Save",
 
 
 
@@ -180,6 +204,7 @@ export class StepOccurrenceItem extends React.Component {
             updateOccurrences: this.props.stepOccurrenceData.updateOccurrences,
             data:this.props.stepOccurrenceData,
 
+
             showingDetail:false,
         },       () =>  {$(this.refs["ref_detail"]).hide()}
 )
@@ -202,6 +227,11 @@ export class StepOccurrenceItem extends React.Component {
                 updateOccurrences: nextProps.stepOccurrenceData.updateOccurrences,
 
             })
+            if (nextProps.stepOccurrenceData.previouslySaved == true) {
+            this.setState({saved:"Saved"})
+        } else {
+            this.setState({saved:"Save"})
+        }
         }
     }
 
@@ -318,8 +348,9 @@ export class StepOccurrenceItem extends React.Component {
 
                         <div className="stepOccurrenceTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
 </div>
-                        <div ref="ref_detail">
-                            {this.state.data.type == "TIME" ? <div>{this.state.date}</div>:null}
+                       <div>{this.state.date}</div>
+ <div ref="ref_detail">
+                            {this.state.data.step.type == "TIME" ? <div>{this.state.date}</div>:null}
                             <div className="itemDetailSmall">
                                 <div dangerouslySetInnerHTML={{__html: this.state.description}}></div>
                             </div>

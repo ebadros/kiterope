@@ -367,7 +367,7 @@ export class DailyList extends React.Component{
        </div></div>: <div></div>}
                                                             </div>
 
-                                <StepOccurrenceList data={this.state.data}/>
+                                <StepOccurrenceList data={this.state.data} status={this.state.stepOccurrenceType} periodStart={this.state.startDate} periodEnd={this.state.endDate} />
 
 
                         </div></div>
