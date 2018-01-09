@@ -645,6 +645,7 @@ export class VideoUploader extends React.Component {
 
 
     render() {
+        console.log("theServer " + theServer)
         var theVideo = this.state.video;
         var theFilename = theVideo.replace("uploads/", "");
         if (this.state.dimensions) {
@@ -971,6 +972,7 @@ export class ImageUploader extends React.Component {
 
 
     render() {
+
         var theImage = this.state.image;
         var theFilename = theImage.replace("uploads/", "");
         if (this.state.dimensions) {
