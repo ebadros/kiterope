@@ -47,6 +47,8 @@ router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'visualizations', views.VisualizationViewSet)
 
+router.register(r'^steps/(?P<step_id>\w+)/duplicate/$', views.StepViewSet, base_name='Step')
+
 router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
@@ -72,11 +74,11 @@ router.register(r'channels/(?P<channel_id>\w+)/messageThread', views.MessageThre
 router.register(r'channels', views.KChannelViewSet, base_name='Room')
 
 router.register(r'channelUsers/(?P<receiver_id>\w+)', views.ReceiverKChannelViewSet, base_name='KChannel')
-router.register(r'^steps/(?P<step_id>\w+)/duplicate', views.StepDuplicatorViewSet, base_name='step-duplicate')
-router.register(r'^programs/(?P<program_id>\w+)/duplicate', views.ProgramDuplicatorViewSet, base_name='program-duplicate')
 
 
 router.register(r'^programs/(?P<program_id>\w+)/steps', views.StepViewSet, base_name='Step')
+router.register(r'^programs/(?P<program_id>\w+)/duplicate/$', views.ProgramViewSet, base_name='Program')
+
 router.register(r'programs', views.ProgramViewSet)
 
 router.register(r'plan/view/(?P<program_id>\w+)', views.ProgramNoStepsViewSet, base_name='Program')
@@ -147,9 +149,7 @@ if settings.DEBUG:
     '''
 
 urlpatterns = [
-                    url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
-
-                    url(r'^', include('django.contrib.auth.urls')),
+      url(r'^', include('django.contrib.auth.urls')),
 
 
 
@@ -166,6 +166,7 @@ urlpatterns = [
       url(r'^accounts/', include('allauth.urls')),
       url(r'^secret', views.secret_page, name='secret'),
       url(r'^tinymce/', include('tinymce.urls')),
+      url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
       url(r'^', views.React.as_view(), name='index'),
