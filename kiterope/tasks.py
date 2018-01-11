@@ -41,6 +41,7 @@ app.conf.timezone = 'UTC'
     #sender.add_periodic_task(crontab(minute='*/1'), send_notification(), name='send_notification' )
 #    pass
 
+
 @app.task()
 def send_app_notification(expoPushToken, message ):
     send_push_message(expoPushToken, message)

@@ -633,7 +633,7 @@ class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -725,6 +725,7 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 
         instance.title = validated_data.get('title', instance.title)
         instance.author = validated_data.get('author', instance.author)
+        instance.isActive = validated_data.get('isActive', instance.isActive)
         instance.description = validated_data.get('description', instance.description)
         #instance.steps = validated_data.get('steps', instance.steps)
         instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
@@ -742,6 +743,9 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 
         instance.save()
         return instance
+
+
+
 
 class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -778,7 +782,7 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSearchSerializer(HaystackSerializer):
     class Meta:
         index_classes = [ProgramIndex]
-        fields = ['id','text','title', 'isSubscribed', 'description', 'author','image', 'author_id', 'timeCommitment', 'scheduleLength', 'costFrequencyMetric', 'cost', 'userPlanOccurrenceId']
+        fields = ['id','text','title', 'isActive', 'isSubscribed', 'description', 'author','image', 'author_id', 'timeCommitment', 'scheduleLength', 'costFrequencyMetric', 'cost', 'userPlanOccurrenceId']
 
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)

@@ -354,7 +354,6 @@ def date_handler(obj):
 
 
 class Program(models.Model):
-
     title = models.CharField(max_length=200, default=" ")
     author = models.ForeignKey(User, null=True, blank=True)
     description = models.CharField(max_length=1000, default=" ")
@@ -367,6 +366,7 @@ class Program(models.Model):
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
+    isActive = models.BooleanField(blank=True, default=True)
 
 
     def get_userPlanOccurrenceId(self, theUser):
@@ -417,6 +417,7 @@ class Program(models.Model):
 
 
 class Step(models.Model):
+
     program = models.ForeignKey(Program, null=True, blank=True)
     title = models.CharField(max_length=100, blank=False, default="")
     description = models.CharField(max_length=1000, default="")
@@ -662,7 +663,7 @@ class StepOccurrenceManager(models.Manager):
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
                                                task='kiterope.tasks.send_email_notification',
-                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title, theStep.description]))
+                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title, "https://kiterope.com/stepOccurrences/" + theStep.id + "/" + "\n\n" + theStep.description]))
             #print("email section done")
 
         if 'APP' in thePlanOccurrence.notificationMethod:
@@ -684,7 +685,7 @@ class StepOccurrenceManager(models.Manager):
             phoneNumber = "%s" % thePlanOccurrence.notificationPhone
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
                                                task='kiterope.tasks.send_text_notification',
-                                               args=json.dumps([phoneNumber, theStep.title]))
+                                               args=json.dumps([phoneNumber, theStep.title + "\n" + "https://kiterope.com/stepOccurrences/" + theStep.id + "/"]))
             #print("text section done")
 
 

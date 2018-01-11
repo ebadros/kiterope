@@ -16,6 +16,8 @@ import {Provider, connect, dispatch} from 'react-redux'
 import  {store} from "./redux/store";
 import {SearchPage} from './search'
 import {SettingsPage} from './settings'
+import {StepOccurrenceDetailPage} from './stepOccurrence'
+
 import {Page404} from './Page404'
 
 import {SplashPage} from './splash'
@@ -116,6 +118,8 @@ ReactDOM.render((
                 <Route path="/goals/:goal_id/plans" component={GoalDetailPage} onEnter={requireAuth}/>
 
                 <Route path="/plans/:plan_id/steps" component={PlanDetailPage} onEnter={requireAuth}/>
+                <Route path="/stepOccurrences/:stepOccurrence_id/" component={StepOccurrenceDetailPage} onEnter={requireAuth}/>
+
 
 
                 <Route path="/profiles/:profile_id" component={ProfileDetailPage}/>

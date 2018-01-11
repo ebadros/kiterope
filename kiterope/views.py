@@ -508,6 +508,24 @@ class StepViewSet(viewsets.ModelViewSet):
 
     pagination_class = LargeResultsSetPagination
 
+    @detail_route(methods=['get'], permission_classes=[IsProgramOwnerOrReadOnly], url_path='duplicate')
+    def duplicateStep(self, request, *args, **kwargs):
+
+        step_id = self.kwargs['pk']
+        theStep = Step.objects.get(id=step_id)
+        theNewStep = deepcopy(theStep)
+        theNewStep.id = None
+        theNewStep.title = theNewStep.title + " Copy"
+        theNewStep.save()
+        theUpdates = Update.objects.filter(steps=theStep)
+        for theUpdate in theUpdates:
+            theNewUpdate = deepcopy(theUpdate)
+            theNewUpdate.id = None
+            theNewUpdate.step_id = theNewStep.id
+            theNewUpdate.save()
+        theStepFromDB = Step.objects.get(id=theNewStep.id)
+        serializer = self.get_serializer(theStepFromDB)
+        return Response(serializer.data)
 
     def get_queryset(self):
 
@@ -717,13 +735,20 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
 
             theUpdate = Update.objects.get(id=instance.update.id)
 
+            # This checks if the StepOccurrence has been previously saved and the default UpdateOccurrence capturing
+            # whether it's been completed and sets the StepOccurrence wasCompleted to True if it's so
+            if theUpdate.format == "boolean":
+                if theUpdate.default and instance.boolean == True:
+                    theStepOccurrence.wasCompleted = True
+                    theStepOccurrence.save()
+                elif theUpdate.default and instance.boolean == False:
 
-            if theUpdate.default and instance.boolean == True:
-                theStepOccurrence.wasCompleted = True
-                theStepOccurrence.save()
-            elif theUpdate.default and instance.boolean == False:
-                theStepOccurrence.wasCompleted = False
-                theStepOccurrence.save()
+                    theStepOccurrence.wasCompleted = False
+
+                    theStepOccurrence.save()
+                    print("check it")
+                    print(theStepOccurrence.wasCompleted)
+                    print("check it out")
         except:
             pass
 
@@ -1014,10 +1039,10 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & stepOccurrenceStatusFilter & typeIsCompletionFilter).order_by('date')
 
             # TIME-BASED
-            theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
+            #theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
 
 
-            #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
+            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -1058,6 +1083,51 @@ class ProgramViewSet(viewsets.ModelViewSet):
     required_scopes = ['groups']
     pagination_class = StandardResultsSetPagination
 
+    @detail_route(methods=['get'], permission_classes=[PostPutAuthorOrView], url_path='duplicate')
+    def duplicateProgram(self, request, *args, **kwargs):
+
+        print("inside duplicateProgram")
+        print(self.kwargs)
+        program_id = self.kwargs['pk']
+        theProgram = Program.objects.get(id=program_id)
+        theNewProgram = deepcopy(theProgram)
+        theNewProgram.id = None
+        theNewProgram.title = theNewProgram.title + " Copy"
+        theNewProgram.save()
+
+
+        theSteps = Step.objects.filter(program=theProgram)
+        for theStep in theSteps:
+            theNewStep = deepcopy(theStep)
+            theNewStep.id = None
+            theNewStep.program_id = theNewProgram.id
+            theNewStep.save()
+            theUpdates = Update.objects.filter(steps=theStep)
+            for theUpdate in theUpdates:
+                theNewUpdate = deepcopy(theUpdate)
+                theNewUpdate.id = None
+                theNewUpdate.step_id = theNewStep.id
+                theNewUpdate.save()
+
+
+        theProgramFromDB = Program.objects.get(id=theNewProgram.id)
+        serializer = self.get_serializer(theProgramFromDB)
+
+
+        return Response(serializer.data)
+
+
+
+            #aQuerySet = Step.objects.filter(id=theNewStep.id)
+
+
+            #serializer = StepSerializer(aQuerySet)
+
+
+
+
+
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
@@ -1077,10 +1147,9 @@ class ProgramViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request.data)
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -1091,12 +1160,15 @@ class ProgramViewSet(viewsets.ModelViewSet):
             theUser = self.request.user.is_authenticated()
             userIsCurrentUser = Q(author=theUser)
             viewableByAnyone = Q(viewableBy="ANYONE")
+            isActiveFilter = Q(isActive=True)
 
-            theQueryset = Program.objects.filter(userIsCurrentUser | viewableByAnyone)
+            theQueryset = Program.objects.filter(isActive & (userIsCurrentUser | viewableByAnyone))
         except:
+            isActiveFilter = Q(isActive=True)
+
             viewableByAnyone = Q(viewableBy="ANYONE")
 
-            theQueryset = Program.objects.filter(viewableByAnyone)
+            theQueryset = Program.objects.filter(viewableByAnyone & isActiveFilter)
 
 
         try:
@@ -1402,6 +1474,9 @@ class ProgramSearchViewSet(HaystackViewSet):
     pagination_class = StandardResultsSetPagination
 
 
+
+
+'''
 class ProgramDuplicatorViewSet(viewsets.ModelViewSet):
     serializer_class = ProgramSerializer
     queryset = Program.objects.all()
@@ -1410,6 +1485,7 @@ class ProgramDuplicatorViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+
         serializer = self.get_serializer(queryset, many=False)
 
         return Response(serializer.data)
@@ -1436,7 +1512,7 @@ class ProgramDuplicatorViewSet(viewsets.ModelViewSet):
                     theNewUpdate.save()
 
 
-            aQueryset = Program.objects.get(id=theNewProgram.id)
+            aQueryset = Program.objects.filter(id=theNewProgram.id)
 
             return aQueryset
             #aQuerySet = Step.objects.filter(id=theNewStep.id)
@@ -1450,7 +1526,7 @@ class ProgramDuplicatorViewSet(viewsets.ModelViewSet):
 
             aQueryset = Program.objects.none()
             return aQueryset
-
+'''
 class StepDuplicatorViewSet(viewsets.ModelViewSet):
     serializer_class = StepSerializer
     queryset = Step.objects.all()

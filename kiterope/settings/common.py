@@ -127,7 +127,10 @@ GEOIP_DATABASE = 'static/GeoLiteCity.dat'
 GEOIPV6_DATABASE = 'static/GeoIPv6.dat'
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_SIGNAL_PROCESSOR = 'celery_haystack.signals.CelerySignalProcessor'
+
+#HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+#HAYSTACK_SIGNAL_PROCESSOR = 'kiterope.signals.ProgramSignalProcessor'
 
 
 MIDDLEWARE_CLASSES = [

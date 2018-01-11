@@ -48,7 +48,7 @@ router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'visualizations', views.VisualizationViewSet)
 
-router.register(r'steps', views.StepViewSet)
+router.register(r'^steps/(?P<step_id>\w+)/duplicate/$', views.StepViewSet, base_name='Step')
 router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
@@ -76,10 +76,10 @@ router.register(r'channels', views.KChannelViewSet, base_name='Room')
 
 router.register(r'channelUsers/(?P<receiver_id>\w+)', views.ReceiverKChannelViewSet, base_name='KChannel')
 router.register(r'^steps/(?P<step_id>\w+)/duplicate', views.StepDuplicatorViewSet, base_name='step-duplicate')
-router.register(r'^programs/(?P<program_id>\w+)/duplicate', views.ProgramDuplicatorViewSet, base_name='program-duplicate')
 
 
 router.register(r'^programs/(?P<program_id>\w+)/steps', views.StepViewSet, base_name='Step')
+router.register(r'^programs/(?P<program_id>\w+)/duplicate/$', views.ProgramViewSet, base_name='Program')
 
 router.register(r'programs', views.ProgramViewSet, base_name='Program')
 

@@ -1,8 +1,12 @@
 import datetime
 from haystack import indexes
 from kiterope.models import Program
+from django.db.models import Q
+from celery_haystack.indexes import CelerySearchIndex
 
-class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
+
+
+class ProgramIndex(CelerySearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     id = indexes.CharField(model_attr="id")
     title = indexes.CharField(model_attr="title")
@@ -17,6 +21,8 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     author_id = indexes.CharField(model_attr='author')
     author_fullName = indexes.CharField(model_attr='author')
     author_profilePhoto = indexes.CharField(model_attr='author')
+    isActive = indexes.BooleanField(model_attr='isActive')
+
 
     category = indexes.CharField(model_attr="category")
 
@@ -44,11 +50,18 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Program
 
+
     def index_queryset(self, using=None):
+        print("indexing queryset")
 
         """Used when the entire index for model is updated."""
 
         #return self.get_model().objects.filter(pub_date__lte=datetime.datetime.now())
+        viewableByAnyoneFilter = Q(viewableBy='ANYONE')
+        isActiveFilter = Q(isActive=True)
 
-        return self.get_model().objects.filter(viewableBy='ANYONE')
+        return self.get_model().objects.filter(viewableByAnyoneFilter & isActiveFilter)
+
+
+        #return self.get_model().objects.filter(viewableByAnyoneFilter)
 

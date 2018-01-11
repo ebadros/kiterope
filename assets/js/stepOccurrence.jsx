@@ -31,8 +31,8 @@ import {UpdateOccurrenceList } from './updateOccurrence'
 import {SaveButton } from './settings'
 
 
-import {ImageUploader,   ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
-import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
+import {ImageUploader,   Breadcrumb, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import { Menubar, StandardSetOfComponents, Footer, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable, ProgramCalendar } from './calendar'
@@ -218,12 +218,13 @@ export class StepOccurrenceItem extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.stepOccurrenceData) {
-            this.setState({data: nextProps.stepOccurrenceData,
-            id: nextProps.stepOccurrenceData.id,
-            title: nextProps.stepOccurrenceData.step.title,
+            this.setState({
+                data: nextProps.stepOccurrenceData,
+                id: nextProps.stepOccurrenceData.id,
+                title: nextProps.stepOccurrenceData.step.title,
                 date: moment(nextProps.stepOccurrenceData.date).format("MM/DD/YYYY hh:mm:ss"),
-            image:nextProps.stepOccurrenceData.step.image,
-            description: nextProps.stepOccurrenceData.step.description,
+                image:nextProps.stepOccurrenceData.step.image,
+                description: nextProps.stepOccurrenceData.step.description,
                 updateOccurrences: nextProps.stepOccurrenceData.updateOccurrences,
 
             })
@@ -339,18 +340,23 @@ export class StepOccurrenceItem extends React.Component {
     render () {
 
         var theInputs = this.getInputs()
+        if (this.state.data.step != undefined) {
             return (
                 <div key={`ref_stepOccurrenceItem_${this.state.data.id}`}
                      className="column">
 
                     <div className="ui segment noBottomMargin noTopMargin">
-                        <div onClick={this.toggleDetail} ><ClippedImage item="plan" src={s3ImageUrl + this.state.image} /></div>
+                        <div onClick={this.toggleDetail}><ClippedImage item="plan" src={s3ImageUrl + this.state.image}/>
+                        </div>
 
-                        <div className="stepOccurrenceTitle" onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ? <i className="chevron up icon" style={{float:"right"}}></i>: <i className="chevron down icon" style={{float:"right"}}></i>}
-</div>
-                       <div>{this.state.date}</div>
- <div ref="ref_detail">
-                            {this.state.data.step.type == "TIME" ? <div>{this.state.date}</div>:null}
+                        <div className="stepOccurrenceTitle"
+                             onClick={this.toggleDetail}>{this.state.title}{this.state.showingDetail ?
+                            <i className="chevron up icon" style={{float: "right"}}></i> :
+                            <i className="chevron down icon" style={{float: "right"}}></i>}
+                        </div>
+                        <div>{this.state.date}</div>
+                        <div ref="ref_detail">
+                            {this.state.data.step.type == "TIME" ? <div>{this.state.date}</div> : null}
                             <div className="itemDetailSmall">
                                 <div dangerouslySetInnerHTML={{__html: this.state.description}}></div>
                             </div>
@@ -358,12 +364,119 @@ export class StepOccurrenceItem extends React.Component {
                         {theInputs}
 
 
-                </div></div>
+                    </div>
+                </div>
             )
+        } else {
+            return <div></div>
+        }
         }
 
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class StepOccurrenceDetailPage extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:"",
 
-module.exports = { StepOccurrenceItem, StepOccurrenceList };
+        }
+    }
+
+
+
+
+    loadStepOccurrence() {
+        console.log("load plans from server");
+    $.ajax({
+      url: "/api/stepOccurrences/" + this.props.params.stepOccurrence_id + "/",
+      dataType: 'json',
+        type: 'GET',
+
+      cache: false,
+      success: function(stepOccurrenceData) {
+        this.setState({
+            data: stepOccurrenceData});
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error( "/api/stepOccurrences/" + this.props.params.program_id + "/", status, err.toString());
+      }.bind(this),
+
+    });
+  };
+
+
+    componentWillUnmount = () => {
+        //clearInterval(this.state.stepsIntervalId);
+
+    };
+
+
+
+
+
+
+  componentDidMount() {
+      console.log("compoentnDidMount")
+      this.loadStepOccurrence()
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+    render() {
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+
+                var listNodeOrMobile = true}
+
+        if (this.state.data != "") {
+            return (
+                <div>
+                    <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+
+                    <div className="ui container footerAtBottom">
+                        <div className="spacer">&nbsp;</div>
+                        <div className="ui alert"></div>
+                        <Breadcrumb values={[
+                            {url: "/plan/view/" + this.props.params.program_id, label: "Plan Detail"},
+
+                        ]}/>
+                        <div>&nbsp;</div>
+                                              <div className="ui three column stackable grid">
+
+
+                        <StepOccurrenceItem stepOccurrenceData={this.state.data} />
+                                                  </div>
+
+
+                    </div>
+                    <Footer />
+                </div>
+
+            )
+        } else {
+            return (<div></div>)
+        }
+    }
+}
+
+module.exports = { StepOccurrenceItem, StepOccurrenceList, StepOccurrenceDetailPage };

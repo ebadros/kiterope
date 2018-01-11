@@ -1132,7 +1132,7 @@ export class ViewEditDeleteItem extends React.Component {
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
-                this.reload()
+                //this.reload()
 
             }.bind(this),
             error: function (xhr, status, err) {
@@ -1586,6 +1586,30 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
   }
 
+  deleteItem = () => {
+      console.log("deleteItem patch")
+        var apiUrl = this.props.apiUrl;
+        var theUrl = apiUrl + this.props.id + "/";
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: {isActive: "false"},
+                headers: {
+                'Authorization': 'Token ' + localStorage.token
+                },
+                success: () => {
+                    this.hideComponent();
+                    this.callDeleteReducer();
+                    //this.reload()
+                },
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }
+            });
+        };
+
   switchToEditView = () => {
 
         this.setState({
@@ -1611,7 +1635,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
             success: function (data) {
                 store.dispatch(addProgram(data));
 
-                this.reload()
+                //this.reload()
 
             }.bind(this),
             error: function (xhr, status, err) {
