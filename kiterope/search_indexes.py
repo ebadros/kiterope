@@ -2,11 +2,10 @@ import datetime
 from haystack import indexes
 from kiterope.models import Program
 from django.db.models import Q
-from celery_haystack.indexes import CelerySearchIndex
 
 
 
-class ProgramIndex(CelerySearchIndex, indexes.Indexable):
+class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     id = indexes.CharField(model_attr="id")
     title = indexes.CharField(model_attr="title")
@@ -50,7 +49,13 @@ class ProgramIndex(CelerySearchIndex, indexes.Indexable):
     def get_model(self):
         return Program
 
-
+    def should_update(self, instance, **kwargs):
+        print("should update")
+        if instance.isActive:
+            return True
+        else:
+            self.remove_object(instance, **kwargs)
+            return False
 
     def index_queryset(self, using=None):
         print("indexing queryset")
