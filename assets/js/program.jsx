@@ -1275,7 +1275,7 @@ export class ProgramDetailPage extends React.Component {
 
         return (
             <div>
-                <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+                <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} />
 
                     <div className="ui container footerAtBottom">
                         <div className="spacer">&nbsp;</div>

@@ -207,6 +207,8 @@ updateWindowDimensions() {
         }
     }
 
+
+
     loadProfileData() {
                 if (!this.state.profileDataLoaded) {
 
@@ -307,6 +309,7 @@ updateWindowDimensions() {
 
 
     loadCoachSpecificData() {
+
         this.loadProgramData()
         this.loadUpdateData()
 
@@ -781,7 +784,7 @@ export class StandardSetOfComponents extends React.Component {
         return (
 
             <div>
-                <ReduxDataGetter />
+                <ReduxDataGetter orderForDataLoad={this.props.orderForDataLoad} />
 
                 {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
                 <MessageButton />*/}

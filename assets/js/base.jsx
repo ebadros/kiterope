@@ -1145,7 +1145,25 @@ export class ViewEditDeleteItem extends React.Component {
     };
 
     determineOptions = () => {
+        if (this.props.storeRoot.user != undefined) {
+            if (this.props.data.author != undefined) {
+            if (this.props.data.author == this.props.storeRoot.user.id) {
+                this.setState({editable:true})
 
+            }
+        } else {
+                if (this.props.data.user != undefined) {
+                    if (this.props.data.user == this.props.storeRoot.user.id) {
+                this.setState({editable:true})
+
+            }
+                }
+
+            }
+        }
+
+
+/*
         var theURL = this.props.apiUrl + this.props.id +"/";
       $.ajax({
       url: theURL,
@@ -1170,7 +1188,7 @@ export class ViewEditDeleteItem extends React.Component {
       }.bind(this),
 
 
-    });
+    });*/
   };
 
     componentWillReceiveProps = (nextProps) => {

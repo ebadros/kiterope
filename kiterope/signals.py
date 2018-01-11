@@ -18,7 +18,6 @@ def init_new_user(sender, instance, signal, created, **kwargs):
 
 class ProgramSignalProcessor(signals.RealtimeSignalProcessor):
     def handle_save(self, sender, instance, **kwargs):
-        print("handle save")
         if isinstance(instance, Program):
             using_backends = self.connection_router.for_write(instance=instance)
             for using in using_backends:
@@ -26,10 +25,8 @@ class ProgramSignalProcessor(signals.RealtimeSignalProcessor):
                     index = self.connections[using].get_unified_index().get_index(sender)
                     if instance.isActive:
                         print(instance.id)
-                        print("instance is Active is true")
                         index.update_object(instance, using=using)
                     else:
-                        print("instance is Active is false")
                         index.remove_object(instance, using=using)
                 except NotHandled:
                     print(NotHandled.message)
