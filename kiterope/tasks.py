@@ -40,6 +40,10 @@ app.conf.timezone = 'UTC'
 #def setup_periodic_tasks(sender, **kwargs):
     #sender.add_periodic_task(crontab(minute='*/1'), send_notification(), name='send_notification' )
 #    pass
+@app.task()
+def rebuildSearchIndexes():
+    from haystack.management.commands import update_index, rebuild_index
+    rebuild_index.Command().handle(interactive=False)
 
 
 @app.task()
