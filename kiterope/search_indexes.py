@@ -51,6 +51,7 @@ class ProgramIndex(CelerySearchIndex, indexes.Indexable):
         return Program
 
 
+
     def index_queryset(self, using=None):
         print("indexing queryset")
 

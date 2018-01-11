@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'kiterope',
     'storages',
+    'celery_haystack',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
