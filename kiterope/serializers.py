@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, SettingsSet, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -66,11 +66,17 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
     updates = serializers.SerializerMethodField(required=False, read_only=True)
     visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+
+    croppableImageData = serializers.SerializerMethodField()
+
 
     def get_absoluteStartDateForCalendar(self,obj):
         #date_1 = datetime.datetime.strptime(obj.absoluteStartDate, "%y-%m-%d")
         new_date = obj.absoluteStartDate + datetime.timedelta(days=1)
         return new_date
+
+
 
     def get_absoluteEndDateForCalendar(self,obj):
         #date_1 = datetime.datetime.strptime(obj.absoluteEndDate, "%y-%m-%d")
@@ -103,9 +109,18 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
         if self.context['request'].user == obj.program.author:
             return True
 
+
+
+    def get_croppableImageData(self, obj):
+
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
+
     class Meta:
         model = Step
-        fields = ('id', 'program', 'image', 'type','updates','absoluteStartDate', 'visualizations','absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
+        fields = ('id', 'program', 'image', 'type', 'croppableImage','croppableImageData','updates','absoluteStartDate', 'visualizations','absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
 
 
 class StepLimitedSerializer(serializers.ModelSerializer):
@@ -633,7 +648,7 @@ class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -654,6 +669,16 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
     updates = serializers.SerializerMethodField(required=False, read_only=True)
     visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+
+    croppableImageData = serializers.SerializerMethodField()
+
+    def get_croppableImageData(self, obj):
+
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
 
 
     def get_updates(self, obj):
@@ -724,6 +749,8 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.image = validated_data.get('image', instance.image)
 
         instance.title = validated_data.get('title', instance.title)
+        instance.croppableImage = validated_data.get('croppableImage', instance.croppableImage)
+
         instance.author = validated_data.get('author', instance.author)
         instance.isActive = validated_data.get('isActive', instance.isActive)
         instance.description = validated_data.get('description', instance.description)
@@ -744,6 +771,22 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
+
+
+class CroppableImageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = CroppableImage
+        fields = ('id', 'originalUncompressedImage', 'image',  'cropperCropboxData',)
+
+    cropperCropboxData = serializers.JSONField()
+
+
+
+    def create(self, validated_data):
+        print(self)
+
+        croppableImageInstance = CroppableImage.objects.create(**validated_data)
+        return croppableImageInstance
 
 
 

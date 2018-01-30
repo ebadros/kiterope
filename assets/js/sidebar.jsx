@@ -93,17 +93,22 @@ export class SidebarWithoutClickingOutside extends React.Component {
             if (this.props.storeRoot.gui != undefined) {
                 this.setState({visible: this.props.storeRoot.gui.isSidebarVisible})
 
-                }
-            } else {
-                $(this.refs["ref_sidebar"]).hide()
-
             }
+
 
             if (this.props.storeRoot.user != undefined) {
                 this.setState({
                     user: this.props.storeRoot.user,
                 })
             }
+        }
+
+            else {
+                $(this.refs["ref_sidebar"]).hide()
+
+            }
+
+
 
 
 

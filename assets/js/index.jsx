@@ -13,7 +13,6 @@ import {ClientListPage, ClientDetailPage} from './client'
 import {Test} from './elements'
 import {MessagePage} from './message'
 import {Provider, connect, dispatch} from 'react-redux'
-import  {store} from "./redux/store";
 import {SearchPage} from './search'
 import {SettingsPage} from './settings'
 import {StepOccurrenceDetailPage} from './stepOccurrence'
@@ -22,8 +21,7 @@ import {Page404} from './Page404'
 
 import {SplashPage} from './splash'
 import {BlogPage} from './blog'
-import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
-import {rootReducer} from './redux/reducers'
+
 
 import {VisualizationsPage} from './visualization'
 
@@ -32,12 +30,17 @@ import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
 import {PlanDetailPage} from './plan'
 import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
-import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 
-import {createStore, combineReducers, applyMiddleware} from "redux";
 import {BrowseProgramsPage } from './browse'
 
 import auth from './auth'
+
+import  {store} from "./redux/store";
+import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import {rootReducer} from './redux/reducers'
+import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
+import {createStore, combineReducers, applyMiddleware} from "redux";
+
 
 
 

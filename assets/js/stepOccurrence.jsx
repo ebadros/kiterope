@@ -48,6 +48,7 @@ import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalS
     costFrequencyMetricOptions, times, durations,  } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
+import { updateStepOccurrence, setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
@@ -148,6 +149,7 @@ var objectNodes = <div style={{padding:'0px'}}><div className="largeItalic" styl
     }
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class StepOccurrenceItem extends React.Component {
     constructor(props) {
         super(props);
@@ -240,10 +242,41 @@ export class StepOccurrenceItem extends React.Component {
 
 
 
+    handleAllSaved() {
+        var theUrl = "/api/stepOccurrences/" + this.state.id + "/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
 
+                    console.log("dispatching update step occurrece *****************************")
+                    store.dispatch(updateStepOccurrence(data))
+                    //if (this.state.stepOccurrenceDoneSaving) {
+                    //    this.setState({doneSaving: true})
+                    //}
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                        saved: "Unsaved",
+                    })
+
+                }.bind(this)
+            });
+
+    }
 
 
     handleSubmit(updateOccurrence) {
+        console.log("handle submit has been called")
         this.setState({doneSaving:false});
         this.setState({
             saved: "Saving"
@@ -299,6 +332,7 @@ export class StepOccurrenceItem extends React.Component {
                         saved: "Saved",
                         doneSaving: true
                     });
+
                     //if (this.state.stepOccurrenceDoneSaving) {
                     //    this.setState({doneSaving: true})
                     //}
@@ -324,7 +358,7 @@ export class StepOccurrenceItem extends React.Component {
 
             return (
                 <div>
-<UpdateOccurrenceList data={this.state.updateOccurrences} />
+<UpdateOccurrenceList data={this.state.updateOccurrences} allUpdateOccurrencesHaveBeenSaved={() => this.handleAllSaved()} />
                     </div>)
         } else {
             return(

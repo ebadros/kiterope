@@ -34,9 +34,22 @@ from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSch
 import datetime
 from datetime import timedelta
 from dateutil.rrule import rrule, DAILY
+from picklefield.fields import PickledObjectField
+from jsonfield import JSONField
 
 
+'''
+rruleFrequencies = (
+    ("SECONDLY", "rrule.SECONDLY"),
+    ("MINUTELY", MINUTELY),
+    ("HOURLY", HOURLY),
+    ("DAILY", DAILY),
+    ("WEEKLY", WEEKLY),
+    ("MONTHLY", MONTHLY),
+    ("YEARLY", YEARLY),
 
+)
+'''
 
 
 TIME_COMMITMENT_CHOICES = (
@@ -304,6 +317,12 @@ class Notification(models.Model):
     objects = NotificationManager()
 
 
+class CroppableImage(models.Model):
+    originalUncompressedImage = models.CharField(max_length=200, null=True, blank=True)
+    image = models.CharField(max_length=200, null=True, blank=True)
+    cropperCropboxData = JSONField(null=True, blank=True, default = "")
+
+
 
 
 
@@ -367,6 +386,8 @@ class Program(models.Model):
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
     isActive = models.BooleanField(blank=True, default=True)
+    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+
 
 
     def get_userPlanOccurrenceId(self, theUser):
@@ -423,6 +444,8 @@ class Step(models.Model):
     description = models.CharField(max_length=1000, default="")
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, null=False, default='ONCE')
     image = models.CharField(max_length=200, null=True, blank=True, default="images/stepDefaultImage.svg")
+    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+
     type = models.CharField(max_length=30, null=False, choices=STEP_TYPE_CHOICES, default='COMPLETION')
 
 
@@ -592,6 +615,30 @@ class UpdateOccurrence(models.Model):
 
 
 class StepOccurrenceManager(models.Manager):
+
+    def getStepStartTimeDelta(self, theStepStartTime, theUserId):
+        print("getStepStartTimeDelta called")
+        try:
+            # If the step has a set time
+            theStepStartTimeString = theStepStartTime
+            theStepStartTimeStringComponents = theStepStartTimeString.split(":")
+            theHour = theStepStartTimeStringComponents[0]
+            theMinutes = theStepStartTimeStringComponents[1]
+            theDatetime = datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
+
+
+        except:
+            theSettingsSet = SettingsSet.objects.get(user=theUserId)
+            try:
+                theStepStartTimeString = theSettingsSet.defaultNotificationSendTime
+                theStepStartTimeStringComponents = theStepStartTimeString.split(":")
+                theHour = theStepStartTimeStringComponents[0]
+                theMinutes = theStepStartTimeStringComponents[1]
+                theDatetime = datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
+            except:
+                theDatetime = datetime.timedelta(hours=int(9), minutes=int(0))
+        return theDatetime
+
     def create_completionBased_occurrence(self, aStepId, aPlanOccurrenceId, theUserId):
         print("create_completionBased_occurrence")
         theStep = Step.objects.get(id=aStepId)
@@ -600,6 +647,7 @@ class StepOccurrenceManager(models.Manager):
                                  wasCompleted=False, user_id=theUserId)
         occurrence.full_clean()
         return occurrence
+
 
     def create_scheduleBased_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
 
@@ -615,6 +663,7 @@ class StepOccurrenceManager(models.Manager):
             theHour = theStepStartTimeStringComponents[0]
             theMinutes = theStepStartTimeStringComponents[1]
             theDatetime = aDate + datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
+
 
         except:
             theSettingsSet = SettingsSet.objects.get(user=theUserId)
@@ -650,52 +699,53 @@ class StepOccurrenceManager(models.Manager):
         theUTCMinute = theUTCDatetime.minute
         theDateString = theUTCDatetime.strftime("%Y-%m-%d %H:%M:%S")
 
-
+        print("scheduleing about to happen")
 
 
         schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth, day_of_month=theUTCDayOfTheMonth)
         thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
-
+        occurrence = self.create(step_id=aStepId, date=theUTCDatetime, type=theStep.type,
+                                 planOccurrence_id=aPlanOccurrenceId, wasCompleted=False, user_id=theUserId)
+        occurrence.full_clean()
 
         if 'EMAIL' in thePlanOccurrence.notificationMethod:
-            #print("inside EMAIL")
-            periodicTaskString1 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            periodicTaskString1 = "%s: %s - %s %s" % (
+            theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (occurrence.id, theStep.description)
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
                                                task='kiterope.tasks.send_email_notification',
-                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title, "https://kiterope.com/stepOccurrences/" + theStep.id + "/" + "\n\n" + theStep.description]))
-            #print("email section done")
+                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title, linkToStepOccurrence]))
 
         if 'APP' in thePlanOccurrence.notificationMethod:
-            #print("inside APP")
-            periodicTaskString2 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            # print("inside APP")
+            periodicTaskString2 = "%s: %s - %s %s" % (
+            theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
 
-            #print("expoToekn")
+            # print("expoToekn")
             print(theUserProfile.expoPushToken)
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
                                                task='kiterope.tasks.send_app_notification',
                                                args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
-            #print("app section done")
-
 
         if 'TEXT' in thePlanOccurrence.notificationMethod:
-            #print("inside TEXT")
-            periodicTaskString3 = "%s: %s - %s %s" % (theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            # print("inside TEXT")
+            linkToStepOccurrence = "%s\n\nhttps://kiterope.com/stepOccurrences/%s/\n\n%s" % ( theStep.title, occurrence.id, theStep.description)
+
+            periodicTaskString3 = "%s: %s - %s %s" % (
+            theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
             phoneNumber = "%s" % thePlanOccurrence.notificationPhone
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
                                                task='kiterope.tasks.send_text_notification',
-                                               args=json.dumps([phoneNumber, theStep.title + "\n" + "https://kiterope.com/stepOccurrences/" + theStep.id + "/"]))
-            #print("text section done")
+                                               args=json.dumps([phoneNumber,
+                                                                linkToStepOccurrence]))
 
 
-
-        occurrence = self.create(step_id=aStepId, date = theUTCDatetime, type=theStep.type, planOccurrence_id = aPlanOccurrenceId, wasCompleted=False, user_id = theUserId)
-        occurrence.full_clean()
 
         return occurrence
 
-    def createScheduleBasedStepOccurrencesForRange(aPlanOccurrence, persistedOccurrences, aStep, periodStart, periodEnd, theUserProfile, userTimezone):
+    '''def createScheduleBasedStepOccurrencesForRange(aPlanOccurrence, persistedOccurrences, aStep, periodStart, periodEnd, theUserProfile, userTimezone):
         print("createScheduleBasedStepOccurrencesForRange")
         stepStart = aStep.startDate
         if aStep.endDate != aStep.startDate and aStep.endDate >= stepStart:
@@ -719,11 +769,9 @@ class StepOccurrenceManager(models.Manager):
         else:
             iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
 
+
         for dateIterator in rrule(DAILY, dtstart=iterationStart, until=iterationEnd):
-            print("iterationstart")
-            print(iterationStart)
-            print("iterationEnd")
-            print(iterationEnd)
+
             stepOccurrenceExists = False
             beginningUTCDateTime = toUTC(dateIterator, userTimezone)
             endUTCDateTime = beginningUTCDateTime + datetime.timedelta(days=1)
@@ -754,27 +802,243 @@ class StepOccurrenceManager(models.Manager):
                 else:
                     aStepOccurrence = self.create_scheduleBased_occurrence(aStep.id, dateIterator, aPlanOccurrence.id, theUser.id)
                     self.create_update_occurrences(aStep.id, aStepOccurrence)
+                    '''
 
-    def updateStepOccurrences(self, theUser, periodRangeStart, periodRangeEnd):
+    def create_scheduleBased_occurrence_new(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
+
+        theStep = Step.objects.get(id=aStepId)
+        theUTCDatetime = aDate
+
+        theUTCMonth = theUTCDatetime.month
+        theUTCDayOfTheMonth = theUTCDatetime.day
+
+        theUTCHour = theUTCDatetime.hour
+
+        theUTCMinute = theUTCDatetime.minute
+        theDateString = theUTCDatetime.strftime("%Y-%m-%d %H:%M:%S")
+
+
+
+        schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth,
+                                                  day_of_month=theUTCDayOfTheMonth)
+        thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
+        occurrence = self.create(step_id=aStepId, date=theUTCDatetime, type=theStep.type,
+                                 planOccurrence_id=aPlanOccurrenceId, wasCompleted=False, user_id=theUserId)
+        occurrence.full_clean()
+        theUserProfile = Profile.objects.get(user_id=theUserId)
+
+        if 'EMAIL' in thePlanOccurrence.notificationMethod:
+            periodicTaskString1 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (
+            occurrence.id, theStep.description)
+
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
+                                               task='kiterope.tasks.send_email_notification',
+                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title,
+                                                                linkToStepOccurrence]))
+
+
+        if 'APP' in thePlanOccurrence.notificationMethod:
+            # print("inside APP")
+            periodicTaskString2 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+
+            # print("expoToekn")
+            print(theUserProfile.expoPushToken)
+
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
+                                               task='kiterope.tasks.send_app_notification',
+                                               args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
+
+        if 'TEXT' in thePlanOccurrence.notificationMethod:
+            # print("inside TEXT")
+            linkToStepOccurrence = "%s\n\nhttps://kiterope.com/stepOccurrences/%s/\n\n%s" % (
+            theStep.title, occurrence.id, theStep.description)
+
+            periodicTaskString3 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            phoneNumber = "%s" % thePlanOccurrence.notificationPhone
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
+                                               task='kiterope.tasks.send_text_notification',
+                                               args=json.dumps([phoneNumber,
+                                                                linkToStepOccurrence]))
+
+
+        return occurrence
+
+
+    def updateStepOccurrencesForRange(self, theUser, periodRangeStart, periodRangeEnd):
+        try:
+            userPlanOccurrences = PlanOccurrence.objects.filter(user=theUser.id, isSubscribed='True')
+
+            for aPlanOccurrence in userPlanOccurrences:
+                isUsersStepOccurrenceFilter = Q(user=theUser.id)
+                planOccurrenceIncludesStepOccurrenceFilter = Q(planOccurrence = aPlanOccurrence.id)
+                persistedOccurrences = StepOccurrence.objects.filter(isUsersStepOccurrenceFilter & planOccurrenceIncludesStepOccurrenceFilter)
+
+
+                # Converting the period range that's been selected into numbers based on the user's plan occurrence start date
+                #periodStart = periodRangeStart.date() - aPlanOccurrence.startDate
+                #periodStart = periodStart.days
+                #periodEnd = periodRangeEnd.date() - aPlanOccurrence.startDate
+                #periodEnd = periodEnd.days
+                theProgram = Program.objects.get(id=aPlanOccurrence.program.id)
+                theProgramsSteps = Step.objects.filter(program=theProgram.id)
+
+                theUserProfile = Profile.objects.get(user=theUser)
+                userTimezone = theUserProfile.timezone
+
+                for aStep in theProgramsSteps:
+
+
+                    theStepDatetimeDelta = self.getStepStartTimeDelta(aStep.startTime, theUser.id)
+                    periodRangeStartStepTime = periodRangeStart + theStepDatetimeDelta
+                    periodRangeEndStepTime = periodRangeEnd + theStepDatetimeDelta
+
+                    print(periodRangeStartStepTime)
+                    print(periodRangeEndStepTime)
+
+
+                    if aStep.useAbsoluteTime:
+                        theProgramAuthorProfileTimezone = aStep.program.author.profile.timezone
+                        theUTCDatetime = toUTC(periodRangeStartStepTime, theProgramAuthorProfileTimezone)
+                        thePeriodRangeStartUTCDatetime = toUTC(periodRangeEndStepTime, theProgramAuthorProfileTimezone)
+                        thePeriodRangeEndUTCDatetime = toUTC(periodRangeEndStepTime, theProgramAuthorProfileTimezone)
+                        theUserProfile = Profile.objects.get(user_id=theUser.id)
+
+                    else:
+
+                        theUserProfile = Profile.objects.get(user_id=theUser.id)
+                        theUTCDatetime = toUTC(periodRangeStartStepTime, theUserProfile.timezone)
+                        thePeriodRangeStartUTCDatetime = toUTC(periodRangeStartStepTime, theUserProfile.timezone)
+                        thePeriodRangeEndUTCDatetime = toUTC(periodRangeEndStepTime, theUserProfile.timezone)
+
+                    if aStep.type == "TIME":
+
+                        if aStep.frequency == "DAILY":
+                            theOccurrenceList = list(rrule(DAILY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime))
+                        elif aStep.frequency == "WEEKLY":
+                            daysList = [aStep.day01, aStep.day02, aStep.day03, aStep.day04, aStep.day05, aStep.day06,
+                                        aStep.day07]
+                            theOccurrenceList = list(
+                                rrule(WEEKLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime, byweekday=daysList))
+                        elif aStep.frequency == "MONTHLY":
+                            monthlyDatesArray = aStep.get_monthlyDatesArray()
+                            theOccurrenceList = list(
+                                rrule(MONTHLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime, bymonthday=monthlyDatesArray))
+                        elif aStep.frequency == "HOURLY":
+                            theOccurrenceList = list(
+                                rrule(HOURLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime))
+                        elif aStep.frequency == "MINUTELY":
+                            theOccurrenceList = list(
+                                rrule(MINUTELY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime))
+                        elif aStep.frequency == "SECONDLY":
+                            theOccurrenceList = list(
+                                rrule(SECONDLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime))
+
+
+                        for persistentOccurrence in persistedOccurrences:
+
+                            if aStep.id == persistentOccurrence.step.id:
+                                if theUTCDatetime == persistentOccurrence.date:
+                                    try:
+                                        theOccurrenceList.remove(persistentOccurrence.date)
+                                    except ValueError:
+                                        pass
+
+
+                        for theOccurrenceListItem in theOccurrenceList:
+
+                            aStepOccurrence = self.create_scheduleBased_occurrence_new(aStep.id, theOccurrenceListItem,
+                                                                                   aPlanOccurrence.id,
+                                                                                   theUser.id)
+                            print("theProgramSteps 9")
+
+                            self.create_update_occurrences(aStep.id, aStepOccurrence)
+
+
+                    elif aStep.type == "COMPLETION":
+
+                        stepOccurrenceExists = False
+                        for persistentOccurrence in persistedOccurrences:
+                            if aStep.id == persistentOccurrence.step.id:
+                                stepOccurrenceExists = True
+                                break
+
+                        if stepOccurrenceExists == False:
+                            aStepOccurrence = self.create_completionBased_occurrence(aStep.id, aPlanOccurrence.id, theUser.id)
+
+                            self.create_update_occurrences(aStep.id, aStepOccurrence)
+
+        except:
+            pass
+
+    '''def updateStepOccurrences(self, theUser, periodRangeStart, periodRangeEnd):
         try:
             userPlanOccurrences = PlanOccurrence.objects.filter(user=theUser.id, isSubscribed='True')
             persistedOccurrences = StepOccurrence.objects.filter(user=theUser.id)
 
             for aPlanOccurrence in userPlanOccurrences:
-                periodStart = periodRangeStart.date() - aPlanOccurrence.startDate
-                periodStart = periodStart.days
-                periodEnd = periodRangeEnd.date() - aPlanOccurrence.startDate
-                periodEnd = periodEnd.days
-                theProgram = Program.objects.filter(id=aPlanOccurrence.program.id)
-                theProgramsSteps = Step.objects.filter(program=theProgram[0].id)
+                # Converting the period range that's been selected into numbers based on the user's plan occurrence start date
+                #periodStart = periodRangeStart.date() - aPlanOccurrence.startDate
+                #periodStart = periodStart.days
+                #periodEnd = periodRangeEnd.date() - aPlanOccurrence.startDate
+                #periodEnd = periodEnd.days
+                theProgram = Program.objects.get(id=aPlanOccurrence.program.id)
+                theProgramsSteps = Step.objects.filter(program=theProgram.id)
                 theUserProfile = Profile.objects.get(user=theUser)
                 userTimezone = theUserProfile.timezone
 
                 for aStep in theProgramsSteps:
+                    theStepDatetimeDelta = self.getStepStartTimeDelta(aStep.startTime, theUser.id)
+                    periodRangeStartStepTime = periodRangeStart + theStepDatetimeDelta
+                    periodRangeEndStepTime = periodRangeEnd + theStepDatetimeDelta
+
+                    if aStep.useAbsoluteTime:
+                        theProgramAuthorProfileTimezone = aStep.program.author.profile.timezone
+                        theUTCDatetime = toUTC(periodRangeStartStepTime, theProgramAuthorProfileTimezone)
+                        thePeriodRangeStartUTCDatetime = toUTC(periodRangeEndStepTime, theProgramAuthorProfileTimezone)
+                        thePeriodRangeEndUTCDatetime = toUTC(periodRangeEndStepTime, theProgramAuthorProfileTimezone)
+                        theUserProfile = Profile.objects.get(user_id=theUser.id)
+
+                    else:
+
+                        theUserProfile = Profile.objects.get(user_id=theUser.id)
+                        theUTCDatetime = toUTC(periodRangeStartStepTime, theUserProfile.timezone)
+                        thePeriodRangeStartUTCDatetime = toUTC(periodRangeStartStepTime, theUserProfile.timezone)
+                        thePeriodRangeEndUTCDatetime = toUTC(periodRangeEndStepTime, theUserProfile.timezone)
+
+
+
+
+                    if aStep.frequency == "DAILY":
+                        print(list(
+                            rrule(DAILY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime)))
+                    elif aStep.frequency == "WEEKLY":
+                        daysList = [aStep.day01, aStep.day02, aStep.day03, aStep.day04, aStep.day05, aStep.day06,
+                                    aStep.day07]
+                        print(list(
+                            rrule(WEEKLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime, byweekday=daysList)))
+                    elif aStep.frequency == "MONTHLY":
+                        monthlyDatesArray = aStep.get_monthlyDatesArray()
+
+                        print(list(
+                            rrule(MONTHLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime, bymonthday=monthlyDatesArray)))
+                    elif aStep.frequency == "HOURLY":
+                        print(list(
+                            rrule(HOURLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime)))
+                    elif aStep.frequency == "MINUTELY":
+                        print(list(
+                            rrule(MINUTELY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime)))
+                    elif aStep.frequency == "SECONDLY":
+                        print(list(
+                            rrule(SECONDLY, dtstart=thePeriodRangeStartUTCDatetime, until=thePeriodRangeEndUTCDatetime)))
+
                     if aStep.type == "TIME":
                         stepStart = aStep.startDate
 
-                        if aStep.endDate != aStep.startDate and aStep.endDate >= stepStart:
+                        if aStep.endDate > stepStart:
                             stepEnd = aStep.endDate
                         else:
                             stepEnd = aStep.startDate
@@ -786,28 +1050,30 @@ class StepOccurrenceManager(models.Manager):
                         if (aStep.frequency == 'MONTHLY'):
                             monthlyDatesArray = aStep.get_monthlyDatesArray()
 
-                        if (stepStart <= periodStart):
-                            iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=periodStart)
-                        else:
-                            iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=stepStart)
 
-                        if (stepEnd <= periodEnd):
-                            iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=stepEnd)
-                        else:
-                            iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
 
-                        for dateIterator in rrule(DAILY, dtstart=iterationStart, until=iterationEnd):
-                            print("iterationstart")
-                            print(iterationStart)
-                            print("iterationEnd")
-                            print(iterationEnd)
+                        #if (stepStart <= periodStart):
+                            #iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=periodStart)
+                        #else:
+                            #iterationStart = aPlanOccurrence.startDate + datetime.timedelta(days=stepStart)
 
+                        #if (stepEnd <= periodEnd):
+                            #iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=stepEnd)
+                        #else:
+                            #iterationEnd = aPlanOccurrence.startDate + datetime.timedelta(days=periodEnd)
+                        print("before dateIterator")
+
+
+
+                        for dateIterator in rrule(DAILY, dtstart=periodRangeStart.date(), until=periodRangeEnd.date()):
+
+                        #for dateIterator in rrule(DAILY, dtstart=iterationStart, until=iterationEnd):
                             stepOccurrenceExists = False
                             beginningUTCDateTime = toUTC(dateIterator, userTimezone)
                             endUTCDateTime = beginningUTCDateTime + datetime.timedelta(days=1)
 
+                            # Set stepOccurrenceExists flag
                             for persistentOccurrence in persistedOccurrences:
-
                                 if aStep.id == persistentOccurrence.step.id:
                                     if (beginningUTCDateTime <= persistentOccurrence.date) & (persistentOccurrence.date < endUTCDateTime):
                                         if aPlanOccurrence.id == persistentOccurrence.planOccurrence.id:
@@ -815,10 +1081,7 @@ class StepOccurrenceManager(models.Manager):
                                             break
 
                             if (stepOccurrenceExists == False):
-                                print(aStep.title)
-
                                 if aStep.frequency == 'WEEKLY':
-
                                     if daysList[dateIterator.weekday()] == True:
                                         aStepOccurrence = self.create_scheduleBased_occurrence(aStep.id, dateIterator,
                                                                                                aPlanOccurrence.id,
@@ -853,6 +1116,7 @@ class StepOccurrenceManager(models.Manager):
 
         except:
             pass
+            '''
 
 
 

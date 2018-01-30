@@ -64,6 +64,7 @@ router.register(r'messageThreads', views.MessageThreadViewSet, base_name='Messag
 
 
 router.register(r'planOccurrences', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
+router.register(r'croppableImages', views.CroppableImageViewSet, base_name='CroppableImage')
 
 router.register(r'messages/(?P<sender_id>\w+)/(?P<receiver_id>\w+)', views.MessageViewSet, base_name='Message')
 router.register(r'messages', views.MessageViewSet, base_name='Message')
@@ -91,7 +92,7 @@ router.register(r'^plans/(?P<plan_id>\w+)/steps', views.StepOccurrenceViewSet, b
 router.register(r'^plans', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
 
 
-router.register(r'^period/(?P<periodRangeStart>[\w\-]+)/(?P<periodRangeEnd>[\w\-]+)/(?P<whichStepOccurrences>[\w\-]+)', views.PeriodViewSet, base_name="StepOccurrence")
+router.register(r'^period/(?P<periodRangeStart>[\w\-]+)/(?P<periodRangeEnd>[\w\-]+)', views.PeriodViewSet, base_name="StepOccurrence")
 #router.register(r'period', views.GoalViewSet, base_name='Goal')
 router.register(r'^programs/(?P<program_id>\w+)/updates', views.ProgramUpdateViewSet, base_name='Update')
 

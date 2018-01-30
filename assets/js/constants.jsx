@@ -26,6 +26,8 @@ export const TINYMCE_CONFIG = {
   'theme_modern_toolbar_align': 'left'
 };
 
+
+
 export const durations = [
     {value:'1', label: "1 minute"},
     {value:'2', label: "2 minutes"},
@@ -256,10 +258,10 @@ export const customStepModalStyles = {
   },
 
   content : {
-    top                   : '15%',
-    left                  : '10%',
-    right                 : '10%',
-    bottom                : '10%',
+    top                   : '10%',
+    left                  : '5%',
+    right                 : '5%',
+    bottom                : '5%',
     WebkitOverflowScrolling    : 'touch',
     borderRadius               : '4px',
     outline                    : 'none',
@@ -277,8 +279,8 @@ export const stepModalStyle = {
 
   content : {
     top                   : '10%',
-    left                  : '10%',
-    right                 : '10%',
+    left                  : '5%',
+    right                 : '5%',
     bottom                : '5%',
     WebkitOverflowScrolling    : 'touch',
     borderRadius               : '4px',
@@ -318,9 +320,9 @@ export const subscribeModalStyle = {
 
   content : {
     top                   : '10%',
-    left                  : '10%',
-    right                 : '10%',
-    bottom                : '10%',
+    left                  : '5%',
+    right                 : '5%',
+    bottom                : '5%',
     WebkitOverflowScrolling    : 'touch',
     borderRadius               : '4px',
     outline                    : 'none',
@@ -336,9 +338,43 @@ function printObject(o) {
   alert(out);
 }
 
+export const selectImageStyle = {
+             overflow: 'hidden',
+             display: 'block',
+             backgroundColor: '#2199e8',
+             color: 'white',
+             fontSize: '1rem',
+             border: '1px solid #2199e8',
+             borderRadius: '4px',
+             position: 'relative',
+             cursor: 'pointer',
+             textAlign: 'center',
+             lineHeight: "50px",
+
+             fontWeight: 'bold',
+             width: '225px',
+             height: '50px'
+         }
+
+export const cropImageStyle = {
+             overflow: 'hidden',
+             display: 'block',
+             backgroundColor: '#2199e8',
+             color: 'white',
+             fontSize: '1rem',
+             border: '1px solid #2199e8',
+             borderRadius: '4px',
+             position: 'relative',
+             cursor: 'pointer',
+             textAlign: 'center',
+             lineHeight: "50px",
+
+             fontWeight: 'bold',
+             width: '400px',
+             height: '50px',
+         }
 
 
 
-
-module.exports = {  theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

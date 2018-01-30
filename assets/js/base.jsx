@@ -5,6 +5,11 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 
+var ReactS3Uploader = require('react-s3-uploader');
+var S3Upload = require('react-s3-uploader/s3upload')
+
+import {SaveButton } from './settings'
+
 import autobind from 'class-autobind'
 import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
 import { GoalForm, GoalBasicView } from './goal'
@@ -20,6 +25,7 @@ import { ProgramForm, ProgramBasicView, SimpleProgramForm, ProgramSubscriptionMo
 import { StepModalForm, StepBasicView, StepDetailView, StepItemMenu } from './step'
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
 
+
 import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
@@ -33,7 +39,7 @@ import Measure from 'react-measure'
 
 import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporter } from './accounts'
 
-import {  theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
+import {  selectImageStyle, cropImageStyle, theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
 
 import { ContactItemMenu } from './contact'
 function printObject(o) {
@@ -44,15 +50,46 @@ function printObject(o) {
   alert(out);
 }
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import ImageCompressor from '@xkeshi/image-compressor';
+import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 
 const uuidv4 = require('uuid/v4');
 
 var Global = require('react-global');
 
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Connection', 'keep-alive');
+        xhr.setRequestHeader('Authorization', 'Token ' + localStorage.token);
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '* ' );
+
+
+    }
+});
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 <Global values={{
   isSidebarVisible: 'false'
 }} />;
-
 
 
 export class Header extends React.Component {
@@ -901,6 +938,634 @@ export class AudioUploader extends React.Component {
     }
 }
 
+function srcToFile(src, fileName, mimeType){
+    return (fetch(src)
+        .then(function(res){return res.arrayBuffer();})
+        .then(function(buf){return new File([buf], fileName, {type:mimeType});})
+    );
+}
+
+function dataURItoBlob(dataURI) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURI.split(',')[1]);
+
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    //Old Code
+    //write the ArrayBuffer to a blob, and you're done
+    //var bb = new BlobBuilder();
+    //bb.append(ab);
+    //return bb.getBlob(mimeString);
+
+    //New Code
+    return new Blob([ab], {type: mimeString});
+
+
+}
+function dataURLtoFile(dataurl, filename) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, {type:mime});
+}
+
+export class MyReactS3Uploader extends ReactS3Uploader {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            originalUncompressedImage:"",
+            croppedImage:"",
+            originalFilename:"",
+            saved: "",
+        }
+
+
+    }
+
+    componentDidMount() {
+        this.setState({
+            originalUncompressedImage:this.props.originalUncompressedImage,
+            croppedImage:this.props.croppedImage,
+            originalFilename: this.props.originalFilename,
+            saved: this.props.saved,
+        })
+    }
+
+
+
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.originalUncompressedImage != nextProps.originalUncompressedImage) {
+            this.setState({originalUncompressedImage:nextProps.originalUncompressedImage })
+        }
+
+        if (this.state.croppedImage != nextProps.croppedImage) {
+            this.setState({croppedImage:nextProps.croppedImage })
+        }
+        if (this.state.originalFilename != nextProps.originalFilename) {
+            this.setState({originalFilename:nextProps.originalFilename })
+        }
+        if (this.state.saved != nextProps.saved) {
+            this.setState({saved: nextProps.saved})
+        }
+    }
+
+    uploadFile ()   {
+        this.setState({
+            buttonText:"Saving..."
+        })
+
+        var theFiles = []
+        var baseFilename = uuidv4()
+
+        var croppedImageFilename = baseFilename + "-crpcmp.png"
+        var fileExt = this.state.originalFilename.split('.').pop();
+        var theFullFilename = baseFilename + "." + fileExt
+
+        theFiles.push(dataURLtoFile(this.state.croppedImage, croppedImageFilename))
+        theFiles.push(dataURLtoFile(this.state.originalUncompressedImage, theFullFilename))
+
+                theFiles.push( )
+
+        this.myUploader = new S3Upload({
+            files: theFiles,
+            signingUrl: this.props.signingUrl,
+            getSignedUrl: this.props.getSignedUrl,
+            preprocess: this.props.preprocess,
+            onProgress: this.props.onProgress,
+            onFinishS3Put: this.props.onFinish,
+            onError: this.props.onError,
+            signingUrlMethod: this.props.signingUrlMethod,
+            signingUrlHeaders: this.props.signingUrlHeaders,
+            signingUrlQueryParams: this.props.signingUrlQueryParams,
+            signingUrlWithCredentials: this.props.signingUrlWithCredentials,
+            uploadRequestHeaders: this.props.uploadRequestHeaders,
+            contentDisposition: this.props.contentDisposition,
+            server: this.props.server,
+            scrubFilename: this.props.scrubFilename,
+            s3path: this.props.s3path
+        });
+    }
+    handleCancelEdit() {
+        this.props.cancelEdit()
+    }
+
+    render() {
+        if(this.props.theDataForFile != "") {
+            var leftButtonStyle = {
+             overflow: 'hidden',
+             display: 'inline-block',
+             backgroundColor: '#C3C4C6',
+             color: 'white',
+             fontSize: '1rem',
+             border: '1px solid #C3C4C6',
+             borderRadius: '4px',
+             position: 'relative',
+             cursor: 'pointer',
+             textAlign: 'center',
+             lineHeight: "50px",
+
+             fontWeight: 'bold',
+             width: '195px',
+             height: '50px',
+            marginRight:'10px'
+         }
+
+         var rightButtonStyle = {
+             overflow: 'hidden',
+             display: 'inline-block',
+             backgroundColor: '#2199e8',
+             color: 'white',
+             fontSize: '1rem',
+             border: '1px solid #2199e8',
+             borderRadius: '4px',
+             position: 'relative',
+             cursor: 'pointer',
+             textAlign: 'center',
+             lineHeight: "50px",
+
+             fontWeight: 'bold',
+             width: '195px',
+             height: '50px',
+         }
+
+
+            return (<div><div style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
+                <SaveButton style={rightButtonStyle} saved={this.state.saved} clicked={this.handleSubmit} />
+</div>)
+        } else return(
+            <div></div>
+        )
+    }
+}
+
+function readFileAsDataURL(file){
+    var reader = new FileReader();
+
+        reader.onload = (function (file) {
+        return function (e) {
+         var data = this.result;
+            this.setState({originalUncompressedImage:data})
+     }
+})(file);
+
+    reader.readAsDataURL(file)
+
+}
+
+function isURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+  '(\\:\\d+)?'+ // port
+  '(\\/[-a-z\\d%@_.~+&:]*)*'+ // path
+  '(\\?[;&a-z\\d%@_.,~+&:=-]*)?'+ // query string
+  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return pattern.test(str);
+}
+
+export class NewImageUploader extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        var theImage
+        this.state = {
+            croppableImage:"",
+            image:"",
+            originalUncompressedImage:"",
+            cropperCropboxData:"",
+            originalFilename:"",
+            theCompressedImageBlob:"",
+            finalImage:"",
+            editMode:false,
+            saved: "Saved"
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            croppableImage: this.props.croppableImage,
+            image: this.props.croppableImage.image,
+            originalUncompressedImage: this.props.croppableImage.originalUncompressedImage,
+
+            cropperCropboxData: this.props.croppableImage.cropperCropboxData,
+            dimensions:this.props.dimensions,
+
+        }, () => {
+                this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+
+            })
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.state.croppableImage != nextProps.croppableImage) {
+            this.setState({
+                croppableImage: nextProps.croppableImage,
+                image: nextProps.croppableImage.image,
+                originalUncompressedImage: nextProps.croppableImage.originalUncompressedImage,
+
+                cropperCropboxData: nextProps.croppableImage.cropperCropboxData,
+
+
+            },() => {
+                this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+
+
+            })
+
+
+        }
+
+
+
+    }
+
+    readFileAsDataURL(file){
+    var reader = new FileReader();
+    const scope = this
+        reader.onload = function (e) {
+            scope.setState({originalUncompressedImage:e.target.result})
+
+
+     }
+    reader.readAsDataURL(file)
+    }
+
+
+  handleReplaceFile (e) {
+      const file = e.target.files[0];
+        if (!file) {
+            return;
+     }
+     let url = URL.createObjectURL(file)
+      this.readFileAsDataURL(file)
+      this.setState({originalUncompressedImage: url}, () => {
+          this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+
+      })
+      this.setState({
+          originalFilename: file.name,
+          saved: "Save"
+      })
+  }
+
+
+    crop(){
+        let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
+        //var cropboxData = this.refs.cropper.getCropBoxData()
+
+      this.setState({
+          finalImage: theFinalImage,
+          //cropperCropboxData: cropboxData,
+
+      })
+
+    }
+
+
+
+
+    onProgress = (progress, textState, file) => {
+    this.props.onProgress && this.props.onProgress(progress, textState, file)
+    this.setState({progress})
+  }
+
+  onError = err => {
+    this.props.onError && this.props.onError(err)
+    this.setState({error: err, progress: null})
+  }
+
+  onFinish = (info, file) => {
+    const filenames = this.state.filenames || []
+    const filename = file.name
+    filenames.push(filename)
+    const newState = {filename, filenames, error: null, progress: null}
+    this.setState(newState, () => this.props.onFinish && this.props.onFinish(info, file))
+  }
+
+  onUploadStart(file, next) {
+      var cropboxData = this.refs.cropper.getCropBoxData()
+      console.log("upload Start cropboxData")
+      console.log(cropboxData)
+
+
+
+      this.setState({cropperCropboxData:cropboxData}, () => console.log("this.state.cropboxData " + this.state.cropperCropboxData))
+
+
+
+       const imageCompressor = new ImageCompressor();
+
+
+  imageCompressor.compress(file, {quality:0.8})
+  .then((result) => {
+      let url = URL.createObjectURL(result)
+
+              next(result)
+
+
+      })
+
+  .catch((err) => {
+        console.log("errors")
+
+  })
+
+
+
+  }
+
+  handleSwitchToEditMode() {
+      var theFilenameURLSplit = this.state.originalUncompressedImage.split('/')
+var theFilename = theFilenameURLSplit.pop() || theFilenameURLSplit.pop()
+      this.setState({originalFilename: theFilename})
+      this.setState({editMode:true})
+      this.refs.cropper.crop()
+              this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+
+
+
+
+      var xhr = new XMLHttpRequest();
+
+
+// Use JSFiddle logo as a sample image to avoid complicating
+// this example with cross-domain issues.
+      if ((this.state.originalUncompressedImage != undefined ) && (this.state.originalUncompressedImage != "" ) ) {
+          xhr.open("GET", this.state.originalUncompressedImage, true);
+      } else {
+          xhr.open("GET", this.props.defaultImage, true);
+
+      }
+
+
+
+// Ask for the result as an ArrayBuffer.
+xhr.responseType = "arraybuffer";
+      const scope = this
+
+xhr.onload = function( e ) {
+    // Obtain a blob: URL for the image data.
+    var arrayBufferView = new Uint8Array( this.response );
+    var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+    var urlCreator = window.URL || window.webkitURL;
+    var imageUrl = urlCreator.createObjectURL( blob );
+          scope.readFileAsDataURL(blob)
+
+
+    //scope.setState({originalUncompressedImage: imageUrl})
+    //var img = document.querySelector( "#photo" );
+    //img.src = imageUrl;
+};
+
+xhr.send();
+//this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+
+
+
+
+
+
+  }
+
+
+
+  handleFinishedUpload (value) {
+      var fullUrl = value.signedUrl;
+      var fileUrl = fullUrl.split("?")[0];
+
+      var theCropboxData = this.state.cropperCropboxData
+
+
+console.log("side stuff")
+          console.log( theCropboxData)
+
+      var theData
+
+      if (fileUrl.includes("-crpcmp")) {
+          var mergingData = {image: fileUrl, cropperCropboxData:theCropboxData }
+
+         theData = Object.assign({}, this.state.croppableImagePostingData, mergingData )
+          this.setState({croppableImagePostingData: theData})
+
+
+      } else {
+          var mergingData =  {originalUncompressedImage: fileUrl, cropperCropboxData:theCropboxData}
+          theData = Object.assign({}, this.state.croppableImagePostingData, mergingData)
+          this.setState({croppableImagePostingData: theData})
+      }
+
+      if (this.state.croppableImagePostingData.image != "" && this.state.croppableImagePostingData.originalUncompressedImage != "" && this.state.croppableImagePostingData.cropperCropboxData != undefined && this.state.croppableImagePostingData.cropperCropboxData != "") {
+          var theUrl = "/api/croppableImages/";
+          var theStringData = JSON.stringify(theData)
+          console.log("stringData")
+          console.log(theStringData)
+
+
+          $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: 'POST',
+                 data: theStringData,
+              contentType: 'application/json',
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+
+                 },
+                 success: function (data) {
+                     this.props.imageReturned(data)
+                     this.setState({editMode:false,
+                     saved: "Saved"})
+
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                     this.setState({
+                         serverErrors: serverErrors,
+                     })
+
+                 }.bind(this)
+             })
+          /*var urlForDatabase = fileUrl.replace(s3BaseUrl, "");
+        this.setState({
+            image:fileUrl,
+            fileUrl:fileUrl,
+        });
+
+
+
+            this.setState({image: urlForDatabase});
+        this.props.imageReturned({
+            image:urlForDatabase
+        })*/
+      }
+
+
+
+
+
+
+    }
+
+
+
+
+
+    handleCancelEdit() {
+
+        this.setState({editMode:false,
+            croppableImagePostingData: {image:"", originalUncompressedImage:"",  cropperCropboxData:"", }})
+
+    }
+    handleCropperReady() {
+        console.log("cropper is ready")
+
+        this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+    }
+
+
+
+    render() {
+
+        if ((this.state.image != "") && (this.state.image != undefined)){
+                    var theImage = this.state.image
+
+        } else {
+            var theImage = this.props.defaultImage
+        }
+        //var theFilename = theImage.replace("uploads/", "");
+        if (this.state.dimensions) {
+            var {width, height} = this.state.dimensions
+        }
+
+        if (this.props.forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+        if (this.state.editMode == true) {
+            var editInterfaceStyle = {
+                visibility: 'block'
+            }
+            var viewInterfaceStyle = {
+                display: 'none'
+            }
+        }
+            else {
+                var editInterfaceStyle = {
+                display: 'none'
+            }
+            var viewInterfaceStyle = {
+                display: 'block'
+            }
+            }
+if (this.refs.cropper != undefined) {
+
+
+}
+
+return(
+            <div className="ui grid">
+                          <div className="ui row" style={editInterfaceStyle}>
+
+                <div className={wideColumnWidth}>
+                    <div style={{width: '225px', height: '270px', display: 'inline-block', marginBottom: '5px'}}>
+                        <Cropper
+                            ready={this.handleCropperReady}
+                            viewMode={2}
+                            ref='cropper'
+                            src={this.state.originalUncompressedImage}
+                            background={false}
+                            style={{width: '225px', height: '225px', float: 'left', marginBottom: '5px'}}
+                            aspectRatio={16 / 9}
+                            guides={false}
+                            scaleX={.5}
+                            scaleY={.5}
+                            crop={this.crop.bind(this)}/>
+                        <div style={selectImageStyle}>Replace Image<input style={{
+                            cursor: 'pointer',
+                            opacity: '0.0',
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            bottom: '0',
+                            right: '0',
+                            width: '100%',
+                            height: '100%'
+                        }} type='file' id="file" accept="image/*" onChange={this.handleReplaceFile.bind(this)}/>
+                        </div>
+                    </div>
+
+
+
+                    <div style={{
+                        marginLeft: '20px',
+                        display: 'inline-block',
+                        cursor: 'pointer',
+                    }}>{this.state.finalImage != "" ?
+                        <img style={{width: '400px', height: '225px'}} src={this.state.finalImage}/> : <div></div>}
+                        <MyReactS3Uploader
+                            style={cropImageStyle}
+                            cancelEdit={this.handleCancelEdit}
+                            originalUncompressedImage={this.state.originalUncompressedImage}
+                            originalFilename={this.state.originalFilename}
+                            croppedImage={this.state.finalImage}
+                            signingUrl="signS3Upload"
+                            signingUrlMethod="GET"
+                            accept="image/*"
+                            preprocess={this.onUploadStart}
+                            onFinish={this.handleFinishedUpload}
+                            signingUrlQueryParams={{uploadType: 'avatar'}}
+                            uploadRequestHeaders={{'x-amz-acl': 'public-read', 'Access-Control-Allow-Origin': '*'}}
+                            signingUrlWithCredentials={ true }
+                            contentDisposition="auto"
+                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
+                            server={theServer}
+                        />
+                    </div>
+                </div></div>
+
+            <div className="ui row" style={viewInterfaceStyle}>
+                                       <div className={mediumColumnWidth} >
+                                           <div className="ui fluid image" >
+                                                 <div className="ui right corner purple large label" onClick={this.handleSwitchToEditMode}>
+<i className="large edit icon"></i>
+                                               </div>
+                                           <img style={{width: '100%', height: 'auto'}} src={theImage}/>
+                                       </div>
+                              </div>
+                </div>
+                </div>
+
+
+            )
+
+    }
+}
+
 
 export class ImageUploader extends React.Component {
     constructor(props) {
@@ -1146,21 +1811,27 @@ export class ViewEditDeleteItem extends React.Component {
 
     determineOptions = () => {
         if (this.props.storeRoot.user != undefined) {
-            if (this.props.data.author != undefined) {
-            if (this.props.data.author == this.props.storeRoot.user.id) {
-                this.setState({editable:true})
+            if (this.props.data != undefined) {
 
-            }
-        } else {
-                if (this.props.data.user != undefined) {
-                    if (this.props.data.user == this.props.storeRoot.user.id) {
-                this.setState({editable:true})
+                if (this.props.data.author != undefined) {
+                    if (this.props.data.author == this.props.storeRoot.user.id) {
+                        this.setState({editable: true})
 
-            }
+                    }
                 }
+                else {
+                    if (this.props.data.user != undefined) {
+                        if (this.props.data.user == this.props.storeRoot.user.id) {
+                            this.setState({editable: true})
+
+                        }
+                    }
 
             }
+
         }
+    }
+
 
 
 /*
@@ -1400,6 +2071,7 @@ deleteItem = () => {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
     constructor(props) {
         super(props);
@@ -3623,6 +4295,7 @@ module.exports = {
     ImageUploader,
     FormHeaderWithActionButton,
     FormAction,
-    Header
+    Header,
+    NewImageUploader
 
 };

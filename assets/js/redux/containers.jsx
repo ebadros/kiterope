@@ -6,68 +6,73 @@ import { Provider, connect, dispatch } from 'react-redux'
 import { setCurrentUser, showSidebar, setOpenThreads, setCurrentThreads, reduxLogout, isMessageWindowVisible } from '../redux/actions'
 
 
-
-
 const mapStateToProps = (state, ownProps) => {
-  if (state != undefined) {
-  return {
 
-      storeRoot:{
-        user:state.rootReducer.user,
-        profile:state.rootReducer.profile,
-        settings:state.rootReducer.settings,
-        goals:state.rootReducer.goals,
-        plans:state.rootReducer.plans,
-        contacts:state.rootReducer.contacts,
-        programs:state.rootReducer.programs,
-        stepOccurrences:state.rootReducer.stepOccurrences,
-        updateOccurrences:state.rootReducer.updateOccurrences,
-        visualizations:state.rootReducer.visualizations,
-        messageThreads:state.rootReducer.messageThreads,
-        updates: state.rootReducer.updates,
-        updateModalData: state.rootReducer.updateModalData,
-        stepModalData: state.rootReducer.stepModalData,
-        programModalData: state.rootReducer.programModalData,
-        visualizationModalData:state.rootReducer.visualizationModalData,
-        gui: {
-          searchQuery:state.rootReducer.searchQuery,
-          searchHitsVisibility:state.rootReducer.searchHitsVisibility,
-          forMobile:state.rootReducer.forMobile,
-          shouldReload:state.rootReducer.shouldReload,
-          isSidebarVisible:state.rootReducer.isSidebarVisible,
-          isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
-          currentThread: state.rootReducer.currentThread,
-          openThreads: state.rootReducer.openThreads,
-          currentContact:state.rootReducer.currentContact,
-          dailyPeriod:state.rootReducer.dailyPeriod
+    if (state != undefined) {
+
+      return {
+        storeRoot: {
+          user: state.rootReducer.user,
+          profile: state.rootReducer.profile,
+          settings: state.rootReducer.settings,
+          goals: state.rootReducer.goals,
+          plans: state.rootReducer.plans,
+          contacts: state.rootReducer.contacts,
+          programs: state.rootReducer.programs,
+          stepOccurrences: state.rootReducer.stepOccurrences,
+          updateOccurrences: state.rootReducer.updateOccurrences,
+          visualizations: state.rootReducer.visualizations,
+          messageThreads: state.rootReducer.messageThreads,
+          updates: state.rootReducer.updates,
+          updateModalData: state.rootReducer.updateModalData,
+          stepModalData: state.rootReducer.stepModalData,
+          programModalData: state.rootReducer.programModalData,
+          visualizationModalData: state.rootReducer.visualizationModalData,
+          gui: {
+            searchQuery: state.rootReducer.searchQuery,
+            searchHitsVisibility: state.rootReducer.searchHitsVisibility,
+            forMobile: state.rootReducer.forMobile,
+            shouldReload: state.rootReducer.shouldReload,
+            isSidebarVisible: state.rootReducer.isSidebarVisible,
+            isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
+            currentThread: state.rootReducer.currentThread,
+            openThreads: state.rootReducer.openThreads,
+            currentContact: state.rootReducer.currentContact,
+            dailyPeriod: state.rootReducer.dailyPeriod
+
+
+          }
 
 
         }
-
-
-}
-  }}
-  else {
-    return {
-      storeRoot: {
-        gui: {
-          searchQuery:state.rootReducer.searchQuery,
-          searchHitsVisibility:state.rootReducer.searchHitsVisibility,
-
-          forMobile: false,
-          isSidebarVisible: false,
-          isMessageWindowVisible: false
-        },
-        dailyPeriod: {
-          selection: 'TODAY',
-          periodStart: "",
-          periodEnd: "",
-        },
       }
     }
-  }
 
-};
+
+
+  else {
+
+      return {
+        storeRoot: {
+          user: "",
+          gui: {
+            searchQuery: state.rootReducer.searchQuery,
+            searchHitsVisibility: state.rootReducer.searchHitsVisibility,
+
+            forMobile: false,
+            isSidebarVisible: false,
+            isMessageWindowVisible: false,
+
+            dailyPeriod: {
+              selection: 'TODAY',
+              periodStart: "",
+              periodEnd: "",
+            },
+          }
+        }
+      }
+    }
+}
 
 const mapDispatchToProps = (dispatch) => {
   return {

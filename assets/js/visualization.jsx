@@ -945,9 +945,7 @@ return thePlans
 
             programUpdatesArray.map((theUpdate) => {
                 if (this.state.programId != undefined) {
-                    console.log("programId is not undefined " + theUpdate.program)
                     if (this.state.programId == theUpdate.program) {
-                        console.log("theUpdate.program is " + theUpdate.program)
 
 
                         if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({

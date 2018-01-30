@@ -15,8 +15,16 @@ import Select from 'react-select'
 import PropTypes from 'prop-types';
 var ReactS3Uploader = require('react-s3-uploader');
 import Measure from 'react-measure'
-import {ImageUploader, VideoUploader } from './base'
+import {NewImageUploader, ImageUploader, VideoUploader } from './base'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import ImageCompressor from '@xkeshi/image-compressor';
+import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
+
+
+
+
+
 
 
 export class App extends React.Component {
@@ -545,11 +553,34 @@ export class TestPage extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
+
+        }
+    render() {
+        return (
+            <div>
+                <NewImageUploader imageReturned={this.handleImageChange} defaultImage={imageUrl} />
+
+
+            </div>
+        )
+    }
+
+
+}
+
+export class TestPage2 extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        var theImage
         this.state = {
             dimensions: {
                 width: -1,
                 height: -1
-            }
+            },
+
+            theCompressedImageBlob:"",
+            finalImage:"",
         }
 
         }
@@ -582,34 +613,121 @@ export class TestPage extends React.Component {
         })
     };
 
+    _getFiles(obj){
+        console.log("have the files been gotten")
+    console.log(obj);
+  }
+
+  handleChange(e) {
+      console.log("handleChange Called")
+      const file = e.target.files[0];
+
+  if (!file) {
+    return;
+  }
+  const imageCompressor = new ImageCompressor();
+
+
+  imageCompressor.compress(file, {quality:0.8})
+  .then((result) => {
+      let url = URL.createObjectURL(result)
+
+      this.setState({theCompressedImageBlob: url})
+            var imageNaturalWidth = this.refs.cropper.getImageData().width
+        var imageNaturalHeight = this.refs.cropper.getImageData().width
+      this.setState({
+          "imageNaturalWidth": imageNaturalWidth,
+          "imageNaturalHeight": imageNaturalHeight,
+
+      }, () => this.getContainerDimensions())
+
+
+
+
+
+
+      //window.URL = window.URL || window.webkitURL;
+
+
+      //this.setState({theCompressedImageBlob: url1})
+  })
+  .catch((err) => {
+        console.log("errors")
+
+  })
+  }
+
+  getContainerDimensions() {
+
+  }
+
+
+_crop(){
+    // image in dataUrl
+    let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
+    this.setState({finalImage: theFinalImage})
+  }
+  callGetData() {
+      console.log(this.refs.cropper.getImageData())
+  }
+
+
     getTestHTML() {
+        var selectImageStyle =  {
+    overflow: 'hidden',
+    display: 'block',
+    backgroundColor: '#2199e8',
+    color: 'white',
+    fontSize: '1rem',
+    border: '1px solid #2199e8',
+    borderRadius: '4px',
+    position: 'relative',
+    cursor: 'pointer',
+    textAlign: 'center',
+    lineHeight: '20px',
+            paddingTop:'60px',
+            fontWeight:'bold',
+    width: '225px',
+    height: '225px'
+}
+
         return (
             <div className="ui four column grid">
+
                 <div className="ui row"> &nbsp;</div>
-                <div className="ui row">
+                <div className="ui row">&nbsp;
 
                 <div className="ui column">
-        <ReactS3Uploader
-                            signingUrl="/s3/sign"
-                            signingUrlMethod="GET"
-                            accept="*"
-                            onProgress={this.onUploadProgress}
-                            onError={this.onUploadError}
-                            onFinish={this.onUploadFinish}
 
-                            signingUrlWithCredentials={ true }      // in case when need to pass authentication credentials via CORS
-                            uploadRequestHeaders= {{'x-amz-acl': 'public-read'}} // this is the default
-                            contentDisposition="auto"
-                            scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
-
-                             />
                     </div>
-                                <div className="ui column">
+                                <div className="ui column">&nbsp;
 
 
-             <VideoUploader videoReturned={this.handleVideoChange} label="Drag and Drop or Click to Add Video" />
+
                                     </div>
                 </div>
+
+
+                {this.state.theCompressedImageBlob != "" ?
+
+                    <Cropper
+                        viewMode={2}
+                        ref='cropper'
+                        src={this.state.theCompressedImageBlob}
+                        background={false}
+                        style={{width:'225px', height:'225px'}}
+        // Cropper.js options
+
+                        aspectRatio={16 / 9}
+                        guides={false}
+                        scaleX={.5}
+                        scaleY={.5}
+                        crop={this._crop.bind(this)} /> : <div style={selectImageStyle}>Drag and Drop or Click to Select Image<input style={{paddingTop:'300px', cursor:'pointer'}} type='file' id="file" accept="image/*"
+onChange={this.handleChange.bind(this)}></input></div>}
+
+
+        {this.state.finalImage != "" ? <div style={{marginLeft:'10px'}}><img style={{width:'400px', height:'225px'}} src={this.state.finalImage}/></div> : <div></div>}
+                <button onClick={this.callGetData.bind(this)} />
                 </div>
 
 
@@ -620,7 +738,7 @@ export class TestPage extends React.Component {
         var theTestHTML = this.getTestHTML();
         return (
             <div>
-                {theTestHTML}
+                <NewImageUploader />
 
 
             </div>

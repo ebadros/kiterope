@@ -16,7 +16,7 @@ import { ValidatedInput } from './app'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 
-import { ImageUploader, FormHeaderWithActionButton, GoalViewEditDeleteItem, Breadcrumb, ErrorWrapper } from './base'
+import { NewImageUploader, ImageUploader, FormHeaderWithActionButton, GoalViewEditDeleteItem, Breadcrumb, ErrorWrapper } from './base'
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { PlanForm, PlanList } from './plan'
 import {ChoiceModal, IconLabelCombo} from './elements'
@@ -793,7 +793,7 @@ export class GoalForm extends React.Component {
 
     componentDidMount () {
         $(this.refs['id_whichGoalForm']).hide();
-        this.checkIfUser()
+        //this.checkIfUser()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -1476,7 +1476,7 @@ export class GoalSMARTForm extends React.Component {
                                                                                         <div className="ui row">&nbsp;</div>
 
                                             <div className="ui row">
-                                            <ImageUploader imageReturned={this.handleImageChange} label="Select an image that will help motivate you." defaultImage={imageUrl} />
+                                            <NewImageUploader imageReturned={this.handleImageChange} label="Select an image that will help motivate you." defaultImage={imageUrl} />
                                                 </div>
 
                                         </div>

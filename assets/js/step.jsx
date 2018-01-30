@@ -28,7 +28,7 @@ import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 import {SaveButton} from './settings'
-import {ImageUploader,  PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader,  NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
@@ -572,12 +572,19 @@ export class StepBasicView extends React.Component {
     render() {
 
             var theTitle = this.state.data.title;
+        var theImage = s3BaseUrl + this.state.data.image
+        if (this.state.data.croppableImageData != undefined) {
+            if (this.state.data.croppableImageData.image != "") {
+                theImage = this.state.data.croppableImageData.image
+
+            }
+        }
 
 
             if (this.props.isListNode) {
                 return (
                                     <div onClick={this.goToDetail}>
-                                        <ClippedImage item="plan" src={s3ImageUrl + this.state.data.image} />
+                                        <ClippedImage item="plan" src={theImage} />
 
 
 
@@ -606,7 +613,7 @@ export class StepBasicView extends React.Component {
                 return (
                      <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui image" src={s3ImageUrl + this.state.data.image}></img>
+                        <img className="ui image" src={theImage}></img>
                     </div>
                     <div className="eight wide column">
 <div className="fluid row">
@@ -796,6 +803,7 @@ export class StepModalForm extends React.Component {
            files:[],
             id:"",
             image:"uploads/stepDefaultImage.svg",
+            croppableImage: {image: s3BaseUrl + "uploads/stepDefaultImage.svg", originalUncompressedImage: s3BaseUrl + "uploads/stepDefaultImage.svg", cropperImageData:"", cropperCropBoxData:"" },
             title: "",
             description:" ",
             type:"COMPLETION",
@@ -830,6 +838,7 @@ export class StepModalForm extends React.Component {
             var urlForDatabase = fullUrl.split("?")[0];
             urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
             this.setState({image: urlForDatabase});
+
     }
 
     showAndHideFrequencyUIElements (frequencyValue) {
@@ -940,6 +949,7 @@ export class StepModalForm extends React.Component {
 
             var endDate = data.endDate;
 
+
             var programStartDateInStringForm = data.programStartDate;
             var programStartDateInMomentForm = moment(programStartDateInStringForm);
             var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
@@ -977,6 +987,9 @@ export class StepModalForm extends React.Component {
                 id: data.id,
 
                 image: data.image,
+
+
+                croppableImage: data.croppableImageData,
                 title: data.title,
                 description: description,
                 type: type,
@@ -1212,6 +1225,7 @@ export class StepModalForm extends React.Component {
 
         var title = this.state.title;
         var image = this.state.image;
+        var croppableImage = this.state.croppableImage.id;
         var description = this.state.description;
         var type = this.state.type;
         var frequency = this.state.frequency;
@@ -1249,6 +1263,7 @@ export class StepModalForm extends React.Component {
         var stepData = {
             id:"",
             image:image,
+            croppableImage:croppableImage,
             title: title,
             description:description,
             type: type,
@@ -1297,6 +1312,7 @@ export class StepModalForm extends React.Component {
                     type: "COMPLETION",
                     frequency: "",
                     image: "uploads/stepDefaultImage.svg",
+                croppableImage:"",
                     day01: false,
                     day02: false,
                     day03: false,
@@ -1327,9 +1343,11 @@ export class StepModalForm extends React.Component {
         handleImageChange = (callbackData) => {
         this.setState({
             image: callbackData.image,
-            saved: "Save"
+            saved: "Save",
+            croppableImage: callbackData
+
         })
-    };
+    }
 
 
 
@@ -1388,7 +1406,7 @@ export class StepModalForm extends React.Component {
 
 
             } else {
-                var imageUrl = "uploads/stepDefaultImage.svg"
+                var imageUrl = this.props.defaultImage
             }
 
 
@@ -1426,11 +1444,14 @@ export class StepModalForm extends React.Component {
                           <div className="ui row">
                               <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-<div className={mediumColumnWidth}>
+<div className={wideColumnWidth}>
 
 
-<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
+<NewImageUploader imageReturned={this.handleImageChange}
+                  defaultImage={s3BaseUrl + "uploads/stepDefaultImage.svg"}
+                  forMobile={forMobile} dimensions={this.state.dimensions}
+                  label="Select an image that will help motivate you."
+                  croppableImage={this.state.croppableImage} /></div></Measure></div>
                           <div className="ui row">
                             <div className={mediumColumnWidth}>
                                               <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>

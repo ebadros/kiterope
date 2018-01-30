@@ -149,8 +149,9 @@ export class DailyList extends React.Component{
 
         periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/" + this.state.stepOccurrenceType + "/";
+        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
+                console.log("sending now " + theUrl)
 
         $.ajax({
             url: theUrl,
@@ -161,9 +162,14 @@ export class DailyList extends React.Component{
                 'Authorization': 'Token ' + localStorage.token
             },
             success: function (data) {
+
+                store.dispatch(setStepOccurrences(data))
+
+
                 this.setState({
                     loading:false,
                     data: data});
+
 
             }.bind(this),
             error: function (xhr, status, err) {
@@ -250,7 +256,7 @@ export class DailyList extends React.Component{
     }
 
     handleStepOccurrenceTypeChange(option) {
-        this.setState({stepOccurrenceType: option.value}, () => { this.loadObjectsFromServer(this.state.period)})
+        this.setState({stepOccurrenceType: option.value}, )
 
 
     }
@@ -367,7 +373,7 @@ export class DailyList extends React.Component{
        </div></div>: <div></div>}
                                                             </div>
 
-                                <StepOccurrenceList data={this.state.data} status={this.state.stepOccurrenceType} periodStart={this.state.startDate} periodEnd={this.state.endDate} />
+                                <StepOccurrenceList data={this.props.storeRoot.stepOccurrences} status={this.state.stepOccurrenceType} periodStart={this.state.startDate} periodEnd={this.state.endDate} />
 
 
                         </div></div>

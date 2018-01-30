@@ -208,7 +208,6 @@ export const addStep = (theProgramId, theStep) => {
 };
 
 export const updateStep = (theProgramId, theStep) => {
-    console.log("updateStep called");
     return {
         type: 'UPDATE_STEP',
         programId: theProgramId,
@@ -369,6 +368,22 @@ export const setStepOccurrences = (theStepOccurrences) => {
     }
 };
 
+export const updateStepOccurrence = (theStepOccurrence) => {
+    return {
+        type: 'UPDATE_STEP_OCCURRENCE',
+        stepOccurrence: theStepOccurrence,
+    }
+
+}
+
+export const updateUpdateOccurrence = (theUpdateOccurrence) => {
+    return {
+        type: 'UPDATE_UPDATE_OCCURRENCE',
+        updateOccurrence: theUpdateOccurrence,
+    }
+
+}
+
 export const setVisualizations = (theVisualizations) => {
     return {
         type: 'SET_VISUALIZATIONS',
@@ -408,4 +423,4 @@ export const showSidebar = (isSidebarVisible) => {
 
 
 
-module.exports = { clearTempStep,  setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

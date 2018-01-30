@@ -198,6 +198,7 @@ isEverythingSaved() {
             doneSaving:true
         })
     }
+    this.props.allUpdateOccurrencesHaveBeenSaved()
 }
 
 

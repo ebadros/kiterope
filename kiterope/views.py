@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -61,7 +61,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -140,8 +140,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
-            send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
-            #print(request.user.username)
+            #send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
+            print(request.user.username)
 
             return Response(UserSerializer(request.user, context={'request': request}).data)
 
@@ -897,6 +897,18 @@ class UpdateViewSet(viewsets.ModelViewSet):
 
 '''
 
+class CroppableImageViewSet(viewsets.ModelViewSet):
+    queryset = CroppableImage.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [AllowAny]
+    serializer_class = CroppableImageSerializer
+
+    def post(self, request, *args, **kwargs):
+        print("inisde post")
+
+        self.create(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
 class VisualizationViewSet(viewsets.ModelViewSet):
     queryset = Visualization.objects.all()
     required_scopes = ['groups']
@@ -929,7 +941,6 @@ class PeriodViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
 
     def list(self, request, *args, **kwargs):
-
         try:
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
@@ -947,8 +958,8 @@ class PeriodViewSet(viewsets.ModelViewSet):
         request.user.is_authenticated()
         currentUser = self.request.user
 
-        StepOccurrence.objects.updateStepOccurrences(currentUser, periodRangeStart, periodRangeEnd)
-        #print("occurrencesUpdated")
+        StepOccurrence.objects.updateStepOccurrencesForRange(currentUser, periodRangeStart, periodRangeEnd)
+        print("occurrencesUpdated")
 
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -983,15 +994,16 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
+        print("getting queryset")
         #userPlanQueryset = user.plan_set.all()
         try:
             self.request.user.is_authenticated()
             currentUser = self.request.user
 
+
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
-            whichStepOccurrences = self.kwargs['whichStepOccurrences']
-            print(whichStepOccurrences)
+            #whichStepOccurrences = self.kwargs['whichStepOccurrences']
 
             periodRangeStart = datetime.datetime.strptime(periodRangeStart, "%Y-%m-%d")
             periodRangeEnd = datetime.datetime.strptime(periodRangeEnd, "%Y-%m-%d")
@@ -1002,31 +1014,30 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
             periodRangeStart = toUTC(periodRangeStart, theUserProfile.timezone)
             periodRangeEnd = toUTC(periodRangeEnd, theUserProfile.timezone)
+            print("periodRangeStart")
+            print(periodRangeStart)
+            print("periodRangeEnd")
+            print(periodRangeEnd)
 
             dateLaterThanStart = Q(date__gte=periodRangeStart)
             dateLessThanEnd = Q(date__lte=periodRangeEnd)
             isSubscribed = Q(planOccurrence__isSubscribed=True)
             userIsCurrentUser = Q(user=currentUser)
 
-            if whichStepOccurrences == 'TODO' or whichStepOccurrences == 'NOT_COMPLETED' :
-                print("1")
+            '''if whichStepOccurrences == 'TODO' or whichStepOccurrences == 'NOT_COMPLETED' :
                 stepOccurrenceStatusFilter = Q(wasCompleted=False)
             elif whichStepOccurrences == 'COMPLETED':
-                print("2")
-
                 stepOccurrenceStatusFilter = Q(wasCompleted=True)
-            print("3")
 
             if whichStepOccurrences == 'TODO':
                 isStepOccurrenceActive = Q(date__gte = datetime.datetime.now().date() )
-                print("4")
 
             elif whichStepOccurrences == 'NEVER_COMPLETED':
                 isStepOccurrenceActive = Q(date__lt = datetime.datetime.now().date())
 
             elif whichStepOccurrences == 'COMPLETED':
                 isStepOccurrenceActive = Q(date__gte = periodRangeStart)
-
+'''
 
 
 
@@ -1041,8 +1052,9 @@ class PeriodViewSet(viewsets.ModelViewSet):
             # TIME-BASED
             #theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
 
-
             theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
+            print(theQueryset)
+            #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
         except:
             #periodRangeStart = str(datetime.datetime.now().date())
@@ -1618,8 +1630,9 @@ conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
     object_name = request.GET['objectName']
-    extension = os.path.splitext(object_name)[1]
-    object_name = str(uuid.uuid4()) + extension
+    print(object_name)
+    #extension = os.path.splitext(object_name)[1]
+    #object_name = str(uuid.uuid4()) + extension
     content_type = mimetypes.guess_type(object_name)[0]
     if content_type == 'audio/x-wav':
         content_type = 'audio/wav'

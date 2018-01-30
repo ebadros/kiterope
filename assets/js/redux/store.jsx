@@ -4,6 +4,7 @@ import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 
 const middleware = routerMiddleware(browserHistory);
 import {persistStore, autoRehydrate} from 'redux-persist'
+import logger from 'redux-logger'
 
 
 import { rootReducer } from "./reducers";

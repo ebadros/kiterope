@@ -23,10 +23,8 @@ import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
 import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
-import  {store} from "./redux/store";
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
 //});
@@ -41,8 +39,8 @@ function printObject(o) {
 var ReconnectingWebSocket = require('reconnecting-websocket');
 var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
-import { Provider, connect, dispatch } from 'react-redux'
-import {persistStore, autoRehydrate} from 'redux-persist'
+
+
 
 // Be sure to include styles at some point, probably during your bootstrapping
 import 'react-select/dist/react-select.css';
@@ -51,6 +49,11 @@ var UpdatesList = require('./update');
 
 import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
+
+import { Provider, connect, dispatch } from 'react-redux'
+import {persistStore, autoRehydrate} from 'redux-persist'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import  {store} from "./redux/store"
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 import {REHYDRATE} from 'redux-persist/constants'
 
@@ -177,19 +180,26 @@ updateWindowDimensions() {
 }
 
     loadUserData() {
+        var theHeaders = {}
+        if (localStorage.token != undefined ) {
+            theHeaders = {
+                    'Authorization': 'Token ' + localStorage.token
+                }
+        }
         if (!this.state.userDataLoaded) {
             var theUrl = '/api/users/i/';
             $.ajax({
                 method: 'GET',
                 url: theUrl,
                 datatype: 'json',
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
+                headers: theHeaders,
                 success: function (userData) {
+                    console.log("the user data is")
+                    console.log(userData)
                     this.setState({userDataLoaded:true})
+                    store.dispatch(setCurrentUser(userData));
+
                     if (userData.id != null) {
-                        store.dispatch(setCurrentUser(userData));
                          if (userData.isCoach) {
                             this.loadCoachSpecificData()
 
@@ -201,6 +211,8 @@ updateWindowDimensions() {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
+        clearInterval(this.state.intervalID);
+                    console.log("couldn't get the value")
                     console.error(theUrl, status, err.toString());
                 }
             })
@@ -494,14 +506,14 @@ updateWindowDimensions() {
 
 
     loadStepOccurrenceData() {
-        if (!this.state.stepOccurrenceDataLoaded) {
+        if (!this.state.stepOccurrenceDataLoaded & this.props.storeRoot.stepOccurrences == undefined) {
 
 
             var periodRangeStart = new Date();
             var periodRangeEnd = new Date();
             periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
             periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-            var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
+            var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/" ;
 
             $.ajax({
                 url: theUrl,
@@ -514,7 +526,7 @@ updateWindowDimensions() {
                                         this.setState({stepOccurrenceDataLoaded:true})
 
 
-                    store.dispatch(setStepOccurrences(data.results))
+                    store.dispatch(setStepOccurrences(data))
 
                 }.bind(this),
                 error: function (xhr, status, err) {
@@ -716,6 +728,7 @@ updateWindowDimensions() {
 }
 
 
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class StandardSetOfComponents extends React.Component {
     constructor(props) {
@@ -771,6 +784,9 @@ export class StandardSetOfComponents extends React.Component {
 
 
     render() {
+        console.log("inside standard set")
+        console.log(this.props)
+        /*
         if (this.props.storeRoot.gui.isMessageWindowVisible == true) {
             $(this.refs["ref_messageWindowContainer"]).show();
             $(this.refs["ref_messageRoundButton"]).hide()
@@ -779,12 +795,12 @@ export class StandardSetOfComponents extends React.Component {
             $(this.refs["ref_messageWindowContainer"]).hide();
             $(this.refs["ref_messageRoundButton"]).show()
 
-        }
+        }*/
 
         return (
 
             <div>
-                <ReduxDataGetter orderForDataLoad={this.props.orderForDataLoad} />
+                <ReduxDataGetter  />
 
                 {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
                 <MessageButton />*/}
@@ -892,7 +908,6 @@ export class NotificationManager extends React.Component {
     }
 }
 
-
 @connect(mapStateToProps, mapDispatchToProps)
 export class Menubar extends React.Component {
     constructor(props) {
@@ -905,6 +920,7 @@ export class Menubar extends React.Component {
     }
 
     componentDidMount() {
+
 
     }
 
@@ -1012,7 +1028,7 @@ export class Menubar extends React.Component {
 
     render() {
 
-        if (!this.props.storeRoot.user) {
+        if (this.props.storeRoot == undefined || this.props.storeRoot.user.id == null) {
             var loginUI =  <div className="right menu">
                                   <button className="ui button item" onClick={this.goToBlog}>Blog</button>
 

@@ -3,7 +3,7 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {NewImageUploader, ImageUploader, Breadcrumb,  PlanViewEditDeleteItem, ProgramViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, StepModalForm, ToggleButton} from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
@@ -88,6 +88,11 @@ export class ProgramModalForm extends React.Component {
             image: "",
             title: "",
             description: "",
+            croppableImage: {
+                image: s3BaseUrl + "uploads/stepDefaultImage.svg",
+                originalUncompressedImage: s3BaseUrl + "uploads/stepDefaultImage.svg",
+                cropperCropBoxData:"" },
+
             startDate:moment(),
             scheduleLength:"3m",
             viewableBy: "ONLY_ME",
@@ -239,6 +244,8 @@ export class ProgramModalForm extends React.Component {
 
             this.setState({
                 image: image,
+                croppableImage: data.croppableImageData,
+
                 title: title,
                 description: description,
                 startDate: startDate,
@@ -441,6 +448,8 @@ this.closeModal()
   }
 
     handleProgramSubmit = (program) => {
+        console.log("program submit")
+        console.log(program.croppableImage)
 
         if ((program.id != "" ) &&  (program.id != undefined )){
 
@@ -512,6 +521,8 @@ this.closeModal()
 
         if (this.props.storeRoot.user) {
             var author = this.props.storeRoot.user.id;
+                    var croppableImage = this.state.croppableImage.id;
+
             var title = this.state.title;
             var description = this.state.description;
             var viewableBy = this.state.viewableBy;
@@ -526,6 +537,8 @@ this.closeModal()
             var programData = {
                 author: author,
                 title: title,
+                croppableImage:croppableImage,
+
                 image: image,
                 description: description,
                 viewableBy: viewableBy,
@@ -558,6 +571,8 @@ this.closeModal()
             this.setState({
                     image: "",
                     title: "",
+                                croppableImage:"",
+
                     description: "",
                     startDate: moment(),
                     scheduleLength: "3m",
@@ -578,12 +593,22 @@ this.closeModal()
 
         };
 
-        handleImageChange = (callbackData) => {
+        /*handleImageChange = (callbackData) => {
         this.setState({
             image: callbackData.image
         })
-    };
+    };*/
 
+    handleImageChange = (callbackData) => {
+        this.setState({
+            image: callbackData.image,
+            saved: "Save",
+            croppableImage: callbackData
+
+        })
+        console.log("handleImageChange")
+        console.log(callbackData)
+    }
 
 
 
@@ -603,7 +628,7 @@ this.closeModal()
 
 
             } else {
-                var imageUrl = "goalItem.svg"
+                var imageUrl = this.props.defaultImage
             }
 
 
@@ -641,11 +666,15 @@ this.closeModal()
                           <div className="ui row">
                               <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
-<div className={mediumColumnWidth}>
+<div className={wideColumnWidth}>
+
+<NewImageUploader imageReturned={this.handleImageChange}
+                  defaultImage={s3BaseUrl + "uploads/goalItem.svg"}
+                  forMobile={forMobile} dimensions={this.state.dimensions}
+                  label="Select an image that will help motivate you."
+                  croppableImage={this.state.croppableImage} /></div></Measure></div>
 
 
-<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
 
 
                           <div className="ui field row">
@@ -2760,13 +2789,13 @@ export class ProgramBasicView extends React.Component {
 
 }
     render() {
-        var imageUrl = s3BaseUrl + "uploads/goalItem.svg";
+        //var imageUrl = s3BaseUrl + "uploads/goalItem.svg";
         var theCost;
 
 
         if (this.state.data) {
             if (this.state.data.image) {
-                var imageUrl = s3BaseUrl + this.state.data.image
+                var imageUrl = this.state.data.image
             }
             if (this.state.data.cost == 0.00 || this.state.data.costFrequencyMetric == "FREE") {
                 theCost = "Free"

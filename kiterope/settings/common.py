@@ -135,9 +135,12 @@ HAYSTACK_SIGNAL_PROCESSOR = 'kiterope.signals.ProgramSignalProcessor'
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
+
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
     'django.middleware.common.CommonMiddleware',
+
     #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -151,7 +154,6 @@ MIDDLEWARE_CLASSES = [
 ]
 
 #CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
