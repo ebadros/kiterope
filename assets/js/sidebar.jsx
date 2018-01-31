@@ -25,7 +25,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'rea
 import onClickOutside  from 'react-onclickoutside';
 import { setCurrentUser, reduxLogout, showSidebar } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
 
 

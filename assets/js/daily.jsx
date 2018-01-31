@@ -25,7 +25,7 @@ import { StandardSetOfComponents, ErrorReporter, Footer} from './accounts'
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import {StepOccurrenceItem, StepOccurrenceList } from './stepOccurrence'
 

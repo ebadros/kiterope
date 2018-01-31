@@ -33,7 +33,7 @@ import  {store} from "./redux/store";
 import { updateStep, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import Measure from 'react-measure'
 
 
@@ -1067,15 +1067,12 @@ export class MyReactS3Uploader extends ReactS3Uploader {
             var leftButtonStyle = {
              overflow: 'hidden',
              display: 'inline-block',
-             backgroundColor: '#C3C4C6',
              color: 'white',
-             fontSize: '1rem',
              border: '1px solid #C3C4C6',
              borderRadius: '4px',
              position: 'relative',
              cursor: 'pointer',
              textAlign: 'center',
-             lineHeight: "50px",
 
              fontWeight: 'bold',
              width: '195px',
@@ -1086,15 +1083,12 @@ export class MyReactS3Uploader extends ReactS3Uploader {
          var rightButtonStyle = {
              overflow: 'hidden',
              display: 'inline-block',
-             backgroundColor: '#2199e8',
              color: 'white',
-             fontSize: '1rem',
              border: '1px solid #2199e8',
              borderRadius: '4px',
              position: 'relative',
              cursor: 'pointer',
              textAlign: 'center',
-             lineHeight: "50px",
 
              fontWeight: 'bold',
              width: '195px',
@@ -1102,8 +1096,8 @@ export class MyReactS3Uploader extends ReactS3Uploader {
          }
 
 
-            return (<div><div style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
-                <SaveButton style={rightButtonStyle} saved={this.state.saved} clicked={this.handleSubmit} />
+            return (<div><div className="ui large fluid grey button" style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
+                <SaveButton style={rightButtonStyle} saved={this.state.saved} clicked={this.uploadFile} />
 </div>)
         } else return(
             <div></div>
@@ -1209,21 +1203,40 @@ export class NewImageUploader extends React.Component {
         if (!file) {
             return;
      }
+     this.setState({
+          originalFilename: file.name,
+          saved: "Save"
+      })
      let url = URL.createObjectURL(file)
       this.readFileAsDataURL(file)
       this.setState({originalUncompressedImage: url}, () => {
           this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
 
       })
-      this.setState({
-          originalFilename: file.name,
-          saved: "Save"
-      })
+
   }
 
 
     crop(){
+
+        var theCurrentCropboxData = this.refs.cropper.getCropBoxData()
+        console.log(theCurrentCropboxData)
         let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
+        if (theCurrentCropboxData.left != this.state.cropperCropboxData.left
+            || theCurrentCropboxData.right != this.state.cropperCropboxData.right
+        || theCurrentCropboxData.width != this.state.cropperCropboxData.width
+        || theCurrentCropboxData.height != this.state.cropperCropboxData.height) {
+            this.setState({
+                saved: "Save"
+            })
+        }else {
+                this.setState({
+                    saved: "Saved"
+                })
+            }
+
+
+
         //var cropboxData = this.refs.cropper.getCropBoxData()
 
       this.setState({
@@ -1435,6 +1448,7 @@ console.log("side stuff")
     handleCropperReady() {
         console.log("cropper is ready")
 
+
         this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
     }
 
@@ -1505,7 +1519,7 @@ return(
                             scaleX={.5}
                             scaleY={.5}
                             crop={this.crop.bind(this)}/>
-                        <div style={selectImageStyle}>Replace Image<input style={{
+                        <div className="ui large fluid grey button" style={selectImageStyle}>Replace Image<input style={{
                             cursor: 'pointer',
                             opacity: '0.0',
                             position: 'absolute',
@@ -1544,6 +1558,8 @@ return(
                             contentDisposition="auto"
                             scrubFilename={(filename) => filename.replace(/[^\w\d_\-.]+/ig, '')}
                             server={theServer}
+
+                            saved={this.state.saved}
                         />
                     </div>
                 </div></div>

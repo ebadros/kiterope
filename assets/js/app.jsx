@@ -21,8 +21,15 @@ import ImageCompressor from '@xkeshi/image-compressor';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
+import ReduxDataGetter from './reduxDataGetter'
 
 
+import { Provider, connect, dispatch } from 'react-redux'
+import { mapStateToProps, mapDispatchToProps} from './redux/containers2'
+
+
+import  {store} from "./redux/store"
+import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 
 
 
@@ -549,6 +556,27 @@ export class ValidatedInput extends React.Component{
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class TestComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+
+        }
+        componentDidMount() {
+            store.dispatch(setCurrentUser({id:1}))
+        }
+
+    render() {
+        return (
+            <div>
+
+            </div>
+        )
+    }
+
+
+}
 export class TestPage extends React.Component {
     constructor(props) {
         super(props);
@@ -558,7 +586,7 @@ export class TestPage extends React.Component {
     render() {
         return (
             <div>
-                <NewImageUploader imageReturned={this.handleImageChange} defaultImage={imageUrl} />
+                <TestComponent />
 
 
             </div>

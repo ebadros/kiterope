@@ -29,7 +29,7 @@ import 'react-select/dist/react-select.css';
 
 import { addThread, addOpenThread, closeOpenThread, addMessage, setMessageWindowVisibility, setCurrentUser, setCurrentContact, reduxLogout, showSidebar, setCurrentThread, setOpenThreads, showMessageWindow } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
 
 import {ImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';

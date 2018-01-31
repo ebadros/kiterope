@@ -343,13 +343,11 @@ export const selectImageStyle = {
              display: 'block',
              backgroundColor: '#2199e8',
              color: 'white',
-             fontSize: '1rem',
              border: '1px solid #2199e8',
              borderRadius: '4px',
              position: 'relative',
              cursor: 'pointer',
              textAlign: 'center',
-             lineHeight: "50px",
 
              fontWeight: 'bold',
              width: '225px',

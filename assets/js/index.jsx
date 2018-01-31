@@ -40,11 +40,6 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'rea
 import {rootReducer} from './redux/reducers'
 import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
-
-
-
-
-
 const history = syncHistoryWithStore(browserHistory, store);
 
 
@@ -82,8 +77,6 @@ function requireAuth(nextState, replace) {
 
 ReactDOM.render((
     <Provider store={store}>
-
-
         <Router history={history}>
             <div>
                 <Route path="/" component={ SplashPage }  />
@@ -137,7 +130,7 @@ ReactDOM.render((
                 <Route path="/search/:search_query/" component={SearchPage}/>
 
                 <Route path="/search" component={SearchPage}/>
-                <Route path="/test" component={TestPage}/>
+                <Route path="/test" component={TestPage} />
                 <Route path="/:path" component={Page404} />
 
 

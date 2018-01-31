@@ -32,7 +32,7 @@ import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 

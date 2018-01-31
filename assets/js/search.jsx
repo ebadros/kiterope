@@ -24,7 +24,7 @@ import Pagination from "react-js-pagination";
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import  {store} from "./redux/store";
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'

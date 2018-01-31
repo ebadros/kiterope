@@ -32,7 +32,7 @@ import Pagination from "react-js-pagination";
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 import PropTypes from 'prop-types';

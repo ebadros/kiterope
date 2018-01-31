@@ -9,7 +9,6 @@ import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
 import autobind from 'class-autobind'
-import {StandardSetOfComponentsContainer} from './redux/containers'
 import Measure from 'react-measure'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
@@ -41,7 +40,7 @@ import { MessageWindowContainer } from './message'
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import { addVisualization, deleteVisualization, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 

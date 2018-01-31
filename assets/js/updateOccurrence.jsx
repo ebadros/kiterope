@@ -37,7 +37,7 @@ import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceMo
 import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
 import { Provider, connect, store, dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 
 import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,

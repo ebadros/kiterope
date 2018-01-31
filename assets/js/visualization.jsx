@@ -17,7 +17,7 @@ import autobind from 'class-autobind'
 import Select from 'react-select'
 
 import { Provider, connect, dispatch } from 'react-redux'
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
 import {StandardSetOfComponents } from './accounts'
 

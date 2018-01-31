@@ -44,7 +44,7 @@ BigCalendar.momentLocalizer(moment);
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import { addStep, deleteStep, clearTempStep, addUpdate, updateStep, setUpdateModalData, setStepModalData, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 

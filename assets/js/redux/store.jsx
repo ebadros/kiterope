@@ -1,4 +1,4 @@
-import { createStore, combineReducers, applyMiddleware } from "redux";
+import { compose, createStore, combineReducers, applyMiddleware } from "redux";
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 
@@ -15,6 +15,8 @@ const reducer = combineReducers({
       rootReducer: rootReducer,
       routing: routerReducer,}
   );
+
+
 
 const store = createStore(
     reducer,

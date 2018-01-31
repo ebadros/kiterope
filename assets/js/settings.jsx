@@ -39,7 +39,7 @@ import { Provider, connect, dispatch } from 'react-redux'
 
 import  {store} from "./redux/store";
 
-import { mapStateToProps, mapDispatchToProps } from './redux/containers'
+import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
@@ -504,6 +504,7 @@ export class SaveButton extends React.Component {
         this.state = {
             saved:"Saved"
 
+
         }
     }
 
@@ -519,6 +520,8 @@ export class SaveButton extends React.Component {
                 saved:nextProps.saved
             })
         }
+
+
     }
 
     handleSubmit() {
@@ -527,7 +530,7 @@ export class SaveButton extends React.Component {
 
     render() {
         return (
-            <div className={`ui large fluid ${ this.state.saved == "Saved" ? "grey": "blue"} ${ this.state.saved == "Saving" ? "loading": null} button`} onClick={this.handleSubmit}>{this.state.saved}</div>
+            <div className={`ui large fluid ${ this.state.saved == "Saved" ? "grey": "blue"} ${ this.state.saved == "Saving" ? "loading": null} button`} style={this.props.style} onClick={this.handleSubmit} >{this.state.saved}</div>
 
 
         )
