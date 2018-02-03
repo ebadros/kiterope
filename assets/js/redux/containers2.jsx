@@ -11,6 +11,18 @@ const mapStateToProps = (state, ownProps) => {
   if (!state) {
     return {
       storeRoot: {
+        userDataLoaded:false,
+        stepDataLoaded:false,
+        programDataLoaded:false,
+        planDataLoaded:false,
+        goalDataLoaded:false,
+        updateOccurrenceDataLoaded:false,
+        visualizationDataLoaded:false,
+        stepOccurrenceDataLoaded:false,
+        updateDataLoaded:false,
+        profileDataLoaded:false,
+        settingsDataLoaded:false,
+        contactDataLoaded:false,
 
         //searchQuery: state.rootReducer.searchQuery,
         //searchHitsVisibility: state.rootReducer.searchHitsVisibility,
@@ -54,9 +66,24 @@ const mapStateToProps = (state, ownProps) => {
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
         profileModalData: state.rootReducer.profileModalData,
-
+        goalModalData:state.rootReducer.goalModalData,
         programModalData: state.rootReducer.programModalData,
         visualizationModalData: state.rootReducer.visualizationModalData,
+        userDataLoaded:state.rootReducer.userDataLoaded,
+        stepDataLoaded:state.rootReducer.stepDataLoaded,
+        programDataLoaded:state.rootReducer.userDataLoaded,
+        planDataLoaded:state.rootReducer.planDataLoaded,
+        goalDataLoaded:state.rootReducer.goalDataLoaded,
+        updateOccurrenceDataLoaded:state.rootReducer.updateOccurrenceDataLoaded,
+        visualizationDataLoaded:state.rootReducer.visualizationDataLoaded,
+        stepOccurrenceDataLoaded:state.rootReducer.stepOccurrenceDataLoaded,
+        updateDataLoaded:state.rootReducer.updateDataLoaded,
+        profileDataLoaded:state.rootReducer.profileDataLoaded,
+        settingsDataLoaded:state.rootReducer.settingsDataLoaded,
+        contactDataLoaded:state.rootReducer.contactDataLoaded,
+
+
+
         gui: {
           searchQuery: state.rootReducer.searchQuery,
           searchHitsVisibility: state.rootReducer.searchHitsVisibility,

@@ -1055,7 +1055,7 @@ componentWillUnmount() {
                   <Link to={`/`}><div className="active section">My Programs</div></Link>
             </div>
             <div>&nbsp;</div>
-                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
+                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} />
         <div ref="ref_whichProgramForm">
              <ProgramModalForm />
             </div>
@@ -1267,9 +1267,11 @@ console.log("programdetail")
        if (this.state.data != nextProps.storeRoot.programs) {
            if (nextProps.storeRoot.programs != undefined) {
                var thePrograms = nextProps.storeRoot.programs;
-               //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
-                         this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray(thePrograms[this.props.params.program_id].steps))
+               //if (thePrograms[this.props.params.program_id] != undefined) {
+                   //this.setState({data: getArrayObjectById(thePrograms, this.props.params.program_id)})
+                   this.setState({data: thePrograms[this.props.params.program_id]}, this.convertStepsIntoArray(thePrograms[this.props.params.program_id].steps))
 
+               //}
            }
        }
 

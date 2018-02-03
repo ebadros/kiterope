@@ -38,12 +38,57 @@ export const rootReducer = (state = {}, action) => {
 
             break;
 
+        case 'SET_DATA_LOADED':
+            switch(action.dataSet) {
+                case "userData":
+                    return Object.assign({}, state, {userDataLoaded: true});
+                    break;
+                case "planData":
+                    return Object.assign({}, state, {planDataLoaded: true});
+                    break;
+                case "stepOccurrenceData":
+                    return Object.assign({}, state, {stepOccurrenceDataLoaded: true});
+                    break;
+                case "goalData":
+                    return Object.assign({}, state, {goalDataLoaded: true});
+                    break;
+                case "updateData":
+                    return Object.assign({}, state, {updateDataLoaded: true});
+                    break;
+                case "updateOccurrenceData":
+                    return Object.assign({}, state, {updateOccurrenceDataLoaded: true});
+                    break;
+                case "stepData":
+                    return Object.assign({}, state, {stepDataLoaded: true});
+                    break;
+                case "settingsData":
+                    return Object.assign({}, state, {settingsDataLoaded: true});
+                    break;
+                case "profileData":
+                    return Object.assign({}, state, {profileDataLoaded: true});
+                    break;
+                case "visualizationsData":
+                    return Object.assign({}, state, {visualizationDataLoaded: true});
+                    break;
+                case "programData":
+                    return Object.assign({}, state, {programDataLoaded: true});
+                    break;
+                case "contactData":
+                    return Object.assign({}, state, {contactDataLoaded: true});
+                    break;
+
+            }
+
 
         case 'SET_UPDATE_MODAL_DATA':
             return Object.assign({}, state, {updateModalData: action.updateModalData});
             break;
         case 'SET_STEP_MODAL_DATA':
             return Object.assign({}, state, {stepModalData: action.stepModalData});
+            break;
+
+        case 'SET_GOAL_MODAL_DATA':
+            return Object.assign({}, state, {goalModalData: action.goalModalData});
             break;
 
         case 'SET_PROGRAM_MODAL_DATA':
@@ -117,7 +162,31 @@ export const rootReducer = (state = {}, action) => {
 
 
         case 'SET_PROGRAMS':
-            return Object.assign({}, state, {programs: action.programs});
+
+            var theNewPrograms = action.programs
+            if (Object.keys(state.programs).length > 0 ) {
+                var theExistingPrograms = Object.assign({}, state.programs)
+
+
+                var theKeys = Object.keys(theNewPrograms)
+
+                for (var i; i < theKeys.length; i++) {
+                    var currentKey = theKeys[i]
+                    if (theExistingPrograms[currentKey] != undefined) {
+                        if (theExistingPrograms[currentKey].updates == undefined) {
+                            theExistingPrograms[currentKey] = theNewPrograms[currentKey]
+                        } else {
+
+                            theExistingPrograms[currentKey] = theNewPrograms[currentKey]
+                        }
+                    }
+                }
+                return Object.assign({}, state, {programs: theExistingPrograms});
+
+            } else {
+                return Object.assign({}, state, {programs: action.programs});
+
+            }
             break;
 
         case 'ADD_PROGRAM':

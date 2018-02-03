@@ -1036,7 +1036,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
+        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000, required=False)
@@ -1048,6 +1048,19 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
 
     planOccurrences = serializers.SerializerMethodField(required=False,read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+
+    croppableImageData = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        return obj.croppableImage.image
+
+    def get_croppableImageData(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
 
     def get_planOccurrences(self, obj):
         serializer_context = {'request': self.context.get('request') }

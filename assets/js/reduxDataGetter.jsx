@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -148,15 +148,36 @@ export default class ReduxDataGetter extends React.Component {
     componentDidMount = () => {
 
         store.dispatch(setMessageWindowVisibility(false));
-          this.updateWindowDimensions();
-          window.addEventListener('resize', this.updateWindowDimensions);
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
 
 
-        persistStore(store, {blacklist: ['routing', 'gui']}, () => {
-      this.setState({rehydrated: true}, () => {this.getAllData()})
+        persistStore(store, {
+            blacklist: [
+                'routing',
+                'gui',
+                'userDataLoaded',
+                'stepDataLoaded',
+                'programDataLoaded',
+                'planDataLoaded',
+                'goalDataLoaded',
+                'updateOccurrenceDataLoaded',
+                'visualizationDataLoaded',
+                'stepOccurrenceDataLoaded',
+                'updateDataLoaded',
+                'profileDataLoaded',
+                'settingsDataLoaded',
+                'contactDataLoaded'
 
 
-    })
+            ]
+        }, () => {
+            this.setState({rehydrated: true}, () => {
+                this.getAllData()
+            })
+
+
+        })
     };
     getAllData() {
         var intervalID = setInterval(this.loadUserData, 2000);
@@ -184,7 +205,7 @@ updateWindowDimensions() {
 }
 
     loadUserData() {
-        if (!this.state.userDataLoaded) {
+        if (!this.props.storeRoot.userDataLoaded) {
             var theUrl = '/api/users/i/';
             $.ajax({
                 method: 'GET',
@@ -194,7 +215,7 @@ updateWindowDimensions() {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (userData) {
-                    this.setState({userDataLoaded:true})
+                store.dispatch(setDataLoaded('userData'))
                     store.dispatch(setCurrentUser(userData));
 
                     if (userData.id != null) {
@@ -218,7 +239,7 @@ updateWindowDimensions() {
 
 
     loadProfileData() {
-                if (!this.state.profileDataLoaded) {
+                if (!this.props.storeRoot.profileDataLoaded) {
 
                     var theUrl = '/api/profiles/me/';
                     $.ajax({
@@ -229,7 +250,7 @@ updateWindowDimensions() {
                             'Authorization': 'Token ' + localStorage.token
                         },
                         success: function (profileData) {
-                    this.setState({profileDataLoaded:true})
+                store.dispatch(setDataLoaded('profileData'))
                             store.dispatch(setProfile(profileData));
 
 
@@ -243,7 +264,7 @@ updateWindowDimensions() {
     }
 
     loadSettingsData() {
-                    if (!this.state.settingsDataLoaded) {
+                    if (!this.props.storeRoot.settingsDataLoaded) {
 
 
                         var theUrl = '/api/settings/me/';
@@ -255,7 +276,8 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (settingsData) {
-                                                    this.setState({settingsDataLoaded:true})
+                                                                    store.dispatch(setDataLoaded('settingsData'))
+
 
 
                                 store.dispatch(setSettings(settingsData));
@@ -323,7 +345,7 @@ updateWindowDimensions() {
     }
 
     loadUpdateData() {
-                    if (!this.state.updateDataLoaded) {
+                    if (!this.props.storeRoot.updateDataLoaded) {
 
 
                         var theUrl = "/api/updates/";
@@ -335,7 +357,7 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (data) {
-                                                    this.setState({updateDataLoaded:true})
+                store.dispatch(setDataLoaded('updateData'))
 
 
                                 store.dispatch(setUpdates(data))
@@ -352,7 +374,7 @@ updateWindowDimensions() {
     }
 
     loadGoalData() {
-                    if (!this.state.goalDataLoaded) {
+                    if (!this.props.storeRoot.goalDataLoaded) {
 
 
                         var theUrl = "/api/goals/";
@@ -364,7 +386,7 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (data) {
-                                                    this.setState({goalDataLoaded:true})
+                store.dispatch(setDataLoaded('goalData'))
 
 
                                 store.dispatch(setGoals(data))
@@ -381,7 +403,7 @@ updateWindowDimensions() {
     }
 
     loadPlanData() {
-                    if (!this.state.planDataLoaded) {
+                    if (!this.props.storeRoot.planDataLoaded) {
 
 
                         var theUrl = "/api/planOccurrences/";
@@ -393,7 +415,7 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (data) {
-                                                    this.setState({planDataLoaded:true})
+                store.dispatch(setDataLoaded('planData'))
 
 
                                 store.dispatch(setPlans(data))
@@ -410,7 +432,7 @@ updateWindowDimensions() {
     }
 
     loadProgramData() {
-                    if (!this.state.programDataLoaded) {
+                    if (!this.props.storeRoot.programDataLoaded) {
 
 
 
@@ -423,7 +445,7 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (data) {
-                                                    this.setState({programDataLoaded:true})
+                store.dispatch(setDataLoaded('programData'))
 
 
                                 store.dispatch(setPrograms(data))
@@ -476,7 +498,7 @@ updateWindowDimensions() {
 
 
     loadStepOccurrenceData() {
-        if (!this.state.stepOccurrenceDataLoaded && this.props.stepOccurrences == undefined) {
+        if (!this.props.storeRoot.stepOccurrenceDataLoaded && this.props.stepOccurrences == undefined) {
 
 
             var periodRangeStart = new Date();
@@ -493,7 +515,7 @@ updateWindowDimensions() {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                                        this.setState({stepOccurrenceDataLoaded:true})
+                store.dispatch(setDataLoaded('stepOccurrenceData'))
 
 
                     store.dispatch(setStepOccurrences(data))
@@ -509,7 +531,7 @@ updateWindowDimensions() {
     }
 
     loadUpdateOccurrenceData() {
-        if (!this.state.updateOccurrenceDataLoaded) {
+        if (!this.props.storeRoot.updateOccurrenceDataLoaded) {
 
 
 
@@ -523,7 +545,7 @@ updateWindowDimensions() {
                 },
                 success: function (data) {
                     this.formatUpdateOccurrenceData(data)
-                    this.setState({updateOccurrenceDataLoaded:true})
+                store.dispatch(setDataLoaded('updateOccurrenceData'))
 
 
 
@@ -593,7 +615,7 @@ updateWindowDimensions() {
 
     loadContactData()
         {
-            if (!this.state.contactDataLoaded) {
+            if (!this.props.storeRoot.contactDataLoaded) {
 
 
             var theUrl = "/api/contacts/";
@@ -605,7 +627,7 @@ updateWindowDimensions() {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                                        this.setState({contactDataLoaded:true})
+                store.dispatch(setDataLoaded('contactData'))
 
 
                     this.organizeContacts(data)
@@ -624,7 +646,7 @@ updateWindowDimensions() {
 
     loadVisualizationData()
         {
-            if (!this.state.visualizationDataLoaded) {
+            if (!this.props.storeRoot.visualizationDataLoaded) {
 
 
             var theUrl = "/api/visualizations/";
@@ -636,7 +658,7 @@ updateWindowDimensions() {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({visualizationDataLoaded:true})
+                store.dispatch(setDataLoaded('visualizationsData'))
                     store.dispatch(setVisualizations(data))
 
 

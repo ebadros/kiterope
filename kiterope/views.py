@@ -442,6 +442,7 @@ class GoalViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        #queryset.update(croppableImage=215)
         #page = self.paginate_queryset(queryset)
         #if page is not None:
         #    serializer = self.get_serializer(page, many=True)
@@ -479,9 +480,9 @@ class GoalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         theUser = self.request.user
-
         userIsCurrentUser = Q(user=theUser)
         viewableByAnyone = Q(viewableBy="ANYONE")
+
 
         theQueryset = Goal.objects.filter(userIsCurrentUser | viewableByAnyone)
 

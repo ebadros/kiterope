@@ -139,7 +139,6 @@ a.pageTitle {
 
 .overlayText {
 
-    z-index:100;
     position:absolute;
     color:white;
     font-weight:bold;

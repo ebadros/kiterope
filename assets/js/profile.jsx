@@ -1159,6 +1159,7 @@ componentWillReceiveProps(nextProps) {
 
 
 <NewImageUploader imageReturned={this.handleImageChange}
+                  aspectRatio="square"
                   defaultImage={s3BaseUrl + "uploads/user.svg"}
                   forMobile={forMobile} dimensions={this.state.dimensions}
                   label="Select an image that will help motivate you."

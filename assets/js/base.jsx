@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -1498,35 +1498,44 @@ xhr.send();
                 display: 'block'
             }
             }
-if (this.refs.cropper != undefined) {
 
+if (this.props.aspectRatio == 'square') {
+    var theAspectRatio = 1
+    var theCropperWidth = '225px'
+    var theImageHeight = '400px'
 
+} else {
+    var theAspectRatio = 16/9
+    var theCropperWidth = '270px'
+    var theImageHeight = '225px'
 }
+
 
 return(
             <div className="ui grid">
                           <div className="ui row" style={editInterfaceStyle}>
 
                 <div className={wideColumnWidth}>
-                    <div style={{width: '225px', height: '270px', display: 'inline-block', marginBottom: '5px'}}>
-                        <Cropper
-                            ready={this.handleCropperReady}
-                            viewMode={2}
-                            ref='cropper'
-                            src={this.state.originalUncompressedImage}
-                            background={true}
-                            style={{width: '225px', height: '225px', float: 'left', marginBottom: '5px'}}
-                            aspectRatio={16 / 9}
-                            minContainerWidth={225}
-                            minContainerHeight={225}
+<div style={{width: '225px', height: theCropperWidth, display: 'inline-block', marginBottom: '5px'}}>
 
-                            guides={false}
-                            scaleX={.5}
-                            scaleY={.5}
-                            autoCrop={true}
-                            autoCropArea={1.0}
-                            crop={this.crop.bind(this)}/>
-                        <div className="ui large fluid grey button" style={selectImageStyle}>Replace Image<input style={{
+            <Cropper
+                ready={this.handleCropperReady}
+                viewMode={2}
+                ref='cropper'
+                src={this.state.originalUncompressedImage}
+                background={true}
+                style={{width: '225px', height: '225px', float: 'left', marginBottom: '5px'}}
+                aspectRatio={theAspectRatio}
+                minContainerWidth={225}
+                minContainerHeight={225}
+
+                guides={false}
+                scaleX={.5}
+                scaleY={.5}
+                autoCrop={true}
+                autoCropArea={1.0}
+                crop={this.crop.bind(this)}/>
+     <div className="ui large fluid grey button" style={selectImageStyle}>Replace Image<input style={{
                             cursor: 'pointer',
                             opacity: '0.0',
                             position: 'absolute',
@@ -1538,7 +1547,9 @@ return(
                             height: '100%'
                         }} type='file' id="file" accept="image/*" onChange={this.handleReplaceFile.bind(this)}/>
                         </div>
-                    </div>
+        </div>
+
+
 
 
 
@@ -1547,7 +1558,7 @@ return(
                         display: 'inline-block',
                         cursor: 'pointer',
                     }}>{this.state.finalImage != "" ?
-                        <img style={{width: '400px', height: '225px'}} src={this.state.finalImage}/> : <div></div>}
+                        <img style={{width: '400px', height: theImageHeight}} src={this.state.finalImage}/> : <div></div>}
                         <MyReactS3Uploader
                             style={cropImageStyle}
                             cancelEdit={this.handleCancelEdit}
@@ -1572,7 +1583,7 @@ return(
                 </div></div>
 
             <div className="ui row" style={viewInterfaceStyle}>
-                                       <div className={mediumColumnWidth} >
+                                       <div className={smallColumnWidth} >
                                            <div className="ui fluid image" >
                                                  <div className="ui right corner purple large label" onClick={this.handleSwitchToEditMode}>
 <i className="large edit icon"></i>
@@ -2064,7 +2075,7 @@ deleteItem = () => {
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
-        var editView = this.getEditView();
+        //var editView = this.getEditView();
 
 
         return (
@@ -2112,9 +2123,21 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
 
   }
 
+  switchToEditView = () => {
+
+        this.setState({
+            modalIsOpen:true,
+        }, () => {store.dispatch(setStepModalData(this.state))})
+        //$(this.refs["ref_basic"]).hide();
+        //$(this.refs["ref_form"]).slideDown();
+        //this.props.currentViewChanged("Edit")
+
+
+    };
 
 
 
+/*
      handleGoalSubmit (goal, callback) {
 
          if (goal.id != "") {
@@ -2184,7 +2207,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
          }
 
 
-  }
+  }*/
 
     getControlBar = () => {
         return(
@@ -2241,7 +2264,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
-        var editView = this.getEditView();
+        //var editView = this.getEditView();
 
         return (
             <div>
