@@ -433,10 +433,8 @@ updateWindowDimensions() {
     }
 
     loadProgramData() {
-        console.log("load program data " + this.props.storeRoot.programDataLoaded)
-                    if (!this.props.storeRoot.programDataLoaded) {
+                    //if (!this.props.storeRoot.programDataLoaded) {
 
-        console.log(" program data loaded")
 
 
                         var theUrl = "/api/programs/";
@@ -461,7 +459,7 @@ updateWindowDimensions() {
                             }.bind(this),
 
                         });
-                    }
+                    //}
     }
 
     loadMessageThreadData (){
