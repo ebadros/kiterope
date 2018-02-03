@@ -139,10 +139,10 @@ class KChannelSerializer(serializers.HyperlinkedModelSerializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'url', 'first_name', 'last_name', 'username', 'email', 'groups', 'name', 'profilePhoto', 'isCoach', 'bio', 'notificationChannelLabel', 'notificationChannel','profile', 'profileId')
+        fields = ('id', 'url', 'first_name', 'last_name', 'username', 'email', 'groups', 'name', 'image', 'isCoach', 'bio', 'notificationChannelLabel', 'notificationChannel','profile', 'profileId')
 
     name = serializers.SerializerMethodField()
-    profilePhoto = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     isCoach = serializers.SerializerMethodField()
     bio = serializers.SerializerMethodField()
     notificationChannelLabel = serializers.SerializerMethodField()
@@ -183,9 +183,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         except:
             return "User is anonymous"
 
-    def get_profilePhoto(self,obj):
+    def get_image(self,obj):
         try:
-            return obj.profile.profilePhoto
+            return obj.profile.croppableImage.image
         except:
             return "User is anonymous"
 
@@ -360,18 +360,45 @@ class ContactListingField(serializers.RelatedField):
 class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'user',  )
+        fields = ( 'id', 'bio', 'isCoach', 'firstName', 'lastName', 'zipCode', 'image', 'croppableImage', 'notificationChannel', 'user',  )
 
     bio = serializers.CharField(max_length=2000, required=False)
     notificationChannel = serializers.PrimaryKeyRelatedField(many=False, queryset=KChannel.objects.all())
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+    image = serializers.SerializerMethodField()
 
+    croppableImageData = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_image(self, obj):
+        try:
+            return obj.croppableImage.image
+        except:
+            return obj.image
+
+    def get_croppableImageData(self, obj):
+
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
+
+    def get_permissions(self,obj):
+
+        #return obj.get_permissions()
+        #serializer = self.request.user
+        #if serializer == obj.program.author:
+        if self.context['request'].user == obj.user:
+            return True
+        else:
+            return False
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'utcMidnight', 'firstName', 'timezone', 'lastName', 'zipCode', 'profilePhoto', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken',  )
+        fields = ( 'id', 'bio', 'isCoach', 'utcMidnight', 'permissions','croppableImage', 'croppableImageData','firstName', 'timezone', 'lastName', 'zipCode', 'image', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken',  )
 
 
     bio = serializers.CharField(max_length=2000, required=False)
@@ -380,9 +407,39 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     notificationChannelLabel = serializers.SerializerMethodField(required=False, read_only=True)
     timezone = TimezoneField()
     utcMidnight = serializers.SerializerMethodField()
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+    image = serializers.SerializerMethodField()
+
+
+    croppableImageData = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_image(self, obj):
+        try:
+            return obj.croppableImage.image
+        except:
+            return ""
+
+
+    def get_croppableImageData(self, obj):
+
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
 
     def get_timezone(self, obj):
         return six.text_type(obj.timezone)
+
+    def get_permissions(self, obj):
+
+        #return obj.get_permissions()
+        #serializer = self.request.user
+        #if serializer == obj.program.author:
+        if self.context["request"].user == obj.user:
+            return True
+        else:
+            return False
 
 
     def get_notificationChannelLabel(self, obj):
@@ -420,7 +477,7 @@ class ContactSerializer(serializers.HyperlinkedModelSerializer):
         serializer_context = {'request': self.context.get('request')}
         #theProfile = Profile.objects.get(id=obj.sender)
 
-        serializer = ProfileSerializer(obj.sender)
+        serializer = ProfileSerializer(obj.sender, context=serializer_context )
         #data = {i['id']: i for i in serializer.data}
 
         return serializer.data
@@ -430,7 +487,7 @@ class ContactSerializer(serializers.HyperlinkedModelSerializer):
         #theProfile = Profile.objects.get(id=obj.receiver)
 
 
-        serializer = ProfileSerializer(obj.receiver)
+        serializer = ProfileSerializer(obj.receiver, context=serializer_context)
         #data = {i['id']: i for i in serializer.data}
 
         return serializer.data
@@ -569,7 +626,7 @@ class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_authorPhoto(self, obj):
         try:
-            return Profile.objects.get(user=obj.author).profilePhoto
+            return Profile.objects.get(user=obj.author).image
         except:
             return ""
 
@@ -645,6 +702,116 @@ class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
         return obj.name
 
 
+class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Program
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000)
+    scheduleLength = serializers.CharField()
+    category = serializers.CharField(max_length=20)
+
+    timeCommitment = serializers.CharField(max_length=20)
+    costFrequencyMetric = serializers.CharField(max_length=20)
+    cost = serializers.CharField(max_length=20)
+    startDate = serializers.DateField()
+    author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+
+    #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+
+    isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
+    userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+
+    croppableImageData = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+
+    def get_image(self,obj):
+        return obj.croppableImage.image
+
+    def get_croppableImageData(self, obj):
+
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
+
+
+
+
+
+    def get_userPlanOccurrenceId(self,obj):
+        try:
+            return obj.get_userPlanOccurrenceId(self.context['request'].user)
+        except:
+            return ""
+
+
+
+
+    def get_isSubscribed(self, obj):
+        try:
+            if PlanOccurrence.objects.filter(program=obj, user=self.context['request'].user, isSubscribed=True).exists():
+                return True
+            else:
+                return False
+
+        except:
+            return False
+
+    def get_category(self, obj):
+        return obj.get_category_display()
+
+
+    def get_timeCommitment(self, obj):
+        return obj.get_timeCommitment_display()
+
+    def get_scheduleLength(self, obj):
+        return obj.get_scheduleLength_display()
+
+    def get_viewableBy(self, obj):
+        return obj.get_viewableBy_display()
+
+    def get_costFrequencyMetric(self, obj):
+        return obj.get_costFrequencyMetric_display()
+
+    '''def create(self, validated_data):
+        steps_data = validated_data.pop('program')
+        program = Program.objects.create(**validated_data)
+        for steps_data in steps_data:
+            Step.objects.create(program=program, **steps_data)
+        return program'''
+
+    def update(self, instance, validated_data):
+        instance.image = validated_data.get('image', instance.image)
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.croppableImage = validated_data.get('croppableImage', instance.croppableImage)
+
+        instance.author = validated_data.get('author', instance.author)
+        instance.isActive = validated_data.get('isActive', instance.isActive)
+        instance.description = validated_data.get('description', instance.description)
+        #instance.steps = validated_data.get('steps', instance.steps)
+        instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
+        instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
+
+        instance.startDate = validated_data.get('startDate', instance.startDate)
+        instance.cost = validated_data.get('cost', instance.cost)
+        instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
+        instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
+        instance.category = validated_data.get('category', instance.category)
+
+
+
+        #instance.goals = validated_data.get('goals', instance.goals)
+
+        instance.save()
+        return instance
+
+
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
@@ -672,6 +839,11 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
 
     croppableImageData = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+
+    def get_image(self,obj):
+        return obj.croppableImage.image
 
     def get_croppableImageData(self, obj):
 
@@ -949,13 +1121,13 @@ class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
         return obj.sender.profile.get_fullName()
 
     def get_senderPhoto(self, obj):
-        return obj.sender.profile.get_profilePhoto()
+        return obj.sender.profile.get_image()
 
     def get_receiverName(self, obj):
         return obj.receiver.profile.get_fullName()
 
     def get_receiverPhoto(self, obj):
-        return obj.receiver.profile.get_profilePhoto()
+        return obj.receiver.profile.get_image()
 
     def get_messages(self,obj):
         serializer = MessageSerializer(obj.get_messages(), many=True)

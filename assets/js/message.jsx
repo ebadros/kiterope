@@ -3041,7 +3041,7 @@ export class MessageList extends React.Component {
             var message = this.state.data[i];
             var messageMarkup = <Message key={message.id} style={fullMessageStyles[i]} messageText={message.text}
                                          receiverId={message.receiver} orientation={theOrientation}
-                                         profilePhoto={this.state.user.profilePhoto}/>;
+                                         profilePhoto={this.state.user.image}/>;
             messageListMarkup = messageListMarkup + messageMarkup
 
         }

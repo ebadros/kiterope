@@ -287,7 +287,7 @@ export class ProfileForm extends React.Component {
                 lastName: nextProps.data.lastName,
                 bio: nextProps.data.bio,
                 zipCode: nextProps.data.zipCode,
-                profilePhoto: nextProps.data.profilePhoto,
+                image: nextProps.data.image,
                 notificationChannel: nextProps.data.notificationChannel,
 
             })
@@ -396,7 +396,7 @@ export class ProfileForm extends React.Component {
             var mediumColumnWidth = "eight wide column";
             var smallColumnWidth = "four wide column"
         }
-            var theImage = s3ImageUrl + this.state.profilePhoto;
+            var theImage = s3ImageUrl + this.state.image;
             var theFilename = theImage.replace("https://kiterope.s3.amazonaws.com:443/uploads/", "");
 
             return (
@@ -416,7 +416,7 @@ export class ProfileForm extends React.Component {
             var fullUrl = value.signedUrl;
             var urlForDatabase = fullUrl.split("?")[0];
             urlForDatabase = urlForDatabase.replace(s3ImageUrl, "");
-            this.setState({profilePhoto: urlForDatabase});
+            this.setState({image: urlForDatabase});
     }
 
 
@@ -450,7 +450,7 @@ export class ProfileForm extends React.Component {
 
     handleImageChange = (callbackData) => {
         this.setState({
-            profilePhoto: callbackData.image
+            image: callbackData.image
         })
     };
 
@@ -477,7 +477,7 @@ if (this.state.user) {
         var firstName = this.state.firstName;
         var lastName = this.state.lastName;
         var zipCode = this.state.zipCode;
-        var profilePhoto = this.state.profilePhoto;
+        var image = this.state.image;
         var bio = this.state.bio;
     var notificationChannel = this.state.notificationChannel;
 
@@ -489,7 +489,7 @@ if (this.state.user) {
             lastName: lastName,
             zipCode: zipCode,
             bio: bio,
-            profilePhoto: profilePhoto,
+            image: image,
             notificationChannel: notificationChannel
 
 
@@ -518,7 +518,7 @@ if (this.state.user) {
                 var buttonText = "Create"
             }
 
-            var imageUrl = s3ImageUrl + this.state.profilePhoto;
+            var imageUrl = s3ImageUrl + this.state.image;
 
             var descriptionEditor = this.getDescriptionEditor();
 
@@ -981,7 +981,7 @@ export class ProfileBasicView extends React.Component {
         if (this.props.isListNode) {
             return (
                 <div onClick={this.goToDetail}>
-                    <ClippedImage item="profile" src={s3ImageUrl + this.state.data.profilePhoto} />
+                    <ClippedImage item="profile" src={s3ImageUrl + this.state.data.image} />
 
 
                 <div className="ui grid" >
@@ -1022,7 +1022,7 @@ export class ProfileBasicView extends React.Component {
             return (
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui circular image" src={s3ImageUrl + this.state.data.profilePhoto}></img>
+                        <img className="ui circular image" src={s3ImageUrl + this.state.data.image}></img>
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">
@@ -1075,7 +1075,7 @@ export class ProfileView extends React.Component {
                 <div className="ui segment noTopMargin grid">
 
                     <div className="four wide column">
-                        <img className="ui image" src={this.state.data.profilePhoto}></img>
+                        <img className="ui image" src={this.state.data.image}></img>
                     </div>
 
                     <div className="eight wide column">

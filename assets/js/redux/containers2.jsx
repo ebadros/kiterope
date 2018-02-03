@@ -11,7 +11,6 @@ const mapStateToProps = (state, ownProps) => {
   if (!state) {
     return {
       storeRoot: {
-        user:{id:1},
 
         //searchQuery: state.rootReducer.searchQuery,
         //searchHitsVisibility: state.rootReducer.searchHitsVisibility,
@@ -41,6 +40,7 @@ const mapStateToProps = (state, ownProps) => {
       storeRoot: {
         user: state.rootReducer.user,
         profile: state.rootReducer.profile,
+
         settings: state.rootReducer.settings,
         goals: state.rootReducer.goals,
         plans: state.rootReducer.plans,
@@ -53,6 +53,8 @@ const mapStateToProps = (state, ownProps) => {
         updates: state.rootReducer.updates,
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
+        profileModalData: state.rootReducer.profileModalData,
+
         programModalData: state.rootReducer.programModalData,
         visualizationModalData: state.rootReducer.visualizationModalData,
         gui: {

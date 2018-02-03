@@ -41,6 +41,7 @@ import {rootReducer} from './redux/reducers'
 import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 const history = syncHistoryWithStore(browserHistory, store);
+import ReduxDataGetter from './reduxDataGetter'
 
 
 
@@ -77,8 +78,10 @@ function requireAuth(nextState, replace) {
 
 ReactDOM.render((
     <Provider store={store}>
+
         <Router history={history}>
             <div>
+
                 <Route path="/" component={ SplashPage }  />
                 <Route path="/blog" component={ BlogPage } />
 

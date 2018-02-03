@@ -1148,7 +1148,7 @@ export class UserLink2 extends React.Component {
             bio:"",
             isCoach:"",
             zipCode:"",
-            profilePhoto:"",
+            image:"",
         }
 
     }
@@ -1171,7 +1171,7 @@ export class UserLink2 extends React.Component {
                   bio:data.bio,
                   isCoach:data.isCoach,
                   zipCode:data.zipCode,
-                  profilePhoto:data.profilePhoto,
+                  image:data.image,
 
               })
 
@@ -1187,7 +1187,7 @@ export class UserLink2 extends React.Component {
           return (
               <div>
 
-                   <img className="ui avatar image" src={this.state.profilePhoto} />
+                   <img className="ui avatar image" src={this.state.image} />
 <span>Designed by {this.state.firstName} {this.state.lastName}</span>
               </div>
           )

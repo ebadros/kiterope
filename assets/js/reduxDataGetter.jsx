@@ -146,7 +146,6 @@ export default class ReduxDataGetter extends React.Component {
     }
 
     componentDidMount = () => {
-                    store.dispatch(setCurrentUser(null))
 
         store.dispatch(setMessageWindowVisibility(false));
           this.updateWindowDimensions();
@@ -167,8 +166,11 @@ export default class ReduxDataGetter extends React.Component {
 
 
     componentWillUnmount() {
-  window.removeEventListener('resize', this.updateWindowDimensions);
-        clearInterval(this.state.intervalID);
+        window.removeEventListener('resize', this.updateWindowDimensions);
+            if (this.state.intervalID != undefined) {
+                clearInterval(this.state.intervalID);
+
+        }
 }
 
 updateWindowDimensions() {
@@ -207,8 +209,6 @@ updateWindowDimensions() {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
-        clearInterval(this.state.intervalID);
-                    console.log("couldn't get the value")
                     console.error(theUrl, status, err.toString());
                 }
             })
@@ -283,9 +283,6 @@ updateWindowDimensions() {
             },
             success: function(data) {
 
-                                console.log("gotUsersTimezone")
-
-
 
 
             }.bind(this),
@@ -309,9 +306,9 @@ updateWindowDimensions() {
         this.loadSettingsData();
         //this.loadMessageThreadData();
         this.loadContactData();
-        if(this.props.user) {
+        if(this.props.storeRoot.user) {
 
-            this.setUsersTimezone(this.props.user.profileId)
+            this.setUsersTimezone(this.props.storeRoot.user.profileId)
         }
 
     }
@@ -415,31 +412,6 @@ updateWindowDimensions() {
     loadProgramData() {
                     if (!this.state.programDataLoaded) {
 
-                        /*} fetch("/api/programs/", {
-                            method: 'GET',
-                            credentials: "same-origin",
-
-                            headers: {
-
-                                'Authorization': 'Token ' + localStorage.token,
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                            },
-
-
-                        })
-                            .then(response => {
-
-                                return response.json()
-                            })
-                            .then(data => {
-                                //console.log("here's the plan data " + data)
-                                store.dispatch(setPrograms(data))
-                                this.setState({programDataLoaded:true})
-
-
-                            })
-                            .catch(error => console.log(error));*/
 
 
                         var theUrl = "/api/programs/";

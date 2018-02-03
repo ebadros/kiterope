@@ -61,7 +61,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -1142,7 +1142,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = AllProgramSerializer(queryset, many=True)
 
         # This is the line that allows us to get at the object without iterating over an array
         data = {i['id']: i for i in serializer.data}
@@ -1166,6 +1166,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
 
     def get_queryset(self):
         try:
@@ -1256,7 +1257,7 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, context={'request': request}, many=True)
 
         # This is the line that allows us to get at the object without iterating over an array
         data = {i['id']: i for i in serializer.data}
@@ -1265,7 +1266,7 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         print(request.data)
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={'request': request}, )
 
         serializer.is_valid(raise_exception=True)
 
@@ -1294,7 +1295,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, context={'request': request}, many=True)
 
         # This is the line that allows us to get at the object without iterating over an array
         data = {i['id']: i for i in serializer.data}

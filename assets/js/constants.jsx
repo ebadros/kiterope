@@ -312,6 +312,38 @@ export const updateModalStyle = {
   }
 };
 
+export const defaultUserCroppableImage = {
+    id: 214,
+    image: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/user.svg",
+    originalUncompressedImage: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/user.svg",
+    cropperCropboxData:""
+
+}
+
+export const defaultGoalCroppableImage = {
+    id: 215,
+    image: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/goalItem.png",
+    originalUncompressedImage: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/goalItem.png",
+    cropperCropboxData:""
+
+}
+
+export const defaultStepCroppableImage = {
+    id: 216,
+    image: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/stepDefaultImage.png",
+    originalUncompressedImage: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/stepDefaultImage.png",
+    cropperCropboxData:""
+
+}
+
+export const defaultProgramCroppableImage = {
+    id: 217,
+    image: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/planDefault.png",
+    originalUncompressedImage: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/planDefault.png",
+    cropperCropboxData:""
+
+}
+
 export const subscribeModalStyle = {
     overlay : {
 
@@ -374,5 +406,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   defaultProgramCroppableImage, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

@@ -44,7 +44,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import { addVisualization, deleteVisualization, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { defaultProgramCroppableImage, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
 
 $.ajaxSetup({
@@ -84,14 +84,10 @@ export class ProgramModalForm extends React.Component {
         autobind(this);
         this.state = {
            files:[],
-            image: "",
+            image: defaultProgramCroppableImage.image,
             title: "",
             description: "",
-            croppableImage: {
-                image: s3BaseUrl + "uploads/stepDefaultImage.svg",
-                originalUncompressedImage: s3BaseUrl + "uploads/stepDefaultImage.svg",
-                cropperCropBoxData:"" },
-
+            croppableImage: defaultProgramCroppableImage,
             startDate:moment(),
             scheduleLength:"3m",
             viewableBy: "ONLY_ME",
@@ -113,6 +109,9 @@ export class ProgramModalForm extends React.Component {
 
 
     componentDidMount () {
+        this.setState({
+            croppableImage: defaultProgramCroppableImage
+        })
 
         $(this.refs['ref_whichProgramForm']).hide();
         this.setState({
@@ -215,6 +214,17 @@ export class ProgramModalForm extends React.Component {
                 var category = this.state.category
             }
 
+            if (data.croppableImageData != undefined) {
+                var croppableImageData = data.croppableImageData
+                                this.setState({croppableImage: croppableImageData})
+
+            }
+
+            if (data.isActive != undefined) {
+                var theIsActive = data.isActive
+                this.setState({isActive: theIsActive})
+            }
+
 
             //var startDate = data.startDate;
 
@@ -243,7 +253,6 @@ export class ProgramModalForm extends React.Component {
 
             this.setState({
                 image: image,
-                croppableImage: data.croppableImageData,
 
                 title: title,
                 description: description,
@@ -254,6 +263,7 @@ export class ProgramModalForm extends React.Component {
                 cost: cost,
                 costFrequencyMetric: costFrequencyMetric,
                 category: category,
+
 
             },() => {
                 ///this.showAndHideTypeUIElements(this.state.type)
@@ -532,6 +542,7 @@ this.closeModal()
             var cost = this.state.cost;
             var costFrequencyMetric = this.state.costFrequencyMetric;
             var category = this.state.category;
+            var isActive = this.state.isActive
 
             var programData = {
                 author: author,
@@ -546,7 +557,8 @@ this.closeModal()
                 cost: cost,
                 startDate:startDate,
                 costFrequencyMetric: costFrequencyMetric,
-                category : category
+                category : category,
+                isActive: this.state.isActive
             };
 
             if (this.state.id != "") {
@@ -570,7 +582,7 @@ this.closeModal()
             this.setState({
                     image: "",
                     title: "",
-                                croppableImage:"",
+                                croppableImage:defaultProgramCroppableImage,
 
                     description: "",
                     startDate: moment(),
@@ -668,7 +680,7 @@ this.closeModal()
 <div className={wideColumnWidth}>
 
 <NewImageUploader imageReturned={this.handleImageChange}
-                  defaultImage={s3BaseUrl + "uploads/goalItem.svg"}
+                  defaultImage={defaultStepCroppableImage.image}
                   forMobile={forMobile} dimensions={this.state.dimensions}
                   label="Select an image that will help motivate you."
                   croppableImage={this.state.croppableImage} /></div></Measure></div>
@@ -917,37 +929,9 @@ export class ProgramListPage extends React.Component {
 
 
 
-  loadProgramsFromServer = () => {
-      //if (this.state.activePage != 1) {
-        //        var theUrl = "api/programs/?page=" + this.state.activePage
-      //}  else {
-         var theUrl = "/api/programs/";
-      //}
-    $.ajax({
-      url: theUrl,
-      dataType: 'json',
-      cache: false,
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
-            store.dispatch(setPrograms(data.results))
-
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-
-      }.bind(this),
-
-    });
-  };
 
 
-handleToggleForm = () => {
 
-
-        $(this.refs['ref_whichProgramForm']).slideToggle()
-    };
 
     componentDidMount() {
         //this.loadProgramsFromServer();
@@ -1025,11 +1009,10 @@ handleCancelClicked = () => {
         }, () => $(this.refs['ref_whichProgramForm']).slideUp())
 
     };
-
-  handleActionClick = () => {
-
-      console.log("setProgrmaModalData")
-      store.dispatch(setProgramModalData({modalIsOpen:true, data:{}}))
+    handleActionClick = () => {
+    var theData ={modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage}}
+        console.log(theData)
+      store.dispatch(setProgramModalData(theData))
 
       //store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
 
@@ -1075,7 +1058,6 @@ componentWillUnmount() {
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} toggleForm={this.handleToggleForm}/>
         <div ref="ref_whichProgramForm">
              <ProgramModalForm />
-            <ProgramForm cancelClicked={this.handleCancelClicked} onProgramSubmit={this.handleProgramSubmit} serverErrors={this.state.serverErrors} />
             </div>
 
                     <ProgramList data={this.props.storeRoot.programs} needsLogin={this.handleNeedsLogin} reloadItem={this.handleReloadItem}/>
@@ -1104,6 +1086,7 @@ export class ProgramDetailPage extends React.Component {
             selectedView:"list",
             headerActionButtonLabel:"Add Step",
             stepArray:[],
+            programDetailLoaded:false
         }
     }
 
@@ -1124,6 +1107,37 @@ export class ProgramDetailPage extends React.Component {
           }.bind(this)
         });
       };
+
+
+       loadProgramDetail() {
+           if (this.props.storeRoot.programs == undefined || this.props.storeRoot.programs[this.props.params.program_id].updates == undefined) {
+console.log("programdetail")
+                        var theUrl = "/api/programs/" + this.props.params.program_id + "/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            headers: {
+                                'Authorization': 'Token ' + localStorage.token
+                            },
+                            success: function (data) {
+                                this.setState({programDetailLoaded:true})
+
+
+                                store.dispatch(updateProgram(data))
+                                var thePrograms = this.props.storeRoot.programs;
+                                this.setState({data: thePrograms[data.id]}, this.convertStepsIntoArray())
+
+
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
+    }
 
 
 
@@ -1211,6 +1225,7 @@ export class ProgramDetailPage extends React.Component {
     };
 
   componentDidMount() {
+      this.loadProgramDetail()
           var thePrograms = this.props.storeRoot.programs;
       if (thePrograms != undefined) {
 
@@ -1275,7 +1290,7 @@ export class ProgramDetailPage extends React.Component {
 
   handleActionClick = () => {
       console.log("handle action click")
-                  store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
+                  store.dispatch(setStepModalData({modalIsOpen:true, data:{croppableImage:defaultStepCroppableImage}}))
       /*if (this.state.formIsOpen == true) {
         this.handleCloseForm()
 
@@ -1982,618 +1997,9 @@ export class ProgramSubscriptionForm extends React.Component {
 
 
 
-@connect(mapStateToProps, mapDispatchToProps)
-export class ProgramForm extends React.Component {
-    constructor(props) {
-        super(props);
-        autobind(this);
-        this.state = {
-           files:[],
-            image: "",
-            title: "",
-            description: "",
-            startDate:moment(),
-            scheduleLength:"3m",
-            viewableBy: "ONLY_ME",
-            timeCommitment: "1h",
-            cost:"0.0",
-            costFrequencyMetric: "MONTH",
-            editable:false,
-            data:"",
-            category:"UNCATEGORIZED",
-            serverErrors:{}
-        }
 
 
-    }
 
-
-
-
-    componentDidMount () {
-
-        $(this.refs['ref_whichProgramForm']).hide();
-        this.setState({
-            serverErrors: this.props.serverErrors,
-
-            })
-
-
-    }
-
-
-    componentWillReceiveProps(nextProps) {
-        if (this.state.data != nextProps.data) {
-            if (nextProps.data != undefined) {
-            this.setState({
-                id: nextProps.data.id,
-                title: nextProps.data.title,
-                deadline: moment(nextProps.data.deadline, "YYYY-MM-DD"),
-                description: nextProps.data.description,
-                image: nextProps.data.image,
-                timeCommitment: nextProps.data.timeCommitment,
-                cost: nextProps.data.cost,
-                costFrequencyMetric: nextProps.data.costFrequencyMetric,
-                startDate: moment(nextProps.data.startDate, "YYYY-MM-DD"),
-                scheduleLength:nextProps.data.scheduleLength,
-                category:nextProps.data.category,
-
-
-                viewableBy: nextProps.data.viewableBy,
-            })
-            }
-
-
-
-        }
-
-        if (this.state.serverErrors != nextProps.serverErrors) {
-            this.setState({
-                serverErrors: nextProps.serverErrors
-            })
-        }
-
-    }
-
-    handleStartDateChange(date)   {
-        this.setState({startDate: date});
-  }
-
-
-
-
-    handleEditorChange(e)  {
-
-        this.setState({description: e});
-  }
-
-    handleCostChange (newValue){
-        this.setState({cost: newValue});
-    }
-
-    handleScheduleLengthChange (option) {
-        this.setState({scheduleLength: option.value});
-    }
-
-    handleCostFrequencyMetricChange(option) {
-
-            this.setState({costFrequencyMetric: option.value})
-    }
-
-    handleViewableByChange(option) {
-
-            this.setState({viewableBy: option.value})
-    }
-
-
-
-    handleTimeCommitmentChange(option){
-        this.setState({timeCommitment: option.value});
-    }
-
-    handleCategoryChange(option){
-        this.setState({category: option.value});
-    }
-
-    getDescriptionEditor () {
-         if (this.props.storeRoot != undefined ) {
-                if (this.props.storeRoot.gui != undefined) {
-                    var forMobile = this.props.storeRoot.gui.forMobile
-                    }
-                }
-
-
-
-            if ((this.props.isListNode) || (forMobile)) {
-             var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column";
-
-           } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "four wide column"
-        }
-        if (this.state.description == null) {
-            return ("")
-        } else {
-            return (<div className="ui row">
-                <div className={wideColumnWidth}>
-                    <div className="field fluid">
-                        <label htmlFor="id_description">Description:</label>
-                        <TinyMCEInput name="description"
-                                      value={this.state.description}
-                                      tinymceConfig={TINYMCE_CONFIG}
-                                      onChange={this.handleEditorChange}
-                        />
-
-
-                    </div>
-                </div>
-                <div className="six wide column">&nbsp;</div>
-
-            </div>)
-        }
-    }
-
-
-
-
-
-    handleFinishedUpload (value) {
-            var fullUrl = value.signedUrl;
-            var urlForDatabase = fullUrl.split("?")[0];
-            urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
-            this.setState({image: urlForDatabase});
-    }
-
-
-    handleTitleChange(value) {
-
-            this.setState({title: value})
-    }
-
-
-
-    getServerErrors(fieldName) {
-        if (this.state.serverErrors == undefined) {
-            return ""
-        } else {
-            return this.state.serverErrors[fieldName]
-        }
-    }
-
-
-    handleCancelClicked() {
-        this.props.cancelClicked()
-    }
-
-    handleSubmit(e) {
-        e.preventDefault();
-
-        if (this.props.storeRoot.user) {
-            var author = this.props.storeRoot.user.id;
-            var title = this.state.title;
-            var description = this.state.description;
-            var viewableBy = this.state.viewableBy;
-            var image = this.state.image;
-            var scheduleLength = this.state.scheduleLength;
-            var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
-            var timeCommitment = this.state.timeCommitment;
-            var cost = this.state.cost;
-            var costFrequencyMetric = this.state.costFrequencyMetric;
-            var category = this.state.category;
-
-            var programData = {
-                author: author,
-                title: title,
-                image: image,
-                description: description,
-                viewableBy: viewableBy,
-                scheduleLength: scheduleLength,
-                timeCommitment: timeCommitment,
-                cost: cost,
-                startDate:startDate,
-                costFrequencyMetric: costFrequencyMetric,
-                category : category
-            };
-
-            if (this.state.id != "") {
-                programData.id = this.state.id
-            }
-            this.props.onProgramSubmit(programData, this.resetForm)
-
-
-        }
-        else {
-            this.setState({
-                    signInOrSignUpModalFormIsOpen: true,
-                }
-            )
-
-        }
-        }
-
-        resetForm = () => {
-            this.setState({
-                    image: "",
-                    title: "",
-                    description: "",
-                    startDate: moment(),
-                    scheduleLength: "3m",
-                    viewableBy: "ONLY_ME",
-                    timeCommitment: "1h",
-                    cost: "0.0",
-                    costFrequencyMetric: "MONTH",
-                    editable: false,
-                    serverErrors:"",
-                    data: "",
-                    category:"UNCATEGORIZED"
-                }
-            );
-
-        };
-
-        handleImageChange = (callbackData) => {
-        this.setState({
-            image: callbackData.image
-        })
-    };
-
-
-        getForm = () => {
-
-
-            if (this.state.id) {
-                var buttonText = "Save"
-
-            } else {
-                var buttonText = "Create"
-            }
-
-
-            if (this.state.image) {
-                var imageUrl = this.state.image
-
-
-            } else {
-                var imageUrl = "goalItem.svg"
-            }
-
-
-            var descriptionEditor = this.getDescriptionEditor();
-
-           if (this.props.storeRoot != undefined ) {
-                if (this.props.storeRoot.gui != undefined) {
-                    var forMobile = this.props.storeRoot.gui.forMobile
-                    }
-                }
-
-
-
-            if ((this.props.isListNode) || (forMobile)) {
-             var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column";
-
-           } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "four wide column"
-        }
-          return (
-              <div className="ui page container">
-
-                  <div>{this.props.programHeaderErrors}</div>
-                  <div className="ui row">&nbsp;</div>
-
-
-                      <div className="ui three column grid">
-
-                          <div className="ui row">
-                              <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
-
-<div className={mediumColumnWidth}>
-
-
-<ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                         label="Select an image that will help motivate you." defaultImage={imageUrl}/></div></Measure></div>
-
-
-                          <div className="ui row">
-                              <div className={wideColumnWidth}>
-
-                                  <ValidatedInput
-                                      type="text"
-                                      name="title"
-                                      label="Title"
-                                      id="id_title"
-                                      placeholder="Program's title"
-                                      value={this.state.title}
-                                      initialValue={this.state.title}
-                                      validators='"!isEmpty(str)"'
-                                      onChange={this.validate}
-                                      stateCallback={this.handleTitleChange}
-                                      serverErrors={this.getServerErrors("title")}
-
-                                  />
- </div>
-                              </div>
-
-
-                          {descriptionEditor}
-
-
-                          <div className="ui row">
-                              <div className={smallColumnWidth}>
-                                  <div className="field"><label htmlFor="id_lengthOfSchedule">Length of
-                                      Schedule:</label>
-
-                                      <Select value={this.state.scheduleLength}
-                                              onChange={this.handleScheduleLengthChange} name="scheduleLength"
-                                              options={programScheduleLengths}   clearable={false}/>
-                                  </div>
-                              </div>
-
-                              <div className={smallColumnWidth}>
-                                  <div className="field">
-
-                                      <label className="tooltip" htmlFor="id_startDate">Start Date:<i
-                                          className="info circle icon"></i>
-                                          <span className="tooltiptext">A start date for your program makes scheduling its steps easier. Your users can choose whatever start date they would like.</span>
-                                      </label>
-
-                                      <DatePicker selected={this.state.startDate}
-                                                  onChange={this.handleStartDateChange}/>
-                                  </div>
-                              </div>
-                          </div>
-                          <div className="ui row">
-                              <div className={smallColumnWidth}>
-                                  <KSSelect value={this.state.timeCommitment}
-                                            valueChange={this.handleTimeCommitmentChange}
-                                            label="Time Commitment:"
-                                            isClearable={false}
-                                            name="timeCommitment"
-                                            options={timeCommitmentOptions}
-                                            />
-                                  </div>
-                              </div>
-
-
-                          <div className="ui row">
-                              <div className={smallColumnWidth}>
-                                  <div className="field">
-                                      <label htmlFor="id_startDate">Cost (in US dollars):</label>
-
-                                      <CurrencyInput value={this.state.cost} onChange={this.handleCostChange}/>
-                                  </div>
-                              </div>
-
-                              <div className={smallColumnWidth}>
-                                  <div className="field">
-
-                                      <label htmlFor="id_costFrequencyMetric">Frequency:</label>
-                                      <Select value={this.state.costFrequencyMetric}
-                                              onChange={this.handleCostFrequencyMetricChange} name="costFrequencyMetric"
-                                              options={costFrequencyMetricOptions} clearable={false}/>
-
-
-                                  </div>
-                              </div>
-
-                              </div>
-
-                          <div className="ui row">
-                              <div className={mediumColumnWidth}>
-                                  <div className='field'>
-                                      <label>Who should be able to see this?:</label>
-
-                                      <Select value={this.state.viewableBy} onChange={this.handleViewableByChange}
-                                              name="viewableBy" options={viewableByOptions} clearable={false}/>
-
-
-                                  </div>
-                              </div>
-                          </div>
-
-                          <div className="ui row">
-                              <div className={mediumColumnWidth}>
-                                  <KSSelect value={this.state.category}
-                                            valueChange={this.handleCategoryChange}
-                                            label="Category:"
-                                            isClearable={false}
-                                            name="programCategory"
-                                            options={programCategoryOptions}
-                                            />
-                                  </div>
-                              </div>
-
-
-
-                  </div>
-                                    <VisualizationsList programId={this.state.id} />
-
-
-                      <div className="ui three column stackable grid">
-                          <div className="column">&nbsp;</div>
-                          <div className="column">
-                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
-                          </div>
-                          <div className="column">
-                              <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
-                          </div>
-                      </div>
-
-              </div>
-          )
-
-    };
-
-
-
-
-
-    render() {
-
-    var theForm = this.getForm();
-
-            return(
-                <div >
-                    <form className="ui form" onSubmit={this.handleSubmit}>
-                        {theForm}
-                    </form>
-                </div>
-
-            )
-        }
-
-
-
-}
-
-export class SimpleProgramForm extends ProgramForm {
-    constructor(props) {
-        super(props);
-        autobind(this);
-        this.state = {
-           files:[],
-            image: "",
-            title: "",
-            description: "",
-            startDate:moment().format("MMM DD, YYYY"),
-            scheduleLength:"3m",
-            viewableBy: "ONLY_ME",
-            timeCommitment: "1h",
-            cost:"0.0",
-            costFrequencyMetric: "MONTH",
-            editable:false,
-            data:"",
-        }
-    }
-
-    findLabel (theValue, theArray) {
-        for (var i=0; theArray.length; i++ ) {
-            if (theArray[i].value == theValue) {
-                return theArray[i].label
-            }
-        }
-    }
-
-
-
-    getForm = () => {
-
-        var imageUrl = s3BaseUrl + this.state.image;
-        var startDate = moment(this.state.startDate).format("MMM DD, YYYY");
-        return (
-            <div className="ui page container">
-                <div className="ui grid">
-                                        <div className="sixteen wide column">
-                                                                    <div className="ui row">
-
-
-                        <img className="listNodeImage" src={imageUrl}/></div>
-                        <div className="ui row">
-                            <div className="header">
-                                <h1>{this.state.title}</h1>
-                            </div>
-
-
-                        </div>
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_description">Description</label>
-                                <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.description}}/>
-                            </div>
-
-
-                        </div>
-
-
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_startDate">Start Date:</label>
-                                <div>{this.state.startDate}</div>
-                            </div>
-
-
-                        </div>
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_scheduleLength">Schedule Length</label>
-                                <div>{this.findLabel(this.state.scheduleLength, programScheduleLengths)}</div>
-                            </div>
-
-
-                        </div>
-                        <div className="ui row">&nbsp;</div>
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_timeCommitment">Time Commitment</label>
-                                <div>{this.findLabel(this.state.timeCommitment, timeCommitmentOptions)}</div>
-                            </div>
-
-
-                        </div>
-                        <div className="ui row">&nbsp;</div>
-
-                        <div className="ui row">
-                            <div className="field">
-                                <label htmlFor="id_cost">Cost</label>
-                                <div>${this.state.cost} {this.findLabel(this.state.costFrequencyMetric, costFrequencyMetricOptions)}</div>
-                            </div>
-
-
-                        </div>
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
-
-        )};
-
-    render() {
-    var theForm = this.getForm();
-
-        if (this.state.editable) {
-            return(
-                <div >
-                    <form className="ui form" onSubmit={this.handleSubmit}>
-                        {theForm}
-                    </form>
-                </div>
-
-            )
-        }
-
-        else {
-            return (
-                <div >
-                    <div className="ui form disabledForm">
-                        {theForm}
-                    </div>
-                </div>
-)
-        }
-
-    }
-
-
-}
 
 export class ProgramList extends React.Component {
     constructor(props) {
@@ -2839,7 +2245,7 @@ export class ProgramBasicView extends React.Component {
                                                 <Link to={authorLink} >
                                             <UserLink
                                                             fullName={this.state.data.author_fullName}
-                                                            profilePhoto={this.state.data.author_profilePhoto} /></Link>
+                                                            profilePhoto={this.state.data.author_image} /></Link>
                                         </div>
 
 
@@ -3076,4 +2482,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, SimpleProgramForm, ProgramForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};

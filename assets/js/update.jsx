@@ -317,18 +317,22 @@ export class UpdateModalForm extends React.Component {
 
                 })
             }
-            if (this.props.storeRoot.programs != undefined) {
+             if (this.props.storeRoot.programs != undefined) {
+                 if (this.props.storeRoot.programs.updates != undefined) {
 
 
-                var theProgramUpdates = []
-                theProgramUpdates = this.props.storeRoot.programs[this.props.programId].updates.slice()
+                     var theProgramUpdates = []
+                     theProgramUpdates = this.props.storeRoot.programs[this.props.programId].updates.slice()
 
-                theProgramUpdates.unshift({id: "CREATE_NEW", name: "Create New Update", default:false})
+                     theProgramUpdates.unshift({id: "CREATE_NEW", name: "Create New Update", default: false})
 
-                this.setState({
-                    programUpdates: theProgramUpdates
-                }, () => {this.createNonDefaultProgramUpdates()})
-            }
+                     this.setState({
+                         programUpdates: theProgramUpdates
+                     }, () => {
+                         this.createNonDefaultProgramUpdates()
+                     })
+                 }
+             }
 
 
         }
@@ -371,15 +375,23 @@ export class UpdateModalForm extends React.Component {
                 })
             }
                                 }
-                                if (nextProps.storeRoot.programs != undefined ) {
-                        var theProgramUpdates = []
-                theProgramUpdates = nextProps.storeRoot.programs[this.props.programId].updates.slice()
-                theProgramUpdates.unshift({id: "CREATE_NEW", name: "Create New Update", default:false})
+                                if (this.props.storeRoot.programs != undefined) {
+                                    if (this.props.storeRoot.programs.updates != undefined) {
+                                        var theProgramUpdates = []
+                                        theProgramUpdates = nextProps.storeRoot.programs[this.props.programId].updates.slice()
+                                        theProgramUpdates.unshift({
+                                            id: "CREATE_NEW",
+                                            name: "Create New Update",
+                                            default: false
+                                        })
 
-                this.setState({
-                    programUpdates: theProgramUpdates
-                }, () => {this.createNonDefaultProgramUpdates()})
-                    }
+                                        this.setState({
+                                            programUpdates: theProgramUpdates
+                                        }, () => {
+                                            this.createNonDefaultProgramUpdates()
+                                        })
+                                    }
+                                }
         }
 
 

@@ -439,8 +439,8 @@ export class Menubar extends React.Component {
                         className="large sidebar icon" style={{margin: 0}}/></div>
 
                     <div className="ui simple dropdown item">
-                        { this.props.storeRoot.user.profilePhoto ? <div className="ui extratiny circular image"><img
-                            src={s3ImageUrl + this.props.storeRoot.user.profilePhoto}/></div> :
+                        { this.props.storeRoot.user.image ? <div className="ui extratiny circular image"><img
+                            src={this.props.storeRoot.user.image}/></div> :
                             <img src="/static/images/avatar-placeholder.png"/>}
                         {/*<div className="username">{this.props.storeRoot.user.username}</div>*/}
 

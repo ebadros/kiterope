@@ -265,7 +265,7 @@ export class ClippedImageOverlayedText extends React.Component {
 
 }
 
-export class ClippedImage extends React.Component {
+export class ClippedImage2 extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -384,6 +384,124 @@ export class ClippedImage extends React.Component {
 
      }
 }
+
+
+export class ClippedImage extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            isImageLoaded:false,
+
+
+        }
+    }
+
+    onImgLoad({target:img}) {
+        this.setState({
+            imageHeight:img.height,
+            imageWidth:img.width,
+            isImageLoaded:true,
+        } );
+    }
+     render () {
+         var isCircular = "";
+         var isCircular = "";
+
+
+         if (this.props.item == 'plan') {
+             var width = '100%';
+
+
+             var height = 'auto';
+             var containerHeight = 9 / 16 * width;
+             var classDescriptor = "reverseSegmentMargin";
+             var position = "relative"
+
+         } else if (this.props.item =='goal') {
+             var width = '100%';
+             var height = width;
+             var containerHeight = height;
+             var classDescriptor = "";
+             var position = "absolute"
+
+         } else if (this.props.item =='profile') {
+             var width = 'calc(100% - 40)';
+             var left = 20;
+             var height = 'auto'
+             //var height = width;
+             var containerHeight = width;
+             var classDescriptor = "center aligned";
+             var isCircular = "ui circular image";
+             var position = "relative"
+         }
+         var heightString = containerHeight + "px !important";
+
+         var containerStyle = {
+             height: containerHeight,
+
+         };
+
+         var minWidthString = width + "px !important";
+         var minHeightString = containerHeight + "px !important";
+         //var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)";
+
+         if (this.state.imageHeight) {
+             if (this.state.imageHeight >= this.state.imageWidth) {
+                 var myStyle = {
+                     position: position,
+                     width: width,
+                     height: "auto",
+                     left:left,
+                     display: this.state.isImageLoaded
+
+                 }
+
+             } else {
+
+
+                 if (this.props.item=='goal') {
+
+                      var myStyle = {
+                         position: position,
+                         height: containerHeight,
+
+                          width: "auto",
+                                               display: this.state.isImageLoaded
+
+
+
+                     }
+
+                 }
+                 else {
+                     var myStyle = {
+                         width: width,
+                         position: position,
+
+                         left:left,
+
+
+                         height: containerHeight,
+                                              display: this.state.isImageLoaded
+
+
+                     }
+                 }
+             }
+         }
+
+            return (
+                    <div className={classDescriptor} style={containerStyle}>
+                        <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad}
+                             style={myStyle} />
+                    </div>
+            )
+
+
+     }
+}
+
 
 export class ChoiceModalButton extends React.Component {
     constructor(props) {

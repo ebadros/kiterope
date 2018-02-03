@@ -318,9 +318,13 @@ class Notification(models.Model):
 
 
 class CroppableImage(models.Model):
+    title = models.CharField(max_length=200, default="", blank=False, null=True,)
     originalUncompressedImage = models.CharField(max_length=200, null=True, blank=True)
     image = models.CharField(max_length=200, null=True, blank=True)
     cropperCropboxData = JSONField(null=True, blank=True, default = "")
+
+    def __str__(self):
+        return "%s" % (self.title)
 
 
 
@@ -346,6 +350,8 @@ class Goal(models.Model):
     user = models.ForeignKey(User)
     wasAchieved = models.BooleanField(default=False)
     metric = models.CharField(max_length=100, blank=True, null=True)
+    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="215")
+
 
 
     #plans = models.ManyToManyField("Plan", blank=True, related_name='plans')
@@ -386,7 +392,7 @@ class Program(models.Model):
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
     isActive = models.BooleanField(blank=True, default=True)
-    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="217")
 
 
 
@@ -434,7 +440,7 @@ class Program(models.Model):
         return "%s" % self.author.profile.get_fullName()
 
     def get_author_profilePhoto(self):
-        return "%s" % self.author.profile.profilePhoto
+        return "%s" % self.author.profile.image
 
 
 class Step(models.Model):
@@ -1275,11 +1281,13 @@ class Profile(models.Model):
     firstName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     lastName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     zipCode = models.CharField(max_length=10, blank=True, null=True)
-    profilePhoto = models.CharField(max_length=200, null=True, blank=True, default="images/user.svg")
+    image = models.CharField(max_length=200, null=True, blank=True, default="images/user.svg")
     notificationChannel = models.OneToOneField('KChannel', null=True, blank=True)
     expoPushToken = models.CharField(max_length=100, blank=True, null=True)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
     utcMidnight = models.CharField(max_length=5, blank=True, null=True, default='00:00')
+    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+
 
 
 
@@ -1304,8 +1312,8 @@ class Profile(models.Model):
 
 
 
-    def get_profilePhoto(self):
-        return self.profilePhoto
+    def get_image(self):
+        return self.image
 
 
 

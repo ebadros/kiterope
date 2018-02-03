@@ -380,7 +380,7 @@ export class StepOccurrenceItem extends React.Component {
                      className="column">
 
                     <div className="ui segment noBottomMargin noTopMargin">
-                        <div onClick={this.toggleDetail}><ClippedImage item="plan" src={s3ImageUrl + this.state.image}/>
+                        <div onClick={this.toggleDetail}><ClippedImage item="plan" src={this.state.image}/>
                         </div>
 
                         <div className="stepOccurrenceTitle"

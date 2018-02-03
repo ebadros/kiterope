@@ -220,8 +220,8 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             My Contacts
                         </a>
 
-                                { this.props.user ?
-                                    <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.user.profileId}`)}  >
+                                { this.props.storeRoot.user ?
+                                    <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.storeRoot.user.profileId}/`)}  >
                                         <i className="large user icon"/>
                                         My Profile
                                     </a> : <div></div>}

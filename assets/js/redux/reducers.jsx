@@ -30,6 +30,7 @@ export const rootReducer = (state = {}, action) => {
     switch (action.type) {
 
         case REHYDRATE:
+            console.log("redhydraing")
             var rootReducerPayload = action.payload.rootReducer
             if (rootReducerPayload) {
                 return Object.assign({}, state, rootReducerPayload)
@@ -46,7 +47,12 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'SET_PROGRAM_MODAL_DATA':
+            console.log("set program modal data")
             return Object.assign({}, state, {programModalData: action.programModalData});
+            break;
+
+        case 'SET_PROFILE_MODAL_DATA':
+            return Object.assign({}, state, {profileModalData: action.profileModalData});
             break;
 
         case 'SET_VISUALIZATION_MODAL_DATA':
@@ -155,6 +161,13 @@ export const rootReducer = (state = {}, action) => {
             var thePrograms = Object.assign({},state.programs);
             thePrograms[action.programId].steps[action.step.id] = action.step;
             return Object.assign({}, state, {programs: thePrograms});
+            break;
+
+        case 'UPDATE_PROFILE':
+
+            var theProfile = Object.assign({},state.profile);
+            theProfile = action.profile
+            return Object.assign({}, state, {profile: theProfile});
             break;
 
         case 'UPDATE_STEP_OCCURRENCE':

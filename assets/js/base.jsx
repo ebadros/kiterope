@@ -20,7 +20,7 @@ import { VisualizationItemMenu, VisualizationBasicView } from './visualization'
 
 
 import { PlanForm, PlanBasicView, SimplePlanForm } from './plan'
-import { ProgramForm, ProgramBasicView, SimpleProgramForm, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionForm } from './program'
+import { ProgramBasicView, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionForm } from './program'
 
 import { StepModalForm, StepBasicView, StepDetailView, StepItemMenu } from './step'
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -1149,38 +1149,46 @@ export class NewImageUploader extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({
-            croppableImage: this.props.croppableImage,
-            image: this.props.croppableImage.image,
-            originalUncompressedImage: this.props.croppableImage.originalUncompressedImage,
+        if (this.props.croppableImage != undefined) {
+            this.setState({
+                croppableImage: this.props.croppableImage,
+                image: this.props.croppableImage.image,
+                originalUncompressedImage: this.props.croppableImage.originalUncompressedImage,
 
-            cropperCropboxData: this.props.croppableImage.cropperCropboxData,
-            dimensions:this.props.dimensions,
+                cropperCropboxData: this.props.croppableImage.cropperCropboxData,
 
-        }, () => {
-                this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+            }, () => {
+                if (this.props.croppableImage.cropperCropboxData != undefined) {
+                    this.refs.cropper.setCropBoxData(this.state.croppableImage.cropperCropboxData)
+                }
 
             })
+        }
     }
 
     componentWillReceiveProps (nextProps) {
-        if (this.state.croppableImage != nextProps.croppableImage) {
-            this.setState({
-                croppableImage: nextProps.croppableImage,
-                image: nextProps.croppableImage.image,
-                originalUncompressedImage: nextProps.croppableImage.originalUncompressedImage,
+         if (nextProps.croppableImage != undefined) {
+             if (this.state.croppableImage != nextProps.croppableImage) {
+                 this.setState({
+                     croppableImage: nextProps.croppableImage,
+                     image: nextProps.croppableImage.image,
+                     originalUncompressedImage: nextProps.croppableImage.originalUncompressedImage,
 
-                cropperCropboxData: nextProps.croppableImage.cropperCropboxData,
-
-
-            },() => {
-                this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+                     cropperCropboxData: nextProps.croppableImage.cropperCropboxData,
 
 
-            })
+                 }, () => {
+                                     if (nextProps.croppableImage.cropperCropboxData != undefined) {
+
+                                         this.refs.cropper.setCropBoxData(this.state.croppableImage.cropperCropboxData)
+                                     }
 
 
-        }
+                 })
+
+
+             }
+         }
 
 
 
@@ -1219,21 +1227,29 @@ export class NewImageUploader extends React.Component {
 
     crop(){
 
+        console.log("cropbox data")
+        console.log(this.state.cropperCropboxData)
+
         var theCurrentCropboxData = this.refs.cropper.getCropBoxData()
-        console.log(theCurrentCropboxData)
         let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
-        if (theCurrentCropboxData.left != this.state.cropperCropboxData.left
-            || theCurrentCropboxData.right != this.state.cropperCropboxData.right
-        || theCurrentCropboxData.width != this.state.cropperCropboxData.width
-        || theCurrentCropboxData.height != this.state.cropperCropboxData.height) {
-            this.setState({
-                saved: "Save"
-            })
-        }else {
+        if (this.state.cropperCropboxData != undefined ) {
+            if (theCurrentCropboxData.left != this.state.cropperCropboxData.left
+                || theCurrentCropboxData.right != this.state.cropperCropboxData.right
+                || theCurrentCropboxData.width != this.state.cropperCropboxData.width
+                || theCurrentCropboxData.height != this.state.cropperCropboxData.height) {
+                this.setState({
+                    saved: "Save"
+                })
+            } else {
                 this.setState({
                     saved: "Saved"
                 })
             }
+        } else {
+            this.setState({
+                    saved: "Saved"
+                })
+        }
 
 
 
@@ -1306,7 +1322,9 @@ var theFilename = theFilenameURLSplit.pop() || theFilenameURLSplit.pop()
       this.setState({originalFilename: theFilename})
       this.setState({editMode:true})
       this.refs.cropper.crop()
-              this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+      if(this.state.cropperCropboxData == undefined) {
+          this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+      }
 
 
 
@@ -1338,13 +1356,10 @@ xhr.onload = function( e ) {
           scope.readFileAsDataURL(blob)
 
 
-    //scope.setState({originalUncompressedImage: imageUrl})
-    //var img = document.querySelector( "#photo" );
-    //img.src = imageUrl;
+
 };
 
 xhr.send();
-//this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
 
 
 
@@ -1362,8 +1377,7 @@ xhr.send();
       var theCropboxData = this.state.cropperCropboxData
 
 
-console.log("side stuff")
-          console.log( theCropboxData)
+
 
       var theData
 
@@ -1383,54 +1397,41 @@ console.log("side stuff")
       if (this.state.croppableImagePostingData.image != "" && this.state.croppableImagePostingData.originalUncompressedImage != "" && this.state.croppableImagePostingData.cropperCropboxData != undefined && this.state.croppableImagePostingData.cropperCropboxData != "") {
           var theUrl = "/api/croppableImages/";
           var theStringData = JSON.stringify(theData)
-          console.log("stringData")
-          console.log(theStringData)
+
 
 
           $.ajax({
-                 url: theUrl,
-                 dataType: 'json',
-                 type: 'POST',
-                 data: theStringData,
+              url: theUrl,
+              dataType: 'json',
+              type: 'POST',
+              data: theStringData,
               contentType: 'application/json',
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
+              headers: {
+                  'Authorization': 'Token ' + localStorage.token
 
-                 },
-                 success: function (data) {
-                     this.props.imageReturned(data)
-                     this.setState({editMode:false,
-                     saved: "Saved"})
-
-
-                 }.bind(this),
-                 error: function (xhr, status, err) {
-
-                     console.error(theUrl, status, err.toString());
-                     var serverErrors = xhr.responseJSON;
-                     this.setState({
-                         serverErrors: serverErrors,
-                     })
-
-                 }.bind(this)
-             })
-          /*var urlForDatabase = fileUrl.replace(s3BaseUrl, "");
-        this.setState({
-            image:fileUrl,
-            fileUrl:fileUrl,
-        });
+              },
+              success: function (data) {
+                  this.props.imageReturned(data)
+                  this.setState({
+                      editMode: false,
+                      saved: "Saved"
+                  })
 
 
+              }.bind(this),
+              error: function (xhr, status, err) {
 
-            this.setState({image: urlForDatabase});
-        this.props.imageReturned({
-            image:urlForDatabase
-        })*/
+                  console.error(theUrl, status, err.toString());
+                  var serverErrors = xhr.responseJSON;
+                  this.setState({
+                      serverErrors: serverErrors,
+                  })
+
+              }.bind(this)
+          })
+
+
       }
-
-
-
-
 
 
     }
@@ -1446,10 +1447,13 @@ console.log("side stuff")
 
     }
     handleCropperReady() {
-        console.log("cropper is ready")
 
+        if(this.state.cropperCropboxData != "") {
+            console.log("inside cropper ready")
+            console.log(this.state.cropperCropboxData)
 
-        this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+            this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+        }
     }
 
 
@@ -1463,9 +1467,7 @@ console.log("side stuff")
             var theImage = this.props.defaultImage
         }
         //var theFilename = theImage.replace("uploads/", "");
-        if (this.state.dimensions) {
-            var {width, height} = this.state.dimensions
-        }
+
 
         if (this.props.forMobile) {
              var wideColumnWidth = "sixteen wide column";
@@ -1512,12 +1514,17 @@ return(
                             viewMode={2}
                             ref='cropper'
                             src={this.state.originalUncompressedImage}
-                            background={false}
+                            background={true}
                             style={{width: '225px', height: '225px', float: 'left', marginBottom: '5px'}}
                             aspectRatio={16 / 9}
+                            minContainerWidth={225}
+                            minContainerHeight={225}
+
                             guides={false}
                             scaleX={.5}
                             scaleY={.5}
+                            autoCrop={true}
+                            autoCropArea={1.0}
                             crop={this.crop.bind(this)}/>
                         <div className="ui large fluid grey button" style={selectImageStyle}>Replace Image<input style={{
                             cursor: 'pointer',
@@ -2278,6 +2285,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              modalShouldClose:false,
              userPlanOccurrenceId:"",
 
+
          }
      }
 
@@ -2501,7 +2509,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
         };
 
 
-
+/*
     getEditView = () => {
         return(
                         <div ref="ref_form">
@@ -2515,7 +2523,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                             </div>
         )
     };
-
+*/
     getDetailView = () => {
 
         if (this.state.data != null) {
@@ -2609,7 +2617,7 @@ hideComponent = () => {
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
-        var editView = this.getEditView();
+        //var editView = this.getEditView();
 
 
         if (this.state.data) {
@@ -2655,13 +2663,7 @@ hideComponent = () => {
                     <div>{basicView}</div>
                     {detailView}
 
-                    <div className="sixteen wide row">
 
-                        <div>
-
-                            {editView}
-                        </div>
-                    </div>
 
                 </div>{subscribeButton}
 
@@ -2993,12 +2995,50 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
              data:"",
              currentView:"Basic",
              serverErrors:"",
+             editable: false,
+
          }
      }
 
      callDeleteReducer() {
         store.dispatch(deleteContact(this.props.contact))
     }
+
+    componentDidMount = () => {
+
+        //$(this.refs["ref_form"]).hide();
+        $(this.refs["ref_detail"]).hide();
+
+        if (this.props.currentView != undefined) {
+            this.setState({
+                data: this.props.data,
+                currentView: this.props.currentView,
+
+            })
+        }
+        else {
+            this.setState({
+                data: this.props.data,
+                currentView: "Basic",
+                serverErrors: this.props.serverErrors
+
+            })
+
+        }
+
+        this.showHideUIElements(this.props.currentView)
+
+    };
+
+    switchToEditView = () => {
+
+        this.setState({
+            modalIsOpen:true,
+        }, () => {store.dispatch(setProfileModalData(this.state))})
+
+
+
+    };
 
      removeContact = () => {
         var theUrl = "/api/contacts/" + this.props.contact + "/";
@@ -3069,8 +3109,10 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
              });
          }
 
-     componentWillReceiveProps = (nextProps) => {
-        if (this.state.data != nextProps.data) {
+
+
+    handleComponentWillReceivePropsSpecificActions = (nextProps) => {
+       if (this.state.data != nextProps.data) {
             this.setState({
                 data:nextProps.data,
             })
@@ -3090,9 +3132,9 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                     user: nextProps.storeRoot.user
                 })
             }
-        }
-
-
+        }if (this.state.userPlanOccurrenceId != nextProps.userPlanOccurrenceId) {
+          this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
+      }
 
     };
 
@@ -3162,12 +3204,17 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         } else {
             var theLabel = "Profile"
         }
+
+        var thePermissions = false;
+        if (this.state.data) {
+            thePermissions = this.state.data.permissions
+        }
         return(
         <ItemControlBar myRef="ref_itemControlBar"
                         label={theLabel}
                         click={this.handleClick}
                         currentView={this.state.currentView}
-                        editable={this.state.editable}
+                        editable={thePermissions}
                         showCloseButton={this.props.showCloseButton} />
         )
     };
@@ -3182,7 +3229,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         )
     };
 
-    getEditView = () => {
+    /*getEditView = () => {
         return(
                         <div ref="ref_form">
 
@@ -3194,7 +3241,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
         serverErrors={this.state.serverErrors} />
                             </div>
         )
-    };
+    };*/
 
     getDetailView = () => {
 
@@ -3229,7 +3276,6 @@ hideComponent = () => {
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
-        var editView = this.getEditView();
 
         if (this.props.storeRoot.user) {
         return (
@@ -3242,13 +3288,7 @@ hideComponent = () => {
                     <div>{basicView}</div>
                     {detailView}
 
-                    <div className="sixteen wide row">
 
-                        <div>
-
-                            {editView}
-                        </div>
-                    </div>
 
                 </div>{ this.props.storeRoot.user.id != this.state.data.user ? <div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>:null}
 
@@ -3265,13 +3305,7 @@ hideComponent = () => {
                     <div>{basicView}</div>
                     {detailView}
 
-                    <div className="sixteen wide row">
 
-                        <div>
-
-                            {editView}
-                        </div>
-                    </div>
 
                 </div><div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>
 
@@ -4105,7 +4139,7 @@ export class ItemControlBar extends React.Component {
         var buttonConfiguration;
 
         if (this.state.editable) {
-            if (this.state.currentView == "Basic") {
+            if (this.state.currentView == "Basic" || this.state.currentView == "Edit") {
                 buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             } else if (this.state.currentView == "UpdateBasic" ) {
@@ -4115,7 +4149,7 @@ export class ItemControlBar extends React.Component {
                 buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             }
         } else {
-            if (this.state.currentView == "Basic") {
+            if (this.state.currentView == "Basic" || this.state.currentView == "Edit") {
                 buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             } else if (this.state.currentView == "UpdateBasic" ) {
                 buttonConfiguration = <MenuControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>

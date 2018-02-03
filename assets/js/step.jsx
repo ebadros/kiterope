@@ -36,7 +36,7 @@ import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList, UpdateModalForm } from './update'
 
 
-import { TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultStepCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
@@ -802,9 +802,8 @@ export class StepModalForm extends React.Component {
         this.state = {
            files:[],
             id:"",
-            image:"uploads/stepDefaultImage.svg",
-            croppableImage: {image: s3BaseUrl + "uploads/stepDefaultImage.svg", originalUncompressedImage: s3BaseUrl + "uploads/stepDefaultImage.svg", cropperImageData:"", cropperCropBoxData:"" },
-            title: "",
+            image:defaultStepCroppableImage.image,
+            croppableImage: defaultStepCroppableImage,
             description:" ",
             type:"COMPLETION",
             frequency:"ONCE",
@@ -833,13 +832,13 @@ export class StepModalForm extends React.Component {
 
 
 
-    handleFinishedUpload (value) {
+    /*handleFinishedUpload (value) {
             var fullUrl = value.signedUrl;
             var urlForDatabase = fullUrl.split("?")[0];
             urlForDatabase = urlForDatabase.replace(s3BaseUrl, "");
             this.setState({image: urlForDatabase});
 
-    }
+    }*/
 
     showAndHideFrequencyUIElements (frequencyValue) {
         if (frequencyValue == "WEEKLY") {
@@ -983,13 +982,18 @@ export class StepModalForm extends React.Component {
                 })
             }
 
+            if (data.croppableImageData != undefined) {
+                this.setState({
+                    croppableImage: data.croppableImageData
+                })
+            }
+
             this.setState({
                 id: data.id,
 
                 image: data.image,
 
 
-                croppableImage: data.croppableImageData,
                 title: data.title,
                 description: description,
                 type: type,
@@ -1311,8 +1315,8 @@ export class StepModalForm extends React.Component {
                     description: "",
                     type: "COMPLETION",
                     frequency: "",
-                    image: "uploads/stepDefaultImage.svg",
-                croppableImage:"",
+                    image: defaultStepCroppableImage.image,
+                croppableImage:defaultStepCroppableImage,
                     day01: false,
                     day02: false,
                     day03: false,
@@ -1442,16 +1446,15 @@ export class StepModalForm extends React.Component {
 
                       <div className="ui grid">
                           <div className="ui row">
-                              <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
 
 <div className={wideColumnWidth}>
 
 
 <NewImageUploader imageReturned={this.handleImageChange}
-                  defaultImage={s3BaseUrl + "uploads/stepDefaultImage.svg"}
-                  forMobile={forMobile} dimensions={this.state.dimensions}
+                  defaultImage={defaultStepCroppableImage.image}
+                  forMobile={forMobile}
                   label="Select an image that will help motivate you."
-                  croppableImage={this.state.croppableImage} /></div></Measure></div>
+                  croppableImage={this.state.croppableImage} /></div></div>
                           <div className="ui row">
                             <div className={mediumColumnWidth}>
                                               <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
@@ -1830,7 +1833,8 @@ export class StepModalForm extends React.Component {
         }
 
             return(
-                <div ><Modal
+                <div>
+                    <Modal
                     isOpen={this.state.modalIsOpen}
                     onAfterOpen={this.afterOpenModal}
                     onRequestClose={this.closeModal}
