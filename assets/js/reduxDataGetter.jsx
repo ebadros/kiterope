@@ -707,7 +707,7 @@ updateWindowDimensions() {
 
     render() {
         if (!this.state.rehydrated) {
-            return (<div>Loading...</div>)
+            return (null)
 
         } else {
             return (<div></div>)
