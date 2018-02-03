@@ -398,6 +398,7 @@ export class ClippedImage extends React.Component {
     }
 
     onImgLoad({target:img}) {
+        console.log("on image loaded")
         this.setState({
             imageHeight:img.height,
             imageWidth:img.width,
@@ -446,6 +447,24 @@ export class ClippedImage extends React.Component {
          var minHeightString = containerHeight + "px !important";
          //var rectString = "rect(0px," + width + "px," + containerHeight + "px, 0px)";
 
+         var isVisible: "hidden"
+         if (this.state.isImageLoaded) {
+             isVisible = "block";
+         }
+
+         var myStyle = {
+                         width: width,
+                         position: position,
+                         left:left,
+                         height: containerHeight,
+                         minWidth:width,
+                         minHeight:containerHeight,
+
+                         display: isVisible
+
+
+                     }
+                     /*
          if (this.state.imageHeight) {
              if (this.state.imageHeight >= this.state.imageWidth) {
                  var myStyle = {
@@ -453,7 +472,7 @@ export class ClippedImage extends React.Component {
                      width: width,
                      height: "auto",
                      left:left,
-                     display: this.state.isImageLoaded
+                     display: isVisible
 
                  }
 
@@ -465,9 +484,12 @@ export class ClippedImage extends React.Component {
                       var myStyle = {
                          position: position,
                          height: containerHeight,
+                          minHeight:containerHeight,
 
                           width: "auto",
-                                               display: this.state.isImageLoaded
+                          minWidth:containerHeight,
+
+                          display: isVisible
 
 
 
@@ -478,25 +500,29 @@ export class ClippedImage extends React.Component {
                      var myStyle = {
                          width: width,
                          position: position,
-
                          left:left,
-
-
                          height: containerHeight,
-                                              display: this.state.isImageLoaded
+                         minWidth:width,
+                         minHeight:containerHeight,
+
+                         display: isVisible
 
 
                      }
                  }
-             }
-         }
 
-            return (
-                    <div className={classDescriptor} style={containerStyle}>
-                        <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad}
-                             style={myStyle} />
-                    </div>
-            )
+             }
+         }*/
+
+                    return (
+                        <div className={classDescriptor} style={containerStyle}>
+                            <img className={`clippedImage ${isCircular}`} src={this.props.src} onLoad={this.onImgLoad.bind(this)}
+                                 style={myStyle}/>
+                        </div>
+                    )
+
+
+
 
 
      }
