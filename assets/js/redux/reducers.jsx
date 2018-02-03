@@ -39,6 +39,8 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'SET_DATA_LOADED':
+                            console.log(action.dataSet)
+
             switch(action.dataSet) {
                 case "userData":
                     return Object.assign({}, state, {userDataLoaded: true});
@@ -162,8 +164,10 @@ export const rootReducer = (state = {}, action) => {
 
 
         case 'SET_PROGRAMS':
+            console.log("set programs")
 
             var theNewPrograms = action.programs
+            if (state.programs != undefined) {
             if (Object.keys(state.programs).length > 0 ) {
                 var theExistingPrograms = Object.assign({}, state.programs)
 
@@ -183,7 +187,7 @@ export const rootReducer = (state = {}, action) => {
                 }
                 return Object.assign({}, state, {programs: theExistingPrograms});
 
-            } else {
+            }} else {
                 return Object.assign({}, state, {programs: action.programs});
 
             }

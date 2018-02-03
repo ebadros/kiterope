@@ -8,7 +8,7 @@ import { Provider, connect, dispatch } from 'react-redux'
 
 const mapStateToProps = (state, ownProps) => {
 
-  if (!state) {
+  if (state.rootReducer == undefined) {
     return {
       storeRoot: {
         userDataLoaded:false,

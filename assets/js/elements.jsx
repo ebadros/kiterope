@@ -398,7 +398,6 @@ export class ClippedImage extends React.Component {
     }
 
     onImgLoad({target:img}) {
-        console.log("on image loaded")
         this.setState({
             imageHeight:img.height,
             imageWidth:img.width,

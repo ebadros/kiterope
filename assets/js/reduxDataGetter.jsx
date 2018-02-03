@@ -338,6 +338,7 @@ updateWindowDimensions() {
 
 
     loadCoachSpecificData() {
+        console.log("coach specific data")
 
         this.loadProgramData()
         this.loadUpdateData()
@@ -432,8 +433,10 @@ updateWindowDimensions() {
     }
 
     loadProgramData() {
+        console.log("load program data " + this.props.storeRoot.programDataLoaded)
                     if (!this.props.storeRoot.programDataLoaded) {
 
+        console.log(" program data loaded")
 
 
                         var theUrl = "/api/programs/";
@@ -445,10 +448,11 @@ updateWindowDimensions() {
                                 'Authorization': 'Token ' + localStorage.token
                             },
                             success: function (data) {
+                                                                store.dispatch(setPrograms(data))
+
                 store.dispatch(setDataLoaded('programData'))
 
 
-                                store.dispatch(setPrograms(data))
 
                             }.bind(this),
                             error: function (xhr, status, err) {
