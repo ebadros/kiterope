@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setPlans,  setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -147,6 +147,8 @@ export default class ReduxDataGetter extends React.Component {
 
     componentDidMount = () => {
 
+
+
         store.dispatch(setMessageWindowVisibility(false));
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
@@ -154,34 +156,30 @@ export default class ReduxDataGetter extends React.Component {
 
         persistStore(store, {
             blacklist: [
+                'rehydrated',
                 'routing',
                 'gui',
-                'userDataLoaded',
-                'stepDataLoaded',
-                'programDataLoaded',
-                'planDataLoaded',
-                'goalDataLoaded',
-                'updateOccurrenceDataLoaded',
-                'visualizationDataLoaded',
-                'stepOccurrenceDataLoaded',
-                'updateDataLoaded',
-                'profileDataLoaded',
-                'settingsDataLoaded',
-                'contactDataLoaded'
+                'smartGoalFormData',
 
 
             ]
         }, () => {
-            this.setState({rehydrated: true}, () => {
-                this.getAllData()
-            })
+            store.dispatch(setRehydrated(true))
+            //this.setState({rehydrated: true}, () => {
+              //  this.getAllData()
+            //})
+            this.getAllData()
 
 
         })
     };
     getAllData() {
-        var intervalID = setInterval(this.loadUserData, 2000);
-        this.setState({intervalID: intervalID})
+
+        store.dispatch(setSmartGoalFormData({modalIsOpen:false, data:{}}))
+
+            var intervalID = setInterval(this.loadUserData, 2000);
+            this.setState({intervalID: intervalID})
+
     }
 
 
@@ -204,8 +202,59 @@ updateWindowDimensions() {
     }
 }
 
+componentWillReceiveProps (nextProps) {
+    if (this.state.userDataLoaded != nextProps.storeRoot.userDataLoaded) {
+        this.setState({userDataLoaded: nextProps.storeRoot.userDataLoaded})
+    }
+
+    if (this.state.stepDataLoaded != nextProps.storeRoot.stepDataLoaded) {
+        this.setState({stepDataLoaded: nextProps.storeRoot.stepDataLoaded})
+    }
+
+    if (this.state.programDataLoaded != nextProps.storeRoot.programDataLoaded) {
+        this.setState({programDataLoaded: nextProps.storeRoot.programDataLoaded})
+    }
+
+    if (this.state.planDataLoaded != nextProps.storeRoot.planDataLoaded) {
+        this.setState({planDataLoaded: nextProps.storeRoot.planDataLoaded})
+    }
+
+    if (this.state.goalDataLoaded != nextProps.storeRoot.goalDataLoaded) {
+        this.setState({goalDataLoaded: nextProps.storeRoot.goalDataLoaded})
+    }
+
+    if (this.state.updateOccurrenceDataLoaded != nextProps.storeRoot.updateOccurrenceDataLoaded) {
+        this.setState({updateOccurrenceDataLoaded: nextProps.storeRoot.updateOccurrenceDataLoaded})
+    }
+
+    if (this.state.visualizationDataLoaded != nextProps.storeRoot.visualizationDataLoaded) {
+        this.setState({visualizationDataLoaded: nextProps.storeRoot.visualizationDataLoaded})
+    }
+
+    if (this.state.stepOccurrenceDataLoaded != nextProps.storeRoot.stepOccurrenceDataLoaded) {
+        this.setState({stepOccurrenceDataLoaded: nextProps.storeRoot.stepOccurrenceDataLoaded})
+    }
+
+    if (this.state.updateDataLoaded != nextProps.storeRoot.updateDataLoaded) {
+        this.setState({updateDataLoaded: nextProps.storeRoot.updateDataLoaded})
+    }
+
+    if (this.state.profileDataLoaded != nextProps.storeRoot.profileDataLoaded) {
+        this.setState({profileDataLoaded: nextProps.storeRoot.profileDataLoaded})
+    }
+
+    if (this.state.settingsDataLoaded != nextProps.storeRoot.settingsDataLoaded) {
+        this.setState({settingsDataLoaded: nextProps.storeRoot.settingsDataLoaded})
+    }
+
+    if (this.state.contactDataLoaded != nextProps.storeRoot.contactDataLoaded) {
+        this.setState({contactDataLoaded: nextProps.storeRoot.contactDataLoaded})
+    }
+}
+
     loadUserData() {
-        if (!this.props.storeRoot.userDataLoaded) {
+
+        if (this.state.userDataLoaded == false || this.props.storeRoot.userDataLoaded == undefined) {
             var theUrl = '/api/users/i/';
             $.ajax({
                 method: 'GET',
@@ -215,7 +264,7 @@ updateWindowDimensions() {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (userData) {
-                store.dispatch(setDataLoaded('userData'))
+                    store.dispatch(setDataLoaded('userData'))
                     store.dispatch(setCurrentUser(userData));
 
                     if (userData.id != null) {
@@ -227,6 +276,8 @@ updateWindowDimensions() {
 
 
                     }
+                                    clearInterval(this.state.intervalID);
+
 
                 }.bind(this),
                 error: function (xhr, status, err) {
@@ -239,7 +290,7 @@ updateWindowDimensions() {
 
 
     loadProfileData() {
-                if (!this.props.storeRoot.profileDataLoaded) {
+                if (!this.state.profileDataLoaded) {
 
                     var theUrl = '/api/profiles/me/';
                     $.ajax({
@@ -264,7 +315,7 @@ updateWindowDimensions() {
     }
 
     loadSettingsData() {
-                    if (!this.props.storeRoot.settingsDataLoaded) {
+                    if (!this.state.settingsDataLoaded) {
 
 
                         var theUrl = '/api/settings/me/';
@@ -316,6 +367,7 @@ updateWindowDimensions() {
     }
 
     loadUniversalData() {
+        console.log("universalData loaded")
         this.loadStepOccurrenceData();
 
         this.loadGoalData();
@@ -346,7 +398,7 @@ updateWindowDimensions() {
     }
 
     loadUpdateData() {
-                    if (!this.props.storeRoot.updateDataLoaded) {
+                    if (!this.state.updateDataLoaded) {
 
 
                         var theUrl = "/api/updates/";
@@ -375,7 +427,7 @@ updateWindowDimensions() {
     }
 
     loadGoalData() {
-                    if (!this.props.storeRoot.goalDataLoaded) {
+                    if (!this.state.goalDataLoaded) {
 
 
                         var theUrl = "/api/goals/";
@@ -404,7 +456,7 @@ updateWindowDimensions() {
     }
 
     loadPlanData() {
-                    if (!this.props.storeRoot.planDataLoaded) {
+                    if (!this.state.planDataLoaded) {
 
 
                         var theUrl = "/api/planOccurrences/";
@@ -500,7 +552,7 @@ updateWindowDimensions() {
 
 
     loadStepOccurrenceData() {
-        if (!this.props.storeRoot.stepOccurrenceDataLoaded && this.props.stepOccurrences == undefined) {
+        if (!this.state.stepOccurrenceDataLoaded ) {
 
 
             var periodRangeStart = new Date();
@@ -533,7 +585,7 @@ updateWindowDimensions() {
     }
 
     loadUpdateOccurrenceData() {
-        if (!this.props.storeRoot.updateOccurrenceDataLoaded) {
+        if (!this.state.updateOccurrenceDataLoaded) {
 
 
 
@@ -617,7 +669,7 @@ updateWindowDimensions() {
 
     loadContactData()
         {
-            if (!this.props.storeRoot.contactDataLoaded) {
+            if (!this.state.contactDataLoaded) {
 
 
             var theUrl = "/api/contacts/";
@@ -648,7 +700,7 @@ updateWindowDimensions() {
 
     loadVisualizationData()
         {
-            if (!this.props.storeRoot.visualizationDataLoaded) {
+            if (!this.state.visualizationDataLoaded) {
 
 
             var theUrl = "/api/visualizations/";
@@ -708,7 +760,7 @@ updateWindowDimensions() {
     }
 
     render() {
-        if (!this.state.rehydrated) {
+        if (!this.props.storeRoot.rehydrated) {
             return (null)
 
         } else {

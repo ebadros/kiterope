@@ -30,7 +30,6 @@ export const rootReducer = (state = {}, action) => {
     switch (action.type) {
 
         case REHYDRATE:
-            console.log("redhydraing")
             var rootReducerPayload = action.payload.rootReducer
             if (rootReducerPayload) {
                 return Object.assign({}, state, rootReducerPayload)
@@ -39,7 +38,6 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'SET_DATA_LOADED':
-                            console.log(action.dataSet)
 
             switch(action.dataSet) {
                 case "userData":
@@ -81,6 +79,17 @@ export const rootReducer = (state = {}, action) => {
 
             }
 
+        case 'SET_DISPLAY_ALERT':
+            return Object.assign({}, state, {displayAlert: action.alert});
+            break;
+
+        case 'SET_DATA_TO_BE_SUBMITTED_AFTER_LOGIN':
+            return Object.assign({}, state, {data: action.data});
+            break;
+
+        case 'SET_REHYDRATED':
+            return Object.assign({}, state, {rehydrated:action.rehydrated})
+
 
         case 'SET_UPDATE_MODAL_DATA':
             return Object.assign({}, state, {updateModalData: action.updateModalData});
@@ -93,9 +102,16 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {goalModalData: action.goalModalData});
             break;
 
+        case 'SET_SMART_GOAL_FORM_DATA':
+            return Object.assign({}, state, {smartGoalFormData: action.smartGoalFormData});
+            break;
+
         case 'SET_PROGRAM_MODAL_DATA':
             console.log("set program modal data")
             return Object.assign({}, state, {programModalData: action.programModalData});
+            break;
+        case 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA':
+            return Object.assign({}, state, {signInOrSignupModalData: action.signInOrSignupModalData});
             break;
 
         case 'SET_PROFILE_MODAL_DATA':
@@ -164,7 +180,6 @@ export const rootReducer = (state = {}, action) => {
 
 
         case 'SET_PROGRAMS':
-            console.log("set programs")
 
             var theNewPrograms = action.programs
             if (state.programs != undefined) {

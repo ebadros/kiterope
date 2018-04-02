@@ -537,4 +537,46 @@ export class SaveButton extends React.Component {
     }
 }
 
-module.exports = { SettingsPage, SettingsForm, SaveButton };
+// <StandardInteractiveButton color="purple" initial="Sign In" processing="Signing In" completed="Signed In" current={this.state.saved} clicked={this.handleSubmit}/>
+export class StandardInteractiveButton extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            current:this.props.initial
+
+
+        }
+    }
+
+    componentWillMount() {
+        this.setState({
+            current: this.props.initial
+        })
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.current != nextProps.current) {
+            this.setState({
+                current:nextProps.current
+            })
+        }
+
+
+    }
+
+    handleSubmit() {
+        this.props.clicked()
+    }
+
+    render() {
+        return (
+            <div className={`ui large fluid ${ this.state.current == this.props.completed ? "grey": this.props.color} ${ this.state.saved == this.props.processing ? "loading": null} button`} style={this.props.style} onClick={this.handleSubmit} >{this.state.current}</div>
+
+
+        )
+    }
+}
+
+
+module.exports = { SettingsPage, SettingsForm, SaveButton, StandardInteractiveButton };

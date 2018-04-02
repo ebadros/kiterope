@@ -16,19 +16,33 @@
                   <button class="ui button item" onClick="window.location.href='/#/account/login/'">Sign In</button>
               </div>
     </div>
-<div class="ui container">
+<div class="ui text container">
     <div class="ui spacer">&nbsp;</div>
     <div class="ui center aligned grid">
 {% if confirmation %}
 
 {% user_display confirmation.email_address.user as user_display %}
+        {% blocktrans with confirmation.email_address.email as email %}
+        <div class="ui stackable grid">
+                <div class="ui  row">
+                                <div class="ui column">
 
-<div class="largeType">{% blocktrans with confirmation.email_address.email as email %}Please confirm that <a href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user {{ user_display }}.{% endblocktrans %}</div>
+
+<!-- <div class="largeType">Your email address <a href="mailto:{{ email }}">{{ email }}</a> your email address.</div>-->
+                                    <div class="largeType">Your email address has been confirmed.Click <a href="/account/login/">here to login</a> {% endblocktrans %}</div>
+
+                    </div></div>
+                                <div class="ui row">
+                                                                    <div class="ui eight wide column">
+
+<!--
 
 <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
 {% csrf_token %}
-    <button class="ui button" type="submit">{% trans 'Confirm' %}</button>
-</form>
+    <button class="ui fluid purple button" type="submit">{% trans 'Confirm' %}</button>
+</form></div>
+            </div>
+            </div>-->
 
 {% else %}
 

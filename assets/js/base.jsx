@@ -12,7 +12,7 @@ import {SaveButton } from './settings'
 
 import autobind from 'class-autobind'
 import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
-import { GoalForm, GoalBasicView } from './goal'
+import { GoalBasicView } from './goal'
 import { UpdateItemMenu } from './update'
 
 
@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setSignInOrSignupModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -39,7 +39,7 @@ import Measure from 'react-measure'
 
 import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporter } from './accounts'
 
-import {  selectImageStyle, cropImageStyle, theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
+import {  selectImageStyle, defaultGoalCroppableImage, cropImageStyle, theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
 
 import { ContactItemMenu } from './contact'
 function printObject(o) {
@@ -1741,7 +1741,7 @@ export class ViewEditDeleteItem extends React.Component {
 
 
      componentDidMount = () => {
-         this.determineOptions();
+         //this.determineOptions();
 
          $(this.refs["ref_form"]).hide();
          $(this.refs["ref_detail"]).hide();
@@ -1868,33 +1868,8 @@ export class ViewEditDeleteItem extends React.Component {
 
 
 
-/*
-        var theURL = this.props.apiUrl + this.props.id +"/";
-      $.ajax({
-      url: theURL,
-      dataType: 'json',
-      cache: false,
-          type: 'OPTIONS',
-        headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-      success: function(data) {
 
-          if (data.actions) {
-              if (data.actions["PUT"]) {
-                  this.setState({
-                      editable: true
-                  });
-              }
-          }
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(theURL, status, err.toString());
-      }.bind(this),
-
-
-    });*/
-  };
+  }
 
     componentWillReceiveProps = (nextProps) => {
         if (this.state.data != nextProps.data) {
@@ -1931,11 +1906,14 @@ export class ViewEditDeleteItem extends React.Component {
     };
 
     handleClick = (callbackData) => {
+        console.log("handle click called")
+
+        console.log(callbackData)
         this.setState({
             currentView:callbackData
-        },this.showHideUIElements(callbackData))
+        }, () => this.showHideUIElements(callbackData))
 
-    };
+    }
 
     switchToDetailView = () => {
         $(this.refs["ref_form"]).hide();
@@ -1973,7 +1951,7 @@ export class ViewEditDeleteItem extends React.Component {
     getControlBar = () => {
         return(
         <ItemControlBar myRef="ref_itemControlBar"
-                        label="Goal" click={this.handleClick}
+                        label="Goal" click={() => this.handleClick}
                         currentView={this.state.currentView}
                         editable={this.state.editable}
                         showCloseButton={this.props.showCloseButton} />
@@ -1990,19 +1968,7 @@ export class ViewEditDeleteItem extends React.Component {
         )
     };
 
-    getEditView = () => {
-        return(
-                        <div ref="ref_form">
 
-        <GoalForm myRef="ref_form"
-                  editable={true}
-                  onGoalSubmit={this.handleGoalSubmit}
-                  cancelClicked={this.cancelClicked}
-                  data={this.state.data}
-                  serverErrors={this.state.serverErrors} />
-                            </div>
-        )
-    };
 
     getDetailView = () => {
          if (this.state.data != null) {
@@ -2112,9 +2078,11 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
         autobind(this);
          this.state = {
              id:"",
-             data:"",
+             data:{croppableImage: defaultGoalCroppableImage},
              currentView:"Basic",
-             serverErrors:""
+             serverErrors:"",
+             editable: false,
+
          }
      }
 
@@ -2124,10 +2092,11 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
   }
 
   switchToEditView = () => {
+      console.log("Switching to edit view")
 
         this.setState({
             modalIsOpen:true,
-        }, () => {store.dispatch(setStepModalData(this.state))})
+        }, () => {store.dispatch(setGoalModalData(this.state))})
         //$(this.refs["ref_basic"]).hide();
         //$(this.refs["ref_form"]).slideDown();
         //this.props.currentViewChanged("Edit")
@@ -2137,85 +2106,21 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
 
 
 
-/*
-     handleGoalSubmit (goal, callback) {
 
-         if (goal.id != "") {
-
-             $.ajax({
-                 url: "/api/goals/" + goal.id +"/",
-                 dataType: 'json',
-                 type: 'PUT',
-                 data: goal,
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
-                 },
-                 success: function (data) {
-                     store.dispatch(updateGoal(data));
-
-                     this.setState({
-
-                     currentView:"Basic",
-                         serverErrors:""
-                     });
-                     this.switchToBasicView();
-                     callback
-
-
-
-                 }.bind(this),
-                 error: function (xhr, status, err) {
-                     console.error(this.props.url, status, err.toString());
-                      var serverErrors = xhr.responseJSON;
-                     this.setState({
-                            serverErrors:serverErrors,
-                })
-
-                 }.bind(this)
-             });
-         }
-         else {
-             $.ajax({
-                 url: "/api/goals/",
-                 dataType: 'json',
-                 type: 'POST',
-                 data: goal,
-                 headers: {
-                     'Authorization': 'Token ' + localStorage.token
-                 },
-                 success: function (data) {
-                                          store.dispatch(addGoal(data));
-
-                     this.setState({
-                         data: data,
-                     currentView:"Basic",
-                         serverErrors:""
-                     });
-                     this.switchToBasicView();
-                     callback
-
-                 }.bind(this),
-                 error: function (xhr, status, err) {
-                     console.error(this.props.url, status, err.toString());
-                      var serverErrors = xhr.responseJSON;
-                     this.setState({
-                            serverErrors:serverErrors,
-                })
-
-                 }.bind(this)
-             });
-         }
-
-
-  }*/
 
     getControlBar = () => {
+
+        var thePermissions = false;
+        if (this.state.data) {
+            thePermissions = this.state.data.permissions
+        }
+
         return(
         <ItemControlBar myRef="ref_itemControlBar"
                         label="Goal"
                         click={this.handleClick}
                         currentView={this.state.currentView}
-                        editable={this.state.editable}
+                        editable={thePermissions}
                         showCloseButton={this.props.showCloseButton} />
         )
     };
@@ -2230,19 +2135,7 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
         )
     };
 
-    getEditView = () => {
-        return(
-                        <div ref="ref_form">
 
-        <GoalForm myRef="ref_form"
-                  editable={true}
-                  onGoalSubmit={this.handleGoalSubmit}
-                  cancelClicked={this.cancelClicked}
-                  data={this.state.data}
-                  serverErrors={this.state.serverErrors}/>
-                            </div>
-        )
-    };
 
     getDetailView = () => {
           if (this.state.data != null) {
@@ -2267,21 +2160,13 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
         //var editView = this.getEditView();
 
         return (
-            <div>
+            <div className="column" >
                 {controlBar}
 
 
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
-                    <div onClick={this.handleClick}>{basicView}</div>
+                    <div>{basicView}</div>
                     {detailView}
-
-                    <div className="sixteen wide row">
-
-                        <div>
-
-                            {editView}
-                        </div>
-                    </div>
 
                 </div>
 
@@ -2358,6 +2243,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     };
+
 
   duplicateItem = () => {
         var theUrl = this.props.apiUrl + this.props.id + "/duplicate/";
@@ -2508,12 +2394,17 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
             label = "Program"
         }
 
+        var thePermissions = false;
+        if (this.state.data) {
+            thePermissions = this.state.data.permissions
+        }
+
             return (
                 <ItemControlBar myRef="ref_itemControlBar"
                                 label={label}
                                 click={this.handleClick}
                                 currentView={this.state.currentView}
-                                editable={this.state.editable}
+                                editable={thePermissions}
                                 showCloseButton={this.props.showCloseButton}
                                 extendedBasic={this.props.extendedBasic}
                 />
@@ -2577,6 +2468,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
             }
          else {
+            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, data:{}}))
             this.setState({
                     signInOrSignUpModalFormIsOpen: true
                 })
@@ -2670,8 +2562,9 @@ hideComponent = () => {
 
         return (
 
-            <div ref={`ref_programItem_${this.props.id}`} className="ui column" >
-                <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
+
+
+            <div ref={`ref_programItem_${this.props.id}`} className="column" >
 
                                 {this.props.hideControlBar ? null : controlBar}
 
@@ -3177,7 +3070,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             default:
                 this.setState({
                     currentView: callbackData
-                }, this.showHideUIElements(callbackData));
+                }, () => this.showHideUIElements(callbackData));
                 break;
 
         }
@@ -3303,7 +3196,7 @@ hideComponent = () => {
         if (this.props.storeRoot.user) {
         return (
 
-            <div className="ui column" ref={`ref_profileItem_${this.props.id}`}  >
+            <div className="column" ref={`ref_profileItem_${this.props.id}`}  >
                 {controlBar}
 
 
@@ -3789,6 +3682,7 @@ export class ItemControlBarButton extends React.Component {
      }
 
      handleClick = (callbackData) => {
+         console.log("button clicked")
          this.props.click(callbackData)
      };
 
@@ -3894,6 +3788,7 @@ export class ControlBarButtonConfiguration extends React.Component {
     };
 
     handleEditClicked = () =>  {
+        console.log("clicked Edit")
 
         this.props.click("Edit")
     };
@@ -4080,38 +3975,41 @@ export class DetailEditDeleteControlBar extends ControlBarButtonConfiguration {
 
     }
 
+
+
     render() {
 
 
         if (this.props.showCloseButton) {
-             var closeButton =  <ItemControlBarButton myRef="ref_closeButton" label="Close"
-                                              click={this.handleCloseClicked}/>
+            var closeButton = <ItemControlBarButton myRef="ref_closeButton" label="Close"
+                                                    click={this.handleCloseClicked}/>
 
         }
-             var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked} style={{display:'block', width:'100%'}}/>;
+        var menuButton = <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
+                                               click={this.handleMenuClicked}
+                                               style={{display: 'block', width: '100%'}}/>;
 
 
         return (
 
-<div style={{display:'inline-flex',  width:'100%', justifyContent:'space-between' }}>
+            <div style={{display: 'inline-flex', width: '100%', justifyContent: 'space-between'}}>
 
                 <div>{this.props.label}</div>
 
                 <div >
 
 
-                    {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked}/>}
+                    {this.props.extendedBasic ? null :
+                        <ItemControlBarButton myRef="ref_editButton" label="Edit" click={this.handleEditClicked} />}
                     {this.props.extendedBasic ? null : <ItemControlBarButton myRef="ref_detailButton" label="Detail"
-                                              click={this.handleDetailClicked}/>}
+                                                                             click={this.handleDetailClicked}/>}
                     {this.props.extendedBasic ? null : menuButton}
                     {closeButton}
 
-</div>
-
-
-
                 </div>
+
+
+            </div>
 
 
         )
@@ -4153,6 +4051,7 @@ export class ItemControlBar extends React.Component {
     }
 
     handleClick = (callbackData) => {
+        console.log("inside handle Click ItemControlBar")
 
         this.setState({currentView:callbackData});
         this.props.click(callbackData)
@@ -4354,15 +4253,11 @@ module.exports = {
     GoalViewEditDeleteItem,
     PlanViewEditDeleteItem,
     Breadcrumb,
-
-
     ProgramViewEditDeleteItem,
     VideoUploader,
     AudioUploader,
     ItemControlBar,
-        VisualizationViewEditDeleteItem,
-
-
+    VisualizationViewEditDeleteItem,
     StepViewEditDeleteItem,
     ProfileViewEditDeleteItem,
     ImageUploader,

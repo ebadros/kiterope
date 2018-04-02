@@ -11,6 +11,7 @@ const mapStateToProps = (state, ownProps) => {
   if (state.rootReducer == undefined) {
     return {
       storeRoot: {
+        rehydrated:false,
         userDataLoaded:false,
         stepDataLoaded:false,
         programDataLoaded:false,
@@ -23,6 +24,8 @@ const mapStateToProps = (state, ownProps) => {
         profileDataLoaded:false,
         settingsDataLoaded:false,
         contactDataLoaded:false,
+        smartGoalFormData:{modalIsOpen:false, data:{}},
+        displayAlert:{showAlert:false, text:"", style:{}},
 
         //searchQuery: state.rootReducer.searchQuery,
         //searchHitsVisibility: state.rootReducer.searchHitsVisibility,
@@ -50,6 +53,7 @@ const mapStateToProps = (state, ownProps) => {
 
     return {
       storeRoot: {
+        rehydrated:state.rootReducer.rehydrated,
         user: state.rootReducer.user,
         profile: state.rootReducer.profile,
 
@@ -66,9 +70,12 @@ const mapStateToProps = (state, ownProps) => {
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
         profileModalData: state.rootReducer.profileModalData,
+        smartGoalFormData: state.rootReducer.smartGoalFormData,
         goalModalData:state.rootReducer.goalModalData,
         programModalData: state.rootReducer.programModalData,
         visualizationModalData: state.rootReducer.visualizationModalData,
+        signInOrSignupModalData: state.rootReducer.signInOrSignupModalData,
+
         userDataLoaded:state.rootReducer.userDataLoaded,
         stepDataLoaded:state.rootReducer.stepDataLoaded,
         programDataLoaded:state.rootReducer.userDataLoaded,
@@ -81,6 +88,7 @@ const mapStateToProps = (state, ownProps) => {
         profileDataLoaded:state.rootReducer.profileDataLoaded,
         settingsDataLoaded:state.rootReducer.settingsDataLoaded,
         contactDataLoaded:state.rootReducer.contactDataLoaded,
+        displayAlert:state.rootReducer.displayAlert,
 
 
 

@@ -19,18 +19,19 @@ import { ValidatedInput } from './app'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 
-import {ImageUploader,  Breadcrumb, NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction,  Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {GoalViewEditDeleteItem, ImageUploader,  Breadcrumb, NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction,  Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { PlanForm, PlanList } from './plan'
 import {ChoiceModal, IconLabelCombo} from './elements'
 import { Textfit } from 'react-textfit';
+import { ProgramModalForm } from './program'
 
-import { defaultGoalCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, userSharingOptions, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultGoalCroppableImage, defaultProgramCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, userSharingOptions, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 
 import Measure from 'react-measure'
 import {SaveButton} from './settings'
-
+import {GoalModalSMARTForm} from './goalSmartForm'
 
 import Pagination from "react-js-pagination";
 
@@ -39,7 +40,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { setCurrentUser, reduxLogout, setGoalModalData, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { setCurrentUser, reduxLogout, setProgramModalData, setGoalModalData, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 import PropTypes from 'prop-types';
 
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
@@ -137,7 +138,7 @@ export class GoalEntryPage extends React.Component {
                     <div className="ui row">
                                     <div className="centered hugeType">Create a goal that is SMART</div>
                                 </div>
-                        <GoalForm cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
+                        <GoalSMARTForm cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
                     </div>
                 </div>
                 </div>
@@ -154,7 +155,7 @@ export class GoalListPage extends React.Component {
             activePage:1,
             serverErrors:"",
             formIsOpen:false,
-            headerActionButtonLabel:"Add Goal"
+            headerActionButtonLabel:"Create Goal"
 
 
         }
@@ -291,7 +292,7 @@ handleCancelClicked = () => {
       $(this.refs['ref_whichGoalForm']).slideUp();
       this.setState({
           formIsOpen:false,
-          headerActionButtonLabel: "Add Goal"
+          headerActionButtonLabel: "Create Goal"
       })
 
   };
@@ -299,7 +300,7 @@ handleCancelClicked = () => {
 
   handleCloseForm = () => {
         this.setState({
-            headerActionButtonLabel: "Add Goal",
+            headerActionButtonLabel: "Create Goal",
             formIsOpen:false,
         }, () => $(this.refs['ref_whichGoalForm']).slideUp())
 
@@ -356,7 +357,7 @@ componentWillUnmount() {
             </div>
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Goals" color="blue" buttonLabel={this.state.headerActionButtonLabel} />
-       <GoalModalForm
+       <GoalModalSMARTForm
                               isListNode={false}
                               serverErrors={this.state.serverErrors}/>
 
@@ -499,8 +500,8 @@ export class GoalDetailPage extends React.Component {
 
    handleActionClick = () => {
        console.log("actionlcickadfj")
-    var theData ={modalIsOpen:true, data:{croppableImage:defaultGoalCroppableImage}}
-      store.dispatch(setGoalModalData(theData))
+    var theData = {modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage}}
+      store.dispatch(setProgramModalData(theData))
 
       //store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
 
@@ -523,12 +524,12 @@ export class GoalDetailPage extends React.Component {
         //$(this.refs['id_whichPlanForm']).slideToggle()
     };
 
-    handleOpenForm = () => {
-        this.setState({
-            openModal:false,
-            headerActionButtonLabel: "Close Form",
-            formIsOpen:true,
-        }, () => {$(this.refs['id_whichPlanForm']).slideDown()} )
+    handleOpenProgramModalForm = () => {
+
+        var theData = {modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage}}
+      store.dispatch(setProgramModalData(theData))
+        this.setState({openModal:false})
+
 
 
     };
@@ -563,7 +564,7 @@ export class GoalDetailPage extends React.Component {
               store.dispatch(push("/search"));
               break;
           case ("create"):
-              this.handleOpenForm();
+              this.handleOpenProgramModalForm();
               break;
           case ("kiterope"):
               store.dispatch(push("/goalEntry"));
@@ -578,7 +579,7 @@ export class GoalDetailPage extends React.Component {
             <div>
                 <ChoiceModal  closeModalClicked={this.handleCloseModalClicked} click={this.handleModalClick} modalIsOpen={this.state.openModal} header="Add a plan" description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you." buttons={[
                             {text:"Use an existing plan", action:"existing", color:"purple"},
-                            {text:"Create your own plan", action:"create", color:"" },
+                            {text:"Create your own program", action:"create", color:"" },
                             {text:"Have Kiterope build you a plan", action:"kiterope", color:""},
                         ]} />
                 <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
@@ -604,7 +605,7 @@ export class GoalDetailPage extends React.Component {
                                                 currentView="Basic"/>
                         <div>&nbsp;</div>
                         <div>&nbsp;</div>
-                <FormHeaderWithActionButton actionClick={this.handleActionClick} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
+                <FormHeaderWithActionButton actionClick={this.handleOpenModal} showingForm={this.state.formIsOpen} headerLabel="Plans" color="green" buttonLabel={this.state.headerActionButtonLabel} closeForm={this.handleCloseForm} openForm={this.handleOpenForm} openModal={this.handleOpenModal}/>
         <div ref="id_whichPlanForm">
             <PlanForm onSubmit={this.handlePlanSubmit} serverErrors={this.state.serverErrors} />
             </div>
@@ -616,9 +617,11 @@ export class GoalDetailPage extends React.Component {
 
                     </div>
                 </div>
-                    <GoalModalForm
+                    <GoalModalSMARTForm
                               isListNode={false}
                               serverErrors={this.state.serverErrors}/>
+                                                         <ProgramModalForm />
+
 
             </div>
                 </div>
@@ -817,446 +820,7 @@ export class GoalStepsHeader extends React.Component {
 
 
 
-@connect(mapStateToProps, mapDispatchToProps)
-export class GoalForm extends React.Component {
-    constructor(props) {
-        super(props);
-        autobind(this);
-        this.state = {
-            title: "",
-            deadline: moment(),
-            description: "",
-            metric: "",
-            why: "",
-            obstacles:"",
-            image: "",
-            viewableBy: "ONLY_ME",
-            user: null,
-            coaches: [],
-            updates: [],
-            wasAchieved: false,
-            plans: [],
-            editable:true,
-            data:"",
-            serverErrors: "",
-        }
-    }
 
-
-    componentDidMount () {
-        $(this.refs['id_whichGoalForm']).hide();
-        //this.checkIfUser()
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if (this.state.data != nextProps.data) {
-            if (nextProps.data != undefined) {
-            this.setState({
-                id: nextProps.data.id,
-                title: nextProps.data.title,
-                deadline: moment(nextProps.data.deadline, "YYYY-MM-DD"),
-                description: nextProps.data.description,
-                metric: nextProps.data.metric,
-                why: nextProps.data.why,
-                obstacles: nextProps.data.obstacles,
-                image: nextProps.data.image,
-                viewableBy: nextProps.data.viewableBy,
-                wasAchieved: nextProps.data.wasAchieved,
-            })
-            }
-
-
-
-        }
-        if (this.state.serverErrors != nextProps.serverErrors) {
-            this.setState({
-                serverErrors:nextProps.serverErrors
-            })
-        }
-
-    }
-
-
-
-    handleTitleChange(value) {
-        this.setState({title: value});
-    }
-
-    handleDeadlineChange = (value)  => {
-        this.setState({deadline: value});
-    };
-
-    handleDescriptionChange(e) {
-        this.setState({description: e});
-    }
-
-
-    handleMetricChange(value) {
-        this.setState({metric: value});
-    }
-
-    handleWhyChange(value) {
-        this.setState({why: value});
-    }
-    handleObstaclesChange(value) {
-        this.setState({obstacles: value});
-    }
-
-
-    handleImageChange = (callbackData) => {
-        this.setState({
-            image: callbackData.image
-        })
-    };
-    handleViewableByChange(e) {
-        this.setState({viewableBy: e.value});
-    }
-
-
-    checkIfUser() {
-        var theUrl =    '/api/users/i/';
-        $.ajax({
-            method: 'GET',
-            url: theUrl,
-            datatype: 'json',
-            headers: {
-                'Authorization': 'Token ' + localStorage.token
-            },
-            success: function(res) {
-                if (res.id != null) {
-                    this.setState({
-                        'user': res
-                    })
-                }
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(theUrl, status, err.toString());
-        }
-        })
-    }
-
-
-    handleCancelClicked() {
-        this.props.cancelClicked()
-    }
-
-    getServerErrors(fieldName) {
-        if (this.state.serverErrors == undefined) {
-            return ""
-        } else {
-            return this.state.serverErrors[fieldName]
-        }
-    }
-
-
-    handleSubmit(e) {
-
-
-            e.preventDefault();
-        this.checkIfUser();
-
-        if (this.state.user) {
-
-            var title = this.state.title;
-            var deadline = moment(this.state.deadline).format("YYYY-MM-DD");
-            var image = this.state.image;
-            var description = this.state.description;
-            var metric = this.state.metric;
-
-
-            var why = this.state.why;
-            var obstacles = this.state.obstacles;
-
-            var viewableBy = this.state.viewableBy;
-            var goalData = {
-                title: title,
-                deadline: deadline,
-                description: description,
-                metric: metric,
-                why: why,
-                obstacles: obstacles,
-                image: image,
-                viewableBy: viewableBy,
-                coaches: [],
-                updates: [],
-                wasAchieved: false,
-                plans: []
-            };
-
-            if (this.state.id != "") {
-                goalData.id = this.state.id
-            }
-            this.props.onGoalSubmit(goalData, this.resetForm);
-        }
-    else {
-            this.setState({
-                    signInOrSignUpModalFormIsOpen: true,
-                }
-            )
-
-            }
-        }
-
-        resetForm = () => {
-            this.setState({
-                title: "",
-                deadline: moment(),
-                description: "",
-                metric: "",
-                why: "",
-                obstacles:"",
-                image: null,
-                viewableBy: "ONLY_ME",
-                user: null,
-                coaches: [],
-                updates: [],
-                wasAchieved: false,
-                plans: []
-            });
-        };
-
-        getForm = () => {
-            if (this.state.id) {
-                var buttonText = "Save Goal"
-
-            } else {
-                var buttonText = "Create Goal"
-            }
-            var forMobile = false;
-
-            if (this.props.storeRoot != undefined ) {
-                if (this.props.storeRoot.gui != undefined) {
-                    var forMobile = this.props.storeRoot.gui.forMobile
-                    }
-                }
-
-
-
-            if ((this.props.isListNode) || (forMobile)) {
-             var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column";
-
-           } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "four wide column"
-        }
-
-
-
-
-            if (this.state.image) {
-                var imageUrl = this.state.image
-
-
-            } else {
-                var imageUrl = "goalItem.svg"
-            }
-        return (
-            <div className="ui page container footerAtBottom">
-                <div className="ui grid">
-                    <div className="ui row">
-                                                      <Measure onMeasure={(dimensions) => {this.setState({dimensions})}}>
-
-                        <div className={mediumColumnWidth}>
-
-                        <ImageUploader imageReturned={this.handleImageChange} dimensions={this.state.dimensions}
-                                       label="Select an image that will help motivate you." defaultImage={imageUrl}/>
-                    </div></Measure></div>
-
-                    <div className="ui row">
-                        <div className={mediumColumnWidth}>
-                            <ValidatedInput
-                                type="text"
-                                name="title"
-                                label="What is your goal? (Required)"
-                                id="id_title"
-                                placeholder="I will run a five minute mile, I will learn to speak Chinese fluently"
-                                value={this.state.title}
-                                initialValue={this.state.title}
-                                validators='"!isEmpty(str)"'
-                                onChange={this.validate}
-                                stateCallback={this.handleTitleChange}
-                                isDisabled={!this.state.editable}
-                                serverErrors={this.getServerErrors("title")}
-                            />
-
-                        </div>
-                    </div>
-                    <div className="ui row">
-                        <div className={mediumColumnWidth}>
-
-                            <ValidatedInput
-                                type="textarea"
-                                name="why"
-                                label="Why do you want to achieve this goal? What good will happen if you achieve it? What bad will happen if you don't achieve it? (Required)"
-                                id="id_why"
-                                placeholder="I want to make something of myself, I want to be around to see my daughter graduate from college."
-                                value={this.state.why}
-                                initialValue={this.state.why}
-                                validators='"!isEmpty(str)"'
-                                onChange={this.validate}
-                                stateCallback={this.handleWhyChange}
-                                rows={3}
-                                isDisabled={!this.state.editable}
-                                serverErrors={this.getServerErrors("why")}
-
-
-                            />
-                        </div>
-
-
-                    </div>
-                    <div className="ui row">
-                        <div className={mediumColumnWidth}>
-
-                            <ValidatedInput
-                                type="textarea"
-                                name="obstacles"
-                                label="What are some obstacles that could stand in your way? What obstacles do you envision encountering? (Required)"
-                                id="id_obstacles"
-                                placeholder="My family doesn't believe in me. I don't have the money"
-                                value={this.state.obstacles}
-                                initialValue={this.state.obstacles}
-                                validators='"!isEmpty(str)"'
-                                onChange={this.validate}
-                                stateCallback={this.handleObstaclesChange}
-                                rows={3}
-                                isDisabled={!this.state.editable}
-                                serverErrors={this.getServerErrors("obstacles")}
-
-
-                            />
-                        </div>
-
-
-                    </div>
-                    <div className="ui row">
-                        <div className={mediumColumnWidth}>
-
-                            <ValidatedInput
-                                type="textarea"
-                                name="description"
-                                label="Tell us a little more about this goal."
-                                id="id_description"
-                                placeholder=""
-                                value={this.state.description}
-                                initialValue={this.state.description}
-                                validators=''
-                                onChange={this.validate}
-                                stateCallback={this.handleDescriptionChange}
-                                rows={3}
-                                isDisabled={!this.state.editable}
-                                serverErrors={this.getServerErrors("description")}
-
-
-                            />
-                        </div>
-
-
-                    </div>
-
-                    <div className="ui row">
-
-
-                        <div className={mediumColumnWidth + ' field'}>
-
-                            <label htmlFor="id_deadline">What is your deadline for achieving this goal? (Required)</label>
-
-                            <DatePicker selected={this.state.deadline} onChange={this.handleDeadlineChange}/>
-
-                        </div>
-
-
-                    </div>
-
-
-
-
-                    <div className="ui row">
-                        <div className={mediumColumnWidth}>
-
-                            <ValidatedInput
-                                type="text"
-                                name="metric"
-                                label="How will you measure your progress? (Required)"
-                                id="id_title"
-                                placeholder="time per mile, judgments of third party observers"
-                                value={this.state.metric}
-                                initialValue={this.state.metric}
-                                validators='"!isEmpty(str)"'
-                                onChange={this.validate}
-                                stateCallback={this.handleMetricChange}
-                                isDisabled={!this.state.editable}
-                                serverErrors={this.getServerErrors("metric")}
-
-
-                            />
-                        </div>
-
-
-                    </div>
-                    <div className="ui  row">
-                        <div className={mediumColumnWidth + ' field'}>
-                    <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
-                    <Select value={this.state.viewableBy} clearable={false}
-                                              onChange={this.handleViewableByChange} name="viewingOptions"
-                                              options={userSharingOptions}/>
-                            </div>
-                        </div>
-
-
-
-
-
-    <div className="ui row">&nbsp;</div>
-                </div>
-
-                <div className="ui three column stackable grid">
-                    <div className="column">&nbsp;</div>
-                    <div className="column">
-                        <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
-                    </div>
-                    <div className="column">
-                        <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
-                    </div>
-                </div>
-            </div>
-
-        )};
-
-
-
-    render() {
-    var theForm = this.getForm();
-
-        if (this.state.editable) {
-            return(
-                <div >
-                    <form className="ui form" onSubmit={this.handleSubmit}>
-                        {theForm}
-                    </form>
-                </div>
-
-            )
-        }
-
-        else {
-            return (
-                <div >
-                    <div className="ui form disabledForm">
-                        {theForm}
-                    </div>
-                </div>
-)
-        }
-
-    }
-
-}
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class GoalModalForm extends React.Component {
@@ -1264,6 +828,7 @@ export class GoalModalForm extends React.Component {
         super(props);
         autobind(this);
         this.state = {
+            id:"",
             title: "",
             deadline: moment(),
             description: "",
@@ -1597,7 +1162,7 @@ export class GoalModalForm extends React.Component {
             <div className="ui page container form ">
                  <div>{this.props.goalHeaderErrors}</div>
                   <div className="ui row">&nbsp;</div>
-                                            <Header headerLabel={this.state.id != ""? "Edit Goal": "Create Goal"} />
+                                            <Header headerLabel={this.state.id != "" & this.state.id != undefined ? "Edit Goal" : "Create Goal"} />
 
                 <div className="ui grid">
                     <div className="ui row">
@@ -1782,7 +1347,7 @@ export class GoalModalForm extends React.Component {
 
         if (goal.id != "") {
 
-            var theUrl = "/api/goal/" + goal.id + "/";
+            var theUrl = "/api/goals/" + goal.id + "/";
             $.ajax({
                 url: theUrl,
                 dataType: 'json',
@@ -1816,7 +1381,7 @@ export class GoalModalForm extends React.Component {
         else {
 
             $.ajax({
-                url: "/api/goal/",
+                url: "/api/goals/",
                 dataType: 'json',
                 type: 'POST',
                 data: goal,
@@ -1887,7 +1452,8 @@ export class GoalModalForm extends React.Component {
 
 
 
-export class GoalSMARTForm extends React.Component {
+
+export class GoalSMARTForm2 extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -2157,7 +1723,7 @@ export class GoalSMARTForm extends React.Component {
                                                                                         <div className="ui row">&nbsp;</div>
 
                                             <div className="ui row">
-                                            <NewImageUploader imageReturned={this.handleImageChange} label="Select an image that will help motivate you." defaultImage={imageUrl} />
+                                            <ImageUploader imageReturned={this.handleImageChange} label="Select an image that will help motivate you." defaultImage={imageUrl} />
                                                 </div>
 
                                         </div>
@@ -2521,16 +2087,11 @@ export class GoalBasicView extends React.Component {
     render() {
         if (this.state.data) {
             var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY");
-            if (this.state.data.image != "") {
-                var theImage = this.state.data.image
-            } else {
-                var theImage = "uploads/goalItem.svg"
 
-            }
             return (
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui image" src={s3BaseUrl + theImage}></img>
+                        <img className="ui image" src={this.state.data.image}></img>
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">
@@ -2573,4 +2134,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalModalForm, GoalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView,  };
+module.exports = { GoalModalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView,  };

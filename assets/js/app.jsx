@@ -22,7 +22,7 @@ import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
 import ReduxDataGetter from './reduxDataGetter'
-
+import SplashGoalEntry from './splashGoalEntry'
 
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps} from './redux/containers2'
@@ -53,7 +53,8 @@ export class App extends React.Component {
     logoutHandler(){
         store.dispatch(reduxLogout());
         auth.logout();
-        store.dispatch(push('/account/login/'))
+
+        store.dispatch(push('/'))
 
     }
 
@@ -215,6 +216,10 @@ export class KSSelect extends React.Component {
         this.setState({
             value: this.props.value
         })
+
+        if (this.state.serverErrors != this.props.serverErrors) {
+            this.setState({serverErrors: this.props.serverErrors})
+        }
     }
 
 
@@ -229,6 +234,9 @@ export class KSSelect extends React.Component {
             this.setState({
                 value:nextProps.value
             })
+        }
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
         }
     }
 
@@ -583,10 +591,15 @@ export class TestPage extends React.Component {
         autobind(this);
 
         }
+
+        componentDidMount() {
+
+
+        }
     render() {
         return (
             <div>
-                <TestComponent />
+                <SplashGoalEntry />
 
 
             </div>

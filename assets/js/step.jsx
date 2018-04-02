@@ -1469,7 +1469,6 @@ export class StepModalForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleTitleChange}
-                                        serverErrors={this.getServerErrors("title")}
 
 
                                     />

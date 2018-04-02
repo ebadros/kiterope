@@ -26,7 +26,7 @@ import {BlogPage} from './blog'
 import {VisualizationsPage} from './visualization'
 
 
-import {GoalListPage, GoalForm, GoalEntryPage, GoalDetailPage} from './goal'
+import {GoalListPage, GoalEntryPage, GoalDetailPage} from './goal'
 import {PlanDetailPage} from './plan'
 import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
@@ -42,6 +42,7 @@ import {Router, Route, Link, hashHistory, browserHistory} from 'react-router'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 const history = syncHistoryWithStore(browserHistory, store);
 import ReduxDataGetter from './reduxDataGetter'
+import { setCurrentUser, setPlans,  setDisplayAlert, setSignInOrSignupModalData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 
 
 
@@ -89,12 +90,13 @@ ReactDOM.render((
 
                 <Route path="/goalEntry" component={ GoalEntryPage }/>
                 <Route path="/browse" component={BrowseProgramsPage} />
-                <Route path="/account/login" component={ LoginPage }/>
                 <Route path="/settings/" component={ SettingsPage }/>
                 <Route path="/visualizations/" component={ VisualizationsPage } />
 
 
-                <Route path="/joinKiterope" component={ JoinPage }/>
+                <Route path="/joinKiterope" component={ JoinPage } />
+                <Route path="/account/login"  component={LoginPage} />
+
                 <Route path="/account/password/reset" component={ PasswordResetPage }/>
                 <Route path="/account/password/reset/confirm/:uid/:token/" component={PasswordConfirmPage}/>
 

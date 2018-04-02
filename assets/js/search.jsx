@@ -1243,4 +1243,4 @@ function getCookie(name) {
 }
 
 
-module.exports = { SearchPage };
+module.exports = { SearchPage, SearchHitsGrid };

@@ -4,7 +4,7 @@ var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import {ImageUploader, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
-import {PlanHeader, StepList, ToggleButton, } from './step';
+import {PlanHeader, StepList, StepModalForm, ToggleButton, } from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
@@ -21,6 +21,7 @@ import CurrencyInput from 'react-currency-input';
 import { IconLabelCombo, ClippedImage } from './elements'
 import { Textfit } from 'react-textfit';
 import ShowMore from 'react-show-more';
+
 
 import { makeEditable,  } from './calendar'
 import { MessageWindowContainer } from './message'
@@ -543,7 +544,7 @@ export class PlanForm extends React.Component {
                 var buttonText = "Create"
             }
 
-            var imageUrl = s3ImageUrl + this.state.image;
+            var imageUrl = this.state.image;
 
 
                 var wideColumnWidth = "sixteen wide column";
@@ -872,7 +873,7 @@ export class PlanListNode extends React.Component {
     render () {
 
         if (this.props.plan.image) {
-            var theImage = <img className="clippedImage" src={s3ImageUrl + this.props.plan.image}/>
+            var theImage = <img className="clippedImage" src={this.props.plan.image}/>
 
         } else {
             var theImage = <img className="clippedImage" src='http://semantic-ui.com/images/avatar2/large/kristy.png' />
@@ -957,8 +958,8 @@ export class PlanBasicView extends React.Component {
         if (this.props.isListNode) {
 
             return (
-                <div onClick={this.goToDetail}>
-                    <ClippedImage item="plan" src={s3ImageUrl + this.state.data.image} />
+                <div>
+                    <ClippedImage item="plan" src={this.state.data.image} />
 
 
                 <div className="ui grid" >
@@ -1003,7 +1004,7 @@ export class PlanBasicView extends React.Component {
             return (
                 <div className="ui grid">
                     <div className="two wide column">
-                        <img className="ui image" src={s3ImageUrl + this.state.data.image}></img>
+                        <img className="ui image" src={this.state.data.image}></img>
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">

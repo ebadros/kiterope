@@ -22,8 +22,9 @@ import ReduxDataGetter from './reduxDataGetter'
 
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
+import {SaveButton, StandardInteractiveButton } from './settings'
 
-import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  setDisplayAlert, setSignInOrSignupModalData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -48,7 +49,7 @@ import 'react-select/dist/react-select.css';
 
 var UpdatesList = require('./update');
 
-import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, stepModalStyle, loginJoinModalStyleMobile, loginJoinModalStyle, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
 
 import { Provider, connect, dispatch } from 'react-redux'
@@ -117,7 +118,76 @@ function getCookie(name) {
 
 
 
+@connect(mapStateToProps, mapDispatchToProps)
+export class Alert extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            displayAlert: {},
+            display: false,
+            text:"",
+            defaultStyle:{
 
+            }
+
+
+
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.displayAlert != undefined) {
+                if (this.state.display != nextProps.storeRoot.displayAlert) {
+                    this.setState({displayAlert:nextProps.storeRoot.displayAlert})
+                    if (nextProps.storeRoot.displayAlert.showAlert) {
+                        setTimeout( () => {store.dispatch(setDisplayAlert({showAlert:false, text:"", style:{}}))}, 1000)
+                    }
+
+                }
+            }
+        }
+    }
+
+    render () {
+        var defaultStyle = {
+                display:'block',
+                backgroundColor:'#992EC1',
+                color:'white',
+            fontSize:'20px',
+            fontWeight:'bold',
+                width:'60vw',
+            textAlign:'center',
+            borderRadius:'4px',
+            height:'0px',
+            position: 'relative',
+            lineHeight:'40px',
+            opacity:'.95',
+            transition: 'opacity 1s',
+            pointerEvents:'none',
+        left: '-50%',
+
+        }
+        if (this.state.displayAlert.showAlert) {
+            var shouldDisplay = '.95'
+            var alertHeight = '80px'
+        } else {
+            var shouldDisplay = '0'
+            var alertheight = '0px'
+
+        }
+            return (
+                <div style={{opacity:shouldDisplay, height: alertHeight, position:'fixed', left:'50%', transition: 'opacity .5',
+top:'80px',zIndex:'100',
+}}>
+                    <div style={defaultStyle}>{this.state.displayAlert.text}</div>
+                </div>
+
+            )
+        }
+
+}
 
 
 
@@ -131,7 +201,7 @@ export class StandardSetOfComponents extends React.Component {
             user:"",
             modalIsOpen:false,
             form:"SignIn",
-            signInOrSignUpModalFormIsOpen:false,
+            //signInOrSignUpModalFormIsOpen:false,
 
 
         }
@@ -147,19 +217,24 @@ export class StandardSetOfComponents extends React.Component {
 
 
     componentWillReceiveProps (nextProps) {
-        if (this.state.signInOrSignUpModalFormIsOpen != nextProps.modalIsOpen) {
+        /*if (this.state.signInOrSignUpModalFormIsOpen != nextProps.modalIsOpen) {
             this.setState({
                 signInOrSignUpModalFormIsOpen: nextProps.modalIsOpen,
             })
-        }
+        }*/
+
+
+
     }
 
 
 
     handleModalClosed = () =>  {
         this.props.modalShouldClose();
+
+        store.dispatch(setSignInOrSignupModalData({modalIsOpen:false, form:"SignIn", data:{}}))
         this.setState({
-            signInOrSignUpModalFormIsOpen:false,
+            //signInOrSignUpModalFormIsOpen:false,
             refreshUser:true,
         }, this.noNeedToRefreshUser())
     };
@@ -192,14 +267,15 @@ export class StandardSetOfComponents extends React.Component {
         return (
 
             <div>
+                <Alert />
                 <ReduxDataGetter  />
 
                 {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
                 <MessageButton />*/}
 
+<SignInOrSignUpModalForm />
 
-            <SignInOrSignUpModalForm modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} modalShouldClose={this.handleModalClosed} />
-            <Menubar shouldRefresh={this.state.refreshUser} /></div>
+                <Menubar shouldRefresh={this.state.refreshUser} /></div>
         )
     }
 }
@@ -359,11 +435,14 @@ export class Menubar extends React.Component {
 
 
     loginHandler() {
-                      store.dispatch(push('/account/login/'))
+        store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
+                      //store.dispatch(push('/account/login/'))
     }
 
     joinKiteropeHandler() {
-        store.dispatch(push('/joinKiterope'))
+        store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"Join", data:{}}))
+
+        //store.dispatch(push('/joinKiterope'))
     }
 
     logoutHandler() {
@@ -372,7 +451,7 @@ export class Menubar extends React.Component {
 
 
         auth.logout();
-                        store.dispatch(push('/account/login/'))
+                        store.dispatch(push('/'))
 
 
 
@@ -457,7 +536,7 @@ export class Menubar extends React.Component {
 
         return (
 
-             <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0,}}>
+             <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0, maxHeight:68}}>
           <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}
@@ -545,10 +624,16 @@ export class SignInOrSignUpModalForm extends React.Component {
     });
   };
     componentWillReceiveProps(nextProps) {
-        if (this.state.modalIsOpen != nextProps.modalIsOpen) {
-            this.setState({
-                modalIsOpen:nextProps.modalIsOpen,
-            })
+
+        if (nextProps.storeRoot != undefined) {
+            if(nextProps.storeRoot.signInOrSignupModalData != undefined) {
+                if (this.state.modalIsOpen != nextProps.storeRoot.signInOrSignupModalData.modalIsOpen) {
+                    this.setState({
+                        modalIsOpen: nextProps.storeRoot.signInOrSignupModalData.modalIsOpen,
+                        form:nextProps.storeRoot.signInOrSignupModalData.form
+                    })
+                }
+            }
         }
     }
 
@@ -562,8 +647,7 @@ export class SignInOrSignUpModalForm extends React.Component {
     }
 
     closeModal = () => {
-        this.props.modalShouldClose();
-
+        store.dispatch(setSignInOrSignupModalData({modalIsOpen:false, form:"SignIn", data:{}}))
             this.setState({
                 modalIsOpen:false,
 
@@ -586,49 +670,36 @@ export class SignInOrSignUpModalForm extends React.Component {
 
   render() {
 
-      const padding = 90; // adjust this to your needs
-    let height = (this.state.contentHeight + padding);
-    let heightPx = height + 'px';
-    let heightOffset = height / 2;
-    let offsetPx = heightOffset + 'px';
 
-    const style = {
-        overlay : {
-
-    backgroundColor   : 'rgba(0, 0, 0, 0.75)'
-  },
-
-      content: {
-        border: '0',
-        borderRadius: '4px',
-        bottom: 'auto',
-        height: heightPx,  // set height
-        left: '30%',
-        padding: '2rem',
-        position: 'fixed',
-        right: 'auto',
-        top: '10%', // start from center
-        transform: 'translate(-50%,-' + offsetPx + ')', // adjust top "up" based on height
-        width: '40%',
-        maxWidth: '40rem'
-      }
-    };
       var theForm = "";
       if (this.state.form == "Join") {
           theForm = <ModalJoinForm selectedForm={this.handleFormChange}/>
       } else if (this.state.form == "SignIn") {
-          theForm = <ModalLoginForm selectedForm={this.handleFormChange} />
+          theForm = <ModalLoginForm selectedForm={this.handleFormChange}/>
       } else if (this.state.form == "ForgotPassword") {
-          theForm = <ModalPasswordResetForm selectedForm={this.handleFormChange} />
+          theForm = <ModalPasswordResetForm selectedForm={this.handleFormChange}/>
       } else if (this.state.form == "None") {
           this.closeModal()
       }
+      var forMobile;
+      if (this.props.storeRoot != undefined) {
+          if (this.props.storeRoot.gui != undefined) {
+              forMobile = this.props.storeRoot.gui.forMobile
+          }
+      }
+      if (forMobile) {
+          var modalStyle = loginJoinModalStyleMobile
+        } else {
+          var modalStyle = loginJoinModalStyle
+      }
+
+
       return(
           <Modal
                             isOpen={this.state.modalIsOpen}
                             onAfterOpen={this.afterOpenModal}
                             onRequestClose={this.closeModal}
-                            style={style} >
+                            style={modalStyle} >
 
       {theForm}
               </Modal>
@@ -641,14 +712,42 @@ export class SignInOrSignUpModalForm extends React.Component {
 
 
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class LoginPage extends React.Component {
     constructor(props) {
       super(props);
       autobind(this);
         this.state = {
+            rehydrated:false
 
         }
 
+  }
+
+  componentDidMount() {
+      this.setState({rehydrated: this.props.storeRoot.rehydrated})
+      if (this.props.storeRoot.rehydrated) {
+          if (this.props.storeRoot.user != undefined) {
+              store.dispatch(push("/"))
+          } else {
+              store.dispatch(setSignInOrSignupModalData({modalIsOpen: true, form: "SignIn", data: {}}))
+          }
+      }
+
+
+  }
+
+  componentWillReceiveProps (nextProps) {
+      if (this.state.rehydrated != nextProps.storeRoot.rehydrated) {
+          this.setState({rehydrated: nextProps.storeRoot.rehydrated})
+          if (nextProps.storeRoot.rehydrated) {
+              if (nextProps.storeRoot.user != undefined) {
+                  store.dispatch(push("/"))
+              } else {
+                  store.dispatch(setSignInOrSignupModalData({modalIsOpen: true, form: "SignIn", data: {}}))
+              }
+          }
+      }
   }
 
     handleError = (theError) => {
@@ -662,21 +761,8 @@ export class LoginPage extends React.Component {
   render() {
       return(
           <div>
-    <Menubar />
-          <div className="ui text container">
-              <div className="fullPageDiv">
-                  <div className="spacer">&nbsp;</div>
-                  <div className="spacer">&nbsp;</div>
-                  <div className="ui two column stackable grid">
-                      <LoginForm  />
-                      <div className="ui eight wide column">
-                          <div className="massiveType">
-                              10 minutes a day is better than 90 minutes a week
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              </div>
+    <StandardSetOfComponents />
+
 
 </div>
       )
@@ -731,6 +817,32 @@ export class JoinPage extends React.Component {
 
   }
 
+  componentDidMount() {
+      this.setState({rehydrated: this.props.storeRoot.rehydrated})
+      if (this.props.storeRoot.rehydrated) {
+          if (this.props.storeRoot.user != undefined) {
+              store.dispatch(push("/"))
+          } else {
+              store.dispatch(setSignInOrSignupModalData({modalIsOpen: true, form: "Join", data: {}}))
+          }
+      }
+
+
+  }
+
+  componentWillReceiveProps (nextProps) {
+      if (this.state.rehydrated != nextProps.storeRoot.rehydrated) {
+          this.setState({rehydrated: nextProps.storeRoot.rehydrated})
+          if (nextProps.storeRoot.rehydrated) {
+              if (nextProps.storeRoot.user != undefined) {
+                  store.dispatch(push("/"))
+              } else {
+                  store.dispatch(setSignInOrSignupModalData({modalIsOpen: true, form: "Join", data: {}}))
+              }
+          }
+      }
+  }
+
   componentDidMount = () => {
       $(this.refs['ref_joinForm']).hide()
 
@@ -743,7 +855,17 @@ export class JoinPage extends React.Component {
         }, () => {$(this.refs['ref_joinForm']).slideDown()})
     };
 
-  render() {
+    render() {
+      return(
+          <div>
+    <StandardSetOfComponents />
+
+
+</div>
+      )
+  }
+
+  /*render() {
 
 
       return(
@@ -769,7 +891,7 @@ export class JoinPage extends React.Component {
 
 </div>
       )
-  }
+  }*/
 }
 
 export class PasswordConfirmPage extends React.Component {
@@ -1073,8 +1195,10 @@ export class PasswordConfirmForm extends React.Component {
 
             complete: function (jqXHR, textStatus){
                 if (textStatus == "success"){
+                    store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
 
-                    store.dispatch(push("/account/login"))
+
+                    //store.dispatch(push("/account/login"))
                 }
             }.bind(this)
         });
@@ -1176,7 +1300,9 @@ export class PasswordResetForm extends React.Component {
     };
 
     handleCompleted() {
-        store.dispatch(push("/account/login/"))
+                            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
+
+        //store.dispatch(push("/account/login/"))
     }
 
     handleEmailChange = (value) => {
@@ -1265,7 +1391,7 @@ export class JoinForm extends React.Component {
           var last_name = this.state.last_name;
 
 
-          var theUrl = "rest-auth/registration/";
+          var theUrl = "/rest-auth/registration/";
           $.ajax({
               url: theUrl,
               dataType: 'json',
@@ -1317,6 +1443,9 @@ export class JoinForm extends React.Component {
           serverErrors:"",
           buttonLabel:"Joined"
       });
+
+      store.dispatch(setSignInOrSignupModalData({modalIsOpen:false, form:"SignIn", data:{}}))
+      store.dispatch(setDisplayAlert({showAlert:true, text:"Thank you for joining Kiterope", style:{backgroundColor:'purple', color:'white'}}))
       this.props.emailSent()
   };
 
@@ -1368,7 +1497,9 @@ export class JoinForm extends React.Component {
   };
 
   handleSignInClick = () => {
-      store.dispatch(push("/account/login/"))
+                          store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
+
+      //store.dispatch(push("/account/login/"))
   };
 
   getServerErrors(fieldName) {
@@ -1382,7 +1513,7 @@ export class JoinForm extends React.Component {
   render() {
 
       return (
-          <div className="ui eight wide segment column">
+          <div className="ui eight wide  column">
                           <div className="ui row">
                               <div className="header"><h1>Join Kiterope</h1></div>
                               </div>
@@ -1513,8 +1644,17 @@ export class ModalJoinForm extends JoinForm {
             first_name:"",
             last_name:"",
 
+            tos: false,
+            emailSent: true,
+            serverErrors: "",
+            tosErrors: [],
+            buttonLabel:"Join Kiterope"
+
+
         }
-  }
+
+        }
+
 
 
   handleSignInClick() {
@@ -1534,7 +1674,8 @@ export class ModalLoginForm extends React.Component {
             username: "",
             email:"",
             password: "",
-            serverErrors:""
+            serverErrors:"",
+            saved:"Sign In"
         }
   }
 
@@ -1557,8 +1698,7 @@ export class ModalLoginForm extends React.Component {
   }
 
   handleSubmit = (e) => {
-      console.log("handleSubmit");
-      e.preventDefault();
+      this.setState({saved:"Signing In"})
       var username = this.state.email;
       var pass = this.state.password;
 
@@ -1566,8 +1706,14 @@ export class ModalLoginForm extends React.Component {
         if (loggedIn) {
             this.actionAfterLogin()
         } else {
-            console.log("in here")
-        }
+            this.setState({
+                saved:"Sign In",
+              serverErrors: {
+                  email: [" "],
+              password1:["This email/password combination does not match any registered user."]
+
+
+          }})        }
 
 
       });
@@ -1604,7 +1750,74 @@ export class ModalLoginForm extends React.Component {
 
   };
 
+  handleGoalSubmit = (goal) => {
+
+        if (goal.id != "" && goal.id != undefined) {
+
+            var theUrl = "/api/goals/" + goal.id + "/";
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: goal,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                         saved: "Saved"
+                    });
+                    store.dispatch(updateGoal( data));
+
+
+
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+        else {
+
+            $.ajax({
+                url: "/api/goals/",
+                dataType: 'json',
+                type: 'POST',
+                data: goal,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    store.dispatch(addGoal( data));
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+
+
+    };
+
   actionAfterLogin = () => {
+      this.setState({saved:"Signed In"})
+      store.dispatch(setDisplayAlert({showAlert:true, text:"You've signed in.", style:{backgroundColor:'purple', color:'white'}}))
       var theUrl = '/api/users/i/';
       $.ajax({
             method: 'GET',
@@ -1618,6 +1831,7 @@ export class ModalLoginForm extends React.Component {
                 //this.props.setCurrentUser(res)
                 if (res.id !=null ) {
                 store.dispatch(setCurrentUser(res))
+
 
             }}.bind(this),
             error: function(xhr, status, err) {
@@ -1634,7 +1848,7 @@ export class ModalLoginForm extends React.Component {
 
   render() {
       return (
-          <div className="ui eight wide segment column">
+          <div className="ui eight wide column">
                           <div className="ui row">
                               <div className="header"><h1>Sign In</h1></div>
                               <div className="ui row">&nbsp;</div>
@@ -1679,7 +1893,9 @@ export class ModalLoginForm extends React.Component {
                                       <div className="float-right"><a style={{cursor:'pointer'}} onClick={this.handleForgotPasswordClick}>Forgot Password?</a>
                                       </div>
                                   </div>
-                                  <button className="ui fluid purple button" type="submit">Sign In</button>
+                                   <StandardInteractiveButton color="purple" initial="Sign In" processing="Signing In" completed="Signed In" current={this.state.saved} clicked={this.handleSubmit} />
+
+
                               </form>
                               <hr />
                                   <div className="ui row">&nbsp;</div>

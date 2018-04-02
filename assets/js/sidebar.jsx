@@ -45,18 +45,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     }
 
-    /*clickDocument (e) {
-        var component = ReactDOM.findDOMNode(this.refs.ref_sidebar);
-        if (e.target == component || $(component).has(e.target).length ) {
-            // Inside of the component.
-        } else {
-                //store.dispatch(showSidebar(false))
 
-
-            // Outside of the component.
-        }
-
-    }*/
 
     componentWillUnmount() {
         //$(document).unbind('click', this.clickDocument);
@@ -67,13 +56,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
         store.dispatch(showSidebar(false));
 
 
-        {/*this.props.sidebarVisibilityChange({
-            sidebarVisibility:false
 
-        })
-        this.setState({
-            visible:false,
-        }) */}
   };
 
   handleClose() {
@@ -86,9 +69,8 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
 
     componentDidMount () {
-        //$(this.refs["ref_sidebar"]).hide()
+
         if (this.props.storeRoot != undefined) {
-            //$(document).bind('click', this.clickDocument);
 
             if (this.props.storeRoot.gui != undefined) {
                 this.setState({visible: this.props.storeRoot.gui.isSidebarVisible})
@@ -134,7 +116,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
         store.dispatch(reduxLogout());
 
         auth.logout();
-                store.dispatch(push('/account/login/'))
+                            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
+
+                //store.dispatch(push('/account/login/'))
 
 
 
@@ -160,11 +144,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
     render() {
 
         if (this.state.visible) {
-                    //if ($(this.refs["ref_sidebar"]).is(":visible")) {
-                    //} else {
-                                        $(this.refs["ref_sidebar"]).show("slide");
 
-                    //}
+            $(this.refs["ref_sidebar"]).show("slide");
+
+
 
 
         } else {
@@ -182,21 +165,11 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
         }
 
-        if (this.state.user != undefined) {
-            if (this.state.user.isCoach) {
-                var viewSwitcher = <a className="item" onClick={this.switchView} >
-                    <i className="large street view icon" ></i>
-                    {this.state.view}
-                </a>
-
-            }
-        }
 
 
 
 
         if (this.state.user != undefined) {
-            if ((this.state.user.isCoach) && (this.state.view == "User View")) {
                 return (
                     <div ref="ref_sidebar"
                          className="ui right vertical inverted labeled visible icon large sidebar menu"
@@ -209,7 +182,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large home icon"></i>
                             Home
                         </a>
-                        {viewSwitcher}
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/goals/')}>
+                        <i className="large block layout icon"/>
+                        My Goals
+                    </a>
 
                         <a className="item" style={style} onClick={() => this.handleURLPush('/programs/')}  >
                             <i className="large cubes icon"/>
@@ -220,12 +196,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             My Contacts
                         </a>
 
-                                { this.props.storeRoot.user ?
                                     <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.storeRoot.user.profileId}/`)}  >
                                         <i className="large user icon"/>
                                         My Profile
-                                    </a> : <div></div>}
-
+                                    </a>
 
                         <a className="item"  style={style} onClick={() => this.handleURLPush('/search/')}>
                             <i className="large search icon"/>
@@ -250,57 +224,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </div>
                 )
             }
-            else return (
-                <div ref="ref_sidebar" className="ui right vertical inverted labeled visible icon large sidebar menu"
-                     style={style}>
-<a className="item"  style={style} onClick={this.handleClose}>
-                            <i className="large close icon"></i>
-                        </a>
-
-                    <a className="item"  style={style} onClick={() => this.handleURLPush('/')}>
-                        <i className="large home icon"></i>
-                        Home
-                    </a>
-                    {viewSwitcher}
-
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/goals/')}>
-                        <i className="large block layout icon"/>
-                        My Goals
-                    </a>
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/contacts/')}>
-                        <i className="large users icon"/>
-                        My Contacts
-                    </a>
-                    { this.props.user ? <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.user.profileId}`)} >
-                        <i className="large user icon"/>
-                        My Profile
-                    </a> : <div></div>}
-
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/search')}>
-                        <i className="large search icon"/>
-                        Search
-                    </a>
-
-
-                    {/*<a className="item" style={style} onClick={() => this.handleURLPush('/messages')}>
-                        <i className="large mail icon"/>
-                        Messages
-                    </a>*/}
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/settings/')}>
-                        <i className="large settings icon"/>
-                        Settings
-                    </a>
-                    <a className="item" style={style} onClick={() => this.handleURLPush('/blog')}>
-                            <i className="large heartbeat icon"/>
-                            Blog
-                        </a>
-
-
-                </div>
-
-            )
-
-        } else {
+             else {
             return <div></div>
         }
     }

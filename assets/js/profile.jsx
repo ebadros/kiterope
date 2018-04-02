@@ -1148,6 +1148,8 @@ componentWillReceiveProps(nextProps) {
               <div className="ui page container footerAtBottom form">
                   <div>{this.props.planHeaderErrors}</div>
                   <div className="ui row">&nbsp;</div>
+                  <Header headerLabel={this.state.id != "" & this.state.id != undefined ? "Edit Profile" : "Create Profile"} />
+
 
 
                       <div className="ui three column grid">

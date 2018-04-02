@@ -332,6 +332,9 @@ div.ui.segment.noTopMargin {
 
 
 }
+.ui.blue.button:hover {
+    background-color:#2199E8;
+}
 
 .plan {
     background-color: #e0e0e0
@@ -720,6 +723,73 @@ label.NLtextinput {
     width:100%;
 
 }
+
+.splashGoalEntryLabel {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #FFFFFF !important;
+    display:inline-block;
+    float:left;
+    padding:0 0 !important;
+    margin:0 0 !important;
+    font-size:2vw !important;
+    line-height:2vw;
+    text-align:right;
+    width:10vw;
+
+}
+
+.hide {
+    display:none;
+}
+
+.splashGoalEntryInput {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #2185d0 !important;
+
+
+
+    color: #2185d0;
+    display:inline-block;
+    float:left;
+    padding:0 0 !important;
+    margin:0 0 !important;
+    margin-left: .5vw !important;
+    font-size:2vw !important;
+    line-height:2vw;
+    width:calc(60% - 55px);
+    outline:none;
+    text-align:left;
+
+
+
+
+
+}
+
+.mobileSplashGoalEntryInput {
+    background:none !important;
+    border:none !important;
+    border-bottom: 1px dashed #2185d0 !important;
+
+    color: #2185d0;
+    display:inline-block;
+    float:left;
+    padding:0 0 !important;
+    margin:0 0 !important;
+    font-size:5vw !important;
+    line-height:5vw;
+    width:calc(100%);
+    outline:none;
+    text-align:center;
+
+
+
+
+
+}
+
 
 .middleOfScreen{
     position: absolute;

@@ -705,7 +705,7 @@ class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
 class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions','isActive','croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -727,6 +727,17 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     croppableImageData = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_permissions(self, obj):
+        # return obj.get_permissions()
+        # serializer = self.request.user
+        # if serializer == obj.program.author:
+
+        if self.context['request'].user == obj.author:
+            return True
+
 
 
     def get_image(self,obj):
@@ -815,7 +826,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive','croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive', 'permissions', 'croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -840,6 +851,17 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
 
     croppableImageData = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_permissions(self, obj):
+        # return obj.get_permissions()
+        # serializer = self.request.user
+        # if serializer == obj.program.author:
+        if self.context['request'].user == obj.author:
+            return True
+        else:
+            return False
 
 
     def get_image(self,obj):
@@ -1036,7 +1058,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'metric', 'why', 'image', 'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
+        fields =('id','title', 'deadline', 'description', 'coreValues','metric', 'isThisReasonable', 'goalInAlignmentWithCoreValues','why', 'image', 'permissions', 'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000, required=False)
@@ -1052,6 +1074,14 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
 
     croppableImageData = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_permissions(self,obj):
+        #return obj.get_permissions()
+        #serializer = self.request.user
+        #if serializer == obj.program.author:
+        if self.context['request'].user == obj.user:
+            return True
 
     def get_image(self, obj):
         return obj.croppableImage.image

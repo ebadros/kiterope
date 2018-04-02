@@ -341,8 +341,9 @@ class Interest(models.Model):
 class Goal(models.Model):
     title = models.CharField(max_length=200, default="", blank=False, null=True,)
     deadline = models.DateField(null=True, default=datetime.date.today, blank=False)
-    description = models.CharField(max_length=2000, null=True, blank=False)
-    obstacles = models.CharField(max_length=2000, null=True, blank=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    obstacles = models.CharField(max_length=2000, null=True, blank=True)
+    coreValues = models.CharField(max_length=2000, null=True, blank=True)
     why = models.CharField(max_length=2000, null=True, blank=True)
     image = models.CharField(max_length=200, null=True, blank=True)
     votes = models.IntegerField(null=True, blank=True)
@@ -351,7 +352,8 @@ class Goal(models.Model):
     wasAchieved = models.BooleanField(default=False)
     metric = models.CharField(max_length=100, blank=True, null=True)
     croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="215")
-
+    goalInAlignmentWithCoreValues = models.BooleanField(default=False)
+    isThisReasonable = models.BooleanField(default=False)
 
 
     #plans = models.ManyToManyField("Plan", blank=True, related_name='plans')

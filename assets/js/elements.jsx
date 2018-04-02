@@ -202,6 +202,7 @@ export class ClippedImageOverlayedText extends React.Component {
              var containerHeight = height;
              var classDescriptor = "";
              var position = "absolute";
+        var squareHeight = width + 44
 
 
          var heightString = containerHeight + "px !important";
@@ -221,7 +222,7 @@ export class ClippedImageOverlayedText extends React.Component {
                  var myStyle = {
                      position: position,
                      width: width,
-                     height: "auto",
+                     height: squareHeight,
                      clip: rectString,
                      background: 'black',
                      opacity: 0.6,

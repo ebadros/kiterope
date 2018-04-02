@@ -431,7 +431,9 @@ class GoalViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def create(self, request, *args, **kwargs):
-        sendMessage('+13107703042','You have tasks that you need to achieve today...check them out here: http://127.0.0.1.8000/' )
+        print(self.request.data)
+
+        #sendMessage('+13107703042','You have tasks that you need to achieve today...check them out here: http://127.0.0.1.8000/' )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -453,7 +455,7 @@ class GoalViewSet(viewsets.ModelViewSet):
         data = {i['id']: i for i in serializer.data}
         return Response(data)
 
-    def update(self, request, *args, **kwargs):
+    '''def update(self, request, *args, **kwargs):
         print(self.request.data)
         instance = self.get_object()
 
@@ -461,14 +463,14 @@ class GoalViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        return Response(serializer.data)
+        return Response(serializer.data)'''
 
     def post(self, request, *args, **kwargs):
+        print(self.request.data)
 
         self.create(request, *args, **kwargs)
 
 
-        print(self.request.errors)
         return self.list(request, *args, **kwargs)
 
     def get_serializer_context(self):
@@ -1140,10 +1142,9 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
 
 
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = AllProgramSerializer(queryset, many=True)
+        serializer = AllProgramSerializer(queryset, context={'request': request}, many=True)
 
         # This is the line that allows us to get at the object without iterating over an array
         data = {i['id']: i for i in serializer.data}
@@ -1166,7 +1167,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        return Response(serializer.data)
+        return Response(serializer.data, context={'request': request})
 
 
     def get_queryset(self):

@@ -270,7 +270,7 @@ export const customStepModalStyles = {
   }
 };
 
-export const stepModalStyle = {
+export const loginJoinModalStyle = {
     overlay : {
 
     backgroundColor   : 'rgba(0, 0, 0, 0.75)',
@@ -279,6 +279,44 @@ export const stepModalStyle = {
 
   content : {
     top                   : '10%',
+    left                  : '20%',
+    right                 : '20%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+
+
+
+  }
+};
+
+export const loginJoinModalStyleMobile = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '15%',
+    left                  : '5%',
+    right                 : '5%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+
+  }
+};
+
+export const stepModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '15%',
     left                  : '5%',
     right                 : '5%',
     bottom                : '5%',
@@ -406,5 +444,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   defaultProgramCroppableImage, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   defaultProgramCroppableImage, loginJoinModalStyleMobile, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

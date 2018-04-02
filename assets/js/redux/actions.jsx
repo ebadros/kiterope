@@ -28,6 +28,13 @@ export const setSettings = (theSettings) => {
     }
 };
 
+export const setRehydrated = (wasRehydrated) => {
+    return {
+        type: 'SET_REHYDRATED',
+        rehydrated: wasRehydrated,
+    }
+};
+
 export const addPlan = (thePlan) => {
     return {
         type: 'ADD_PLAN',
@@ -344,6 +351,13 @@ export const setGoalModalData = (theGoalModalData) => {
     }
 };
 
+export const setSmartGoalFormData = (theSmartGoalFormData) => {
+    return {
+        type: 'SET_SMART_GOAL_FORM_DATA',
+        smartGoalFormData: theSmartGoalFormData,
+    }
+};
+
 export const setProfileModalData = (theProfileModalData) => {
     return {
         type: 'SET_PROFILE_MODAL_DATA',
@@ -356,6 +370,14 @@ export const setProgramModalData = (theProgramModalData) => {
     return {
         type: 'SET_PROGRAM_MODAL_DATA',
         programModalData: theProgramModalData,
+    }
+};
+
+export const setSignInOrSignupModalData = (theSignInOrSignupModalData) => {
+    console.log("setProgramModalData action called")
+    return {
+        type: 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA',
+        signInOrSignupModalData: theSignInOrSignupModalData,
     }
 };
 
@@ -397,6 +419,13 @@ export const setStepOccurrences = (theStepOccurrences) => {
     }
 };
 
+export const setDisplayAlert = (theAlert) => {
+    return {
+        type: 'SET_DISPLAY_ALERT',
+        alert: theAlert,
+    }
+};
+
 export const updateStepOccurrence = (theStepOccurrence) => {
     return {
         type: 'UPDATE_STEP_OCCURRENCE',
@@ -427,6 +456,13 @@ export const setUpdateOccurrences = (theUpdateOccurrences) => {
     }
 };
 
+export const setDataToBeSubmittedAfterLogin = (theData) => {
+    return {
+        type: 'SET_DATA_TO_BE_SUBMITTED_AFTER_LOGIN',
+        data: theData,
+    }
+
+}
 export const reduxLogin = (theUser) => {
     return {
         type: 'LOGIN',
@@ -461,4 +497,4 @@ export const setDataLoaded = (theDataSetThatWasLoaded) => {
 
 
 
-module.exports = { setDataLoaded, setGoalModalData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { setDataLoaded, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

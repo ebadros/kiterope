@@ -670,6 +670,8 @@ this.closeModal()
 
                   <div>{this.props.programHeaderErrors}</div>
                   <div className="ui row">&nbsp;</div>
+                  <Header headerLabel={this.state.id != "" & this.state.id != undefined ? "Edit Program" : "Create Program"} />
+
 
 
                       <div className="ui three column grid">
@@ -1315,6 +1317,7 @@ console.log("programdetail")
 }
 
 
+
     render() {
 
 
@@ -1329,17 +1332,23 @@ console.log("programdetail")
                                     {url:"/programs", label:"My Programs"},
                                     {url:"/programs/" + this.props.params.program_id + "/steps/", label:"Program Detail"},
 
-                        ]}/>
+                        ]} />
                         <div>&nbsp;</div>
 
 
-                        <ProgramViewEditDeleteItem isListNode={false}
-                                                showCloseButton={false}
-                                                apiUrl="/api/programs/"
-                                                id={this.props.params.program_id}
-                                                data={this.state.data}
-                                                currentView="Basic"
-                        />
+                        <ProgramViewEditDeleteItem
+                                                   isListNode={false}
+                                                   showCloseButton={false}
+                                                   apiUrl="/api/programs/"
+                                                   id={this.props.params.program_id}
+                                                   data={this.state.data}
+                                                   currentView="Basic"
+                                                   needsLogin={this.handleNeedsLogin}
+                                                   reloadItem={this.handleReloadItem}
+                                                   extendedBasic={false} />
+
+
+
 
                         <div>&nbsp;</div>
                         <div className="ui grid">
