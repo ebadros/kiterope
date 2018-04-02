@@ -70,7 +70,7 @@ export class SplashPage extends React.Component {
                 //store.dispatch(push('/search/'))
                                    // props.history.push("/search/")
 
-                store.dispatch(push("/search/"));
+                store.dispatch(push("/splashGoal/"));
                 //history.push('/search/')
 
 

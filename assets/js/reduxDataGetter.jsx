@@ -137,7 +137,8 @@ export default class ReduxDataGetter extends React.Component {
             updateOccurrenceDataLoaded:false,
             updateDataLoaded:false,
             messageThreadDataLoaded:false,
-            rehydrated:false
+            rehydrated:false,
+            user:""
 
 
 
@@ -176,9 +177,10 @@ export default class ReduxDataGetter extends React.Component {
     getAllData() {
 
         store.dispatch(setSmartGoalFormData({modalIsOpen:false, data:{}}))
+        this.loadUserData
 
-            var intervalID = setInterval(this.loadUserData, 2000);
-            this.setState({intervalID: intervalID})
+           // var intervalID = setInterval(this.loadUserData, 2000);
+            //this.setState({intervalID: intervalID})
 
     }
 
@@ -250,7 +252,45 @@ componentWillReceiveProps (nextProps) {
     if (this.state.contactDataLoaded != nextProps.storeRoot.contactDataLoaded) {
         this.setState({contactDataLoaded: nextProps.storeRoot.contactDataLoaded})
     }
+
+    if (this.state.user != nextProps.storeRoot.user) {
+        var currentUser = nextProps.storeRoot.user
+        this.setState({user: currentUser})
+        if (currentUser != undefined) {
+            if (currentUser.id != null) {
+                if (currentUser.isCoach) {
+                    this.loadCoachSpecificData()
+
+                }
+                this.loadUniversalData();
+
+
+            }
+        }
+    }
+
 }
+
+    stopPollingForData() {
+        if (this.state.userDataLoaded &&
+                this.state.stepDataLoaded &&
+                this.state.programDataLoaded &&
+                this.state.planDataLoaded &&
+                this.state.goalDataLoaded &&
+                this.state.updateOccurrenceDataLoaded &&
+                this.state.visualizationDataLoaded &&
+                this.state.stepOccurrenceDataLoaded &&
+                this.state.updateDataLoaded &&
+                this.state.profileDataLoaded &&
+                this.state.settingsDataLoaded &&
+                this.state.contactDataLoaded )
+
+
+         {
+                clearInterval(this.state.intervalID)
+
+        }
+    }
 
     loadUserData() {
 
@@ -282,6 +322,7 @@ componentWillReceiveProps (nextProps) {
                 }.bind(this),
                 error: function (xhr, status, err) {
                     console.error(theUrl, status, err.toString());
+
                 }
             })
         }
@@ -367,7 +408,7 @@ componentWillReceiveProps (nextProps) {
     }
 
     loadUniversalData() {
-        console.log("universalData loaded")
+        //console.log("universalData loaded")
         this.loadStepOccurrenceData();
 
         this.loadGoalData();
@@ -390,7 +431,7 @@ componentWillReceiveProps (nextProps) {
 
 
     loadCoachSpecificData() {
-        console.log("coach specific data")
+        //console.log("coach specific data")
 
         this.loadProgramData()
         this.loadUpdateData()
@@ -614,7 +655,7 @@ componentWillReceiveProps (nextProps) {
     }
 
     formatUpdateOccurrenceData(theUpdateOccurrences) {
-        console.log("formatUpdateOccurrenceData")
+        //console.log("formatUpdateOccurrenceData")
             var theData = []
             var uniqueStepOccurrenceIds = []
 

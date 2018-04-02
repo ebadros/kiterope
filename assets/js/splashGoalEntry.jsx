@@ -199,7 +199,7 @@ export default class SplashGoalEntry extends React.Component {
         setTimeout(() => {
             store.dispatch(setSmartGoalFormData({modalIsOpen: true, data: {title: "I will " + this.state.query}}))
             $(this.refs['setGoalInterface']).slideUp()
-        }, 2000)
+        }, 1000)
         //store.dispatch(setSearchQuery(this.state.query))
 
         //store.dispatch(push("/search/" + this.state.query + "/"));
@@ -495,3 +495,5 @@ _handleKeyPress = (e) => {
     }
 
 }
+
+module.exports = {SplashGoalEntry }

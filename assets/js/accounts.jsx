@@ -451,7 +451,7 @@ export class Menubar extends React.Component {
 
 
         auth.logout();
-                        store.dispatch(push('/'))
+                        store.dispatch(push('/splashGoal'))
 
 
 
@@ -1374,6 +1374,14 @@ export class JoinForm extends React.Component {
           store.dispatch(push(nextProps.location.state.nextPathname) )
       }
   }
+_handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+
+      this.handleSubmit(e)
+    }
+  }
 
 
   handleSubmit = (e) => {
@@ -1697,6 +1705,8 @@ export class ModalLoginForm extends React.Component {
       }
   }
 
+
+
   handleSubmit = (e) => {
       this.setState({saved:"Signing In"})
       var username = this.state.email;
@@ -1868,6 +1878,7 @@ export class ModalLoginForm extends React.Component {
                                                     onChange={this.validate}
                                                     stateCallback={this.handleEmailChange}
                                                     serverErrors={this.state.serverErrors.email}
+
                                             />
 
                                        <ValidatedInput
@@ -1893,7 +1904,7 @@ export class ModalLoginForm extends React.Component {
                                       <div className="float-right"><a style={{cursor:'pointer'}} onClick={this.handleForgotPasswordClick}>Forgot Password?</a>
                                       </div>
                                   </div>
-                                   <StandardInteractiveButton color="purple" initial="Sign In" processing="Signing In" completed="Signed In" current={this.state.saved} clicked={this.handleSubmit} />
+                                   <StandardInteractiveButton color="purple" initial="Sign In" processing="Signing In" completed="Signed In" current={this.state.saved} clicked={this.handleSubmit}  />
 
 
                               </form>

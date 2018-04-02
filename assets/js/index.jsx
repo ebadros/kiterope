@@ -22,6 +22,8 @@ import {Page404} from './Page404'
 import {SplashPage} from './splash'
 import {BlogPage} from './blog'
 
+import { SplashGoalEntry } from './splashGoalEntry'
+
 
 import {VisualizationsPage} from './visualization'
 
@@ -135,7 +137,7 @@ ReactDOM.render((
                 <Route path="/search/:search_query/" component={SearchPage}/>
 
                 <Route path="/search" component={SearchPage}/>
-                <Route path="/test" component={TestPage} />
+                <Route path="/splashGoal" component={SplashGoalEntry} />
                 <Route path="/:path" component={Page404} />
 
 
