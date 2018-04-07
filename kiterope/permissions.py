@@ -27,6 +27,20 @@ class UserPermission(permissions.BasePermission):
         else:
             return False
 
+class IsReceiverOrNone(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    Assumes the model instance has an `owner` attribute.
+    """
+
+    def has_object_permission(self, request, view, obj):
+
+        if request.method in SAFE_ALL_ACCESS_POST_METHODS:
+            return True
+
+        if obj.receiver == request.user or request.user.email == "eric@kiterope.com":
+            return True
+
 class IsReceiverSenderOrReadOnly(permissions.BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.

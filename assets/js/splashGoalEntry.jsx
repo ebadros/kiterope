@@ -3,7 +3,7 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {Sidebar, ProgramViewEditDeleteItem } from './base'
+import {Sidebar, ProgramViewEditDeleteItem, Header } from './base'
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
@@ -19,6 +19,7 @@ import ValidatedInput from './app'
 import Dimensions from 'react-dimensions'
 import TextTruncate from 'react-text-truncate';
 import autobind from 'class-autobind'
+import {GoalList } from './goal'
 import { GoalSMARTForm } from './goalSmartForm'
 import Pagination from "react-js-pagination";
 
@@ -28,7 +29,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'
-import { setSmartGoalFormData, updateStep, setRehydrated, setDisplayAlert, removePlan, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { setSmartGoalFormData, updateStep, setPublicGoals, setRehydrated, setDisplayAlert, removePlan, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import {
     SearchBox,
@@ -123,6 +124,7 @@ export default class SplashGoalEntry extends React.Component {
             placeholder:placeholderText[0],
             signInOrSignUpModalFormIsOpen:false,
             user:"",
+            displayLoader: false
         }
 
 
@@ -131,10 +133,11 @@ export default class SplashGoalEntry extends React.Component {
     }
 
     componentDidMount = () => {
-        console.log("componentDidMount")
+        this.setState({displayLoader:false})
 
 
-        $(this.refs["loader"]).hide()
+
+
         var intervalID = setInterval(this.changePlaceholderText, 2000);
         this.setState({intervalID:intervalID});
         if (this.props.storeRoot != undefined) {
@@ -144,10 +147,31 @@ export default class SplashGoalEntry extends React.Component {
                 queryUrl:this.props.storeRoot.gui.searchQuery,
             })
         }
+        this.loadPublicGoalData()
 
 
 
     };
+
+    loadPublicGoalData () {
+        var theUrl = "/api/publicGoals/";
+                        $.ajax({
+                            url: theUrl,
+                            dataType: 'json',
+                            cache: false,
+                            success: function (data) {
+
+                                store.dispatch(setPublicGoals(data))
+
+                            }.bind(this),
+                            error: function (xhr, status, err) {
+                                console.error(theUrl, status, err.toString());
+
+                            }.bind(this),
+
+                        });
+                    }
+
 
     componentWillReceiveProps = (nextProps) => {
         if (nextProps.storeRoot != undefined) {
@@ -179,26 +203,16 @@ export default class SplashGoalEntry extends React.Component {
 
     };
 
-    revealForm() {
-        console.log("reveal form")
-
-
-
-    }
-
-
-
-
 
     handleSubmit = (e) => {
-
-        e.preventDefault();
-
-                $(this.refs['loader']).show()
+        e.preventDefault()
+        this.setState({displayLoader:true})
 
         setTimeout(() => {
             store.dispatch(setSmartGoalFormData({modalIsOpen: true, data: {title: "I will " + this.state.query}}))
             $(this.refs['setGoalInterface']).slideUp()
+                    this.setState({displayLoader:false})
+
         }, 1000)
         //store.dispatch(setSearchQuery(this.state.query))
 
@@ -216,6 +230,16 @@ export default class SplashGoalEntry extends React.Component {
 
       //  });
     };
+
+    handleCancelClicked() {
+        this.setState({query:""})
+                    store.dispatch(setSmartGoalFormData({modalIsOpen: false, data:{} }))
+
+            scroll(0,0)
+                    $(this.refs['setGoalInterface']).slideDown()
+
+
+    }
 
     handleCloseButtonClicked = () => {
 
@@ -252,7 +276,10 @@ _handleKeyPress = (e) => {
       this.handleSubmit(e)
     }
   };
+
+
     render () {
+
         if (this.state.query == "") {
             $(this.refs["ref_closeButton"]).hide();
 
@@ -261,6 +288,17 @@ _handleKeyPress = (e) => {
 
         }
 
+        if (this.state.displayLoader == true) {
+            var loaderStyle ={
+                display: 'block'
+            }
+        } else {
+            var loaderStyle = {
+                display: 'none'
+            }
+        }
+
+
 
 
         if (this.props.storeRoot != undefined ) {
@@ -268,6 +306,8 @@ _handleKeyPress = (e) => {
                     var forMobile = this.props.storeRoot.gui.forMobile
                     }
                 }
+
+
 
                         if (!forMobile) {
 
@@ -279,6 +319,7 @@ _handleKeyPress = (e) => {
                                        <div className="spacer">&nbsp;</div>
 
     <div ref="setGoalInterface">
+
                     <div className="ui one column grid">
 
 
@@ -318,12 +359,12 @@ _handleKeyPress = (e) => {
                                  onClick={this.handleSubmit} style={{paddingBottom: "0 !important"}}>Set Goal
                             </div>
                         </div>
-        </div>
-    <div className="ui row">&nbsp;</div>
-                            <div className="ui row">&nbsp;</div>
+        </div></div>
+        <div className="ui spacer">&nbsp;</div>
+                            <div className="ui spacer">&nbsp;</div>
 
 
-    <div ref="loader" className="ui centered row">
+                        <div style={loaderStyle} className="ui centered row">
         <div className="ui sixteen wide column">
 
             <div className="ui active indeterminate large text loader">Searching...</div>
@@ -331,7 +372,8 @@ _handleKeyPress = (e) => {
                     </div>
 
                </div>
-        </div></div>
+
+        </div>
 
 
                                        <GoalSMARTForm  cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
@@ -342,10 +384,11 @@ _handleKeyPress = (e) => {
 
 
 
-                </div>
-                <div className="spacer">&nbsp;</div>
-                <div className="spacer">&nbsp;</div>
 
+                </div>
+
+
+                <div className="spacer">&nbsp;</div>
 
                 <div className="blue">
                     <div className="centered hugeType topPadding">Kiterope helps you get things done</div>
@@ -388,9 +431,18 @@ _handleKeyPress = (e) => {
                     </div>
 
 
+                </div>                    <div className="spacer">&nbsp;</div>
+
+                    </div>
+                            <div className="spacer">&nbsp;</div>
+
+                    <div className="ui page container">
+                        <Header headerLabel="Recent Public Goals"/>
+                                <GoalList data={this.props.storeRoot.publicGoals} />
                 </div>
 
-            </div>
+
+<Footer />
         </div>
 
 
@@ -402,10 +454,12 @@ _handleKeyPress = (e) => {
                                      modalShouldClose={this.handleModalClosed}/>
             <div className="ui page container">
                 <div className="ui mobileSpacer">&nbsp;</div>
+                    <div ref="setGoalInterface">
+
 
                     <div className="ui grid">
 
-                        <div className="ui centered row header"><h2>What do you want to do?</h2></div>
+                        <div className="ui centered row header"><h2>What's your goal?</h2></div>
 
 
                         <div className="ui centered row">
@@ -427,25 +481,45 @@ _handleKeyPress = (e) => {
                                                         <div className="ui column">
 
                             <div className="ui fluid purple left floated medium button"
-                                 onClick={this.handleSubmit} style={{paddingBottom: "0 !important"}}>Search Plans
+                                 onClick={this.handleSubmit} style={{paddingBottom: "0 !important"}}>Set Goal
                             </div>
                                                             </div>
                         </div>
-                <div className="ui centered row">
-                                                             <Link to="/browse/">Browse
-                                Plans</Link>
-                                                            </div>
+
+
+
+
+
+
+
+</div><div className="ui spacer">&nbsp;</div>
+                            <div className="ui spacer">&nbsp;</div>
                     </div>
 
 
 
 
+                        <div style={loaderStyle} className="ui centered row">
 
+        <div className="ui sixteen wide column">
 
+            <div className="ui active indeterminate large text loader">Searching...</div>
 
-                    <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
-<div className="mobileSpacer">&nbsp;</div>
+                    </div>
+
+               </div>
                 </div>
+
+
+        <GoalSMARTForm  cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
+
+
+
+
+
+
+
+<div className="spacer">&nbsp;</div>
 
 
                 <div className="blue">
@@ -484,8 +558,17 @@ _handleKeyPress = (e) => {
 
 
                 </div>
+                            <div className="ui row">&nbsp;</div>
 
             </div>
+
+            <div className="spacer">&nbsp;</div>
+
+                    <div className="ui page container">
+                        <Header headerLabel="Recent Public Goals"/>
+                                <GoalList data={this.props.storeRoot.publicGoals} />
+                </div>
+            <Footer />
         </div>
 
 

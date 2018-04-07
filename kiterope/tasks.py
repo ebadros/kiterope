@@ -79,14 +79,15 @@ def updateOccurrencesAtUTCMidnight():
     periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
 
     for theUser in userSet:
+        StepOccurrence.objects.updateStepOccurrencesForRange(currentUser, periodRangeStart, periodRangeEnd)
 
-        StepOccurrence.objects.updateStepOccurrences(theUser, periodRangeStart, periodRangeEnd)
+
+        #StepOccurrence.objects.updateStepOccurrences(theUser, periodRangeStart, periodRangeEnd)
 
 
 
 @app.task()
 def dailyUpdateStepOccurrences():
-    print("dailyUpdateStepOccurrences posted")
     todaysUTCDate = datetime.datetime.now().date()
     print(todaysUTCDate)
     '''

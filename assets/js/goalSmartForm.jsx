@@ -25,7 +25,7 @@ import { PlanForm, PlanList } from './plan'
 import {ChoiceModal, IconLabelCombo} from './elements'
 import { Textfit } from 'react-textfit';
 
-import { defaultGoalCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, userSharingOptions, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultGoalCroppableImage, mobileModalStyle, TINYMCE_CONFIG, theServer, s3IconUrl, userSharingOptions, loginJoinModalStyleMobile, loginJoinModalStyle, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 
 import Measure from 'react-measure'
@@ -264,7 +264,7 @@ export class GoalSMARTForm extends React.Component {
 
     handleCancelClicked() {
         store.dispatch(setGoalModalData({modalIsOpen:false, data:{}}))
-        //this.props.cancelClicked()
+        this.props.cancelClicked()
     }
 
     getServerErrors(fieldName) {
@@ -438,7 +438,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                     return ("")
                 } else {
                     return (<div className="ui row">
-                        <div className={mediumColumnWidth}>
+                        <div className={wideColumnWidth}>
                             <div className="field fluid">
                                 <label htmlFor="id_description">Visualize your goal. Describe it as clearly as possible.</label>
                                 <TinyMCEInput name="description"
@@ -456,9 +456,291 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                 }
             }
 
+            getForm = () => {
+
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
 
 
-        getForm = () => {
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+           } else {
+
+
+            var wideColumnWidth = "twelve wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+
+
+
+            if (this.state.image) {
+                var imageUrl = this.state.image
+
+
+            } else {
+                var imageUrl = "goalItem.svg"
+            }
+
+                    var descriptionEditor = this.getDescriptionEditor();
+
+        return ( <div className="ui page container footerAtBottom">
+
+                                            <div className="ui form">
+
+                                <div className="ui row">&nbsp;</div>
+
+                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column  ">Specific</div>
+                                                <div className="twelve wide column left aligned  largeType">Your goal should be
+                                                    well-defined and clear. Make it as concise as possible.
+                                                </div>
+                                            </div>
+                                            <div className="ui row bold">
+                                                <div className={wideColumnWidth}>
+                                                <ValidatedInput
+                                                    type="text"
+                                                    name="title"
+                                                    label="What is your goal? (Required)"
+                                                    id="id_title"
+                                                    placeholder="I will run a five minute mile, I will learn to speak Chinese fluently"
+                                                    value={this.state.title}
+                                                    initialValue={this.state.title}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleTitleChange}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("title")}
+
+                                            />
+
+                                            </div>
+                                                </div>
+
+                                            {descriptionEditor}
+
+
+                                        </div>
+                                    </div>
+                                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui  blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Measureable</div>
+                                                <div className="twelve wide column left aligned  largeType">A goal should be measurable so you can judge your progress and know when it's been achieved.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth}>
+
+                                                <ValidatedInput
+                                                    type="text"
+                                                    name="metric"
+                                                    label="How will you measure your progress?"
+                                                    id="id_metric"
+                                                    placeholder="time per mile, pounds, pictures, audio recording, etc. "
+                                                    value={this.state.metric}
+                                                    initialValue={this.state.metric}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleMetricChange}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("metric")}
+
+                                            />
+                                                                                                    </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                                 <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Achievable</div>
+                                                <div className="twelve wide column left aligned  largeType">To progress as fast and far as possible, you should choose a goal that stretches your abilities while being realistic so you stay motivated.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth + " field"}>
+                                            <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
+                            <KSSelect value={this.state.isThisReasonable}
+                                      valueChange={this.handleIsThisReasonableChange}
+                                      name="isThisReasonable" options={isThisReasonableOptions}
+                                      serverErrors={this.getServerErrors("isThisReasonable")}
+                                      isClearable={false}
+                            /></div>
+                                                </div>
+
+                                            <div className="ui row">
+                                                <div className={wideColumnWidth}>
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="obstacles"
+                                                    label="What obstacles have you encountered in the past or do you foresee encountering?"
+                                                    id="id_obstacles"
+                                                    placeholder="I sometimes skip practice if I've had a late night, My friends aren't supportive"
+                                                    value={this.state.obstacles}
+                                                    initialValue={this.state.obstacles}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleObstaclesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("obstacles")}
+
+                                            />
+                                                    </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                                 <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column">Relevant</div>
+                                                <div className="twelve wide column left aligned largeType">The goal should matter to you and should align with your other goals and core values. Staying motivated is much easier when you believe in what you're doing.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth}>
+
+
+
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="coreValues"
+                                                    label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
+                                                    id="id_coreValues"
+                                                    placeholder="Providing for my friends and family are the most important to me. I believe self-actualization is my highest goal."
+                                                    value={this.state.coreValues}
+                                                    initialValue={this.state.coreValues}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleCoreValuesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("coreValues")}
+
+                                            />
+                                                                                                </div>
+                                            </div>
+
+                                            <div className="ui row ">
+                                                <div className={wideColumnWidth + " field"}>
+
+                                            <label  htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
+                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                                valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
+                                name="goalInAlignmentWithCoreValues"
+                                options={goalInAlignmentWithCoreValuesOptions}
+                                  isClearable={false}
+
+                        serverErrors={this.getServerErrors("goalInAlignmentWithCoreValues")}/>
+                                            </div></div>
+                                                <div className="ui row">
+                                                    <div className={wideColumnWidth}>
+
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="why"
+                                                    label="Why do you want to achieve this goal?"
+                                                    id="id_why"
+                                                    placeholder="I want to make something of myself, I want to be around to see my daughter graduate from college."
+                                                    value={this.state.why}
+                                                    initialValue={this.state.why}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleWhyChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("why")}
+
+                                            />
+                                                                                                                                                        </div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+                                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Time-Bound</div>
+                                                <div className="twelve wide column left aligned   largeType">Your goal should have a definite end date for best results.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth + " field"}>
+
+
+                                                <label htmlFor="id_deadline">What is your deadline for achieving this goal?</label>
+
+                                                <DatePicker selected={this.state.deadline} onChange={this.handleDeadlineChange} />
+                                                                                                    </div>
+
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                            <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Memorable</div>
+                                                <div className="twelve wide column left aligned  largeType">It helps to make goals memorable.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+
+                        <div className={wideColumnWidth + ' field'} >
+                    <label htmlFor="id_croppableImage">Please choose a picture that will help motivate you.</label>
+
+
+<NewImageUploader imageReturned={this.handleImageChange}
+                  defaultImage={defaultGoalCroppableImage.image}
+                  forMobile={forMobile}
+                  aspectRatio="square"
+                  label="Select an image that will help motivate you."
+                  croppableImage={this.state.croppableImage} /></div>
+            </div>
+
+                                            <div className="ui row">
+                        <div className={wideColumnWidth + ' field'}>
+                    <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
+                    <Select value={this.state.viewableBy} clearable={false}
+                                              onChange={this.handleViewableByChange} name="viewingOptions"
+                                              options={userSharingOptions}/>
+                            </div>
+                        </div>
+                                            </div>
+                                        </div>
+                    </div>
+                                            <div className="ui row">&nbsp;</div>
+
+                                <div className="ui three column stackable grid">
+                                    <div className="column">&nbsp;</div>
+                                    <div className="column"><div className="ui large fluid button" onClick={this.handleCancelClicked} >Cancel</div></div>
+                                    <div className="column">                             <SaveButton saved={this.state.saved} clicked={this.handleSubmit} />
+</div>
+                                    </div>
+                                                </div>
+
+        )};
+
+
+
+        getForm2 = () => {
 
             if (this.props.storeRoot != undefined ) {
                 if (this.props.storeRoot.gui != undefined) {
@@ -493,7 +775,8 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
                     var descriptionEditor = this.getDescriptionEditor();
 
-        return ( <div className="ui page container footerAtBottom">
+        return (
+            <div className="ui page container footerAtBottom">
                                 <div className="ui row">&nbsp;</div>
 
                                 <div className="ui segment">
@@ -748,7 +1031,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                     </div>
                             </div>
 
-        )};
+        )}
 
      openModal() {
         this.setState({
@@ -865,15 +1148,15 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
 
                     return (
-                        <div>                                <div className="spacer">&nbsp;</div>
+                        <div>
 
-                            <div className="ui one column grid">
+                            <div className="ui one column grid container">
                                 <div className="ui centered row  massiveType">Great news! We can help you with that!
                                 </div>
                             </div>
                             <div className="ui one column grid">
 
-                                <div className="ui centered row  largeType">We just need a little more information.
+                                <div className="ui centered row largeType">We just need a little more information.
                                 </div>
 
                             </div>
@@ -1251,7 +1534,7 @@ handleTitleChange(value) {
            } else {
 
 
-            var wideColumnWidth = "sixteen wide column";
+            var wideColumnWidth = "twelve wide column";
             var mediumColumnWidth = "eight wide column";
             var smallColumnWidth = "four wide column"
         }
@@ -1261,7 +1544,7 @@ handleTitleChange(value) {
                     return ("")
                 } else {
                     return (<div className="ui row">
-                        <div className={mediumColumnWidth}>
+                        <div className={wideColumnWidth}>
                             <div className="field fluid">
                                 <label htmlFor="id_description">Visualize your goal. Describe it as clearly as possible.</label>
                                 <TinyMCEInput name="description"
@@ -1278,9 +1561,7 @@ handleTitleChange(value) {
                     </div>)
                 }
             }
-
-
-getForm = () => {
+getForm2 = () => {
 
             if (this.props.storeRoot != undefined ) {
                 if (this.props.storeRoot.gui != undefined) {
@@ -1577,6 +1858,290 @@ getForm = () => {
 
         )};
 
+
+getForm = () => {
+
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+           } else {
+
+
+            var wideColumnWidth = "twelve wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+
+
+
+            if (this.state.image) {
+                var imageUrl = this.state.image
+
+
+            } else {
+                var imageUrl = "goalItem.svg"
+            }
+
+                    var descriptionEditor = this.getDescriptionEditor();
+
+        return ( <div className="ui page container footerAtBottom">
+                                  <Header headerLabel={this.state.id != "" & this.state.id != undefined ? "Edit Goal" : "Create Goal"} />
+
+                                            <div className="ui form">
+
+                                <div className="ui row">&nbsp;</div>
+
+                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column  ">Specific</div>
+                                                <div className="twelve wide column left aligned  largeType">Your goal should be
+                                                    well-defined and clear. Make it as concise as possible.
+                                                </div>
+                                            </div>
+                                            <div className="ui row bold">
+                                                <div className={wideColumnWidth}>
+                                                <ValidatedInput
+                                                    type="text"
+                                                    name="title"
+                                                    label="What is your goal? (Required)"
+                                                    id="id_title"
+                                                    placeholder="I will run a five minute mile, I will learn to speak Chinese fluently"
+                                                    value={this.state.title}
+                                                    initialValue={this.state.title}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleTitleChange}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("title")}
+
+                                            />
+
+                                            </div>
+                                                </div>
+
+                                            {descriptionEditor}
+
+
+                                        </div>
+                                    </div>
+                                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui  blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Measureable</div>
+                                                <div className="twelve wide column left aligned  largeType">A goal should be measurable so you can judge your progress and know when it's been achieved.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth}>
+
+                                                <ValidatedInput
+                                                    type="text"
+                                                    name="metric"
+                                                    label="How will you measure your progress?"
+                                                    id="id_metric"
+                                                    placeholder="time per mile, pounds, pictures, audio recording, etc. "
+                                                    value={this.state.metric}
+                                                    initialValue={this.state.metric}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleMetricChange}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("metric")}
+
+                                            />
+                                                                                                    </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                                 <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Achievable</div>
+                                                <div className="twelve wide column left aligned  largeType">To progress as fast and far as possible, you should choose a goal that stretches your abilities while being realistic so you stay motivated.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth + " field"}>
+                                            <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
+                            <KSSelect value={this.state.isThisReasonable}
+                                      valueChange={this.handleIsThisReasonableChange}
+                                      name="isThisReasonable" options={isThisReasonableOptions}
+                                      serverErrors={this.getServerErrors("isThisReasonable")}
+                                      isClearable={false}
+                            /></div>
+                                                </div>
+
+                                            <div className="ui row">
+                                                <div className={wideColumnWidth}>
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="obstacles"
+                                                    label="What obstacles have you encountered in the past or do you foresee encountering?"
+                                                    id="id_obstacles"
+                                                    placeholder="I sometimes skip practice if I've had a late night, My friends aren't supportive"
+                                                    value={this.state.obstacles}
+                                                    initialValue={this.state.obstacles}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleObstaclesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("obstacles")}
+
+                                            />
+                                                    </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                                 <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column">Relevant</div>
+                                                <div className="twelve wide column left aligned largeType">The goal should matter to you and should align with your other goals and core values. Staying motivated is much easier when you believe in what you're doing.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth}>
+
+
+
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="coreValues"
+                                                    label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
+                                                    id="id_coreValues"
+                                                    placeholder="Providing for my friends and family are the most important to me. I believe self-actualization is my highest goal."
+                                                    value={this.state.coreValues}
+                                                    initialValue={this.state.coreValues}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleCoreValuesChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("coreValues")}
+
+                                            />
+                                                                                                </div>
+                                            </div>
+
+                                            <div className="ui row ">
+                                                <div className={wideColumnWidth + " field"}>
+
+                                            <label  htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
+                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                                valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
+                                name="goalInAlignmentWithCoreValues"
+                                options={goalInAlignmentWithCoreValuesOptions}
+                                  isClearable={false}
+
+                        serverErrors={this.getServerErrors("goalInAlignmentWithCoreValues")}/>
+                                            </div></div>
+                                                <div className="ui row">
+                                                    <div className={wideColumnWidth}>
+
+                                                <ValidatedInput
+                                                    type="textarea"
+                                                    name="why"
+                                                    label="Why do you want to achieve this goal?"
+                                                    id="id_why"
+                                                    placeholder="I want to make something of myself, I want to be around to see my daughter graduate from college."
+                                                    value={this.state.why}
+                                                    initialValue={this.state.why}
+                                                    validators='"!isEmpty(str)"'
+                                                    onChange={this.validate}
+                                                    stateCallback={this.handleWhyChange}
+                                                    rows={3}
+                                                    isDisabled={!this.state.editable}
+                                                    serverErrors={this.getServerErrors("why")}
+
+                                            />
+                                                                                                                                                        </div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+                                                <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Time-Bound</div>
+                                                <div className="twelve wide column left aligned   largeType">Your goal should have a definite end date for best results.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+                                                                                                <div className={wideColumnWidth + " field"}>
+
+
+                                                <label htmlFor="id_deadline">What is your deadline for achieving this goal?</label>
+
+                                                <DatePicker selected={this.state.deadline} onChange={this.handleDeadlineChange} />
+                                                                                                    </div>
+
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                            <div className="ui segment">
+                                    <div className="ui grid">
+                                        <div className="ui blue row">
+                                            <div className="ui largeType center aligned middle aligned four wide column ">Memorable</div>
+                                                <div className="twelve wide column left aligned  largeType">It helps to make goals memorable.
+                                                </div>
+                                            </div>
+                                            <div className="ui row">
+
+                        <div className={wideColumnWidth + ' field'} >
+                    <label htmlFor="id_croppableImage">Please choose a picture that will help motivate you.</label>
+
+
+<NewImageUploader imageReturned={this.handleImageChange}
+                  defaultImage={defaultGoalCroppableImage.image}
+                  forMobile={forMobile}
+                  aspectRatio="square"
+                  label="Select an image that will help motivate you."
+                  croppableImage={this.state.croppableImage} /></div>
+            </div>
+
+                                            <div className="ui row">
+                        <div className={mediumColumnWidth + ' field'}>
+                    <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
+                    <Select value={this.state.viewableBy} clearable={false}
+                                              onChange={this.handleViewableByChange} name="viewingOptions"
+                                              options={userSharingOptions}/>
+                            </div>
+                        </div>
+                                            </div>
+                                        </div>
+                    </div>
+                                            <div className="ui row">&nbsp;</div>
+
+                                <div className="ui three column stackable grid">
+                                    <div className="column">&nbsp;</div>
+                                    <div className="column"><div className="ui large fluid button" onClick={this.handleCancelClicked} >Cancel</div></div>
+                                    <div className="column">                             <SaveButton saved={this.state.saved} clicked={this.handleSubmit} />
+</div>
+                                    </div>
+                                                </div>
+
+        )};
+
      openModal() {
         this.setState({
             modalIsOpen: true
@@ -1689,7 +2254,7 @@ getForm = () => {
 
 
             if (forMobile) {
-             var modalStyle = stepModalStyle
+             var modalStyle = mobileModalStyle
 
            } else {
 

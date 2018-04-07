@@ -11,7 +11,7 @@ var TinyMCE = require('react-tinymce-input');
 var MaskedInput = require('react-maskedinput');
 import autobind from 'class-autobind'
 var validator = require('validator');
-import TimePicker from 'rc-time-picker';
+//import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
 import  { ValidatedInput, KRCheckBox } from './app'
@@ -125,24 +125,34 @@ export class Alert extends React.Component {
         autobind(this);
         this.state = {
             displayAlert: {},
-            display: false,
-            text:"",
-            defaultStyle:{
 
-            }
 
 
 
         }
     }
 
+    componentDidMount() {
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.displayAlert != undefined) {
+                if (this.state.displayAlert != this.props.storeRoot.displayAlert) {
+                    this.setState({displayAlert:this.props.storeRoot.displayAlert})
+                    if (this.props.storeRoot.displayAlert.showAlert) {
+                        setTimeout( () => {store.dispatch(setDisplayAlert({showAlert:false, text:"", style:{}}))}, 30000)
+                    }
+
+                }
+            }
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.storeRoot != undefined) {
             if (nextProps.storeRoot.displayAlert != undefined) {
-                if (this.state.display != nextProps.storeRoot.displayAlert) {
+                if (this.state.displayAlert != nextProps.storeRoot.displayAlert) {
                     this.setState({displayAlert:nextProps.storeRoot.displayAlert})
                     if (nextProps.storeRoot.displayAlert.showAlert) {
-                        setTimeout( () => {store.dispatch(setDisplayAlert({showAlert:false, text:"", style:{}}))}, 1000)
+                        setTimeout( () => {store.dispatch(setDisplayAlert({showAlert:false, text:"", style:{}}))}, 3000)
                     }
 
                 }
@@ -160,7 +170,7 @@ export class Alert extends React.Component {
                 width:'60vw',
             textAlign:'center',
             borderRadius:'4px',
-            height:'0px',
+            height:'80px',
             position: 'relative',
             lineHeight:'40px',
             opacity:'.95',
@@ -170,6 +180,7 @@ export class Alert extends React.Component {
 
         }
         if (this.state.displayAlert.showAlert) {
+            console.log("showAlert")
             var shouldDisplay = '.95'
             var alertHeight = '80px'
         } else {
@@ -181,7 +192,7 @@ export class Alert extends React.Component {
                 <div style={{opacity:shouldDisplay, height: alertHeight, position:'fixed', left:'50%', transition: 'opacity .5',
 top:'80px',zIndex:'100',
 }}>
-                    <div style={defaultStyle}>{this.state.displayAlert.text}</div>
+                    <div className="ui middle aligned" style={defaultStyle}>{this.state.displayAlert.text}</div>
                 </div>
 
             )
@@ -298,15 +309,13 @@ export class Footer extends React.Component {
             <div>
                 <div className="footerSpacer">&nbsp;</div>
                 <div className="customFooter">
-                    <div className="ui six column center aligned stackable grid">
+                    <div className="ui four column center aligned grid">
 
 
-<div className="ui column">&nbsp;</div>
                         <div className="ui column">&nbsp;</div>
                         <div className="ui column"><a >Contact Us</a></div>
                         <div className="ui column"><Link to="/tos">Terms</Link></div>
 
-                        <div className="ui column">&nbsp;</div>
                         <div className="ui column">&nbsp;</div>
                         </div>
                                         <div className="ui one column center aligned stackable grid">
@@ -447,11 +456,12 @@ export class Menubar extends React.Component {
 
     logoutHandler() {
         store.dispatch(reduxLogout());
-                persistStore(store, undefined).purge()
 
 
         auth.logout();
-                        store.dispatch(push('/splashGoal'))
+        store.dispatch(push('/splashGoal'))
+        persistStore(store, undefined).purge()
+
 
 
 

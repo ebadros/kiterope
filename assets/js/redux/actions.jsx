@@ -91,6 +91,13 @@ export const setGoals = (theGoals) => {
     }
 };
 
+export const setPublicGoals = (theGoals) => {
+    return {
+        type: 'SET_PUBLIC_GOALS',
+        publicGoals: theGoals,
+    }
+};
+
 export const addGoal = (theGoal) => {
     return {
         type: 'ADD_GOAL',
@@ -366,15 +373,20 @@ export const setProfileModalData = (theProfileModalData) => {
 };
 
 export const setProgramModalData = (theProgramModalData) => {
-    console.log("setProgramModalData action called")
     return {
         type: 'SET_PROGRAM_MODAL_DATA',
         programModalData: theProgramModalData,
     }
 };
 
+export const setSubscriptionModalData = (theSubscriptionModalData) => {
+    return {
+        type: 'SET_SUBSCRIPTION_MODAL_DATA',
+        subscriptionModalData: theSubscriptionModalData,
+    }
+};
+
 export const setSignInOrSignupModalData = (theSignInOrSignupModalData) => {
-    console.log("setProgramModalData action called")
     return {
         type: 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA',
         signInOrSignupModalData: theSignInOrSignupModalData,
@@ -492,9 +504,28 @@ export const setDataLoaded = (theDataSetThatWasLoaded) => {
     }
 };
 
+export const setTimeLastReloaded = () => {
+    return {
+        type: 'SET_TIME_LAST_RELOADED',
+
+
+    }
+};
+
+export const setProgramRequestModalData = (programRequestModalData) => {
+    return {
+        type: 'SET_PROGRAM_REQUEST_MODAL_DATA',
+        programRequestModalData: programRequestModalData,
+
+
+
+    }
+};
 
 
 
 
 
-module.exports = { setDataLoaded, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+
+
+module.exports = { setDataLoaded, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

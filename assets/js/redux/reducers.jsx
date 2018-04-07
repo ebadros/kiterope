@@ -1,6 +1,7 @@
 
 import { createStore, combineReducers } from 'redux';
 import {REHYDRATE} from 'redux-persist/constants'
+var moment = require('moment');
 
 
 
@@ -107,9 +108,16 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'SET_PROGRAM_MODAL_DATA':
-            console.log("set program modal data")
             return Object.assign({}, state, {programModalData: action.programModalData});
             break;
+
+        case 'SET_SUBSCRIPTION_MODAL_DATA':
+            return Object.assign({}, state, {subscriptionModalData: action.subscriptionModalData});
+            break;
+        case 'SET_PROGRAM_REQUEST_MODAL_DATA':
+            return Object.assign({}, state, {programRequestModalData: action.programRequestModalData});
+            break;
+
         case 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA':
             return Object.assign({}, state, {signInOrSignupModalData: action.signInOrSignupModalData});
             break;
@@ -145,6 +153,14 @@ export const rootReducer = (state = {}, action) => {
 
         case 'SET_GOALS':
             return Object.assign({}, state, {goals: action.goals});
+            break;
+        case 'SET_PUBLIC_GOALS':
+            return Object.assign({}, state, {publicGoals: action.publicGoals});
+            break;
+
+         case 'SET_TIME_LAST_RELOADED':
+
+            return Object.assign({}, state, {timeLastReloaded: moment()});
             break;
 
         case 'ADD_GOAL':
@@ -478,6 +494,7 @@ export const rootReducer = (state = {}, action) => {
             state = {};
             return state;
             break;
+
     }
 
             return state

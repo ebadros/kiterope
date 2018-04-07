@@ -28,7 +28,7 @@ import { PlanForm, PlanList } from './plan'
 import { Caller, CallManager } from './call'
 import TinyMCEInput from 'react-tinymce-input';
 
-import { defaultUserCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultUserCroppableImage, mobileModalStyle, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 
 import { OTSession, OTPublisher, OTStreams, OTSubscriber, createSession } from 'opentok-react';
@@ -42,6 +42,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import { setProfileModalData, updateProfile, clearTempProfile, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import auth from './auth'
 
 
 function printObject(o) {
@@ -1365,7 +1366,7 @@ componentWillReceiveProps(nextProps) {
 
 
             if (forMobile) {
-             var modalStyle = stepModalStyle
+             var modalStyle = mobileModalStyle
 
            } else {
 
@@ -1582,6 +1583,11 @@ export class ProfileDetailPage extends React.Component {
     };
 
     componentDidMount() {
+                    scroll(0,0)
+
+        this.loadObjectsFromServer()
+
+
         if (this.props.storeRoot != undefined) {
             if (this.props.storeRoot.profile != undefined) {
                 if (this.state.data != this.props.storeRoot.profile) {
@@ -1590,7 +1596,41 @@ export class ProfileDetailPage extends React.Component {
 
             }
         }
+
     }
+    loadObjectsFromServer = () => {
+
+        if (auth.loggedIn) {
+            var theHeaders = {
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+            }
+        } else {
+            var theHeaders = {}
+        }
+
+
+        var myUrl = "/api/profiles/" + this.props.params.profile_id + "/";
+        $.ajax({
+          url: myUrl,
+          dataType: 'json',
+          cache: false,
+            theHeaders,
+
+          success: function(data) {
+              this.setState({
+                  data: data,
+              })
+
+
+
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(myUrl, status, err.toString());
+          }.bind(this)
+        });
+      };
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.storeRoot != undefined) {
@@ -1613,6 +1653,27 @@ export class ProfileDetailPage extends React.Component {
 
     render () {
 
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
 
         return (
             <div>
@@ -1631,7 +1692,7 @@ export class ProfileDetailPage extends React.Component {
 
                         ]}/>
                         <div>&nbsp;</div>
-                        <ProfileViewEditDeleteItem isListNode={false}
+                        <ProfileViewEditDeleteItem isListNode={forMobile ? true:false}
                                                    showCloseButton={false}
                                                    apiUrl="/api/profiles/"
                                                    id={this.state.data.id}
@@ -1655,6 +1716,8 @@ export class ProfileDetailPage extends React.Component {
             )
     }
 }
+
+
 
 export class ProfileBasicView extends React.Component {
     constructor(props) {
@@ -1685,7 +1748,7 @@ export class ProfileBasicView extends React.Component {
     render() {
         if (this.props.isListNode) {
             return (
-                <div onClick={this.goToDetail}>
+                <div onClick={this.goToDetail} >
                     <ClippedImage item="profile" src={this.state.data.image} />
 
                 <div className="ui grid" >
@@ -1856,7 +1919,7 @@ export class UserLink extends React.Component {
                   <div style={{marginBottom:5, marginRight:-10}}>
 
                       <span>{this.props.fullName}</span><img className="ui mini avatar image"
-                           src={s3BaseUrl + this.props.image} style={{marginLeft:'5px'}}/>
+                           src={this.props.image} style={{marginLeft:'5px'}}/>
 
                   </div>
               )
@@ -1866,7 +1929,7 @@ export class UserLink extends React.Component {
                   <div style={{marginBottom:5}}>
 
                       <img className="ui mini avatar image"
-                           src={s3BaseUrl + this.props.image}/><span>{this.props.fullName}</span>
+                           src={this.props.image}/><span>{this.props.fullName}</span>
 
                   </div>
               )
@@ -1991,4 +2054,4 @@ checkIfUser() {
 }
 
 
-module.exports = { ProfileViewPage, UserLink, ProfileItemMenu, ProfileView, ProfileViewAndEditPage, ProfileDetailPage, ProfileBasicView, ProfileForm, ProfileListPage , ProfileList };
+module.exports = { ProfileViewPage, UserLink,  ProfileItemMenu, ProfileView, ProfileViewAndEditPage, ProfileDetailPage, ProfileBasicView, ProfileForm, ProfileListPage , ProfileList };

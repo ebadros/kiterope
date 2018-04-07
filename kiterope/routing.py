@@ -8,3 +8,8 @@ channel_routing = [
     route("chat-messages", msg_consumer),
     route("notifications", notification_consumer)
 ]
+
+
+
+
+

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, ProgramRequest, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -458,6 +458,33 @@ class SettingsSetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = SettingsSet
         fields = ( 'id', 'defaultNotificationPhone', 'defaultNotificationMethod', 'defaultNotificationEmail', 'defaultNotificationSendTime')
+
+
+
+class ProgramRequestSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ProgramRequest
+        fields = ('id', 'user', 'goal', 'receiver', 'goalInfo')
+
+
+    user = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
+    receiver = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=User.objects.all())
+    goalInfo = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+    def get_userInfo(self, obj):
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = UserSerializer(obj.user, many=False, context=serializer_context)
+        return serializer.data
+
+    def get_goalInfo(self, obj):
+        serializer_context = {'request': self.context.get('request') }
+
+        serializer = GoalSerializer(obj.goal, many=False, context=serializer_context)
+        return serializer.data
+
 
 
 
@@ -1058,7 +1085,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Goal
-        fields =('id','title', 'deadline', 'description', 'coreValues','metric', 'isThisReasonable', 'goalInAlignmentWithCoreValues','why', 'image', 'permissions', 'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'wasAchieved', 'planOccurrences', 'obstacles')
+        fields =('id','title', 'deadline', 'description', 'coreValues','metric', 'isThisReasonable', 'goalInAlignmentWithCoreValues','why', 'image', 'permissions', 'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'userName', 'userImage','wasAchieved', 'planOccurrences', 'obstacles')
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000, required=False)
@@ -1070,6 +1097,9 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
 
     planOccurrences = serializers.SerializerMethodField(required=False,read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    userName = serializers.SerializerMethodField(required=False, read_only=True)
+    userImage = serializers.SerializerMethodField(required=False, read_only=True)
+
     croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
 
     croppableImageData = serializers.SerializerMethodField()
@@ -1086,6 +1116,12 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
     def get_image(self, obj):
         return obj.croppableImage.image
 
+    def get_userImage(self,obj):
+        return obj.user.profile.get_image()
+
+    def get_userName(self,obj):
+        return obj.user.profile.get_fullName()
+
     def get_croppableImageData(self, obj):
         serializer_context = {'request': self.context.get('request')}
 
@@ -1098,6 +1134,40 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
         serializer = PlanOccurrenceSerializer(obj.get_planOccurrences(), many=True, context=serializer_context)
         return serializer.data
 
+
+class PublicGoalSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Goal
+        fields =('id','title',  'image',  'croppableImage', 'croppableImageData', 'votes', 'viewableBy',  'user', 'userName', 'userImage',)
+
+    title = serializers.CharField(max_length=200)
+
+
+    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    userName = serializers.SerializerMethodField(required=False, read_only=True)
+    userImage = serializers.SerializerMethodField(required=False, read_only=True)
+
+    croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
+
+    croppableImageData = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+
+
+    def get_image(self, obj):
+        return obj.croppableImage.image
+
+    def get_userImage(self,obj):
+        return obj.user.profile.get_image()
+
+    def get_userName(self,obj):
+        return obj.user.profile.get_fullName()
+
+    def get_croppableImageData(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
+        return serializer.data
 
 
 

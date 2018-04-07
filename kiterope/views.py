@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, ProgramRequest, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -35,7 +35,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 import pytz
 from kiterope.send_sms import sendMessage
 
-from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, PostPutAuthorOrView, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
+from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, PostPutAuthorOrView, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 from celery import shared_task
 from .celery_setup import app
 from celery.task.schedules import crontab
@@ -54,6 +54,7 @@ import boto
 import mimetypes
 import uuid
 import os.path
+from django.core.mail import send_mail
 
 
 from kiterope.helpers import formattime
@@ -61,7 +62,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -137,11 +138,9 @@ class UserViewSet(viewsets.ModelViewSet):
             users = User.objects.filter(profile=None)
             for u in users:
                 Profile.objects.create(user=u, firstName=u.first_name, lastName=u.lastName)
-                print("Created profile for {u}".format(u=u))
 
         if pk == 'i':
             #send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
-            print(request.user.username)
 
             return Response(UserSerializer(request.user, context={'request': request}).data)
 
@@ -156,7 +155,6 @@ class ExpoPushTokenViewSet(viewsets.ModelViewSet):
     required_scopes = ['groups']
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -196,7 +194,6 @@ class LabelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         try:
             typeOfLabel = self.kwargs['typeOfLabel']
-            print("this is type of message %s" % typeOfLabel)
             #aQueryset = Label.objects.filter(Q(user=self.request.user) | Q(type=typeOfLabel))
 
             aQueryset = Label.objects.all()
@@ -248,9 +245,7 @@ class ReceiverKChannelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         try:
             receiver_id = self.kwargs['receiver_id']
-            print("receiverId %s" % receiver_id)
             currentUser = self.request.user.id
-            print("currentUser %s" % currentUser)
 
             usersChannelsIds = KChannelUser.objects.filter(user_id=currentUser).values_list('channel_id', flat=True)
             usersChannelsIds = usersChannelsIds[::1]
@@ -263,12 +258,9 @@ class ReceiverKChannelViewSet(viewsets.ModelViewSet):
             if channelWithBothUserAndReceiver == []:
                 try:
                     theUsersWithPermission = [receiver_id, currentUser]
-                    print("try to create_channel")
-                    print(theUsersWithPermission)
 
 
                     theChannel = KChannel.objects.create_channel([receiver_id, currentUser], "ONLYRECEIVER_ONLYSENDER")
-                    print("try to get channel query")
                     aQueryset = KChannel.objects.filter(id=theChannel.id)
                 except:
                     aQueryset = KChannel.objects.none()
@@ -288,8 +280,6 @@ class ReceiverKChannelViewSet(viewsets.ModelViewSet):
         return aQueryset
 
     def intersect(a, b):
-        print(usersChannelsIds)
-        print(receiversChannelsIds)
         return set(a) & set(b)
 
 class MessageThreadChannelViewSet(viewsets.ModelViewSet):
@@ -320,13 +310,11 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     serializer_class = BlogPostSerializer
     pagination_class = StandardResultsSetPagination
     utcTime = datetime.datetime.now().strftime("%H:%M")
-    print(utcTime)
 
     tz = pytz.timezone('America/Los_Angeles')
     today = datetime.datetime.now(tz).date()
     midnight = tz.localize(datetime.datetime.combine(today, datetime.time(0, 0)), is_dst=None)
     utc_dt = midnight.astimezone(pytz.utc).time().strftime("%H:%M")
-    print(utc_dt)
 
 
 
@@ -352,7 +340,6 @@ class MessageThreadViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        print(request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -431,7 +418,6 @@ class GoalViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def create(self, request, *args, **kwargs):
-        print(self.request.data)
 
         #sendMessage('+13107703042','You have tasks that you need to achieve today...check them out here: http://127.0.0.1.8000/' )
 
@@ -466,7 +452,6 @@ class GoalViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)'''
 
     def post(self, request, *args, **kwargs):
-        print(self.request.data)
 
         self.create(request, *args, **kwargs)
 
@@ -498,7 +483,47 @@ class GoalViewSet(viewsets.ModelViewSet):
         return theQueryset
 
 
+class PublicGoalViewSet(viewsets.ModelViewSet):
+    model = Goal
+    queryset = Goal.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+    required_scopes = ['groups']
+    serializer_class = PublicGoalSerializer
+    pagination_class = StandardResultsSetPagination
 
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        #queryset.update(croppableImage=215)
+        #page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
+
+
+
+    def get_serializer_context(self):
+        """
+        pass request attribute to serializer
+        """
+        context = super(PublicGoalViewSet, self).get_serializer_context()
+        return context
+
+    def get_queryset(self):
+        viewableByAnyone = Q(viewableBy="ANYONE")
+
+        theQueryset = Goal.objects.filter(viewableByAnyone).order_by('-id')[:6]
+
+
+
+
+        return theQueryset
 
 class StepViewSet(viewsets.ModelViewSet):
     #permission_classes = [permissions.IsAuthenticated, TokenHasScope]
@@ -541,7 +566,6 @@ class StepViewSet(viewsets.ModelViewSet):
         return aQueryset
 
     def create(self, request, *args, **kwargs):
-        print(self.request.data)
 
 
         serializer = self.get_serializer(data=request.data)
@@ -568,7 +592,6 @@ class StepViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
@@ -596,9 +619,8 @@ class StepViewSet(viewsets.ModelViewSet):
         return self.list(request, *args, **kwargs)
 
 
-    @list_route(methods=['get'], permission_classes=[permissions.IsAuthenticated], url_path='daily')
-    def dailyList(self, request, *args, **kwargs):
-        print("inside")
+    #@list_route(methods=['get'], permission_classes=[permissions.IsAuthenticated], url_path='daily')
+    #def dailyList(self, request, *args, **kwargs):
 
 class PlanOccurrenceViewSet(viewsets.ModelViewSet):
     queryset = PlanOccurrence.objects.all()
@@ -634,7 +656,6 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -646,7 +667,26 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
 
 
+class ProgramRequestViewSet(viewsets.ModelViewSet):
+    queryset = ProgramRequest.objects.all()
+    serializer_class = ProgramRequestSerializer
+    permission_classes = [IsReceiverOrNone]
+    required_scopes = ['groups']
 
+    def create(self, request, *args, **kwargs):
+        print(self.request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        send_mail(
+            "New Program Request",
+            "https://127.0.0.1:8000/api/programRequests/" + json.dumps(serializer.data["id"]) + "/",
+            'notifications@kiterope.com',
+            ["eric@kiterope.com"],
+            fail_silently=False,
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 
@@ -661,7 +701,6 @@ class GoalPlanOccurrenceViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def create(self, request, *args, **kwargs):
-        print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -688,9 +727,6 @@ class StepOccurrenceViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
 class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
     queryset = UpdateOccurrence.objects.all()
     permission_classes = [AllowAny]
@@ -709,13 +745,11 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
         return aQueryset
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
-        print("inside update")
+
         instance = self.get_object()
 
         if instance.update.measuringWhat == "Absolute Date/Time":
-            print("inside the dated")
-            print(instance.stepOccurrence.planOccurrence.startDate)
+
             instance.datetime = datetime.datetime.now()
         if instance.update.measuringWhat == "Relative Date":
             instance.integer = instance.stepOccurrence.planOccurrence.startDate - datetime.datetime.now()
@@ -727,14 +761,12 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
         try:
             self.perform_update(serializer)
 
-            print("inside theStepOccurrence")
-            print(instance.stepOccurrence)
+
 
             theStepOccurrence = StepOccurrence.objects.get(id=instance.stepOccurrence.id)
             theStepOccurrence.previouslySaved = True
             theStepOccurrence.save()
 
-            print("inside theStepOccurrence2")
 
             theUpdate = Update.objects.get(id=instance.update.id)
 
@@ -749,9 +781,7 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
                     theStepOccurrence.wasCompleted = False
 
                     theStepOccurrence.save()
-                    print("check it")
-                    print(theStepOccurrence.wasCompleted)
-                    print("check it out")
+
         except:
             pass
 
@@ -761,12 +791,6 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -818,7 +842,6 @@ class UpdateViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
@@ -828,7 +851,6 @@ class UpdateViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        print(request.data)
 
         instance = self.get_object()
 
@@ -907,7 +929,6 @@ class CroppableImageViewSet(viewsets.ModelViewSet):
     serializer_class = CroppableImageSerializer
 
     def post(self, request, *args, **kwargs):
-        print("inisde post")
 
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
@@ -919,13 +940,11 @@ class VisualizationViewSet(viewsets.ModelViewSet):
     serializer_class = VisualizationSerializer
 
     def post(self, request, *args, **kwargs):
-        print(self.request.data)
 
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
@@ -962,7 +981,6 @@ class PeriodViewSet(viewsets.ModelViewSet):
         currentUser = self.request.user
 
         StepOccurrence.objects.updateStepOccurrencesForRange(currentUser, periodRangeStart, periodRangeEnd)
-        print("occurrencesUpdated")
 
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -978,7 +996,6 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def post(self, request, *args, **kwargs):
-        #print(request)
 
         self.create(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
@@ -997,7 +1014,6 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        print("getting queryset")
         #userPlanQueryset = user.plan_set.all()
         try:
             self.request.user.is_authenticated()
@@ -1017,10 +1033,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
 
             periodRangeStart = toUTC(periodRangeStart, theUserProfile.timezone)
             periodRangeEnd = toUTC(periodRangeEnd, theUserProfile.timezone)
-            print("periodRangeStart")
-            print(periodRangeStart)
-            print("periodRangeEnd")
-            print(periodRangeEnd)
+
 
             dateLaterThanStart = Q(date__gte=periodRangeStart)
             dateLessThanEnd = Q(date__lte=periodRangeEnd)
@@ -1056,7 +1069,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             #theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
 
             theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
-            print(theQueryset)
+            #print(theQueryset)
             #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
         except:
@@ -1101,8 +1114,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'], permission_classes=[PostPutAuthorOrView], url_path='duplicate')
     def duplicateProgram(self, request, *args, **kwargs):
 
-        print("inside duplicateProgram")
-        print(self.kwargs)
+
         program_id = self.kwargs['pk']
         theProgram = Program.objects.get(id=program_id)
         theNewProgram = deepcopy(theProgram)
@@ -1151,7 +1163,6 @@ class ProgramViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
@@ -1211,7 +1222,6 @@ class ProgramNoStepsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
@@ -1221,7 +1231,6 @@ class ProgramNoStepsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data)
@@ -1267,7 +1276,6 @@ class ContactViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data, context={'request': request}, )
 
         serializer.is_valid(raise_exception=True)
@@ -1278,7 +1286,6 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         theUser = self.request.user
-        print(theUser)
         #querySet = Contact.objects.all()
         querySet = Contact.objects.filter((Q(sender=theUser.profile) | Q(receiver=theUser.profile)))
         return querySet
@@ -1304,7 +1311,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -1322,12 +1328,22 @@ class ProfileViewSet(viewsets.ModelViewSet):
             # print(request.user.username)
 
             return Response(ProfileSerializer(theProfile, context={'request': request}).data)
+        else:
+            theProfile = Profile.objects.get(pk=pk)
+            # send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]', "did you get this?")
+            # print(request.user.username)
+
+            return Response(ProfileSerializer(theProfile, context={'request': request}).data)
+
         return super(ProfileViewSet, self).retrieve(request, pk)
 
 
     def get_queryset(self):
-        theUser = self.request.user.is_authenticated()
-        return Profile.objects.filter(user=theUser)
+        if pk=='i':
+            theUser = self.request.user.is_authenticated()
+            return Profile.objects.filter(user=theUser)
+        else:
+            return Profile.objects.filter(user=pk)
 
     def get_object(self):
         theUser = self.request.user.is_authenticated()
@@ -1360,7 +1376,6 @@ class SettingsSetViewSet(viewsets.ModelViewSet):
         return super(SettingsSetViewSet, self).retrieve(request, pk)
 
     def update(self, request, *args, **kwargs):
-        print(self.request.data)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -1444,7 +1459,6 @@ class SessionViewSet(viewsets.ModelViewSet):
 
         serializer.is_valid(raise_exception=True)
 
-        print("this is the serializer data %s" % serializer.data)
 
         #self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -1633,7 +1647,6 @@ conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
     object_name = request.GET['objectName']
-    print(object_name)
     #extension = os.path.splitext(object_name)[1]
     #object_name = str(uuid.uuid4()) + extension
     content_type = mimetypes.guess_type(object_name)[0]

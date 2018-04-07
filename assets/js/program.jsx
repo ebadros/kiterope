@@ -42,10 +42,11 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { addVisualization, deleteVisualization, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addVisualization, deleteVisualization, setDisplayAlert, setProgramRequestModalData, setSubscriptionModalData, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { defaultProgramCroppableImage, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { defaultProgramCroppableImage, mobileModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
+import {SaveButton, StandardInteractiveButton } from './settings'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -457,8 +458,7 @@ this.closeModal()
   }
 
     handleProgramSubmit = (program) => {
-        console.log("program submit")
-        console.log(program.croppableImage)
+
 
         if ((program.id != "" ) &&  (program.id != undefined )){
 
@@ -836,7 +836,7 @@ this.closeModal()
 
 
             if (forMobile) {
-             var modalStyle = stepModalStyle
+             var modalStyle = mobileModalStyle
 
            } else {
 
@@ -1620,14 +1620,41 @@ export class ProgramSubscriptionModal extends React.Component {
         super(props);
         autobind(this);
         this.state = {
+            program:"",
+            notificationMethod:"",
+            goalsData:"",
+            goal:"",
+            planOccurrenceStartDate:moment(),
+            goalOptions:[],
+            subscribed:"Subscribe",
+            serverErrors:{},
             modalIsOpen: false,
-            program:""
         }
     }
 
     openModal () {
         this.setState({modalIsOpen: true});
     }
+
+    componentDidMount() {
+        this.setState({
+            serverErrors: this.props.serverErrors,
+
+            })
+
+         if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.subscriptionModalData != undefined) {
+                this.setState({programModalData:this.props.storeRoot.subscriptionModalData})
+                    this.setStateToData(this.props.storeRoot.subscriptionModalData)
+
+
+            }
+        }
+    }
+
+
+
+
 
     componentWillReceiveProps(nextProps) {
 
@@ -1695,7 +1722,6 @@ export class ProgramSubscriptionModal extends React.Component {
 
                     <div className="row"><div className="eight wide column">
 
-                        <ProgramSubscriptionForm program={this.state.program} formSubmitted={this.handleFormSubmitted} />
                         </div></div>
                     </div>
 
@@ -1706,7 +1732,289 @@ export class ProgramSubscriptionModal extends React.Component {
 }
 
 @connect(mapStateToProps, mapDispatchToProps)
-export class ProgramSubscriptionForm extends React.Component {
+export class ProgramRequestModalForm extends React.Component {
+     constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            user:"",
+            goal:"",
+            receiver:"",
+            shared:"Share"
+        }
+    }
+
+    componentDidMount = () => {
+
+
+       if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.programRequestModalData != undefined) {
+                this.setState({programModalData:this.props.storeRoot.programRequestModalData})
+                    this.setStateToData(this.props.storeRoot.programRequestModalData)
+
+
+            }
+        }
+    }
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
+    handleGoalChange(option){
+        this.setState({goal: option.value});
+    }
+
+
+
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.programRequestModalData != undefined) {
+                this.setState({programModalData: this.props.storeRoot.programRequestModalData})
+                this.setStateToData(nextProps.storeRoot.programRequestModalData)
+
+
+            }
+        }
+
+        if (nextProps.storeRoot) {
+            if (this.state.goalsData != nextProps.storeRoot.goals) {
+                this.setState({
+                    goalsData: nextProps.storeRoot.goals
+                }, this.convertGoalDataToGoalOptions
+                )
+            }
+        }
+
+    }
+
+    convertGoalDataToGoalOptions () {
+        var i;
+        var goalsData = this.state.goalsData;
+        var goalOptions = [];
+
+        for (var key in goalsData) {
+            var aGoalOption = {value: goalsData[key].id, label: goalsData[key].title};
+            goalOptions.push(aGoalOption)
+
+        }
+        /*for (i=0; i < goalsData.length; i++) {
+            var aGoalOption = {value: goalsData[i].id, label: goalsData[i].title}
+            goalOptions.push(aGoalOption)
+
+        }*/
+        this.setState({
+            goalOptions: goalOptions
+        })
+    }
+
+    closeModal() {
+        this.setState({modalIsOpen: false});
+        this.resetForm()
+
+
+    }
+
+    resetForm = () => {
+    this.setState({
+                    goal: "",
+                    user: "",
+        receiver:"",
+                    modalIsOpen: false,
+
+                },            () =>        { store.dispatch(setProgramRequestModalData(this.state))}
+
+
+            )
+
+        }
+
+        setStateToData (programRequestModalData) {
+            this.setState({
+                modalIsOpen: programRequestModalData.modalIsOpen,
+
+            })
+            if (programRequestModalData.data != undefined) {
+
+                var data = programRequestModalData.data
+
+                if (data.receiver != undefined ) {
+                    var theReceiver = data.receiver
+                } else {
+                    var theReceiver = ""
+                }
+
+
+                this.setState({
+                        goal: data.goal,
+                    user: data.user,
+                    receiver: theReceiver
+
+                    }
+                )
+            }
+
+        }
+
+
+
+
+
+
+     handleCancelClicked() {
+        this.closeModal()
+    }
+
+    handleShareClicked() {
+        this.setState({shared:"Sharing"})
+       $.ajax({
+                url: "/api/programRequests/",
+                dataType: 'json',
+                type: 'POST',
+                data: {goal:this.state.goal, user:this.state.user, receiver:this.state.receiver},
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({shared:"Shared"})
+                    this.closeModal()
+                    store.dispatch(setDisplayAlert({showAlert:true, text:"Your request has been sent.", style:{backgroundColor:'purple', color:'white'}}))
+
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+            var serverErrors = xhr.responseJSON;
+                    this.setState({
+                serverErrors:serverErrors,
+                                shared:"Share",
+
+            })
+
+                }.bind(this)
+            });
+
+
+    }
+
+
+    getForm() {
+
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+        return (
+                          <div className="ui page container form">
+ <div className="ui row">&nbsp;</div>
+                  <Header headerLabel="Program Request" />
+                                  <div className="ui three column grid">
+                                           <div className="ui row">
+                                               <div className={wideColumnWidth}>
+                       To request a program be created for you, you must share your goal. Are you sure you want to share this goal?
+                                                   </div>
+                                               </div>
+
+
+
+     <div className="ui field row">
+         <div className={wideColumnWidth + ' field'}>
+
+
+
+                                      <KSSelect value={this.state.goal}
+                                            valueChange={this.handleGoalChange}
+                                            label="Goal to Be Shared:"
+                                            isClearable={false}
+                                            name="goal"
+                                            options={this.state.goalOptions}
+                                            serverErrors={this.getServerErrors("goal")}
+
+                                            />
+                                  </div></div>
+
+                                      </div>
+
+                                    <div className="ui three column stackable grid">
+                          <div className="column">&nbsp;</div>
+                          <div className="column">
+                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                          </div>
+                          <div className="column">
+                              <StandardInteractiveButton color="purple" initial="Share" processing="Sharing" completed="Shared" current={this.state.shared} clicked={this.handleShareClicked}  />
+
+                          </div>
+                      </div>
+                              </div>
+                              )
+
+
+    }
+
+    render() {
+
+    var theForm = this.getForm();
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var modalStyle = mobileModalStyle
+
+           } else {
+
+
+                var modalStyle = stepModalStyle
+
+        }
+
+            return(
+
+
+                 <div className="ui form"><Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={modalStyle}>
+                        {theForm}
+
+                    </Modal>
+                </div>
+
+            )
+        }
+
+}
+
+
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class ProgramSubscriptionModalForm extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -1717,22 +2025,29 @@ export class ProgramSubscriptionForm extends React.Component {
             goal:"",
             planOccurrenceStartDate:moment(),
             goalOptions:[],
+            subscribed:"Subscribe",
+            modalIsOpen: false,
         }
     }
 
     componentDidMount = () => {
 
-        //this.getGoals()
-        this.setState({
-            program: this.props.program
-        });
+
+
+         if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.subscriptionModalData != undefined) {
+                this.setState({programModalData:this.props.storeRoot.subscriptionModalData})
+                    this.setStateToData(this.props.storeRoot.subscriptionModalData)
+
+
+            }
+        }
 
         if (this.props.storeRoot) {
-
             if (this.props.storeRoot.goals) {
                 this.setState({
-            goalsData: this.props.storeRoot.goals
-        },     this.convertGoalDataToGoalOptions )
+                    goalsData: this.props.storeRoot.goals
+                },  this.convertGoalDataToGoalOptions )
             }
             if (this.props.storeRoot.settings) {
                 this.setState({
@@ -1749,21 +2064,52 @@ export class ProgramSubscriptionForm extends React.Component {
         }
     };
 
-    componentWillReceiveProps = (nextProps) => {
-        if (this.state.program != nextProps.program) {
-            this.setState({program: nextProps.program})
+    setStateToData (subscriptionModalData) {
+         this.setState({
+            modalIsOpen: subscriptionModalData.modalIsOpen,
+
+        })
+        if (subscriptionModalData.data != undefined ) {
+
+            var data = subscriptionModalData.data
+
+
+            this.setState({
+                    program: data.program
+                }
+            )
         }
 
-        if (this.props.storeRoot) {
-            if (this.state.goalsData != this.props.storeRoot.goals) {
-                console.log("inside the componetWill receive props");
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+
+         if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors: nextProps.serverErrors
+            })
+        }
+
+        if (nextProps.storeRoot.subscriptionModalData != undefined ) {
+            if (this.state.subscriptionModalData != nextProps.storeRoot.subscriptionModalData) {
+                this.setState({subscriptionModalData:nextProps.storeRoot.subscriptionModalData })
+
+                    this.setStateToData(nextProps.storeRoot.subscriptionModalData)
+
+                }
+
+
+            }
+
+        if (nextProps.storeRoot) {
+            if (this.state.goalsData != nextProps.storeRoot.goals) {
                 this.setState({
-            goalsData: this.props.storeRoot.goals
-        },     this.convertGoalDataToGoalOptions
-)
+                    goalsData: nextProps.storeRoot.goals
+                }, this.convertGoalDataToGoalOptions
+                )
             }
         }
-    };
+    }
 
     getGoals = () => {
         var theUrl = '/api/goals/';
@@ -1796,9 +2142,10 @@ export class ProgramSubscriptionForm extends React.Component {
     }
 
     handleSubscribeClicked = () => {
+        this.setState({subscribed: "Subscribing"});
         var theUrl = "/api/planOccurrences/";
         var planOccurrence = {
-            program: this.state.program.id,
+            program: this.state.program,
             goal: this.state.goal,
             user: this.props.storeRoot.user.id,
             startDate: moment(this.state.planOccurrenceStartDate).format("YYYY-MM-DD"),
@@ -1817,14 +2164,18 @@ export class ProgramSubscriptionForm extends React.Component {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log("handleSubscribeClicked");
-                     this.setState({data: data});
+                     this.setState({
+                         data: data,
+                         subscribed: "Subscribed"
+                     });
 
 
                      store.dispatch(addPlan(data));
                      store.dispatch(shouldReload("subscribed"));
+                     var goalURL = "/goals/" + data.goal + "/plans"
+                     store.dispatch(push(goalURL))
 
-                     this.props.formSubmitted()
+                     //this.props.formSubmitted()
 
 
                  }.bind(this),
@@ -1833,12 +2184,22 @@ export class ProgramSubscriptionForm extends React.Component {
                      var serverErrors = xhr.responseJSON;
                         this.setState({
                             serverErrors:serverErrors,
+                            subscribed: "Subscribe"
                     })
+
 
                  }.bind(this)
              });
 
     };
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
 
     convertGoalDataToGoalOptions () {
         var i;
@@ -1867,7 +2228,6 @@ export class ProgramSubscriptionForm extends React.Component {
 
   handleGoalChange(option){
         this.setState({goal: option.value});
-      console.log(option.value)
     }
 
     handleNotificationMethodChange(option){
@@ -1894,41 +2254,88 @@ export class ProgramSubscriptionForm extends React.Component {
         }
     }
 
-    render () {
+    closeModal() {
+        this.setState({modalIsOpen: false});
+        this.resetForm()
+
+
+    }
+
+    resetForm = () => {
+    this.setState({
+                    program: "",
+                    startDate: moment(),
+                    modalIsOpen: false,
+
+                },            () =>        { store.dispatch(setSubscriptionModalData(this.state))}
+
+
+            )
+
+        }
+
+
+    handleCancelClicked() {
+        this.closeModal()
+    }
+
+    getForm = () => {
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
         return (
-            <div className="ui left aligned grid form">
-                <div className="ui row">
-                        <div className="ui sixteen wide column">
+                          <div className="ui page container form">
+ <div className="ui row">&nbsp;</div>
+                  <Header headerLabel="Subscribe to Plan" />
+                                  <div className="ui three column grid">
 
+     <div className="ui field row">
+         <div className={wideColumnWidth + ' field'}>
 
-                     <div className="field">
 
                                       <label htmlFor="id_startDate">Start Date:</label>
 
                                       <DatePicker selected={this.state.planOccurrenceStartDate}
                                                   onChange={this.handleStartDateChange}/>
                                   </div></div>
-                    </div>
-
-<div className="ui row">
-    <div className="ui twelve wide column">
-                <div className="fluid field">
-                    <KSSelect value={this.state.goal}
+                        <div className="ui field row">
+                                <div className="ui ten wide column">
+<KSSelect value={this.state.goal}
                                             valueChange={this.handleGoalChange}
                                             label="Which goal is this plan for?:"
                                             isClearable={false}
                                             name="goal"
                                             options={this.state.goalOptions}
+                                            serverErrors={this.getServerErrors("goal")}
+
                                             />
-                    </div>
-    </div>
-    <div className="ui four wide column" >                <div className="fluid field"><label>&nbsp;</label>
+                                    </div>
+                            <div className="ui six wide column" >                <div className="fluid field"><label>&nbsp;</label>
 
             <div className="ui right floated fluid primary button" onClick={() => store.dispatch(push('/goals/'))} style={{marginTop:'-1px'}} >Add Goal</div>
         </div>
-    </div>     </div>
-                <div className="ui row">
-                        <div className="ui sixteen wide column">
+    </div>
+                            </div>
+                                      <div className="ui field row">
+                        <div className={wideColumnWidth}>
 
                 <div className="fluid field">
                 <KSSelect value={this.state.notificationMethod}
@@ -1937,16 +2344,16 @@ export class ProgramSubscriptionForm extends React.Component {
                                             isClearable={false}
                                             name="notificationSendMethod"
                                             options={notificationSendMethodOptions}
+                                            serverErrors={this.getServerErrors("notificationMethodChange")}
                                             />
 
                     </div></div>
                     </div>
 
+                                      { this.state.notificationMethod.includes("EMAIL") ?
 
-                                { this.state.notificationMethod.includes("EMAIL") ?
-
-                <div className="ui row">
-                            <div className="sixteen wide column">
+                <div className="ui field row">
+                            <div className={wideColumnWidth}>
                 <ValidatedInput
                                       type="text"
                                       name="title"
@@ -1966,8 +2373,8 @@ export class ProgramSubscriptionForm extends React.Component {
 
                                                 { this.state.notificationMethod.includes("TEXT")  ?
 
-                                <div className="ui row">
-                            <div className="sixteen wide column">                <div className="fluid field"><label>At what phone number would you like to receive notification texts?</label>
+                                <div className="ui field row">
+                            <div className={wideColumnWidth}>                <div className="fluid field"><label>At what phone number would you like to receive notification texts?</label>
 
                 <Phone placeholder="At what mobile phone number would like to receive notification texts?"
                        value={ this.state.notificationPhone }
@@ -1976,8 +2383,8 @@ export class ProgramSubscriptionForm extends React.Component {
                                     </div></div>:<div></div>}
                                                             { this.state.notificationMethod.includes("NO") || this.state.notificationMethod == "" ? <div></div>:
 
-                <div className="ui row">
-                        <div className="ui sixteen wide column">
+                <div className="ui field row">
+                        <div className={wideColumnWidth}>
 
                 <div className="fluid field">
                 <KSSelect value={this.state.notificationSendTime}
@@ -1986,24 +2393,77 @@ export class ProgramSubscriptionForm extends React.Component {
                                             isClearable={false}
                                             name="notificationSendTime"
                                             options={times}
+                          serverErrors={this.getServerErrors("notificationSendTime")}
+
                                             />
 
                     </div></div>
                     </div>}
-                <div className="ui row">
-                        <div className="ui sixteen wide column">
+                                                                            </div>
 
-                <div className="fluid field">
-                <ChoiceModalButton key="key_subscribeButton" click={this.handleSubscribeClicked} color="purple" action="subscribe"
-                                       text="Subscribe"/>
-                </div>
-                            </div>
-                    </div>
-                </div>
+
+                                      <div className="ui three column stackable grid">
+                          <div className="column">&nbsp;</div>
+                          <div className="column">
+                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                          </div>
+                          <div className="column">
+                              <StandardInteractiveButton color="purple" initial="Subscribe" processing="Subscribing" completed="Subscribed" current={this.state.subscribed} clicked={this.handleSubscribeClicked}  />
+
+                          </div>
+                      </div>
+                              </div>
+
+
+
+
+
+
 
 
         )
+
     }
+
+    render() {
+
+    var theForm = this.getForm();
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var modalStyle = mobileModalStyle
+
+           } else {
+
+
+                var modalStyle = stepModalStyle
+
+        }
+
+            return(
+
+
+                 <div className="ui form"><Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={modalStyle}>
+                        {theForm}
+
+                    </Modal>
+                </div>
+
+            )
+        }
+
+
+
 }
 
 
@@ -2493,4 +2953,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, ProgramRequestModalForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionModalForm, ProgramSubscriptionModal};

@@ -424,11 +424,12 @@ export class ClippedImage extends React.Component {
              var height = width;
              var containerHeight = height;
              var classDescriptor = "";
-             var position = "absolute"
+             var position = "relative"
 
-         } else if (this.props.item =='profile') {
-             var width = 'calc(100% - 40)';
-             var left = 20;
+         }
+         else if (this.props.item =='profile') {
+             var width = '100%';
+             var left = 0;
              var height = 'auto'
              //var height = width;
              var containerHeight = width;
@@ -439,7 +440,6 @@ export class ClippedImage extends React.Component {
          var heightString = containerHeight + "px !important";
 
          var containerStyle = {
-             height: containerHeight,
 
          };
 

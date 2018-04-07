@@ -308,6 +308,9 @@ ul.days2 {
     color:white;
 }
 
+.ui.card, .ui.cards>.card {
+    width:100%;
+}
 
 
 div.ui.segment.noBottomMargin {

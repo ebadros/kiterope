@@ -308,6 +308,26 @@ export const loginJoinModalStyleMobile = {
   }
 };
 
+export const mobileModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '10%',
+    left                  : '2%',
+    right                 : '2%',
+    bottom                : '2%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '3px',
+      paddingTop                :'10px',
+  }
+};
+
 export const stepModalStyle = {
     overlay : {
 
@@ -444,5 +464,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   defaultProgramCroppableImage, loginJoinModalStyleMobile, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   mobileModalStyle, defaultProgramCroppableImage, loginJoinModalStyleMobile, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

@@ -290,7 +290,6 @@ NOTIFICATION_METHOD_CHOICES = [
 class NotificationManager(models.Manager):
 
     def create_notification(self, theUserId, sessionId, theType):
-        print("create notification called")
         notification = self.create(user_id=theUserId, call_id=sessionId, type=theType)
 
 
@@ -324,7 +323,7 @@ class CroppableImage(models.Model):
     cropperCropboxData = JSONField(null=True, blank=True, default = "")
 
     def __str__(self):
-        return "%s" % (self.title)
+        return "%s" % (self.id)
 
 
 
@@ -508,9 +507,9 @@ class Step(models.Model):
         dateArrayWithRanges = dateText.split(",")
         dateArray = []
         for element in dateArrayWithRanges:
-            print(element)
+            #print(element)
             if '-' in element:
-                print(" dash in element")
+                #print(" dash in element")
                 subElementArray = element.split("-")
                 #print(subElementArray)
                 startingSubElement = int(subElementArray[0])
@@ -569,10 +568,8 @@ class UpdateOccurrenceManager(models.Manager):
         #print("aDate %s" % aDate)
         #print("aPlanOccurrenceId %d" % aPlanOccurrenceId)
         #print("theUser %d" % theUser)
-        print("aStepOccurrenceId %s, anUpdateId %s" % (aStepOccurrenceId, anUpdateId))
         occurrence = self.create(stepOccurrence_id= aStepOccurrenceId, update_id=anUpdateId)
 
-        print("after Created")
 
         occurrence.full_clean()
         # do something with the book
@@ -588,7 +585,6 @@ class UpdateOccurrenceManager(models.Manager):
         self._for_write = True
 
         obj.save(force_insert=True, using=self.db)
-        print("inside create2")
 
         return obj
 
@@ -625,7 +621,6 @@ class UpdateOccurrence(models.Model):
 class StepOccurrenceManager(models.Manager):
 
     def getStepStartTimeDelta(self, theStepStartTime, theUserId):
-        print("getStepStartTimeDelta called")
         try:
             # If the step has a set time
             theStepStartTimeString = theStepStartTime
@@ -648,7 +643,6 @@ class StepOccurrenceManager(models.Manager):
         return theDatetime
 
     def create_completionBased_occurrence(self, aStepId, aPlanOccurrenceId, theUserId):
-        print("create_completionBased_occurrence")
         theStep = Step.objects.get(id=aStepId)
         theUserProfile = Profile.objects.get(user_id=theUserId)
         occurrence = self.create(step_id=aStepId, type=theStep.type, planOccurrence_id=aPlanOccurrenceId,
@@ -683,8 +677,6 @@ class StepOccurrenceManager(models.Manager):
                 theDatetime = aDate + datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
             except:
                 theDatetime = aDate + datetime.timedelta(hours=int(9), minutes=int(0))
-        print("create_scheduleBased_occurrence")
-        print(theDatetime)
 
 
 
@@ -707,7 +699,6 @@ class StepOccurrenceManager(models.Manager):
         theUTCMinute = theUTCDatetime.minute
         theDateString = theUTCDatetime.strftime("%Y-%m-%d %H:%M:%S")
 
-        print("scheduleing about to happen")
 
 
         schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth, day_of_month=theUTCDayOfTheMonth)
@@ -853,7 +844,6 @@ class StepOccurrenceManager(models.Manager):
                 theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
 
             # print("expoToekn")
-            print(theUserProfile.expoPushToken)
 
             task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
                                                task='kiterope.tasks.send_app_notification',
@@ -904,8 +894,8 @@ class StepOccurrenceManager(models.Manager):
                     periodRangeStartStepTime = periodRangeStart + theStepDatetimeDelta
                     periodRangeEndStepTime = periodRangeEnd + theStepDatetimeDelta
 
-                    print(periodRangeStartStepTime)
-                    print(periodRangeEndStepTime)
+                    #print(periodRangeStartStepTime)
+                    #print(periodRangeEndStepTime)
 
 
                     if aStep.useAbsoluteTime:
@@ -961,7 +951,6 @@ class StepOccurrenceManager(models.Manager):
                             aStepOccurrence = self.create_scheduleBased_occurrence_new(aStep.id, theOccurrenceListItem,
                                                                                    aPlanOccurrence.id,
                                                                                    theUser.id)
-                            print("theProgramSteps 9")
 
                             self.create_update_occurrences(aStep.id, aStepOccurrence)
 
@@ -1130,8 +1119,6 @@ class StepOccurrenceManager(models.Manager):
 
     def create_update_occurrences(self, theStepId, theStepOccurrence):
         currentStepUpdates = Update.objects.filter(steps=theStepId)
-        print("inside create update occurrences")
-        print(currentStepUpdates.count())
         for currentStepUpdate in currentStepUpdates:
             anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(theStepOccurrence.id, currentStepUpdate.id)
 
@@ -1170,9 +1157,7 @@ class StepOccurrence(models.Model):
         updateOccurrences = UpdateOccurrence.objects.filter(stepOccurrence=self)
         return updateOccurrences
 
-    @classmethod
-    def test(self):
-        print("inside test")
+
 
 
 class Contact(models.Model):
@@ -1197,6 +1182,7 @@ class Contact(models.Model):
 
 
 
+
 class PlanOccurrence(models.Model):
     program = models.ForeignKey(Program, null=True, blank=True)
     goal = models.ForeignKey(Goal, null=True, blank=True)
@@ -1216,6 +1202,13 @@ class PlanOccurrence(models.Model):
 
     def get_theProgram(self):
         return Program.objects.get(id=self.program.id)
+
+class ProgramRequest(models.Model):
+    user = models.ForeignKey(User, null=False, blank=False)
+    goal = models.ForeignKey(Goal, null=False, blank=False)
+    receiver = models.ForeignKey(User, null=True, blank=True, related_name='programRequest_receiver')
+
+
 
 
 
@@ -1288,7 +1281,7 @@ class Profile(models.Model):
     expoPushToken = models.CharField(max_length=100, blank=True, null=True)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
     utcMidnight = models.CharField(max_length=5, blank=True, null=True, default='00:00')
-    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+    croppableImage = models.ForeignKey(CroppableImage, null=True, default="214")
 
 
 
@@ -1315,7 +1308,7 @@ class Profile(models.Model):
 
 
     def get_image(self):
-        return self.image
+        return self.croppableImage.image
 
 
 
@@ -1482,8 +1475,6 @@ class KRMessage(models.Model):
 
 class KChannelManager(models.Manager):
     def create_channel(self, theUserIds, thePermission):
-        print("inside create_channel")
-        print(thePermission)
         theChannel = KChannel.objects.create()
         if thePermission:
             theChannel.permission = thePermission
@@ -1517,23 +1508,17 @@ class KChannel(models.Model):
 
     def save(self, *args, **kwargs):
         if self.id:
-            print("inside channel save")
 
             super(KChannel, self).save(*args, **kwargs)
 
         else:
-            print("no id")
             unique = False
             while not unique:
-                print("while not unique")
                 try:
-                    print("try")
 
                     self.label = get_random_string(length=16, allowed_chars=u'-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-                    print("self.label %s" % self.label)
 
                     super(KChannel, self).save(*args, **kwargs)
-                    print("saved")
                 except IntegrityError:
                     self.label = get_random_string(length=16, allowed_chars=u'-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
                 else:

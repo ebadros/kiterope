@@ -42,80 +42,55 @@ from rest_framework.urlpatterns import format_suffix_patterns
 router = routers.DefaultRouter()
 
 router.register(r'users', views.UserViewSet)
-
 router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
-
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'visualizations', views.VisualizationViewSet)
-
 router.register(r'^steps/(?P<step_id>\w+)/duplicate/$', views.StepViewSet, base_name='Step')
 router.register(r'steps', views.StepViewSet)
 router.register(r'searchQuery', views.SearchQueryViewSet, 'SearchQuery')
 router.register(r'goalEntry', views.GoalViewSet, base_name='Goal')
 router.register(r'sessions', views.SessionViewSet, base_name='Session')
 router.register(r'blogPosts', views.BlogPostViewSet, base_name='BlogPost')
-
 router.register(r'notifications', views.NotificationViewSet, base_name='Notification')
-
 router.register(r'messageThreads/(?P<thread_id>\w+)/messages', views.MessageThreadMessageViewSet, base_name='MessageThreadMessage')
 router.register(r'messageThreads/labels/(?P<label_id>\w+)', views.MessageThreadViewSet, base_name='MessageThread')
-
 router.register(r'messageThreads', views.MessageThreadViewSet, base_name='MessageThread')
-
-
 router.register(r'planOccurrences', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
 router.register(r'croppableImages', views.CroppableImageViewSet, base_name='CroppableImage')
-
 router.register(r'messages/(?P<sender_id>\w+)/(?P<receiver_id>\w+)', views.MessageViewSet, base_name='Message')
 router.register(r'messages', views.MessageViewSet, base_name='Message')
 router.register(r'labels/(?P<typeOfLabel>\w+)', views.LabelViewSet, base_name='Label')
-
 router.register(r'labels', views.LabelViewSet, base_name='Label')
 router.register(r'channels/(?P<channel_id>\w+)/messageThread', views.MessageThreadChannelViewSet, base_name='MessageThreadChannel')
-
 router.register(r'channels', views.KChannelViewSet, base_name='Room')
-
 router.register(r'channelUsers/(?P<receiver_id>\w+)', views.ReceiverKChannelViewSet, base_name='KChannel')
 router.register(r'^steps/(?P<step_id>\w+)/duplicate', views.StepDuplicatorViewSet, base_name='step-duplicate')
-
-
 router.register(r'^programs/(?P<program_id>\w+)/steps', views.StepViewSet, base_name='Step')
 router.register(r'^programs/(?P<program_id>\w+)/duplicate/$', views.ProgramViewSet, base_name='Program')
-
 router.register(r'programs', views.ProgramViewSet, base_name='Program')
-
 router.register(r'plan/view/(?P<program_id>\w+)', views.ProgramNoStepsViewSet, base_name='Program')
 router.register(r'browseablePrograms', views.BrowseableProgramViewSet, base_name='Program')
-
-
 router.register(r'^plans/(?P<plan_id>\w+)/steps', views.StepOccurrenceViewSet, base_name='Step')
 router.register(r'^plans', views.PlanOccurrenceViewSet, base_name='PlanOccurrence')
-
-
 router.register(r'^period/(?P<periodRangeStart>[\w\-]+)/(?P<periodRangeEnd>[\w\-]+)', views.PeriodViewSet, base_name="StepOccurrence")
 #router.register(r'period', views.GoalViewSet, base_name='Goal')
 router.register(r'^programs/(?P<program_id>\w+)/updates', views.ProgramUpdateViewSet, base_name='Update')
-
 router.register(r'^steps/(?P<step_id>\w+)/updates', views.UpdateViewSet, base_name='Update')
 router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationViewSet, base_name='Visualization')
-
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
+router.register(r'publicGoals', views.PublicGoalViewSet, base_name='Goal')
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
-
 router.register(r'^goals/(?P<goal_id>\w+)/planOccurrences', views.GoalPlanOccurrenceViewSet, base_name='PlanOccurrence')
-
 router.register(r'^goals/(?P<goal_id>\w+)/programs', views.ProgramViewSet, base_name='Program')
 router.register(r'^stepOccurrences/(?P<stepOccurrence_id>\w+)/updateOccurrences', views.UpdateOccurrenceViewSet, base_name='UpdateOccurrence')
 router.register(r'^stepOccurrences', views.StepOccurrenceViewSet, base_name='StepOccurrence')
 router.register(r'^updateOccurrences', views.UpdateOccurrenceViewSet, base_name='UpdateOccurrence')
-
-
 router.register(r'^clients', views.ClientViewSet, base_name='Profile')
 router.register(r'^settings', views.SettingsSetViewSet, base_name='SettingsSet')
-
-
 router.register(r'^profiles', views.ProfileViewSet, base_name='Profile')
 router.register(r'^program/search', views.ProgramSearchViewSet, base_name="program-search")
+router.register(r'^programRequests', views.ProgramRequestViewSet, base_name="ProgramRequest")
+
 
 
 

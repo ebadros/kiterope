@@ -36,7 +36,7 @@ import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList, UpdateModalForm } from './update'
 
 
-import { defaultStepCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultStepCroppableImage, mobileModalStyle, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
@@ -1822,7 +1822,7 @@ export class StepModalForm extends React.Component {
 
 
             if (forMobile) {
-             var modalStyle = stepModalStyle
+             var modalStyle = mobileModalStyle
 
            } else {
 

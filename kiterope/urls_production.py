@@ -101,6 +101,8 @@ router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationVi
 
 
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
+router.register(r'publicGoals', views.PublicGoalViewSet, base_name='Goal')
+
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
 
 router.register(r'^goals/(?P<goal_id>\w+)/planOccurrences', views.GoalPlanOccurrenceViewSet, base_name='PlanOccurrence')
@@ -118,6 +120,7 @@ router.register(r'^settings', views.SettingsSetViewSet, base_name='SettingsSet')
 router.register(r'^profiles', views.ProfileViewSet, base_name='Profile')
 router.register(r'^program/search', views.ProgramSearchViewSet, base_name="program-search")
 
+router.register(r'^programRequest', views.ProgramRequestViewSet, base_name="ProgramRequest")
 
 
 from django.views.generic.base import RedirectView

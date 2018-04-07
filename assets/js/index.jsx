@@ -8,7 +8,7 @@ var ObjectCreationPage = require('./plan');
 import { DailyList } from './daily'
 import {LoginPage, JoinPage, PasswordResetPage, PasswordConfirmPage, PasswordConfirmForm} from './accounts'
 import {App, TestPage} from './app'
-import {ProfileViewPage, ProfileViewAndEditPage, ProfileListPage, ProfileDetailPage} from './profile'
+import {ProfileViewPage, ProfileViewAndEditPage, ProfileListPage, ProfileDetailPage, ContactDetailPage} from './profile'
 import {ClientListPage, ClientDetailPage} from './client'
 import {Test} from './elements'
 import {MessagePage} from './message'
@@ -126,6 +126,7 @@ ReactDOM.render((
 
 
                 <Route path="/profiles/:profile_id" component={ProfileDetailPage}/>
+
                 <Route path="/clients" component={ClientListPage} onEnter={requireAuth}/>
                 <Route path="/contacts" component={() => (<ProfileListPage myContacts={true}/>)} onEnter={requireAuth}/>
                 <Route path="/tos" component={TermsOfServicePage} />

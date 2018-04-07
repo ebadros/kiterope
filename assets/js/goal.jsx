@@ -14,6 +14,8 @@ import autobind from 'class-autobind'
 var Select = require('react-select');
 import TinyMCE from 'react-tinymce';
 import TinyMCEInput from 'react-tinymce-input';
+import {UserLink } from './profile'
+
 
 import { ValidatedInput } from './app'
 import DatePicker  from 'react-datepicker';
@@ -24,7 +26,7 @@ import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { PlanForm, PlanList } from './plan'
 import {ChoiceModal, IconLabelCombo} from './elements'
 import { Textfit } from 'react-textfit';
-import { ProgramModalForm } from './program'
+import { ProgramModalForm, ProgramRequestModalForm } from './program'
 
 import { defaultGoalCroppableImage, defaultProgramCroppableImage, TINYMCE_CONFIG, theServer, s3IconUrl, userSharingOptions, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
@@ -40,7 +42,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { setCurrentUser, reduxLogout, setProgramModalData, setGoalModalData, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { setCurrentUser, reduxLogout, setProgramRequestModalData, setDisplayAlert, setProgramModalData, setGoalModalData, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 import PropTypes from 'prop-types';
 
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
@@ -371,6 +373,9 @@ componentWillUnmount() {
   }
 }
 
+
+
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class GoalList extends React.Component {
     constructor(props) {
@@ -567,12 +572,39 @@ export class GoalDetailPage extends React.Component {
               this.handleOpenProgramModalForm();
               break;
           case ("kiterope"):
-              store.dispatch(push("/goalEntry"));
+              this.setState({openModal:false})
+                  var theData = {modalIsOpen:true, data:{goal:this.state.data.id, user:this.state.data.user, receiver: ""}}
+
+              store.dispatch(setProgramRequestModalData(theData))
+
               break;
       }
   };
 
+
+
     render () {
+
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
 
 
         return (
@@ -598,6 +630,7 @@ export class GoalDetailPage extends React.Component {
 
                         <div>&nbsp;</div>
                         <GoalViewEditDeleteItem key={this.props.params.goal_id}
+                                                isListNode={forMobile ? true: false}
                                                 showCloseButton={false}
                                                 apiUrl="/api/goals/"
                                                 id={this.props.params.goal_id}
@@ -621,6 +654,8 @@ export class GoalDetailPage extends React.Component {
                               isListNode={false}
                               serverErrors={this.state.serverErrors}/>
                                                          <ProgramModalForm />
+                    <ProgramRequestModalForm />
+
 
 
             </div>
@@ -670,6 +705,41 @@ if (this.props.data != undefined) {
 
     };
 
+    handleLike() {
+
+        var theUrl = "/api/goals/" + this.state.data.id + "/";
+        var theGoal = this.state.data
+        var theLikes =
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: goal,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                        saved: "Saved"
+                    });
+                    store.dispatch(updateGoal(data));
+
+
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                        saved: "Save"
+                    })
+                }
+            })
+
+    }
+
     handleWasCompletedChange(e) {
         if (this.state.wasCompleted) {
             this.setState({
@@ -701,13 +771,26 @@ if (this.props.data != undefined) {
         }
         return(
             <div key={this.state.data.id} className="column">
-                                    <div className="ui segment noBottomMargin noTopMargin">
+                                    <div className="ui card">
+                                        <div className="content">
 
                 {theImage}
+                                            </div>
+                                                                                <div className="right aligned content">
+                                                                                    {/* <span className="right floated">
+      <a onClick={this.handleLike}><i className="heart outline like icon"></i></a>
+                                                                                        {this.state.data.votes}
+    </span> */}
 
+                                        <Link to={`/profiles/${this.state.data.user}/`}><UserLink userId={this.state.data.user} fullName={this.state.data.userName} image={this.state.data.userImage}/></Link>
+
+
+
+                                                                                    </div>
 
                 </div>
                 </div>
+
 
         )
     }
@@ -2087,30 +2170,62 @@ export class GoalBasicView extends React.Component {
     render() {
         if (this.state.data) {
             var theDeadline = moment(this.state.data.deadline).format("MMM DD, YYYY");
+            if (this.props.isListNode) {
+                return (
+                    <div onClick={this.goToDetail}>
+                        <ClippedImage item="goal" src={this.state.data.image}/>
 
-            return (
-                <div className="ui grid">
-                    <div className="two wide column">
-                        <img className="ui image" src={this.state.data.image}></img>
+                        <div className="ui grid">
+                            <div className="sixteen wide column">
+
+                                <div className="row">&nbsp;</div>
+                                <div className="row">
+                                    <div className="ui two column grid">
+
+                                            <div className="ui left aligned column">
+                                                 <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
+                                            background="Light" link="/goalEntry"/>
+                                                </div>
+                                                                                    <div className="ui right aligned column">
+
+                                                 <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric}
+                                            icon="metric"
+                                            background="Light" link="/goalEntry"/>
+                                                                                        </div>
+                        </div></div>
                     </div>
-                    <div className="eight wide column">
-                        <div className="fluid row">
-                            <h1>{this.state.data.title}</h1>
+                            </div>
                         </div>
-                        <div className="fluid row">
-                            {this.state.data.coreValues}
+
+                )
+            }
+        else {
+
+                return (
+                    <div className="ui grid">
+                        <div className="two wide column">
+                            <img className="ui image" src={this.state.data.image}></img>
+                        </div>
+                        <div className="eight wide column">
+                            <div className="fluid row">
+                                <h1>{this.state.data.title}</h1>
+                            </div>
+                            <div className="fluid row">
+                                {this.state.data.coreValues}
+                            </div>
+                        </div>
+                        <div className="right aligned six wide column">
+                            <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
+                                            background="Light" link="/goalEntry"/>
+                            <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric}
+                                            icon="metric"
+                                            background="Light" link="/goalEntry"/>
                         </div>
                     </div>
-                    <div className="right aligned six wide column">
-                        <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
-                                        background="Light" link="/goalEntry"/>
-                        <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric} icon="metric"
-                                        background="Light" link="/goalEntry"/>
-                    </div>
-                </div>
 
-            )
+                )
 
+            }
         } else {
             return (<div></div>)
         }
@@ -2134,4 +2249,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalModalForm, GoalListPage , GoalEntryPage, GoalDetailPage, GoalBasicView,  };
+module.exports = { GoalModalForm, GoalListPage , GoalList, GoalEntryPage, GoalDetailPage, GoalBasicView,  };

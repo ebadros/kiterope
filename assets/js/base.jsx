@@ -12,7 +12,7 @@ import {SaveButton } from './settings'
 
 import autobind from 'class-autobind'
 import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
-import { GoalBasicView } from './goal'
+import { GoalBasicView , GoalNode } from './goal'
 import { UpdateItemMenu } from './update'
 
 
@@ -20,7 +20,7 @@ import { VisualizationItemMenu, VisualizationBasicView } from './visualization'
 
 
 import { PlanForm, PlanBasicView, SimplePlanForm } from './plan'
-import { ProgramBasicView, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionForm } from './program'
+import { ProgramBasicView, ProgramSubscriptionModal, ProgramItemMenu, ProgramSubscriptionModalForm } from './program'
 
 import { StepModalForm, StepBasicView, StepDetailView, StepItemMenu } from './step'
 import { ProfileItemMenu, ProfileForm, ProfileBasicView } from './profile'
@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setSignInOrSignupModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -1963,7 +1963,7 @@ export class ViewEditDeleteItem extends React.Component {
         return (
                         <div ref="ref_basic">
 
-            <GoalBasicView data={this.state.data} />
+            <GoalBasicView data={this.state.data}  />
                             </div>
         )
     };
@@ -2127,13 +2127,15 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
 
 
     getBasicView = () => {
-        return (
-                        <div ref="ref_basic">
 
-            <GoalBasicView data={this.state.data} />
-                            </div>
-        )
-    };
+            return (
+                <div ref="ref_basic">
+
+                    <GoalBasicView data={this.state.data} isListNode={this.props.isListNode}/>
+                </div>
+            )
+
+    }
 
 
 
@@ -2192,6 +2194,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
              openModal:false,
              modalShouldClose:false,
              userPlanOccurrenceId:"",
+             subscribeButtonText:"",
 
 
          }
@@ -2282,8 +2285,15 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
          if (this.props.userPlanOccurrenceId) {
              this.setState({userPlanOccurrenceId: this.props.userPlanOccurrenceId})
          }
+         if (this.state.data.subscribed) {
+             this.setState({subscribeButtonText: "Unsubscribe"})
+         } else {
+             this.setState({subscribeButtonText: "Subscribe"})
 
          }
+     }
+
+
 
 
      reload = () => {
@@ -2461,10 +2471,12 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     handleSubscribeClick = () => {
+
+
+
         if (this.props.storeRoot.user != undefined) {
-            this.setState({
-                    openModal: true
-                })
+            var theData ={modalIsOpen:true, data:{program:this.state.id}}
+            store.dispatch(setSubscriptionModalData(theData))
 
             }
          else {
@@ -2490,6 +2502,7 @@ hideComponent = () => {
     };
 
     handleUnsubscribeClick = () => {
+        this.setState({subscribeButtonText: "Unsubscribing..."})
         if (this.state.userPlanOccurrenceId) {
             var theUrl = "/api/planOccurrences/" + this.state.userPlanOccurrenceId + "/";
             var planOccurrence = {
@@ -2506,7 +2519,10 @@ hideComponent = () => {
                 },
                 success: function (data) {
                     console.log("success");
-                    this.state.data.isSubscribed = false;
+                    this.setState({data:Object.assign(this.state.data, {isSubscribed:false})})
+                    //this.state.data.isSubscribed = false;
+                            this.setState({subscribeButtonText: "Subscribe"})
+
                     store.dispatch(removePlan(this.state.userPlanOccurrenceId))
 
 
@@ -2538,7 +2554,7 @@ hideComponent = () => {
         if (this.state.data) {
             if (this.state.data.isSubscribed) {
                 var subscribeButton = <div className="ui purple bottom attached large button"
-                                           onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
+                                           onClick={this.handleUnsubscribeClick}>{this.state.subscribeButtonText}</div>
 
             } else if (!this.state.data.isSubscribed) {
 
@@ -2568,7 +2584,7 @@ hideComponent = () => {
 
                                 {this.props.hideControlBar ? null : controlBar}
 
-                <ProgramSubscriptionModal  closeModalClicked={this.handleCloseModalClicked}
+                <ProgramSubscriptionModal closeModalClicked={this.handleCloseModalClicked}
               click={this.handleModalClick}
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
@@ -2804,7 +2820,6 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     handleUnsubscribeClick = () => {
-        console.log("handleSubscribeclicke");
         if (this.state.id) {
             var theUrl = "/api/planOccurrences/" + this.state.id + "/";
             var planOccurrence = {
@@ -2820,6 +2835,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
+                    this.setState({data:Object.assign(this.state.data, {isSubscribed:false})})
                     this.state.data.isSubscribed = false;
                     store.dispatch(removePlan(this.state.id))
 

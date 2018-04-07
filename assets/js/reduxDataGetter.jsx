@@ -11,7 +11,7 @@ var TinyMCE = require('react-tinymce-input');
 var MaskedInput = require('react-maskedinput');
 import autobind from 'class-autobind'
 var validator = require('validator');
-import TimePicker from 'rc-time-picker';
+//import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
 import  { ValidatedInput, KRCheckBox } from './app'
@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setTimeLastReloaded, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -124,264 +124,249 @@ export default class ReduxDataGetter extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            width:'0',
-            height:'0',
-            userDataLoaded:false,
-            profileDataLoaded:false,
-            settingsDataLoaded:false,
-            goalDataLoaded:false,
-            planDataLoaded:false,
-            programDataLoaded: false,
-            contactDataLoaded:false,
-            stepOccurrenceDataLoaded:false,
-            updateOccurrenceDataLoaded:false,
-            updateDataLoaded:false,
-            messageThreadDataLoaded:false,
-            rehydrated:false,
-            user:""
-
-
-
+            width: '0',
+            height: '0',
+            rehydrated: false,
+            user: "",
+            intervals: "",
         }
 
     }
 
     componentDidMount = () => {
-
-
-
         store.dispatch(setMessageWindowVisibility(false));
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
 
 
-        persistStore(store, {
-            blacklist: [
-                'rehydrated',
-                'routing',
-                'gui',
-                'smartGoalFormData',
+
+         persistStore(store, {
+         blacklist: [
+         'rehydrated',
+         'routing',
+         'gui',
+         'smartGoalFormData',
+         ]
+         }, () => {
+         store.dispatch(setRehydrated(true))
 
 
-            ]
-        }, () => {
-            store.dispatch(setRehydrated(true))
-            //this.setState({rehydrated: true}, () => {
-              //  this.getAllData()
-            //})
-            this.getAllData()
+
+         //this.setState({rehydrated: true}, () => {
+           this.getAllData()
+         //})
 
 
-        })
+         })
+
     };
-    getAllData() {
 
-        store.dispatch(setSmartGoalFormData({modalIsOpen:false, data:{}}))
-        this.loadUserData
+    stopPollingForData() {
+        if (this.state.userDataLoaded &&
+            this.state.stepDataLoaded &&
+            this.state.programDataLoaded &&
+            this.state.planDataLoaded &&
+            this.state.goalDataLoaded &&
+            this.state.updateOccurrenceDataLoaded &&
+            this.state.visualizationDataLoaded &&
+            this.state.stepOccurrenceDataLoaded &&
+            this.state.updateDataLoaded &&
+            this.state.profileDataLoaded &&
+            this.state.settingsDataLoaded &&
+            this.state.contactDataLoaded) {
+            clearInterval(this.state.intervalID)
 
-           // var intervalID = setInterval(this.loadUserData, 2000);
-            //this.setState({intervalID: intervalID})
-
+        }
     }
 
+
+    getAllData() {
+
+        store.dispatch(setSmartGoalFormData({modalIsOpen: false, data: {}}))
+
+
+        this.loadUserData()
+
+        // var intervalID = setInterval(this.loadUserData, 2000);
+        //this.setState({intervalID: intervalID})
+
+    }
 
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
-            if (this.state.intervalID != undefined) {
-                clearInterval(this.state.intervalID);
+        if (this.state.intervalID != undefined) {
+            clearInterval(this.state.intervalID);
 
         }
-}
-
-updateWindowDimensions() {
-  this.setState({ width: window.innerWidth, height: window.innerHeight });
-    if (window.innerWidth >= 768 ) {
-        store.dispatch(setForMobile(false))
-    } else {
-                store.dispatch(setForMobile(true))
-
-    }
-}
-
-componentWillReceiveProps (nextProps) {
-    if (this.state.userDataLoaded != nextProps.storeRoot.userDataLoaded) {
-        this.setState({userDataLoaded: nextProps.storeRoot.userDataLoaded})
     }
 
-    if (this.state.stepDataLoaded != nextProps.storeRoot.stepDataLoaded) {
-        this.setState({stepDataLoaded: nextProps.storeRoot.stepDataLoaded})
+
+    updateWindowDimensions() {
+        this.setState({width: window.innerWidth, height: window.innerHeight});
+        if (window.innerWidth >= 768) {
+            store.dispatch(setForMobile(false))
+        } else {
+            store.dispatch(setForMobile(true))
+
+        }
     }
 
-    if (this.state.programDataLoaded != nextProps.storeRoot.programDataLoaded) {
-        this.setState({programDataLoaded: nextProps.storeRoot.programDataLoaded})
-    }
+    componentWillReceiveProps(nextProps) {
+        if (this.state.userDataLoaded != nextProps.storeRoot.userDataLoaded) {
+            this.setState({userDataLoaded: nextProps.storeRoot.userDataLoaded})
 
-    if (this.state.planDataLoaded != nextProps.storeRoot.planDataLoaded) {
-        this.setState({planDataLoaded: nextProps.storeRoot.planDataLoaded})
-    }
+        }
 
-    if (this.state.goalDataLoaded != nextProps.storeRoot.goalDataLoaded) {
-        this.setState({goalDataLoaded: nextProps.storeRoot.goalDataLoaded})
-    }
+        if (this.state.stepDataLoaded != nextProps.storeRoot.stepDataLoaded) {
+            this.setState({stepDataLoaded: nextProps.storeRoot.stepDataLoaded})
+        }
 
-    if (this.state.updateOccurrenceDataLoaded != nextProps.storeRoot.updateOccurrenceDataLoaded) {
-        this.setState({updateOccurrenceDataLoaded: nextProps.storeRoot.updateOccurrenceDataLoaded})
-    }
+        if (this.state.programDataLoaded != nextProps.storeRoot.programDataLoaded) {
+            this.setState({programDataLoaded: nextProps.storeRoot.programDataLoaded})
+        }
 
-    if (this.state.visualizationDataLoaded != nextProps.storeRoot.visualizationDataLoaded) {
-        this.setState({visualizationDataLoaded: nextProps.storeRoot.visualizationDataLoaded})
-    }
+        if (this.state.planDataLoaded != nextProps.storeRoot.planDataLoaded) {
+            this.setState({planDataLoaded: nextProps.storeRoot.planDataLoaded})
+        }
 
-    if (this.state.stepOccurrenceDataLoaded != nextProps.storeRoot.stepOccurrenceDataLoaded) {
-        this.setState({stepOccurrenceDataLoaded: nextProps.storeRoot.stepOccurrenceDataLoaded})
-    }
+        if (this.state.goalDataLoaded != nextProps.storeRoot.goalDataLoaded) {
+            this.setState({goalDataLoaded: nextProps.storeRoot.goalDataLoaded})
+        }
 
-    if (this.state.updateDataLoaded != nextProps.storeRoot.updateDataLoaded) {
-        this.setState({updateDataLoaded: nextProps.storeRoot.updateDataLoaded})
-    }
+        if (this.state.updateOccurrenceDataLoaded != nextProps.storeRoot.updateOccurrenceDataLoaded) {
+            this.setState({updateOccurrenceDataLoaded: nextProps.storeRoot.updateOccurrenceDataLoaded})
+        }
 
-    if (this.state.profileDataLoaded != nextProps.storeRoot.profileDataLoaded) {
-        this.setState({profileDataLoaded: nextProps.storeRoot.profileDataLoaded})
-    }
+        if (this.state.visualizationDataLoaded != nextProps.storeRoot.visualizationDataLoaded) {
+            this.setState({visualizationDataLoaded: nextProps.storeRoot.visualizationDataLoaded})
+        }
 
-    if (this.state.settingsDataLoaded != nextProps.storeRoot.settingsDataLoaded) {
-        this.setState({settingsDataLoaded: nextProps.storeRoot.settingsDataLoaded})
-    }
+        if (this.state.stepOccurrenceDataLoaded != nextProps.storeRoot.stepOccurrenceDataLoaded) {
+            this.setState({stepOccurrenceDataLoaded: nextProps.storeRoot.stepOccurrenceDataLoaded})
+        }
 
-    if (this.state.contactDataLoaded != nextProps.storeRoot.contactDataLoaded) {
-        this.setState({contactDataLoaded: nextProps.storeRoot.contactDataLoaded})
-    }
+        if (this.state.updateDataLoaded != nextProps.storeRoot.updateDataLoaded) {
+            this.setState({updateDataLoaded: nextProps.storeRoot.updateDataLoaded})
+        }
 
-    if (this.state.user != nextProps.storeRoot.user) {
-        var currentUser = nextProps.storeRoot.user
-        this.setState({user: currentUser})
-        if (currentUser != undefined) {
-            if (currentUser.id != null) {
-                if (currentUser.isCoach) {
-                    this.loadCoachSpecificData()
+        if (this.state.profileDataLoaded != nextProps.storeRoot.profileDataLoaded) {
+            this.setState({profileDataLoaded: nextProps.storeRoot.profileDataLoaded})
+        }
+
+        if (this.state.settingsDataLoaded != nextProps.storeRoot.settingsDataLoaded) {
+            this.setState({settingsDataLoaded: nextProps.storeRoot.settingsDataLoaded})
+        }
+
+        if (this.state.contactDataLoaded != nextProps.storeRoot.contactDataLoaded) {
+            this.setState({contactDataLoaded: nextProps.storeRoot.contactDataLoaded})
+        }
+
+        if (this.state.user != nextProps.storeRoot.user) {
+
+            var currentUser = nextProps.storeRoot.user
+            this.setState({user: currentUser})
+            if (currentUser != undefined) {
+                if (currentUser.id != null) {
+                    this.loadUniversalData();
+
 
                 }
-                this.loadUniversalData();
-
-
             }
         }
+
     }
 
-}
+    loadSpecificData(dataLoadedVariable, theApiUrl, methodCall) {
+                if (this.state[dataLoadedVariable] != true || this.state[dataLoadedVariable] != undefined) {
 
-    stopPollingForData() {
-        if (this.state.userDataLoaded &&
-                this.state.stepDataLoaded &&
-                this.state.programDataLoaded &&
-                this.state.planDataLoaded &&
-                this.state.goalDataLoaded &&
-                this.state.updateOccurrenceDataLoaded &&
-                this.state.visualizationDataLoaded &&
-                this.state.stepOccurrenceDataLoaded &&
-                this.state.updateDataLoaded &&
-                this.state.profileDataLoaded &&
-                this.state.settingsDataLoaded &&
-                this.state.contactDataLoaded )
+                    var intervalID = setInterval(this.loadSpecificDataCall(dataLoadedVariable, theApiUrl, methodCall), 3000);
 
-
-         {
-                clearInterval(this.state.intervalID)
-
-        }
+                    var theInterval = {[dataLoadedVariable]: intervalID}
+                    this.setState({intervals: Object.assign({}, this.state.intervals, theInterval)})
+                }
     }
 
-    loadUserData() {
 
-        if (this.state.userDataLoaded == false || this.props.storeRoot.userDataLoaded == undefined) {
-            var theUrl = '/api/users/i/';
+
+
+
+
+    loadSpecificDataCall(dataLoadedVariable, theApiUrl, methodCall) {
+
+
             $.ajax({
                 method: 'GET',
-                url: theUrl,
+                url: theApiUrl,
                 datatype: 'json',
                 headers: {
                     'Authorization': 'Token ' + localStorage.token
                 },
-                success: function (userData) {
-                    store.dispatch(setDataLoaded('userData'))
-                    store.dispatch(setCurrentUser(userData));
+                success:  (someData) => {
 
-                    if (userData.id != null) {
-                         if (userData.isCoach) {
-                            this.loadCoachSpecificData()
+                    methodCall({data:someData, dataLoadedVariable: dataLoadedVariable})
 
-                        }
-                        this.loadUniversalData();
-
-
-                    }
-                                    clearInterval(this.state.intervalID);
-
-
-                }.bind(this),
+                },
                 error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
+                    console.error(theApiUrl, status, err.toString());
 
                 }
             })
-        }
+
+    }
+
+    loadUserData() {
+
+        this.loadSpecificData("userDataLoaded", "/api/users/i/", (theData) => {
+
+            store.dispatch(setDataLoaded('userData'))
+            store.dispatch(setCurrentUser(theData.data));
+            if (theData.data.id != null) {
+
+                this.loadUniversalData();
+
+
+            }
+
+
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+                    clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+                }
+
+
+
+
+        })
     }
 
 
 
     loadProfileData() {
-                if (!this.state.profileDataLoaded) {
+        this.loadSpecificData("profileDataLoaded", "/api/profiles/me/",  (theData) => {
+            store.dispatch(setProfile(theData.data))
+            store.dispatch(setDataLoaded('profileData'))
 
-                    var theUrl = '/api/profiles/me/';
-                    $.ajax({
-                        method: 'GET',
-                        url: theUrl,
-                        datatype: 'json',
-                        headers: {
-                            'Authorization': 'Token ' + localStorage.token
-                        },
-                        success: function (profileData) {
-                store.dispatch(setDataLoaded('profileData'))
-                            store.dispatch(setProfile(profileData));
-
-
-                        }.bind(this),
-                        error: function (xhr, status, err) {
-                            console.error(theUrl, status, err.toString());
-                        }
-                    })
-                }
-
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
+
+
+
 
     loadSettingsData() {
-                    if (!this.state.settingsDataLoaded) {
+        this.loadSpecificData("settingsDataLoaded", "/api/settings/me/",  (theData) => {
+            store.dispatch(setSettings(theData.data))
+            store.dispatch(setDataLoaded('settingsData'))
 
-
-                        var theUrl = '/api/settings/me/';
-                        $.ajax({
-                            method: 'GET',
-                            url: theUrl,
-                            datatype: 'json',
-                            headers: {
-                                'Authorization': 'Token ' + localStorage.token
-                            },
-                            success: function (settingsData) {
-                                                                    store.dispatch(setDataLoaded('settingsData'))
-
-
-
-                                store.dispatch(setSettings(settingsData));
-
-
-                            }.bind(this),
-                            error: function (xhr, status, err) {
-                                console.error(theUrl, status, err.toString());
-                            }
-                        })
-                    }
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
+
+
 
     setUsersTimezone(userProfileId) {
         var theUrl = '/api/profiles/' + userProfileId + "/";
@@ -391,268 +376,177 @@ componentWillReceiveProps (nextProps) {
             method: 'PATCH',
             url: theUrl,
             datatype: 'json',
-            data:{timezone: timezone},
+            data: {timezone: timezone},
             headers: {
                 'Authorization': 'Token ' + localStorage.token
             },
-            success: function(data) {
-
+            success: function (data) {
 
 
             }.bind(this),
-            error: function(xhr, status, err) {
+            error: function (xhr, status, err) {
                 console.error(theUrl, status, err.toString());
-        }
+            }
         })
 
     }
 
     loadUniversalData() {
-        //console.log("universalData loaded")
-        this.loadStepOccurrenceData();
-
-        this.loadGoalData();
-        this.loadPlanData();
-        this.loadUpdateOccurrenceData();
-        this.loadVisualizationData();
+        var halfAnHourAgo = moment().subtract(.5, "hours")
+        if (this.state.timeLastReloaded < halfAnHourAgo || this.props.storeRoot.timeLastReloaded == undefined) {
+                        store.dispatch(setTimeLastReloaded())
 
 
-        this.loadProfileData();
-        this.loadSettingsData();
-        //this.loadMessageThreadData();
-        this.loadContactData();
-        if(this.props.storeRoot.user) {
+            this.loadStepOccurrenceData();
 
-            this.setUsersTimezone(this.props.storeRoot.user.profileId)
+            this.loadGoalData();
+            this.loadProgramData()
+
+            this.loadPlanData();
+            this.loadUpdateOccurrenceData();
+            this.loadVisualizationData();
+            this.loadUpdateData()
+
+
+            this.loadProfileData();
+            this.loadSettingsData();
+            //this.loadMessageThreadData();
+            this.loadContactData();
+            if (this.props.storeRoot.user) {
+                if (this.props.storeRoot.profile != undefined) {
+                    if (this.props.storeRoot.profile.timezone == undefined) {
+
+                        this.setUsersTimezone(this.props.storeRoot.user.profileId)
+                    }
+                }
+            }
         }
 
     }
 
 
 
-    loadCoachSpecificData() {
-        //console.log("coach specific data")
-
-        this.loadProgramData()
-        this.loadUpdateData()
-
-    }
 
     loadUpdateData() {
-                    if (!this.state.updateDataLoaded) {
+        this.loadSpecificData("updateDataLoaded", "/api/updates/",  (theData) => {
+            store.dispatch(setUpdates(theData.data))
+            store.dispatch(setDataLoaded('updateData'))
 
-
-                        var theUrl = "/api/updates/";
-                        $.ajax({
-                            url: theUrl,
-                            dataType: 'json',
-                            cache: false,
-                            headers: {
-                                'Authorization': 'Token ' + localStorage.token
-                            },
-                            success: function (data) {
-                store.dispatch(setDataLoaded('updateData'))
-
-
-                                store.dispatch(setUpdates(data))
-
-                            }.bind(this),
-                            error: function (xhr, status, err) {
-                                console.error(theUrl, status, err.toString());
-
-                            }.bind(this),
-
-                        });
-                    }
-
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
+
+
+
 
     loadGoalData() {
-                    if (!this.state.goalDataLoaded) {
+        this.loadSpecificData("goalDataLoaded", "/api/goals/",  (theData) => {
+            store.dispatch(setGoals(theData.data))
+            store.dispatch(setDataLoaded('goalData'))
 
-
-                        var theUrl = "/api/goals/";
-                        $.ajax({
-                            url: theUrl,
-                            dataType: 'json',
-                            cache: false,
-                            headers: {
-                                'Authorization': 'Token ' + localStorage.token
-                            },
-                            success: function (data) {
-                store.dispatch(setDataLoaded('goalData'))
-
-
-                                store.dispatch(setGoals(data))
-
-                            }.bind(this),
-                            error: function (xhr, status, err) {
-                                console.error(theUrl, status, err.toString());
-
-                            }.bind(this),
-
-                        });
-                    }
-
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
+
+
+
 
     loadPlanData() {
-                    if (!this.state.planDataLoaded) {
+        this.loadSpecificData("planDataLoaded", "/api/planOccurrences/",  (theData) => {
+            store.dispatch(setPlans(theData.data))
+            store.dispatch(setDataLoaded('planData'))
 
-
-                        var theUrl = "/api/planOccurrences/";
-                        $.ajax({
-                            url: theUrl,
-                            dataType: 'json',
-                            cache: false,
-                            headers: {
-                                'Authorization': 'Token ' + localStorage.token
-                            },
-                            success: function (data) {
-                store.dispatch(setDataLoaded('planData'))
-
-
-                                store.dispatch(setPlans(data))
-
-                            }.bind(this),
-                            error: function (xhr, status, err) {
-                                console.error(theUrl, status, err.toString());
-
-                            }.bind(this),
-
-                        });
-                    }
-
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
+
+
 
     loadProgramData() {
-                    //if (!this.props.storeRoot.programDataLoaded) {
+        console.log("loadProgramData")
+        this.loadSpecificData("programDataLoaded", "/api/programs/",  (theData) => {
+            store.dispatch(setPrograms(theData.data))
+            store.dispatch(setDataLoaded('programData'))
 
-
-
-                        var theUrl = "/api/programs/";
-                        $.ajax({
-                            url: theUrl,
-                            dataType: 'json',
-                            cache: false,
-                            headers: {
-                                'Authorization': 'Token ' + localStorage.token
-                            },
-                            success: function (data) {
-                                                                store.dispatch(setPrograms(data))
-
-                store.dispatch(setDataLoaded('programData'))
-
-
-
-                            }.bind(this),
-                            error: function (xhr, status, err) {
-                                console.error(theUrl, status, err.toString());
-
-                            }.bind(this),
-
-                        });
-                    //}
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
 
-    loadMessageThreadData (){
-            if (!this.state.messageThreadDataLoaded) {
+
+    loadMessageThreadData() {
+        if (!this.state.messageThreadDataLoaded) {
+
+            //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
+
+            var theUrl = '/api/messageThreads/';
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({messageThreadDataLoaded: true})
 
 
+                    store.dispatch(setMessageThreads(data));
+                    store.dispatch(setOpenThreads({}))
 
 
-                //sb.connect('eric@kiterope.com', '06acb152950c651a173c7c4425856ef7317281d3', function(user, error) {});
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                }.bind(this),
 
-
-                var theUrl = '/api/messageThreads/';
-
-                $.ajax({
-                    url: theUrl,
-                    dataType: 'json',
-                    cache: false,
-                    headers: {
-                        'Authorization': 'Token ' + localStorage.token
-                    },
-                    success: function (data) {
-                                            this.setState({messageThreadDataLoaded:true})
-
-
-                        store.dispatch(setMessageThreads(data));
-                        store.dispatch(setOpenThreads({}))
-
-
-                    }.bind(this),
-                    error: function (xhr, status, err) {
-                        console.error(theUrl, status, err.toString());
-                    }.bind(this),
-
-                });
-            }
-  }
+            });
+        }
+    }
 
 
 
     loadStepOccurrenceData() {
-        if (!this.state.stepOccurrenceDataLoaded ) {
+        var periodRangeStart = new Date();
+        var periodRangeEnd = new Date();
+        periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
+        periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
+        var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
+        this.loadSpecificData("stepOccurrenceDataLoaded", theUrl,  (theData) => {
+            store.dispatch(setDataLoaded('stepOccurrenceData'))
+            store.dispatch(setStepOccurrences(theData.data))
 
-            var periodRangeStart = new Date();
-            var periodRangeEnd = new Date();
-            periodRangeStart = moment(periodRangeStart).format('YYYY-MM-DD');
-            periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
-            var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/" ;
-
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
-                success: function (data) {
-                store.dispatch(setDataLoaded('stepOccurrenceData'))
-
-
-                    store.dispatch(setStepOccurrences(data))
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-                }.bind(this)
-            });
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
         }
 
+        })
 
     }
 
     loadUpdateOccurrenceData() {
-        if (!this.state.updateOccurrenceDataLoaded) {
+        /*
+        this.loadSpecificData("updateOccurrenceDataLoaded", "/api/updateOccurrences/",  (theData) => {
+            this.formatUpdateOccurrenceData(theData.data)
+            store.dispatch(setDataLoaded('updateOccurrenceData'))
 
-
-
-            var theUrl = "/api/updateOccurrences/"
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
-                success: function (data) {
-                    this.formatUpdateOccurrenceData(data)
-                store.dispatch(setDataLoaded('updateOccurrenceData'))
-
-
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-                }.bind(this)
-            });
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
         }
-
-
+        })*/
     }
+
+
+
 
     formatUpdateOccurrenceData(theUpdateOccurrences) {
         //console.log("formatUpdateOccurrenceData")
@@ -708,67 +602,33 @@ componentWillReceiveProps (nextProps) {
     }
 
 
-    loadContactData()
-        {
-            if (!this.state.contactDataLoaded) {
+     loadContactData() {
+         this.loadSpecificData("contactDataLoaded", "/api/contacts/",  (theData) => {
+             store.dispatch(setDataLoaded('contactData'))
+             this.organizeContacts(theData.data)
 
-
-            var theUrl = "/api/contacts/";
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
-                success: function (data) {
-                store.dispatch(setDataLoaded('contactData'))
-
-
-                    this.organizeContacts(data)
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-
-                }.bind(this),
-
-            });
-
-
+             if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
         }
+
+         })
+
+
+     }
+
+
+    loadVisualizationData() {
+        this.loadSpecificData("visualizationDataLoaded", "/api/visualizations/",  (theData) => {
+            store.dispatch(setVisualizations(theData.data))
+            store.dispatch(setDataLoaded('visualizationsData'))
+
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
     }
 
-    loadVisualizationData()
-        {
-            if (!this.state.visualizationDataLoaded) {
 
-
-            var theUrl = "/api/visualizations/";
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                cache: false,
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
-                success: function (data) {
-                store.dispatch(setDataLoaded('visualizationsData'))
-                    store.dispatch(setVisualizations(data))
-
-
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error(theUrl, status, err.toString());
-
-                }.bind(this),
-
-            });
-
-
-        }
-    }
 
     organizeContacts(theContactData) {
         var theContacts = {};

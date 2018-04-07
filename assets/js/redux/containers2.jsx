@@ -26,6 +26,8 @@ const mapStateToProps = (state, ownProps) => {
         contactDataLoaded:false,
         smartGoalFormData:{modalIsOpen:false, data:{}},
         displayAlert:{showAlert:false, text:"", style:{}},
+        timeLastReloaded: moment().subtract(1,"hours"),
+
 
         //searchQuery: state.rootReducer.searchQuery,
         //searchHitsVisibility: state.rootReducer.searchHitsVisibility,
@@ -67,6 +69,7 @@ const mapStateToProps = (state, ownProps) => {
         visualizations: state.rootReducer.visualizations,
         messageThreads: state.rootReducer.messageThreads,
         updates: state.rootReducer.updates,
+        publicGoals: state.rootReducer.publicGoals,
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
         profileModalData: state.rootReducer.profileModalData,
@@ -75,6 +78,10 @@ const mapStateToProps = (state, ownProps) => {
         programModalData: state.rootReducer.programModalData,
         visualizationModalData: state.rootReducer.visualizationModalData,
         signInOrSignupModalData: state.rootReducer.signInOrSignupModalData,
+        subscriptionModalData: state.rootReducer.subscriptionModalData,
+         programRequestModalData: state.rootReducer.programRequestModalData,
+
+
 
         userDataLoaded:state.rootReducer.userDataLoaded,
         stepDataLoaded:state.rootReducer.stepDataLoaded,
@@ -88,6 +95,7 @@ const mapStateToProps = (state, ownProps) => {
         profileDataLoaded:state.rootReducer.profileDataLoaded,
         settingsDataLoaded:state.rootReducer.settingsDataLoaded,
         contactDataLoaded:state.rootReducer.contactDataLoaded,
+        timeLastReloaded:state.rootReducer.timeLastReloaded,
         displayAlert:state.rootReducer.displayAlert,
 
 

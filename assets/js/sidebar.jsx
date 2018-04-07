@@ -12,7 +12,7 @@ var TinyMCE = require('react-tinymce-input');
 var MaskedInput = require('react-maskedinput');
 import autobind from 'class-autobind'
 var validator = require('validator');
-import TimePicker from 'rc-time-picker';
+//import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
 import  { ValidatedInput } from './app'

@@ -44,7 +44,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 
 
-import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { TINYMCE_CONFIG, theServer, mobileModalStyle, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations,  } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
