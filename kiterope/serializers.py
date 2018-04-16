@@ -289,17 +289,23 @@ class UpdateSerializer(serializers.ModelSerializer):
 class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Visualization
-        fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'updateOccurrences', 'plan','user', 'permissions')
+        #fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'plan','user', 'permissions')
+        fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'plan','user', 'permissions' )
+
 
     program = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Program.objects.all())
     plan = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=PlanOccurrence.objects.all())
 
-    updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
+    #updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
-    dependentVariable = UpdateSerializer(read_only=True)
-    independentVariable = UpdateSerializer(read_only=True)
-    mediatorVariable = UpdateSerializer(read_only=True)
+    dependentVariable = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Update.objects.all())
+    independentVariable = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Update.objects.all())
+    mediatorVariable = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Update.objects.all())
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
+    #dependentVariableInfo = UpdateSerializer(required=False, read_only=True)
+    #independentVariableInfo = UpdateSerializer(required=False, read_only=True)
+    #mediatorVariableInfo = UpdateSerializer(required=False, read_only=True)
+
 
     def get_permissions(self,obj):
         #return obj.get_permissions()
@@ -318,6 +324,22 @@ class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
 
         else:
             return True
+
+    def get_dependentVariableInfo(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = UpdateSerializer(obj.dependentVariable, many=False, context=serializer_context)
+        return serializer.data
+
+    def get_independentVariableInfo(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = UpdateSerializer(obj.independentVariable, many=False, context=serializer_context)
+        return serializer.data
+
+    def get_mediatorVariableInfo(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = UpdateSerializer(obj.mediatorVariable, many=False, context=serializer_context)
+        return serializer.data
+
 
 
 
@@ -728,11 +750,17 @@ class ProgramUpdateSerializer(serializers.HyperlinkedModelSerializer):
     def get_label(self, obj):
         return obj.name
 
+class ProgramVisualizationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Visualization
+        fields = ('id', 'name', 'kind')
+
+
 
 class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions','isActive','croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions', 'isActive', 'visualizations', 'croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -744,18 +772,23 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     cost = serializers.CharField(max_length=20)
     startDate = serializers.DateField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
-
     #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
     croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
-
     croppableImageData = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
-
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
+    visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+    def get_visualizations(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+
+        serializer = ProgramVisualizationSerializer(obj.get_visualizations(), many=True, context=serializer_context)
+        data = {i['id']: i for i in serializer.data}
+
+        return data
 
     def get_permissions(self, obj):
         # return obj.get_permissions()
@@ -909,6 +942,7 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         #data = {i['id']: i for i in serializer.data}
 
         return serializer.data
+
     def get_visualizations(self, obj):
         serializer_context = {'request': self.context.get('request') }
 

@@ -138,11 +138,12 @@ export class FormHeaderWithActionButton extends React.Component {
 
 
 
-    handleActionClick = () => {
+    handleActionClick ()  {
+        console.log("handleactionclicke called")
         this.props.actionClick()
 
 
-    };
+    }
 
     componentWillReceiveProps(nextProps) {
         if (this.state.buttonLabel != nextProps.buttonLabel) {
@@ -173,7 +174,7 @@ render() {
             <h1>{this.props.headerLabel}</h1>
         </div>
                     <div className="ui right floated column">
-                        <div className={`ui right floated ${this.props.color} medium fluid button`} onClick={this.handleActionClick}>{this.state.buttonLabel}</div>
+                        <div className={`ui right floated ${this.props.color} medium fluid button`} onClick={ this.handleActionClick.bind(this) } >{this.state.buttonLabel}</div>
                     </div>
                         </div>
         )

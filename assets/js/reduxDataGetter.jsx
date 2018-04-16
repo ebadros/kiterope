@@ -146,6 +146,7 @@ export default class ReduxDataGetter extends React.Component {
          'routing',
          'gui',
          'smartGoalFormData',
+
          ]
          }, () => {
          store.dispatch(setRehydrated(true))

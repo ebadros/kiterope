@@ -139,6 +139,8 @@ ReactDOM.render((
 
                 <Route path="/search" component={SearchPage}/>
                 <Route path="/splashGoal" component={SplashGoalEntry} />
+                                <Route path="/test" component={TestPage} />
+
                 <Route path="/:path" component={Page404} />
 
 

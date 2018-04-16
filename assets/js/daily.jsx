@@ -110,8 +110,6 @@ export class DailyList extends React.Component{
             loading:false,
             stepOccurrenceType:"TODO",
 
-
-
         }
     }
 
@@ -245,7 +243,7 @@ export class DailyList extends React.Component{
   }
 
   handlePeriodChange(option){
-                      this.setState({loading:true})
+      this.setState({loading:true})
 
        this.setState({period: option.value});
 

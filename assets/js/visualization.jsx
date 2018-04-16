@@ -3,7 +3,7 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, PlanForm2, VisualizationViewEditDeleteItem, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader, PlanForm2, VisualizationViewEditDeleteItem, ItemControlBar, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
@@ -21,7 +21,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
 import {StandardSetOfComponents } from './accounts'
 
-import { theServer, s3IconUrl, updateModalStyle, formats, s3ImageUrl, customStepModalStyles, customModalStyles, visualizationChoices, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, updateModalStyle, mobileModalStyle, updateModalStyleHigher, mobileModalStyleHigher, formats, s3ImageUrl, customStepModalStyles, customModalStyles, visualizationChoices, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, metricFormatOptions} from './constants'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
@@ -105,7 +105,10 @@ export class VisualizationsPage extends React.Component {
 
 
     getVisualizations() {
+
                 if (this.state.visualizations != undefined) {
+                            console.log("getvisualizations")
+
 
 
                     var objectNodes = this.state.visualizations.map( (objectData) => {
@@ -154,13 +157,13 @@ export class VisualizationsPage extends React.Component {
             <div>&nbsp;</div>
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Visualizations" color="green" buttonLabel="Add" />
 
-                                <VisualizationsList visualizations={this.state.visualizations}/>
+                <VisualizationsList visualizations={this.state.visualizations}/>
 
-                {/* <Spreadsheet />*/}
+                {/* <Spreadsheet /> */}
 
             </div>
                 </div>
-                                        <VisualizationModalForm programId={this.props.params.program_id} />
+                                        <VisualizationModalForm />
 
                 </div>
         )
@@ -310,7 +313,7 @@ export class VisualizationsList extends React.Component {
 
 
 @connect(mapStateToProps, mapDispatchToProps)
-export class VisualizationsList2 extends React.Component {
+export class VisualizationsListAndAdd extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -325,10 +328,10 @@ export class VisualizationsList2 extends React.Component {
         if (this.props.programId != undefined) {
             this.setState({programId: this.props.programId});
             if (this.props.storeRoot != undefined) {
-                if (this.props.storeRoot.programs != undefined) {
-                    if (this.state.data != this.props.storeRoot.programs[this.props.programId].visualizations) {
+                if (this.props.storeRoot.visualizations != undefined) {
+                    if (this.state.data != this.props.storeRoot.visualizations) {
                         this.setState({
-                            data: this.props.storeRoot.programs[this.props.programId].visualizations
+                            data: this.props.storeRoot.visualizations
                         })
                     }
                 }
@@ -345,10 +348,10 @@ export class VisualizationsList2 extends React.Component {
 
         if ((nextProps.storeRoot != undefined) && (nextProps.programId != undefined)){
 
-            if (nextProps.storeRoot.programs != undefined) {
-                if (this.state.data != nextProps.storeRoot.programs[nextProps.programId].visualizations) {
+            if (nextProps.storeRoot.visualizations != undefined) {
+                if (this.state.data != nextProps.storeRoot.visualizations) {
                     this.setState({
-                        data: nextProps.storeRoot.programs[nextProps.programId].visualizations
+                        data: nextProps.storeRoot.visualizations
                     })
                 }
             }
@@ -454,10 +457,10 @@ export class VisualizationsList2 extends React.Component {
                                 if (theProgramId = objectData.program) {
 
                                     return (
-                                        <div className="ui sixteen wide column">
+                                        <div key={`visualization_${objectData.id}`} className="ui sixteen wide column">
                                         <VisualizationAddAndEditItemForm ref={`ref_visualization_${objectData.id}`}
                                                                          currentView="UpdateBasic"
-                                                    key={`visualization_${objectData.id}`} visualizationData={objectData}
+                                                    visualizationData={objectData}
                                                     programId={theProgramId}
                                         /></div>
 
@@ -606,20 +609,25 @@ export class VisualizationAddAndEditItemForm extends React.Component {
     };
 
     openModal() {
-        this.setState({
-            modalIsOpen: true},() => { store.dispatch(setVisualizationModalData(this.state))});
-
-        if (this.state.data) {
+         if (this.state.data != undefined) {
             this.setState({
                 modalIsOpen:true,
-                id: this.state.data.id,
-                name: this.state.data.name,
-                kind: this.state.data.kind,
-                dependentVariable: this.state.data.dependentVariable,
-                independentVariable: this.state.data.independentVariable,
-                mediatorVariable: this.state.data.mediatorVariable,
+                data: {id: this.state.data.id,
+                    name: this.state.data.name,
+                    kind: this.state.data.kind,
+                    dependentVariable: this.state.data.dependentVariable,
+                    independentVariable: this.state.data.independentVariable,
+                    mediatorVariable: this.state.data.mediatorVariable,
+                    programId: this.state.programId,
+                }
+
             }, () => { store.dispatch(setVisualizationModalData(this.state))})
-        }
+        } else {
+             store.dispatch(setVisualizationModalData({modalIsOpen:true, data:{programId:this.state.programId}}))
+         }
+
+
+
 
     }
 
@@ -733,12 +741,12 @@ export class VisualizationAddAndEditItemForm extends React.Component {
 
 
             if ((this.props.isListNode) || (forMobile)) {
-             var updateModal = customStepModalStyles
+             var updateModal = mobileModalStyleHigher
 
            } else {
 
 
-                         var updateModal = updateModalStyle
+                         var updateModal = updateModalStyleHigher
 
         }
 
@@ -1024,6 +1032,9 @@ return thePlans
 
 
     setStateToData (visualizationModalData) {
+        console.log("setStateToData")
+
+        console.log(visualizationModalData)
         this.setState({
             modalIsOpen: visualizationModalData.modalIsOpen,
 
@@ -1063,8 +1074,8 @@ return thePlans
                 independentVariable: independentVariable,
                 mediatorVariable: mediatorVariable,
                 programUpdates: programUpdates,
-                //programId: programId,
-                //planId: planId
+                programId: programId,
+                planId: planId
 
             }, () => {this.createUniqueProgramUpdates()});
 
@@ -1140,6 +1151,7 @@ return thePlans
     }
 
     handleDependentVariableChange(option) {
+        console.log(option.id)
 
         this.setState({dependentVariable: option.id});
     }
@@ -1175,6 +1187,8 @@ return thePlans
                 program: program,
                 plan:plan
         }
+        console.log("visualizationData")
+        console.log(visualizationData)
 
 
         if (this.state.id != "") {
@@ -1206,6 +1220,7 @@ return thePlans
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
+                     console.log(data)
 
                      if (visualization.id) {
                          store.dispatch(editVisualization(data.id, data))
@@ -1243,12 +1258,12 @@ return thePlans
 
 
         if ((this.props.isListNode) || (forMobile)) {
-            var updateModal = customStepModalStyles
+            var updateModal = mobileModalStyleHigher
 
         } else {
 
 
-            var updateModal = updateModalStyle
+            var updateModal = updateModalStyleHigher
 
         }
         return (
@@ -1257,7 +1272,7 @@ return thePlans
                 isOpen={this.state.modalIsOpen}
                 onAfterOpen={this.afterOpenModal}
                 onRequestClose={this.closeModal}
-                style={customModalStyles}>
+                style={updateModal}>
 
                 <div className="ui grid">
                     <div className="header sixteen wide column"><h2>Visualization</h2></div>
@@ -1391,4 +1406,4 @@ return thePlans
     }
 }
 
-module.exports = {VisualizationAddAndEditItemForm, VisualizationsPage, VisualizationModalForm, VisualizationsList, VisualizationBasicView, VisualizationItemMenu}
+module.exports = {VisualizationAddAndEditItemForm, VisualizationsPage, VisualizationsListAndAdd, VisualizationModalForm, VisualizationsList, VisualizationBasicView, VisualizationItemMenu}

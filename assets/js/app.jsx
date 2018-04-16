@@ -26,12 +26,14 @@ import SplashGoalEntry from './splashGoalEntry'
 
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps} from './redux/containers2'
+import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accounts'
+
 
 
 import  {store} from "./redux/store"
-import { setCurrentUser, setPlans,  setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  setModalFormData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 
-
+import {testForm, FormFactory} from './formFactory'
 
 
 export class App extends React.Component {
@@ -350,6 +352,8 @@ export class ValidatedInput extends React.Component{
 
     validate = (e) => {
         this.setState({value: e.target.value});
+        //this.props.stateCallback(e);
+
         this.props.stateCallback(e.target.value);
 
         this.state.errors = [];
@@ -564,6 +568,8 @@ export class ValidatedInput extends React.Component{
 
 }
 
+
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class TestComponent extends React.Component {
     constructor(props) {
@@ -585,6 +591,8 @@ export class TestComponent extends React.Component {
 
 
 }
+
+@connect(mapStateToProps, mapDispatchToProps)
 export class TestPage extends React.Component {
     constructor(props) {
         super(props);
@@ -596,10 +604,19 @@ export class TestPage extends React.Component {
 
 
         }
+
+        handleClick() {
+            console.log("handleClick")
+                var theData = {modalIsOpen:true, data:{}}
+
+            store.dispatch(setModalFormData("bird", theData))
+        }
     render() {
         return (
-            <div>
-                <SplashGoalEntry />
+            <div><StandardSetOfComponents />
+                <div className="spacer">&nbsp;</div>
+                <div className="ui button" onClick={this.handleClick}>Click Me</div>
+                <FormFactory form={testForm} />
 
 
             </div>

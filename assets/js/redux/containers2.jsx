@@ -25,6 +25,7 @@ const mapStateToProps = (state, ownProps) => {
         settingsDataLoaded:false,
         contactDataLoaded:false,
         smartGoalFormData:{modalIsOpen:false, data:{}},
+        birdModalData:{modalIsOpen:false, data:{}},
         displayAlert:{showAlert:false, text:"", style:{}},
         timeLastReloaded: moment().subtract(1,"hours"),
 
@@ -80,6 +81,7 @@ const mapStateToProps = (state, ownProps) => {
         signInOrSignupModalData: state.rootReducer.signInOrSignupModalData,
         subscriptionModalData: state.rootReducer.subscriptionModalData,
          programRequestModalData: state.rootReducer.programRequestModalData,
+        birdModalData:state.rootReducer.birdModalData,
 
 
 

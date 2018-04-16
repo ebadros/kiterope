@@ -69,7 +69,8 @@ TIME_COMMITMENT_CHOICES = (
 
 VISUALIZATION_CHOICES = (
     ("LINE", "Line Graph"),
-    ("BAR", "Bar Graph")
+    ("BAR", "Bar Graph"),
+    ("SPREADSHEET", "Spreadsheet")
 )
 
 STEP_TYPE_CHOICES = (
@@ -1255,17 +1256,17 @@ class Visualization(models.Model):
             dependentVariableIsUpdate = Q(update=self.dependentVariable)
             independentVariableIsUpdate = Q(update=self.independentVariable)
             mediatorVariableIsUpdate = Q(update=self.mediatorVariable)
-            userOwnsPlan = Q(user=currentUser)
+            userOwnsPlan = Q(author=currentUser)
             return UpdateOccurrence.objects.filter((dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate) & userOwnsPlan)
 
         else:
             # Return all update occurrences owned by a user
             self.user.is_authenticated
             currentUser = self.user
-            dependentVariableIsUpdate = Q(update__measuringWhat=self.dependentVariable.measuringWhat)
-            independentVariableIsUpdate = Q(update=self.independentVariable.measuringWhat)
-            mediatorVariableIsUpdate = Q(update=self.mediatorVariable.measuringWhat)
-            userOwnsPlan = Q(user=currentUser)
+            dependentVariableIsUpdate = Q(update=self.dependentVariable)
+            independentVariableIsUpdate = Q(update=self.independentVariable)
+            mediatorVariableIsUpdate = Q(update=self.mediatorVariable)
+            userOwnsPlan = Q(author=currentUser)
             return UpdateOccurrence.objects.filter((dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate) & userOwnsPlan)
 
 

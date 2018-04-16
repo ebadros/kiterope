@@ -181,15 +181,17 @@ export class Alert extends React.Component {
         }
         if (this.state.displayAlert.showAlert) {
             console.log("showAlert")
-            var shouldDisplay = '.95'
+            var opacity = '.95'
             var alertHeight = '80px'
+            var display = 'block'
         } else {
-            var shouldDisplay = '0'
+            var opacity = '0'
             var alertheight = '0px'
+            var display= 'none'
 
         }
             return (
-                <div style={{opacity:shouldDisplay, height: alertHeight, position:'fixed', left:'50%', transition: 'opacity .5',
+                <div style={{display:display, opacity:opacity, height: alertHeight, position:'fixed', left:'50%', transition: 'opacity .5',
 top:'80px',zIndex:'100',
 }}>
                     <div className="ui middle aligned" style={defaultStyle}>{this.state.displayAlert.text}</div>

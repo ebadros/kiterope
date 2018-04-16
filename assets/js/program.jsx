@@ -27,7 +27,7 @@ import Modal from 'react-modal';
 import Phone from 'react-phone-number-input'
 import rrui from 'react-phone-number-input/rrui.css'
 import rpni from 'react-phone-number-input/style.css'
-import {VisualizationsList, VisualizationModalForm} from './visualization'
+import {VisualizationsList, VisualizationModalForm, VisualizationsListAndAdd} from './visualization'
 
 import {UserLink } from './profile'
 
@@ -279,12 +279,6 @@ export class ProgramModalForm extends React.Component {
 
     componentWillReceiveProps(nextProps) {
 
-
-        if (this.state.serverErrors != nextProps.serverErrors) {
-            this.setState({
-                serverErrors: nextProps.serverErrors
-            })
-        }
 
          if (this.state.serverErrors != nextProps.serverErrors) {
             this.setState({serverErrors: nextProps.serverErrors})
@@ -617,8 +611,7 @@ this.closeModal()
             croppableImage: callbackData
 
         })
-        console.log("handleImageChange")
-        console.log(callbackData)
+
     }
 
 
@@ -802,7 +795,7 @@ this.closeModal()
 
 
                   </div>
-                                    <VisualizationsList programId={this.state.id} />
+                                    <VisualizationsListAndAdd programId={this.state.id} />
 
 
                       <div className="ui three column stackable grid">
@@ -1060,6 +1053,8 @@ componentWillUnmount() {
                 <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Programs" color="green" buttonLabel={this.state.headerActionButtonLabel} />
         <div ref="ref_whichProgramForm">
              <ProgramModalForm />
+                                    <VisualizationModalForm  />
+
             </div>
 
                     <ProgramList data={this.props.storeRoot.programs} needsLogin={this.handleNeedsLogin} reloadItem={this.handleReloadItem}/>

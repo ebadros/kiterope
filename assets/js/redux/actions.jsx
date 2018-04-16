@@ -206,6 +206,9 @@ export const updateProgram = (theProgram) => {
         program: theProgram,
     }
 };
+
+
+
 export const deleteProgram = (theProgramId) => {
     console.log("theProgramId " + theProgramId);
     return {
@@ -522,10 +525,36 @@ export const setProgramRequestModalData = (programRequestModalData) => {
     }
 };
 
+export const updateDataItem =  (theForm, theReduxKey, theDataItem) => {
+    return {
+        type: "UPDATE_DATA_ITEM",
+        form: theForm,
+        reduxKey: theReduxKey,
+        dataItem: theDataItem,
+    }
+}
+
+export const addDataItem = (theForm, theReduxKey, theDataItem) => {
+    return {
+        type: 'ADD_DATA_ITEM',
+        form:theForm,
+        reduxKey: theReduxKey,
+        dataItem: theDataItem,
+    }
+}
+
+export const setModalFormData = (theFormName, theModalFormData) => {
+    return {
+        type: 'SET_MODAL_FORM_DATA',
+        formName: theFormName,
+        modalData: theModalFormData,
+    }
+};
 
 
 
 
 
 
-module.exports = { setDataLoaded, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+
+module.exports = { setDataLoaded, setModalFormData, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

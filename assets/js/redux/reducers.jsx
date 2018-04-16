@@ -170,12 +170,25 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {goals: theGoals});
             break;
 
+        case 'ADD_DATA_ITEM':
+            var theDataItems = Object.assign({}, state[action.theReduxKey])
+            theDataItems[action[theDataItem.id]] = action.theDataItem;
+            return Object.assign({}, state, {[theReduxKey]:theDataItems})
+            break;
+
         case 'UPDATE_GOAL':
             var theGoals = Object.assign({},state.goals);
             theGoals[action.goal.id] = action.goal;
 
 
             return Object.assign({}, state, {goals: theGoals});
+            break;
+
+        case 'SET_MODAL_FORM_DATA':
+            var theKey = action.formName + "ModalData"
+            console.log(theKey)
+
+            return Object.assign({}, state, {[theKey]: action.modalData});
             break;
 
         case 'DELETE_GOAL':
@@ -276,7 +289,9 @@ export const rootReducer = (state = {}, action) => {
 
         case 'UPDATE_STEP_OCCURRENCE':
 
-            var theStepOccurrences = Object.assign({}, state.stepOccurrences)
+            var theStepOccurrencesOriginal = state.stepOccurrences
+            var theStepOccurrences = [...theStepOccurrencesOriginal];
+
             for (var i = 0; i < theStepOccurrences.length; i++) {
 
                 if (theStepOccurrences[i].id == action.stepOccurrence.id) {
@@ -376,19 +391,16 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'ADD_VISUALIZATION':
-            var theVisualization = action.visualization
 
-            var thePrograms = Object.assign({},state.programs)
-            var theVisualizations = Object.assign({},state.programs[action.visualization.program].visualizations)
-            theVisualizations[action.visualization.id] = action.visualization;
-            return Object.assign({}, state, {programs: thePrograms});
+            var theVisualizations = Object.assign({}, state.visualizations)
+            theVisualizations[action.visualizationId] = action.visualization;
+            return Object.assign({}, state, {visualizations: theVisualizations});
             break;
 
         case 'EDIT_VISUALIZATION':
-            var thePrograms = Object.assign({},state.programs)
-            var theVisualizations = Object.assign({}, thePrograms[action.visualization.program].visualizations)
+            var theVisualizations = Object.assign({}, state.visualizations)
             theVisualizations[action.visualizationId] = action.visualization;
-            return Object.assign({}, state, {programs: thePrograms});
+            return Object.assign({}, state, {visualizations: theVisualizations});
             break;
 
         case 'DELETE_VISUALIZATION':

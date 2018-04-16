@@ -97,6 +97,8 @@ export class StepOccurrenceList extends React.Component {
 
     render() {
         if ((this.state.data != undefined) && (this.state.data.length != 0 )){
+            console.log("here's the data")
+            console.log(this.state.data)
 
             var objectNodes = this.state.data.map(function (objectData) {
                 if ((this.state.status == "COMPLETED") && (objectData.wasCompleted == true)) {

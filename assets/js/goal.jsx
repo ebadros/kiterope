@@ -308,23 +308,12 @@ handleCancelClicked = () => {
 
     };
 
-  handleActionClick = () => {
+  handleActionClick () {
        console.log("actionlcickadfj")
-    var theData ={modalIsOpen:true, data:{croppableImage:defaultGoalCroppableImage}}
+    var theData = { modalIsOpen:true, data:{croppableImage:defaultGoalCroppableImage}}
       store.dispatch(setGoalModalData(theData))
 
-      //store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
-
-      /*
-      if (this.state.formIsOpen == true) {
-
-        this.handleCloseForm()
-
-      }
-      else {
-          this.handleOpenForm()
-      }*/
-    };
+    }
 
 
 componentWillUnmount() {
@@ -358,7 +347,7 @@ componentWillUnmount() {
                   <Link to={`/`}><div className="active section">My Goals</div></Link>
             </div>
             <div>&nbsp;</div>
-                <FormHeaderWithActionButton actionClick={this.handleActionClick} headerLabel="Goals" color="blue" buttonLabel={this.state.headerActionButtonLabel} />
+                <FormHeaderWithActionButton actionClick={this.handleActionClick.bind(this)} headerLabel="Goals" color="blue" buttonLabel={this.state.headerActionButtonLabel} />
        <GoalModalSMARTForm
                               isListNode={false}
                               serverErrors={this.state.serverErrors}/>

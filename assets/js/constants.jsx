@@ -325,6 +325,27 @@ export const mobileModalStyle = {
     outline                    : 'none',
     padding                    : '3px',
       paddingTop                :'10px',
+
+  }
+};
+export const mobileModalStyleHigher = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 30,
+  },
+
+  content : {
+    top                   : '10%',
+    left                  : '2%',
+    right                 : '2%',
+    bottom                : '2%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '3px',
+      paddingTop                :'10px',
+
   }
 };
 
@@ -350,6 +371,27 @@ export const stepModalStyle = {
 
 
 export const updateModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+                zIndex: 30,
+
+  },
+
+  content : {
+    top                   : '15%',
+    left                  : '30%',
+    right                 : '30%',
+    bottom                : '10%',
+
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '30px 30px 30px 30px',
+  }
+};
+
+export const updateModalStyleHigher = {
     overlay : {
 
     backgroundColor   : 'rgba(0, 0, 0, 0.75)',
@@ -464,5 +506,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   mobileModalStyle, defaultProgramCroppableImage, loginJoinModalStyleMobile, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   mobileModalStyle, updateModalStyleHigher, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };
