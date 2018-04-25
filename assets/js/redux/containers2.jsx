@@ -71,6 +71,8 @@ const mapStateToProps = (state, ownProps) => {
         messageThreads: state.rootReducer.messageThreads,
         updates: state.rootReducer.updates,
         publicGoals: state.rootReducer.publicGoals,
+        publicPrograms: state.rootReducer.publicPrograms,
+
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
         profileModalData: state.rootReducer.profileModalData,
@@ -104,6 +106,7 @@ const mapStateToProps = (state, ownProps) => {
 
         gui: {
           searchQuery: state.rootReducer.searchQuery,
+            goalSearchQuery:state.rootReducer.goalSearchQuery,
           searchHitsVisibility: state.rootReducer.searchHitsVisibility,
           forMobile: state.rootReducer.forMobile,
           shouldReload: state.rootReducer.shouldReload,

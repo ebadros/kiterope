@@ -616,11 +616,12 @@ class BlogPostSerializer(serializers.HyperlinkedModelSerializer):
 class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id', 'title', 'category', 'image', 'isSubscribed')
+        fields = ('id', 'title', 'category', 'image', 'isSubscribed', 'scheduleLength', )
 
     title = serializers.CharField(max_length=200)
     category = serializers.CharField(max_length=20)
     image = serializers.CharField(max_length=20)
+
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
 
     def get_isSubscribed(self, obj):
@@ -675,7 +676,7 @@ class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_authorPhoto(self, obj):
         try:
-            return Profile.objects.get(user=obj.author).image
+            return Profile.objects.get(user=obj.author).croppableImage.image
         except:
             return ""
 

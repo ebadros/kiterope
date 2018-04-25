@@ -2286,12 +2286,18 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
          if (this.props.userPlanOccurrenceId) {
              this.setState({userPlanOccurrenceId: this.props.userPlanOccurrenceId})
          }
-         if (this.state.data.subscribed) {
-             this.setState({subscribeButtonText: "Unsubscribe"})
-         } else {
-             this.setState({subscribeButtonText: "Subscribe"})
 
-         }
+          if (this.props.data != undefined) {
+              if (this.state.data.isSubscribed != this.props.data.isSubscribed) {
+                  if (this.props.data.isSubscribed) {
+                      this.setState({subscribeButtonText: "Unsubscribe"})
+                  } else {
+                      this.setState({subscribeButtonText: "Subscribe"})
+
+                  }
+              }
+          }
+
      }
 
 
@@ -2322,7 +2328,22 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
           this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
       }
 
-    };
+      if (nextProps.data != undefined) {
+              if (this.state.data.isSubscribed != nextProps.data.isSubscribed) {
+                  if (nextProps.data.isSubscribed) {
+                      this.setState({subscribeButtonText: "Unsubscribe"})
+                  } else {
+                      this.setState({subscribeButtonText: "Subscribe"})
+
+                  }
+              }
+          }
+
+
+      }
+
+
+
 
 
 
@@ -2481,7 +2502,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
             }
          else {
-            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, data:{}}))
+            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
             this.setState({
                     signInOrSignUpModalFormIsOpen: true
                 })
@@ -2585,13 +2606,13 @@ hideComponent = () => {
 
                                 {this.props.hideControlBar ? null : controlBar}
 
-                <ProgramSubscriptionModal closeModalClicked={this.handleCloseModalClicked}
+                {/*<ProgramSubscriptionModal closeModalClicked={this.handleCloseModalClicked}
               click={this.handleModalClick}
               modalIsOpen={this.state.openModal}
               header="Subscribe to a plan"
               description="You can subscribe to a plan created by a coach, create your own plan, or let Kiterope create a plan for you."
               program={this.state.data}
-/>
+/>*/}
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
                     <div>{basicView}</div>
                     {detailView}
@@ -2813,9 +2834,8 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
             }
          else {
-            this.setState({
-                    signInOrSignUpModalFormIsOpen: true
-                })
+            store.dispatch(setSignInOrSignupModalData({modalIsOpen:true, form:"SignIn", data:{}}))
+
         }
 
     };

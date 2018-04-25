@@ -102,6 +102,7 @@ router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationVi
 
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
 router.register(r'publicGoals', views.PublicGoalViewSet, base_name='Goal')
+router.register(r'publicPrograms', views.PublicProgramViewSet, base_name='Program')
 
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
 

@@ -98,6 +98,14 @@ export const setPublicGoals = (theGoals) => {
     }
 };
 
+
+export const setPublicPrograms = (thePrograms) => {
+    return {
+        type: 'SET_PUBLIC_PROGRAMS',
+        publicPrograms: thePrograms,
+    }
+};
+
 export const addGoal = (theGoal) => {
     return {
         type: 'ADD_GOAL',
@@ -267,6 +275,13 @@ export const setSearchQuery = (theSearchQuery) => {
     return {
         type: 'SET_SEARCH_QUERY',
         searchQuery: theSearchQuery,
+    }
+}
+
+export const setGoalSearchQuery = (theSearchQuery) => {
+    return {
+        type: 'SET_GOAL_SEARCH_QUERY',
+        goalSearchQuery: theSearchQuery,
     }
 }
 
@@ -557,4 +572,4 @@ export const setModalFormData = (theFormName, theModalFormData) => {
 
 
 
-module.exports = { setDataLoaded, setModalFormData, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { setDataLoaded, setModalFormData, setGoalSearchQuery, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicPrograms, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

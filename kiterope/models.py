@@ -441,8 +441,8 @@ class Program(models.Model):
     def get_author_fullName(self):
         return "%s" % self.author.profile.get_fullName()
 
-    def get_author_profilePhoto(self):
-        return "%s" % self.author.profile.image
+    def get_author_image(self):
+        return "%s" % self.author.profile.croppableImage.image
 
 
 class Step(models.Model):

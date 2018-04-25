@@ -20,16 +20,17 @@ import Dimensions from 'react-dimensions'
 import TextTruncate from 'react-text-truncate';
 import autobind from 'class-autobind'
 import {GoalList } from './goal'
+import {PlanList} from './plan'
 import { GoalSMARTForm } from './goalSmartForm'
 import Pagination from "react-js-pagination";
-
+import { ProgramList, SubscribeableProgramList } from './program'
 import { Provider, connect,  dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'
-import { setSmartGoalFormData, updateStep, setPublicGoals, setRehydrated, setDisplayAlert, removePlan, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { setSmartGoalFormData, updateStep, setPublicGoals, setRehydrated, setDisplayAlert, removePlan, setGoalSearchQuery, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import {
     SearchBox,
@@ -141,13 +142,13 @@ export default class SplashGoalEntry extends React.Component {
         var intervalID = setInterval(this.changePlaceholderText, 2000);
         this.setState({intervalID:intervalID});
         if (this.props.storeRoot != undefined) {
-            if (this.props.storeRoot.gui.searchQuery != undefined)
+            if (this.props.storeRoot.gui.goalSearchQuery != undefined)
             this.setState({
-                query: this.props.storeRoot.gui.searchQuery,
-                queryUrl:this.props.storeRoot.gui.searchQuery,
+                query: this.props.storeRoot.gui.goalSearchQuery,
+                queryUrl:this.props.storeRoot.gui.goalSearchQuery,
             })
         }
-        this.loadPublicGoalData()
+        //this.loadPublicGoalData()
 
 
 
@@ -175,10 +176,10 @@ export default class SplashGoalEntry extends React.Component {
 
     componentWillReceiveProps = (nextProps) => {
         if (nextProps.storeRoot != undefined) {
-            if (nextProps.storeRoot.gui.searchQuery != undefined) {
+            if (nextProps.storeRoot.gui.goalSearchQuery != undefined) {
                 this.setState({
-                    query: nextProps.storeRoot.gui.searchQuery,
-                    queryUrl: nextProps.storeRoot.gui.searchQuery,
+                    query: nextProps.storeRoot.gui.goalSearchQuery,
+                    queryUrl: nextProps.storeRoot.gui.goalSearchQuery,
                 })
             }
         }
@@ -214,7 +215,7 @@ export default class SplashGoalEntry extends React.Component {
                     this.setState({displayLoader:false})
 
         }, 1000)
-        //store.dispatch(setSearchQuery(this.state.query))
+        store.dispatch(setGoalSearchQuery(this.state.query))
 
         //store.dispatch(push("/search/" + this.state.query + "/"));
 
@@ -244,6 +245,8 @@ export default class SplashGoalEntry extends React.Component {
     handleCloseButtonClicked = () => {
 
          store.dispatch(setSmartGoalFormData({modalIsOpen:false, data:{}}))
+                 store.dispatch(setGoalSearchQuery(""))
+
         //store.dispatch(setSearchHitsVisibility(false))
                     //store.dispatch(push("/search/") )
 
@@ -439,6 +442,11 @@ _handleKeyPress = (e) => {
                     <div className="ui page container">
                         <Header headerLabel="Recent Public Goals"/>
                                 <GoalList data={this.props.storeRoot.publicGoals} />
+                        <div className="spacer">&nbsp;</div>
+                                                <Header headerLabel="Recent Public Programs"/>
+
+                                                        <SubscribeableProgramList data={this.props.storeRoot.publicPrograms} />
+
                 </div>
 
 
@@ -567,6 +575,11 @@ _handleKeyPress = (e) => {
                     <div className="ui page container">
                         <Header headerLabel="Recent Public Goals"/>
                                 <GoalList data={this.props.storeRoot.publicGoals} />
+                                                <div className="spacer">&nbsp;</div>
+
+                         <Header headerLabel="Recent Public Programs"/>
+
+                                                        <SubscribeableProgramList data={this.props.storeRoot.publicPrograms} />
                 </div>
             <Footer />
         </div>

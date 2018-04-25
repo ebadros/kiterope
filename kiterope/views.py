@@ -35,7 +35,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 import pytz
 from kiterope.send_sms import sendMessage
 
-from kiterope.permissions import CustomAllowAny, UserPermission, IsAuthorOrReadOnly, PostPutAuthorOrView, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
+from kiterope.permissions import CustomAllowAny, UserPermission, IsPublic, IsAuthorOrReadOnly, PostPutAuthorOrView, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 from celery import shared_task
 from .celery_setup import app
 from celery.task.schedules import crontab
@@ -62,7 +62,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, PlanProgramSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
@@ -482,6 +482,29 @@ class GoalViewSet(viewsets.ModelViewSet):
 
         return theQueryset
 
+class PublicProgramViewSet(viewsets.ModelViewSet):
+    model = Program
+    queryset = Program.objects.all()
+    permission_classes = [IsPublic]
+    required_scopes = ['groups']
+    serializer_class = ProgramNoStepsSerializer
+
+    pagination_class = StandardResultsSetPagination
+
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        #queryset.update(croppableImage=215)
+        #page = self.paginate_queryset(queryset)
+        #if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = {i['id']: i for i in serializer.data}
+        return Response(data)
 
 class PublicGoalViewSet(viewsets.ModelViewSet):
     model = Goal

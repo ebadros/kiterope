@@ -63,6 +63,7 @@ def send_email_notification(emailAddress, subject, message ):
 
 @app.task()
 def send_text_notification(phoneNumber, message ):
+    print("here's where a text message would be sent")
     #sendMessage(phoneNumber, message)
 
 

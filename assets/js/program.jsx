@@ -1463,6 +1463,8 @@ export class ProgramDetailPageNoSteps extends React.Component {
 
   componentDidMount() {
       this.loadProgramsFromServer()
+                  scroll(0,0)
+
 
   }
 
@@ -2612,6 +2614,93 @@ export class ProgramListNode extends React.Component {
 
 }
 
+export class SubscribeableProgramList extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:"",
+        }
+    }
+
+    componentDidMount() {
+        this.setState({data:this.props.data})
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.data != nextProps.data) {
+                    this.setState({data:nextProps.data})
+
+        }
+    }
+
+    getNodes() {
+        var objectNodes = null
+
+        if (this.state.data) {
+            var theData = this.state.data
+            var values = Object.keys(theData).map(function (key) {
+                        return theData[key];
+                    });
+            objectNodes = values.map(function (objectData) {
+                var theUserPlanOccurrenceId = "";
+
+                if (this.props.storeRoot) {
+                    if (this.props.storeRoot.plans) {
+                        for (var key in this.props.storeRoot.plans) {
+                            if ((this.props.storeRoot.plans[key].program == objectData.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
+
+                                objectData.isSubscribed = this.props.storeRoot.plans[key].isSubscribed;
+                                theUserPlanOccurrenceId = key
+
+                            }
+                        }
+
+                    }
+                }
+
+
+                return (
+                    <ProgramViewEditDeleteItem key={objectData.id}
+                                               isListNode={true}
+                                               currentView="Basic"
+                                               showCloseButton={false}
+                                               hideControlBar={true}
+                                               apiUrl="/api/programs/"
+                                               id={objectData.id}
+                                               data={objectData}
+                                               editable={false}
+                                               needsLogin={this.handleNeedsLogin}
+                                               forSearch={true}
+                                               userPlanOccurrenceId={theUserPlanOccurrenceId}
+                                               extendedBasic={false}/>
+
+
+                    //  <PlanHit key={objectData.id} result={objectData} />
+
+                )
+            }.bind(this));
+
+
+        }
+        return objectNodes
+    }
+
+
+    render() {
+        var objectNodes = this.getNodes()
+
+        return (
+            <div className="centeredContent">
+          <div className='ui three column stackable grid'>
+        {objectNodes}
+                </div>
+                </div>
+        )
+    }
+}
+
+
 export class ProgramBasicView extends React.Component {
     constructor(props) {
         super(props);
@@ -2652,7 +2741,7 @@ export class ProgramBasicView extends React.Component {
 
     goToDetail() {
         if (this.props.forSearch) {
-                    store.dispatch(push("/plan/view/" + this.state.data.id + "/"))
+            store.dispatch(push("/plan/view/" + this.state.data.id + "/"))
 
         } else {
             store.dispatch(push("/programs/" + this.state.data.id + "/steps") )
@@ -2674,10 +2763,26 @@ export class ProgramBasicView extends React.Component {
             else {
                 theCost = this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
             }
+
+
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
-                        var startDate = moment(this.state.data.startDate).format("MMM DD YYYY")
 
+            var startDate = moment(this.state.data.startDate).format("MMM DD YYYY")
+
+            var authorName
+            if (this.state.data.author_name) {
+                authorName = this.state.data.author_name
+            } else {
+                authorName = this.state.data.authorName
+            }
+
+            var authorImage
+            if (this.state.data.author_name) {
+                authorImage = this.state.data.author_immage
+            } else {
+                authorImage = this.state.data.authorPhoto
+            }
 
             if (this.state.data.author_id) {
                             var authorLink = "/profiles/" + this.state.data.author_id;
@@ -2710,8 +2815,8 @@ export class ProgramBasicView extends React.Component {
                                             <div className="ui left aligned column">
                                                 <Link to={authorLink} >
                                             <UserLink
-                                                            fullName={this.state.data.author_fullName}
-                                                            profilePhoto={this.state.data.author_image} /></Link>
+                                                            fullName={authorName}
+                                                            image={authorImage} /></Link>
                                         </div>
 
 
@@ -2729,7 +2834,7 @@ export class ProgramBasicView extends React.Component {
 
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
-                                                                text={this.state.data.scheduleLength}
+                                                                text={theScheduleLength}
                                                                 icon="calendar" background="Light"/>
                                             </div> :
                                             <div className="ui right aligned column">
@@ -2753,7 +2858,7 @@ export class ProgramBasicView extends React.Component {
                                         {this.props.forSearch ?
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
-                                                                text={this.state.data.timeCommitment} icon="timeCommitment"
+                                                                text={theTimeCommitment} icon="timeCommitment"
                                                                 background="Light" link="/goalEntry"/>
                                             </div> :
                                             <div className="ui right aligned column">
@@ -2789,7 +2894,7 @@ export class ProgramBasicView extends React.Component {
                         <div className="right aligned six wide column">
                             <Link to={authorLink} >
                                             <UserLink orientation="right" fullName={this.state.data.authorName}
-                                                            profilePhoto={this.state.data.authorPhoto} /></Link>
+                                                            image={this.state.data.authorPhoto} /></Link>
                             <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
                                             icon="deadline" background="Light" link="/goalEntry"/>
                             <IconLabelCombo size="extramini" orientation="right" text={theCost} icon="cost"
@@ -2948,4 +3053,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, ProgramModalForm, ProgramRequestModalForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionModalForm, ProgramSubscriptionModal};
+module.exports = { GoalHeader, ProgramDetailPage, ProgramItemMenu, SubscribeableProgramList, ProgramModalForm, ProgramRequestModalForm, ProgramDetailPageNoSteps, ProgramBasicView , ProgramList, ProgramListPage, ProgramSubscriptionModalForm, ProgramSubscriptionModal};

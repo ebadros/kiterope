@@ -555,7 +555,7 @@ export class GoalDetailPage extends React.Component {
   handleModalClick = (callbackData) => {
       switch(callbackData.action) {
           case ("existing"):
-              store.dispatch(push("/search"));
+              store.dispatch(push("/search/" + this.state.data.title + "/"));
               break;
           case ("create"):
               this.handleOpenProgramModalForm();
@@ -568,7 +568,7 @@ export class GoalDetailPage extends React.Component {
 
               break;
       }
-  };
+  };f
 
 
 

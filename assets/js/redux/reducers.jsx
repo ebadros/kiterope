@@ -119,6 +119,7 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA':
+            console.log("signin")
             return Object.assign({}, state, {signInOrSignupModalData: action.signInOrSignupModalData});
             break;
 
@@ -156,6 +157,10 @@ export const rootReducer = (state = {}, action) => {
             break;
         case 'SET_PUBLIC_GOALS':
             return Object.assign({}, state, {publicGoals: action.publicGoals});
+            break;
+
+        case 'SET_PUBLIC_PROGRAMS':
+            return Object.assign({}, state, {publicPrograms: action.publicPrograms});
             break;
 
          case 'SET_TIME_LAST_RELOADED':
@@ -203,6 +208,9 @@ export const rootReducer = (state = {}, action) => {
 
         case 'SET_SEARCH_QUERY':
             return Object.assign({}, state, {searchQuery: action.searchQuery});
+
+        case 'SET_GOAL_SEARCH_QUERY':
+            return Object.assign({}, state, {goalSearchQuery: action.goalSearchQuery});
 
         case 'SET_SEARCH_HITS_VISIBILITY':
             return Object.assign({}, state, {searchHitsVisibility: action.searchHitsVisibility});

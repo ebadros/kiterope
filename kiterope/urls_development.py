@@ -79,6 +79,8 @@ router.register(r'^steps/(?P<step_id>\w+)/updates', views.UpdateViewSet, base_na
 router.register(r'^steps/(?P<step_id>\w+)/visualizations', views.VisualizationViewSet, base_name='Visualization')
 router.register(r'goals', views.GoalViewSet, base_name='Goal')
 router.register(r'publicGoals', views.PublicGoalViewSet, base_name='Goal')
+router.register(r'publicPrograms', views.PublicProgramViewSet, base_name='Program')
+
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
 router.register(r'^goals/(?P<goal_id>\w+)/planOccurrences', views.GoalPlanOccurrenceViewSet, base_name='PlanOccurrence')
 router.register(r'^goals/(?P<goal_id>\w+)/programs', views.ProgramViewSet, base_name='Program')

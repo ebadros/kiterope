@@ -2735,7 +2735,7 @@ export class ContactItem extends React.Component {
 
         if (this.props.profilePhoto != "") {
 
-            imageUrl = s3ImageUrl + this.props.contact.profilePhoto
+            imageUrl = s3ImageUrl + this.props.contact.image
         }
         else {
             imageUrl = s3ImageUrl + "uploads/user.svg"
@@ -2938,7 +2938,7 @@ export class MessageThreadPane extends React.Component {
                 var theOrientation = "left"
             }
             return (
-                    <Message key={`key_message_${this.nextUniqueId()}`} messageText={message.text} receiverId={message.receiver} orientation={theOrientation} profilePhoto={this.state.user.profilePhoto} />
+                    <Message key={`key_message_${this.nextUniqueId()}`} messageText={message.text} receiverId={message.receiver} orientation={theOrientation} profilePhoto={this.state.user.image} />
 )
 
         })

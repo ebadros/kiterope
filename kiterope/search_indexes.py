@@ -19,7 +19,7 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     author = indexes.CharField(model_attr='author')
     author_id = indexes.CharField(model_attr='author')
     author_fullName = indexes.CharField(model_attr='author')
-    author_profilePhoto = indexes.CharField(model_attr='author')
+    author_image = indexes.CharField(model_attr='author')
     isActive = indexes.BooleanField(model_attr='isActive')
 
 
@@ -41,8 +41,8 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_author_fullName(self,obj):
         return obj.get_author_fullName()
 
-    def prepare_author_profilePhoto(self,obj):
-        return obj.get_author_profilePhoto()
+    def prepare_author_image(self,obj):
+        return obj.get_author_image()
 
 
 

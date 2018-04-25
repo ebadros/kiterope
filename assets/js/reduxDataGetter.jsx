@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setTimeLastReloaded, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setTimeLastReloaded, setPublicGoals, setPublicPrograms, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -184,7 +184,8 @@ export default class ReduxDataGetter extends React.Component {
     getAllData() {
 
         store.dispatch(setSmartGoalFormData({modalIsOpen: false, data: {}}))
-
+this.loadPublicGoalData()
+                        this.loadPublicProgramData()
 
         this.loadUserData()
 
@@ -409,6 +410,8 @@ export default class ReduxDataGetter extends React.Component {
             this.loadUpdateData()
 
 
+
+
             this.loadProfileData();
             this.loadSettingsData();
             //this.loadMessageThreadData();
@@ -628,6 +631,48 @@ export default class ReduxDataGetter extends React.Component {
         }
         })
     }
+
+    loadPublicGoalData () {
+        var theUrl = "/api/publicGoals/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+
+                store.dispatch(setPublicGoals(data))
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+
+            }.bind(this),
+
+        });
+    }
+
+    loadPublicProgramData () {
+
+        var theUrl = "/api/publicPrograms/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+
+                store.dispatch(setPublicPrograms(data))
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+
+            }.bind(this),
+
+        });
+
+    }
+
+
 
 
 

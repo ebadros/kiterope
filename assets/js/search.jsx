@@ -19,6 +19,7 @@ import ValidatedInput from './app'
 import Dimensions from 'react-dimensions'
 import TextTruncate from 'react-text-truncate';
 import autobind from 'class-autobind'
+import { ProgramSubscriptionModalForm } from './program'
 
 import Pagination from "react-js-pagination";
 
@@ -327,6 +328,8 @@ _handleKeyPress = (e) => {
         <div>
             <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
                                      modalShouldClose={this.handleModalClosed}/>
+                            <ProgramSubscriptionModalForm />
+
             <div className="ui page container">
 
                     <div className="ui one column grid">
@@ -382,7 +385,6 @@ _handleKeyPress = (e) => {
 
 
                     <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
-
                 </div>
                 <div className="spacer">&nbsp;</div>
                 <div className="spacer">&nbsp;</div>
@@ -441,6 +443,8 @@ _handleKeyPress = (e) => {
         <div>
             <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
                                      modalShouldClose={this.handleModalClosed}/>
+                            <ProgramSubscriptionModalForm />
+
             <div className="ui page container">
                 <div className="ui mobileSpacer">&nbsp;</div>
 
@@ -1079,7 +1083,7 @@ export class PlanHit2 extends React.Component {
                                   <div>${result.cost} {result.costFrequencyMetric}</div>
                                   <div>&nbsp;</div>
 
-<Link to={`/profiles/${result.author_id}/`}><UserLink userId={result.author_id} /></Link>
+<Link to={`/profiles/${result.author_id}/`}><UserLink userId={result.author_id} image={result.author_image} /></Link>
 
                               </div>
 
