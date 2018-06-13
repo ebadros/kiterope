@@ -24,6 +24,10 @@ html {
     padding-bottom: 0 !important;
 }
 
+.noLabel {
+    margin-top:17px !important;
+}
+
 .inputfile {
 	width: 0.1px;
 	height: 0.1px;
@@ -31,6 +35,11 @@ html {
 	overflow: hidden;
 	position: absolute;
 	z-index: -1;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .google {

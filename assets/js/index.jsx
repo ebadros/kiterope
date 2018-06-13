@@ -30,6 +30,8 @@ import {VisualizationsPage} from './visualization'
 
 import {GoalListPage, GoalEntryPage, GoalDetailPage} from './goal'
 import {PlanDetailPage} from './plan'
+import {StepDetailPage} from './step'
+
 import {ProgramListPage, ProgramDetailPage, ProgramDetailPageNoSteps} from'./program'
 
 
@@ -121,6 +123,8 @@ ReactDOM.render((
                 <Route path="/goals/:goal_id/plans" component={GoalDetailPage} onEnter={requireAuth}/>
 
                 <Route path="/plans/:plan_id/steps" component={PlanDetailPage} onEnter={requireAuth}/>
+                                <Route path="/steps/:step_id/" component={StepDetailPage} onEnter={requireAuth}/>
+
                 <Route path="/stepOccurrences/:stepOccurrence_id/" component={StepOccurrenceDetailPage} onEnter={requireAuth}/>
 
 

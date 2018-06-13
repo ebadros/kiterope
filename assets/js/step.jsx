@@ -23,20 +23,19 @@ import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
 var BigCalendar = require('react-big-calendar');
 var classNames = require('classnames');
 import validator from 'validator';
-require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 import {SaveButton} from './settings'
-import {ImageUploader,  NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
-import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
+import {ImageUploader,  NewImageUploader, Breadcrumb, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import { Menubar, StandardSetOfComponents, Footer, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList, UpdateModalForm } from './update'
+import { ReversedRadioButton, RadioGroup, RadioButton } from 'react-radio-buttons'
 
-
-import { defaultStepCroppableImage, mobileModalStyle, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { defaultStepCroppableImage, mobileModalStyle, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, TINYMCE_CONFIG, theServer, s3IconUrl, s3BaseUrl, stepModalStyle, updateModalStyle, customStepModalStyles, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations, stepTypeOptions, } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
@@ -46,6 +45,15 @@ import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import { addStep, deleteStep, clearTempStep, addUpdate, updateStep, setUpdateModalData, setStepModalData, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import 'react-datepicker/dist/react-datepicker.css';
+moment.locale('en')
+var momentDurationFormatSetup = require("moment-duration-format");
+
+momentDurationFormatSetup(moment);
+typeof moment.duration.fn.format === "function";
+// true
+typeof moment.duration.format === "function";
+ true
 
 
 $.ajaxSetup({
@@ -299,26 +307,28 @@ export class StepDetailView extends React.Component {
     getWeeklyDays() {
         var theDaysPerWeek = "";
         if (this.state.data.day01) {
-            theDaysPerWeek = theDaysPerWeek + "M"
+            theDaysPerWeek = theDaysPerWeek + "Mon, "
         }
         if (this.state.data.day02) {
-            theDaysPerWeek = theDaysPerWeek + "T"
+            theDaysPerWeek = theDaysPerWeek + "Tue, "
         }
         if (this.state.data.day03) {
-            theDaysPerWeek = theDaysPerWeek + "W"
+            theDaysPerWeek = theDaysPerWeek + "Wed, "
         }
         if (this.state.data.day04) {
-            theDaysPerWeek = theDaysPerWeek + "R"
+            theDaysPerWeek = theDaysPerWeek + "Thu, "
         }
         if (this.state.data.day05) {
-            theDaysPerWeek = theDaysPerWeek + "F"
+            theDaysPerWeek = theDaysPerWeek + "Fri, "
         }
         if (this.state.data.day06) {
-            theDaysPerWeek = theDaysPerWeek + "Sa"
+            theDaysPerWeek = theDaysPerWeek + "Sat, "
         }
         if (this.state.data.day07) {
-            theDaysPerWeek = theDaysPerWeek + "Su"
+            theDaysPerWeek = theDaysPerWeek + "Sun, "
         }
+
+        theDaysPerWeek.slice(0, theDaysPerWeek.length - 2)
     }
 
 setDateAndTimeInfo() {
@@ -331,30 +341,30 @@ setDateAndTimeInfo() {
 
 
     setDateInfo = () => {
-        var theAbsoluteStartDate = this.state.data.absoluteStartDate;
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY");
-        var theAbsoluteEndDate = this.state.data.absoluteEndDate;
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY");
+        var theAbsoluteStartDateTime = this.state.data.absoluteStartDateTime;
+        theAbsoluteStartDateTime = moment(theAbsoluteStartDateTime).format("MM/DD/YY");
+        var theAbsoluteEndDateTime = this.state.data.absoluteEndDateTime;
+        theAbsoluteEndDateTime = moment(theAbsoluteEndDateTime).format("MM/DD/YY");
 
         switch (this.state.data.frequency) {
             case("ONCE"):
                 this.setState({
-                    dateInfo: theAbsoluteStartDate
+                    dateInfo: theAbsoluteStartDateTime
                 });
                 break;
             case("DAILY"):
                 this.setState({
-                    dateInfo: "Daily, " +  theAbsoluteStartDate + " to " + theAbsoluteEndDate,
+                    dateInfo: "Daily, " +  theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime,
                 });
                 break;
             case("WEEKLY"):
                 this.setState({
-                    dateInfo: this.getWeeklyDays() + " Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo: "Weekly, " + this.getWeeklyDays() + theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime
                 });
                 break;
             case("MONTHLY"):
                 this.setState({
-                    dateInfo:  this.state.data.monthlyDates + " Montly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo:  this.state.data.monthlyDates + " Monthly, " + theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime
                 });
                 break;
         }
@@ -474,25 +484,25 @@ export class StepBasicView extends React.Component {
     getWeeklyDays(theData) {
         var theDaysPerWeek = "";
         if (theData.day01) {
-            theDaysPerWeek = theDaysPerWeek + "M"
+            theDaysPerWeek = theDaysPerWeek + "Mon, "
         }
         if (theData.day02) {
-            theDaysPerWeek = theDaysPerWeek + "T"
+            theDaysPerWeek = theDaysPerWeek + "Tue, "
         }
         if (theData.day03) {
-            theDaysPerWeek = theDaysPerWeek + "W"
+            theDaysPerWeek = theDaysPerWeek + "Wed, "
         }
         if (theData.day04) {
-            theDaysPerWeek = theDaysPerWeek + "R"
+            theDaysPerWeek = theDaysPerWeek + "Thu, "
         }
         if (theData.day05) {
-            theDaysPerWeek = theDaysPerWeek + "F"
+            theDaysPerWeek = theDaysPerWeek + "Fri, "
         }
         if (theData.day06) {
-            theDaysPerWeek = theDaysPerWeek + "Sa"
+            theDaysPerWeek = theDaysPerWeek + "Sat, "
         }
         if (theData.day07) {
-            theDaysPerWeek = theDaysPerWeek + "Su"
+            theDaysPerWeek = theDaysPerWeek + "Sun, "
         }
 
         return theDaysPerWeek
@@ -506,32 +516,32 @@ export class StepBasicView extends React.Component {
 
 
     setDateInfo = (theData) => {
-        var theAbsoluteStartDate = theData.absoluteStartDate;
-        theAbsoluteStartDate = moment(theAbsoluteStartDate).format("MM/DD/YY");
-        var theAbsoluteEndDate = theData.absoluteEndDate;
-        theAbsoluteEndDate = moment(theAbsoluteEndDate).format("MM/DD/YY");
+        var theAbsoluteStartDateTime = theData.absoluteStartDateTime;
+        theAbsoluteStartDateTime = moment(theAbsoluteStartDateTime).format("MM/DD/YY");
+        var theAbsoluteEndDateTime = theData.absoluteEndDateTime;
+        theAbsoluteEndDateTime = moment(theAbsoluteEndDateTime).format("MM/DD/YY");
 
         switch (theData.frequency) {
 
             case("ONCE"):
                 this.setState({
-                    dateInfo: theAbsoluteStartDate
+                    dateInfo: theAbsoluteStartDateTime
                 });
                 break;
 
             case("DAILY"):
                 this.setState({
-                    dateInfo: "Daily, " +  theAbsoluteStartDate + " to " + theAbsoluteEndDate,
+                    dateInfo: "Daily, " +  theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime,
                 });
                 break;
             case("WEEKLY"):
                 this.setState({
-                    dateInfo: this.getWeeklyDays(theData) + ", Weekly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo: "Weekly, " + this.getWeeklyDays(theData) + theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime
                 });
                 break;
             case("MONTHLY"):
                 this.setState({
-                    dateInfo:  this.state.data.monthlyDates + ", Monthly, " + theAbsoluteStartDate + " to " + theAbsoluteEndDate
+                    dateInfo:  this.state.data.monthlyDates + ", Monthly, " + theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime
                 });
                 break;
 
@@ -566,7 +576,7 @@ export class StepBasicView extends React.Component {
 
     goToDetail() {
          if (this.state.data.id) {
-             store.dispatch(push("/steps/" + this.state.data.id + "/updates"))
+             store.dispatch(push("/steps/" + this.state.data.id + "/"))
          }
      }
     render() {
@@ -795,6 +805,129 @@ var TimePicker = React.createClass({
 });
 
 @connect(mapStateToProps, mapDispatchToProps)
+export class StepDetailPage extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:"",
+
+        }
+    }
+
+
+
+
+    loadStep() {
+        console.log("load plans from server");
+    $.ajax({
+      url: "/api/steps/" + this.props.params.step_id + "/",
+      dataType: 'json',
+        type: 'GET',
+
+      cache: false,
+      success: function(data) {
+        this.setState({
+            data: data});
+
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error( "/api/steps/" + this.props.params.step_id + "/", status, err.toString());
+      }.bind(this),
+
+    });
+  };
+
+
+    componentWillUnmount = () => {
+        //clearInterval(this.state.stepsIntervalId);
+
+    };
+
+
+
+
+
+
+  componentDidMount() {
+      console.log("compoentnDidMount")
+      this.loadStep()
+
+  }
+
+
+
+
+handleCurrentViewChanged = (currentView) => {
+
+      this.setState({currentView:currentView})
+
+  };
+
+
+
+
+
+
+
+
+    render() {
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+        if (forMobile){
+
+                var listNodeOrMobile = true
+        }
+
+        if (this.state.data != "") {
+            return (
+                <div>
+                    <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+
+                    <div className="ui container footerAtBottom">
+                        <div className="spacer">&nbsp;</div>
+                        <div className="ui alert"></div>
+                        <Breadcrumb values={[
+                            {url: "/steps/" + this.props.params.step_id +"/", label: "Step Detail"},
+
+                        ]}/>
+                        <div>&nbsp;</div>
+                                              <div className="ui one column stackable grid">
+
+
+                        <StepViewEditDeleteItem closeClicked={this.handleCloseClicked}
+                                            parentId={this.props.programId}
+                                            key={this.props.params.step_id}
+                                            isListNode={true}
+                                            showCloseButton={false}
+                                            apiUrl="/api/steps/"
+                                            id={this.props.params.step_id}
+                                            data={this.state.data}
+                                            currentViewChanged={this.handleCurrentViewChanged}
+
+                                            reloadItem={this.handleReloadItem}
+                                            currentView="Detail"
+                    />
+                                                  </div>
+
+
+                    </div>
+                    <Footer />
+                </div>
+
+            )
+        } else {
+            return (<div></div>)
+        }
+    }
+}
+
+
+@connect(mapStateToProps, mapDispatchToProps)
 export class StepModalForm extends React.Component {
     constructor(props) {
         super(props);
@@ -815,18 +948,23 @@ export class StepModalForm extends React.Component {
             day06:false,
             day07:false,
             monthlyDates:"",
-            absoluteStartDate:moment(),
-            absoluteEndDate:moment(),
+            absoluteStartDateTime:moment(),
+            absoluteEndDateTime:moment(),
+            relativeStartDateTime:moment.duration(),
+            relativeEndDateTime:moment.duration(),
             useAbsoluteTime:false,
-            startDate:0,
-            endDate:0,
-            startTime:"09:00",
-            duration:"",
             program:this.props.parentId,
             data:"",
             serverErrors:{},
             updates:[],
             modalIsOpen:false,
+            endRecurrence:"NEVER",
+            monthlySpecificity:"SPECIFIC_DAYS",
+            monthlyDay: "MONDAY",
+            monthlyDayOption: "FIRST",
+            interval: 1,
+            numberOfOccurrences:1,
+            recurrenceRule:"",
         }
     }
 
@@ -842,43 +980,86 @@ export class StepModalForm extends React.Component {
 
     showAndHideFrequencyUIElements (frequencyValue) {
         if (frequencyValue == "WEEKLY") {
-            $(this.refs['ref_whichDays']).show();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
+            $(this.refs['weeklyUI']).show();
+            $(this.refs['monthlyUI']).hide();
+            $(this.refs['dailyUI']).hide();
+            $(this.refs['hourlyUI']).hide();
+            $(this.refs['onceUI']).hide();
+            $(this.refs['endOnUI']).hide();
+        $(this.refs['afterUI']).hide();
+
+    } else if (frequencyValue == "" ) {
+            $(this.refs['weeklyUI']).hide();
+            $(this.refs['monthlyUI']).hide();
+                        $(this.refs['hourlyUI']).hide();
+                        $(this.refs['onceUI']).hide();
+                        $(this.refs['dailyUI']).hide();
 
 
-        } else if (frequencyValue == "ONCE" || frequencyValue == "") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).hide();
-            $(this.refs['ref_date']).show();
+
+        } else if (frequencyValue == "ONCE" ) {
+                        $(this.refs['weeklyUI']).hide();
+                        $(this.refs['monthlyUI']).hide();
+                        $(this.refs['hourlyUI']).hide();
+                        $(this.refs['onceUI']).show();
+                        $(this.refs['dailyUI']).hide();
+
+
+
+
+
 
 
         } else if (frequencyValue == "MONTHLY") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).show();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
+            $(this.refs['weeklyUI']).hide();
+            $(this.refs['monthlyUI']).show();
+            $(this.refs['dailyUI']).hide();
+            $(this.refs['hourlyUI']).hide();
+            $(this.refs['onceUI']).hide();
+            $(this.refs['endOnUI']).hide();
+
+
+        $(this.refs['afterUI']).hide();
+             $(this.refs['specificDatesUI']).hide();
+            $(this.refs['specificDaysUI']).hide();
+
+
 
 
         } else if (frequencyValue == "DAILY") {
-            $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).show();
-            $(this.refs['ref_date']).hide();
+            $(this.refs['onceUI']).hide();
+            $(this.refs['weeklyUI']).hide();
+            $(this.refs['monthlyUI']).hide();
+                                    $(this.refs['hourlyUI']).hide();
+                                                $(this.refs['dailyUI']).show();
+
+
+
+
+
+        }
+        else if (frequencyValue == "HOURLY") {
+            $(this.refs['onceUI']).hide();
+            $(this.refs['weeklyUI']).hide();
+            $(this.refs['monthlyUI']).hide();
+            $(this.refs['hourlyUI']).show();
+
+
+
 
         }
     }
 
     showAndHideTypeUIElements (typeValue) {
-         if (typeValue == "COMPLETION" || typeValue == "") {
-            $(this.refs['ref_dateUI']).hide();
+         if (typeValue == "COMPLETION" || typeValue == "" || typeValue == undefined) {
+             $(this.refs['timeBasedUI']).hide();
+
 
 
 
         } else if (typeValue == "TIME" ) {
-             $(this.refs['ref_dateUI']).show();
+             $(this.refs['timeBasedUI']).show();
+
 
 
 
@@ -887,8 +1068,6 @@ export class StepModalForm extends React.Component {
          }
 
     }
-
-
 
     loadParentFromServer = () => {
      var theUrl = "/api/programs/" + this.props.parentId;
@@ -913,10 +1092,18 @@ export class StepModalForm extends React.Component {
 
 
     componentDidMount() {
-        $(this.refs['ref_whichDays']).hide();
-            $(this.refs['ref_whichDates']).hide();
-            $(this.refs['ref_dateSet']).hide();
-        $(this.refs['ref_dateUI']).hide();
+
+        $(this.refs['weeklyUI']).hide();
+         $(this.refs['endOnUI']).hide();
+        $(this.refs['afterUI']).hide();
+        $(this.refs['specificDatesUI']).hide();
+        $(this.refs['specificDaysUI']).hide();
+        $(this.refs['monthlyUI']).hide();
+        $(this.refs['hourlyUI']).hide();
+        $(this.refs['dailyUI']).hide();
+
+        $(this.refs['onceUI']).hide();
+
 
         this.resetForm();
         this.setState({
@@ -944,17 +1131,31 @@ export class StepModalForm extends React.Component {
         if (stepModalData.data != undefined ) {
 
             var data = stepModalData.data
-            var startDate = data.startDate;
+            var relativeStartDateTime = moment.duration(data.startDateTime);
 
-            var endDate = data.endDate;
+            var relativeEndDateTime = moment.duration(data.endDateTime);
 
 
-            var programStartDateInStringForm = data.programStartDate;
+            var programStartDateInStringForm = data.programStartDateTime;
+
             var programStartDateInMomentForm = moment(programStartDateInStringForm);
-            var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
-            var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
-            calculatedStartDate = moment(calculatedStartDate);
-            calculatedEndDate = moment(calculatedEndDate);
+
+            var absoluteStartDateTime = programStartDateInMomentForm.add(relativeStartDateTime)
+            var absoluteEndDateTime = programStartDateInMomentForm.add(relativeEndDateTime)
+            console.log("relativeStartDateTime")
+            console.log(relativeStartDateTime)
+            console.log("absoluteStartDateTime")
+            console.log(absoluteStartDateTime)
+
+
+
+
+            //var absoluteStartDateTime = moment(absoluteStartDateTime)
+
+            //var calculatedStartDate = convertDate(programStartDateInMomentForm, startDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            //var calculatedEndDate = convertDate(programStartDateInMomentForm, endDate, "momentFormat", "relativeTime").format("YYYY-MM-DD");
+            //calculatedStartDate = moment(calculatedStartDate);
+            //calculatedEndDate = moment(calculatedEndDate);
             var description = ""
             var type="COMPLETION"
             var frequency="ONCE"
@@ -1005,16 +1206,24 @@ export class StepModalForm extends React.Component {
                 day05: data.day05,
                 day06: data.day06,
                 day07: data.day07,
-                startDate: startDate,
-                endDate: endDate,
+                //startDate: startDate,
+                //endDate: endDate,
                 useAbsoluteTime: data.useAbsoluteTime,
-                absoluteStartDate: calculatedStartDate,
-                absoluteEndDate: calculatedEndDate,
+                //absoluteStartDate: calculatedStartDate,
+                //absoluteEndDate: calculatedEndDate,
+                absoluteStartDateTime: absoluteStartDateTime,
+                absoluteEndDateTime: absoluteEndDateTime,
                 startTime: data.startTime,
                 duration: data.duration,
                 monthlyDates: data.monthlyDates,
-                programStartDate: data.programStartDate,
+                programStartDateTime: moment(data.programStartDateTime),
                 updates: data.updates,
+                 endRecurrence:data.endRecurrence,
+            monthlySpecificity:data.monthlySpecificity,
+            monthlyDay: data.monthlyDay,
+            monthlyDayOption: data.monthlyDayOption,
+            interval: data.interval,
+            numberOfOccurrences:data.numberOfOccurrences,
             },() => {
                 this.showAndHideTypeUIElements(this.state.type)
                 this.showAndHideFrequencyUIElements(this.state.frequency)
@@ -1078,14 +1287,7 @@ export class StepModalForm extends React.Component {
 
 
 
-   handleStartDateChange(date) {
-        this.setState({startDate: date,
-                            saved: "Save"});
-  }
-    handleEndDateChange(date) {
-        this.setState({endDate: date,
-                            saved: "Save"});
-  }
+
 
   handleUseAbsoluteTimeChange = (e) =>  {
 
@@ -1101,40 +1303,51 @@ export class StepModalForm extends React.Component {
     };
 
 
-    handleAbsoluteStartDateChange(date) {
+    handleAbsoluteStartDateTimeChange(date) {
 
         this.setState({
-            absoluteStartDate: date,
-            startDate: daysBetweenDates(this.state.programStartDate, date),
+            absoluteStartDateTime: date,
                             saved: "Save"
-        });
+        }, () => this.updateRelativeDates());
 
         if (this.state.frequency == 'ONCE') {
             this.setState({
-                absoluteEndDate: date,
+                absoluteEndDateTime: date,
                             saved: "Save"
-            })
+            }, () => this.updateRelativeDates())
         }
-        if (this.state.absoluteEndDate < date) {
+        if (this.state.absoluteEndDateTime < date) {
             this.setState({
-                absoluteEndDate: date,
+                absoluteEndDateTime: date,
                             saved: "Save"
-            })
+            }, () => this.updateRelativeDates())
         }
+
 
   }
-    handleAbsoluteEndDateChange(date) {
+
+  updateRelativeDates () {
+      console.log("updateRelativeDates")
+    var relativeStartDateTime = moment.duration(this.state.absoluteStartDateTime.diff(this.state.programStartDateTime)).format("d hh:mm:ss.SS")
+        var relativeEndDateTime = moment.duration(this.state.absoluteEndDateTime.diff(this.state.programStartDateTime)).format("d hh:mm:ss.SS")
+        this.setState({
+            relativeStartDateTime:relativeStartDateTime,
+            relativeEndDateTime:relativeEndDateTime
+        })
+
+}
+    handleAbsoluteEndDateTimeChange(date) {
+        console.log("handle called")
     this.setState({
-            absoluteEndDate: date,
-            endDate: daysBetweenDates(this.state.programStartDate, date),
+            absoluteEndDateTime: date,
                             saved: "Save"
-        });
+        }, () => this.updateRelativeDates());
 
-        if (this.state.absoluteStartDate > date) {
+        if (this.state.absoluteStartDateTime > date) {
             this.setState({
-                absoluteStartDate: date,
+                absoluteStartDateTime: date,
 
-            })
+            }, () => this.updateRelativeDates())
         }
   }
     setTitle(stateValueFromChild) {
@@ -1221,8 +1434,27 @@ export class StepModalForm extends React.Component {
         }
     }
 
-    handleSubmit(e) {
+    handleIntervalChange(value) {
+        this.setState({interval:value,
+        saved: "Save"})
+    }
+
+    handleFormatDuration (theDuration) {
+        var returnDuration = theDuration.get('days') + " " + theDuration.get('hours') + ":" + theDuration.get('minutes') + ":" + theDuration.get('seconds') + "." + theDuration.get('milliseconds')
+        return returnDuration
+    }
+
+    buildRecurrenceRuleAndSubmit() {
+        var recurrenceRule = this.buildRecurrenceRule
+        this.setState({recurrenceRule: recurrenceRule}, () => this.handleSubmit())
+
+    }
+
+    handleSubmit() {
         this.setState({saved:"Saving"})
+        console.log("handleBuild ******************************************")
+
+
 
 
     if (this.props.storeRoot.user) {
@@ -1241,17 +1473,19 @@ export class StepModalForm extends React.Component {
         var day06 = this.state.day06;
         var day07 = this.state.day07;
         var startTime = this.state.startTime;
-        var duration = this.state.duration;
         var monthlyDates = this.state.monthlyDates;
         var theProgram = this.props.parentId;
 
-        var absoluteStartDate = convertDate(this.state.absoluteStartDate, 0, "stringFormatComputer", "relativeTime");
-        var absoluteEndDate = convertDate(this.state.absoluteEndDate, 0, "stringFormatComputer", "relativeTime");
-        var programStartDate = convertDate(this.state.programStartDate, 0 , "dateFormat", "relativeTime");
+        //var absoluteStartDateTime = convertDate(this.state.absoluteStartDateTime, 0, "stringFormatComputer", "relativeTime");
+        //var absoluteEndDateTime = convertDate(this.state.absoluteEndDateTime, 0, "stringFormatComputer", "relativeTime");
+        //var programStartDateTime = convertDate(this.state.programStartDateTime, 0 , "dateFormat", "relativeTime");
         var useAbsoluteTime = this.state.useAbsoluteTime;
 
-        var startDate = this.state.startDate;
-        var endDate = this.state.endDate;
+        //relativeStartDateTime = this.handleFormatDuration(relativeStartDateTime)
+        //relativeEndDateTime = this.handleFormatDuration(relativeEndDateTime)
+
+
+
         var updates = this.state.updates;
         var updatesIds = [];
 
@@ -1280,14 +1514,20 @@ export class StepModalForm extends React.Component {
             day06:day06,
             day07:day07,
             monthlyDates:monthlyDates,
-            absoluteStartDate:absoluteStartDate,
-            absoluteEndDate:absoluteEndDate,
+            absoluteStartDateTime:moment(this.state.absoluteStartDateTime).format('YYYY-MM-DD HH:mm'),
+            absoluteEndDateTime:moment(this.state.absoluteEndDateTime).format('YYYY-MM-DD HH:mm'),
+            relativeStartDateTime: this.state.relativeStartDateTime,
+            relativeEndDateTime: this.state.relativeEndDateTime,
             useAbsoluteTime: useAbsoluteTime,
-            startDate:startDate,
-            endDate:endDate,
-            startTime:startTime,
-            duration:duration,
             program:theProgram,
+            endRecurrence:this.state.endRecurrence,
+            recurrenceRule:this.state.recurrenceRule,
+            monthlySpecificity:this.state.monthlySpecificity,
+            monthlyDay: this.state.monthlyDay,
+            monthlyDayOption: this.state.monthlyDayOption,
+            interval: this.state.interval,
+            programStartDateTime: this.state.programStartDateTime,
+            numberOfOccurrences:this.state.numberOfOccurrences,
             'updatesIds[]': updatesIds,
         };
 
@@ -1325,16 +1565,18 @@ export class StepModalForm extends React.Component {
                     day06: false,
                     day07: false,
                     monthlyDates: "",
-                    absoluteStartDate: moment(),
-                    absoluteEndDate: moment(),
-                    startDate: 0,
+                    absoluteStartDateTime: moment(),
+                    absoluteEndDateTime: moment(),
                     useAbsoluteTime: false,
-                    endDate: 0,
-                    startTime: "",
-                    duration: "",
-                    durationMetric: "",
                     program: this.props.parentId,
                     updates: [],
+                endRecurrence:"NEVER",
+            monthlySpecificity:"SPECIFIC_DAYS",
+            monthlyDay: "MONDAY",
+            monthlyDayOption: "FIRST",
+            interval: 1,
+            numberOfOccurrences:1,
+            recurrenceRule:"",
 
                     modalIsOpen: false,
                 },            () =>        { store.dispatch(setStepModalData(this.state))}
@@ -1353,6 +1595,48 @@ export class StepModalForm extends React.Component {
         })
     }
 
+    handleEndRecurrenceChange (option) {
+        this.setState({endRecurrence: option.value})
+        switch(option.value) {
+            case ("NEVER"):
+
+                $(this.refs['endOnUI']).hide();
+                $(this.refs['afterUI']).hide();
+
+                break;
+            case ("END_DATE"):
+                $(this.refs['endOnUI']).show();
+                $(this.refs['afterUI']).hide();
+                break;
+
+             case ("AFTER_NUMBER_OF_OCCURRENCES"):
+                $(this.refs['afterUI']).show();
+                $(this.refs['endOnUI']).hide();
+                break;
+
+
+        }
+
+
+    }
+
+    handleMonthlySpecificityChange (option) {
+        this.setState({monthlySpecificity: option.value})
+
+
+
+    }
+
+    handleNumberOfOccurrencesChange (value) {
+        this.setState({numberOfOccurrences:value})
+    }
+    handleMonthlyDayOptionChange (option) {
+        this.setState({monthlyDayOption: option.value})
+    }
+
+    handleMonthlyDayChange (option) {
+        this.setState({monthlyDay: option.value})
+    }
 
 
         getDescriptionEditor () {
@@ -1400,10 +1684,648 @@ export class StepModalForm extends React.Component {
                 }
             }
 
+    getDailyUI = () => {
+                var startAndEndRecurrenceUI = this.getStartAndEndRecurrenceUI()
+
+                if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+                return (
+                    <div ref="dailyUI" className="ui grid">
+                         <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                            <div className="one wide middle aligned column noLabel">every</div>
+
+                            <div className="one wide column noLabel">
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="interval"
+                                        label=""
+                                        id="id_interval"
+                                        value={this.state.interval}
+                                        initialValue={this.state.interval}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleIntervalChange}
+
+
+                                    />
+                                </div>
+                                <div className="two wide middle aligned column noLabel">day(s)</div>
+
+
+
+
+
+
+
+                        </div>
+                        {startAndEndRecurrenceUI}
+                        </div>
+                )
+
+            }
+            getHourlyUI = () => {
+                var startAndEndRecurrenceUI = this.getStartAndEndRecurrenceUI()
+
+                if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+                return (
+                    <div ref="hourlyUI" className="ui grid">
+                         <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                            <div className="one wide middle aligned column noLabel">every</div>
+
+                            <div className="one wide column noLabel">
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="interval"
+                                        label=""
+                                        id="id_interval"
+                                        value={this.state.interval}
+                                        initialValue={this.state.interval}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleIntervalChange}
+
+
+                                    />
+                                </div>
+                                <div className="two wide middle aligned column noLabel">hour(s)</div>
+
+
+
+
+
+
+
+                        </div>
+                        {startAndEndRecurrenceUI}
+                        </div>
+                )
+
+            }
+
+            getOnceUI = () => {
+                            var startAndEndRecurrenceUI = this.getStartAndEndRecurrenceUI()
+
+                if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+                return (
+                    <div ref="onceUI" className="ui grid">
+                        
+                         <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                             </div>
+                        <div className="ui row">
+                                    <div className={smallColumnWidth}>
+                                        <div className="field fluid">
+                                            <label className="tooltip" htmlFor="id_startDate">When:<i
+                          className="info circle icon"></i>
+                          <span className="tooltiptext">This is relative to your program start date/time which is highlighted on the calendar.</span>
+                      </label>
+
+                                            <DatePicker showTimeSelect
+                                                        showTime = {{ use12hours: true }}
+                                                        allowClear={false}
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="LLL"
+                                                        timeCaption="time"
+                                                        highlightDates={[this.state.programStartDateTime]}
+                                                        selected={this.state.absoluteStartDateTime}
+                                                        onChange={this.handleAbsoluteStartDateTimeChange} />
+                                            </div>
+                                        </div>
+                            </div>
+
+
+                        </div>
+                             )
+                             }
+//TODO: Validate that this is a number
+
+
+            getWeeklyUI = () => {
+                            var startAndEndRecurrenceUI = this.getStartAndEndRecurrenceUI()
+
+                if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+                return (
+                    <div ref="weeklyUI" className="ui grid">
+                         <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                            <div className="one wide middle aligned column noLabel">every</div>
+
+                            <div className="one wide column noLabel">
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="interval"
+                                        label=""
+                                        id="id_interval"
+                                        value={this.state.interval}
+                                        initialValue={this.state.interval}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleIntervalChange}
+
+
+                                    />
+                                </div>
+                                <div className="two wide middle aligned column noLabel">week(s)</div>
+
+
+
+
+
+
+
+                        </div>
+                        <div className="ui row">
+
+
+                                <div className={mediumColumnWidth}>
+                                <div className="field fluid">                                        <label htmlFor="id_absoluteStartDate">on these days:</label>
+
+                                    <div className="ui equal width tiny buttons ">
+                                        <ToggleButton id="id_day01" label="M" value={this.state.day01} callback={this.handleDay01Change.bind(this)} />
+                                        <ToggleButton id="id_day02" label="T" value={this.state.day02} callback={this.handleDay02Change.bind(this)} />
+                                        <ToggleButton id="id_day03" label="W" value={this.state.day03} callback={this.handleDay03Change.bind(this)} />
+                                        <ToggleButton id="id_day04" label="Th" value={this.state.day04} callback={this.handleDay04Change.bind(this)} />
+                                        <ToggleButton id="id_day05" label="F" value={this.state.day05} callback={this.handleDay05Change.bind(this)} />
+                                        <ToggleButton id="id_day06" label="Sa" value={this.state.day06} callback={this.handleDay06Change.bind(this)} />
+                                        <ToggleButton id="id_day07" label="Su" value={this.state.day07} callback={this.handleDay07Change.bind(this)} />
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+                                                 {startAndEndRecurrenceUI}
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+                )
+
+        }
+
+        buildRecurrenceRule = () => {
+            var recurrenceRule = "RRULE:"
+            recurrenceRule += "FREQ=" + this.state.frequency + ";"
+            if (this.state.interval != "") {
+                recurrenceRule += "INTERVAL=" + this.state.interval + ";"
+            }
+            recurrenceRule += "DTSTART=" + this.state.absoluteStartDateTime + ";"
+
+            switch (this.state.endRecurrence) {
+                case "END_DATE":
+                    recurrenceRule += "UNTIL=" + this.state.absoluteEndDateTime + ";"
+                    break;
+                case "AFTER_NUMBER_OF_OCCURRENCES":
+                    recurrenceRule += "COUNT=" + this.state.numberOfOccurrences + ";"
+
+            }
+            var theDays = ""
+
+            switch (this.state.frequency) {
+                case "WEEKLY":
+                    if (this.state.day01) {
+                        theDays += "MO,"
+
+                    }
+                    if (this.state.day02) {
+                        theDays += "TU,"
+
+                    }
+                    if (this.state.day03) {
+                        theDays += "WE,"
+
+                    }
+                    if (this.state.day04) {
+                        theDays += "TH,"
+
+                    }
+                    if (this.state.day05) {
+                        theDays += "FR,"
+
+                    }
+                    if (this.state.day06) {
+                        theDays += "SA,"
+
+                    }
+                    if (this.state.day07) {
+                        theDays += "SU,"
+
+                    }
+                    if (theDays != "") {
+                        theDays = theDays.slice(0, -1)
+                    }
+                    recurrenceRule += "BYDAY=" + theDays + ";"
+                    break
+
+
+                case "MONTHLY":
+                    if (this.state.monthlySpecificity = "SPECIFIC_DATES") {
+                        recurrenceRule += "BYMONTHDAY=" + this.state.monthlyDates + ";"
+                    } else if (this.state.monthlySpecificity = "SPECIFIC_DAYS") {
+                        switch(this.state.monthlyDayOption) {
+                            case "FIRST":
+                                recurrenceRule += "BYSETPOS=1;"
+                                break
+                            case "FIRST":
+                                recurrenceRule += "BYSETPOS=2;"
+                                break
+                            case "FIRST":
+                                recurrenceRule += "BYSETPOS=3;"
+                                break
+                            case "FIRST":
+                                recurrenceRule += "BYSETPOS=4;"
+                                break
+                            case "FIRST":
+                                recurrenceRule += "BYSETPOS=-1;"
+                                break
+
+
+                        }
+                        switch(this.state.monthlyDay) {
+                            case "MONDAY":
+                                recurrenceRule += "BYDAY=MO;"
+                                break
+                            case "TUESDAY":
+                                recurrenceRule += "BYDAY=TU;"
+                                break
+                            case "WEDNESDAY":
+                                recurrenceRule += "BYDAY=WE;"
+                                break
+                            case "THURSDAY":
+                                recurrenceRule += "BYDAY=TH;"
+                                break
+                            case "FRIDAY":
+                                recurrenceRule += "BYDAY=FR;"
+                                break
+                            case "SATURDAY":
+                                recurrenceRule += "BYDAY=SA;"
+                                break
+
+                            case "SUNDAY":
+                                recurrenceRule += "BYDAY=SU;"
+                                break
+
+
+
+                        }
+                    }
+
+            }
+            return recurrenceRule
+
+
+
+
+
+
+        }
+
+        getStartAndEndRecurrenceUI = () => {
+            if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+             if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+    return (
+    <div className="ui row">
+                                    <div className={smallColumnWidth}>
+                                        <div className="field fluid">
+                                            <label htmlFor="id_absoluteStartDate">Starting:</label>
+
+                                            <DatePicker showTimeSelect
+                                                        showTime = {{ use12hours: true }}
+                                                        allowClear={false}
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="LLL"
+                                                        timeCaption="time"
+                                                        highlightDates={[this.state.programStartDateTime]}
+
+                                                        selected={this.state.absoluteStartDateTime}
+                                                        onChange={this.handleAbsoluteStartDateTimeChange} />
+                                            </div>
+                                        </div>
+
+
+
+                            <div className={smallColumnWidth}>
+                                <div className="field fluid">
+                                            <label htmlFor="id_frequency">and ending:</label>
+                                    <Select value={this.state.endRecurrence}  onChange={this.handleEndRecurrenceChange} name="endRecurrence" options={endRecurrenceOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                        {this.state.endRecurrence == "AFTER_NUMBER_OF_OCCURRENCES" ?  <div><div className="one wide column">
+                                            <label htmlFor="id_frequency">&nbsp;</label>
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="interval"
+                                        label=""
+                                        id="id_interval"
+                                        value={this.state.numberOfOccurrences}
+                                        initialValue={this.state.numberOfOccurrences}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleNumberOfOccurrencesChange}
+
+
+                                    />
+                                </div>                                <div className="two wide column middle aligned">occurrence(s)</div></div>
+ : null}
+
+                        {this.state.endRecurrence == "END_DATE" ?
+                            <div ref="endOnUI" className={smallColumnWidth}>
+                                        <div className="field">
+                                            <label htmlFor="id_frequency">&nbsp;</label>
+
+                                            <DatePicker showTimeSelect
+                                                        showTime = {{ use12hours: true }}
+                                                        use12Hours = {true}
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="LLL"
+                                                        timeCaption="time"
+                                                        highlightDates={[this.state.programStartDateTime]}
+
+                                                        selected={this.state.absoluteEndDateTime}
+                                                        onChange={this.handleAbsoluteEndDateTimeChange} />
+                                            </div>
+                                        </div> : null}
+
+                        </div>
+)
+
+
+}
+
+        getMonthlyUI = () => {
+            var startAndEndRecurrenceUI = this.getStartAndEndRecurrenceUI()
+                if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+                return (
+                    <div ref="monthlyUI" className="ui grid">
+                         <div className="ui row">
+                            <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Repeat?:</label>
+                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                            <div className="one wide middle aligned column noLabel">every</div>
+
+                            <div className="one wide column noLabel">
+
+                                <ValidatedInput
+                                        type="text"
+                                        name="interval"
+                                        label=""
+                                        id="id_interval"
+                                        value={this.state.interval}
+                                        initialValue={this.state.interval}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleIntervalChange}
+
+
+                                    />
+                                </div>
+                                <div className="two wide middle aligned column noLabel">month(s)</div>
+
+
+
+
+
+
+
+                        </div>
+                         <div className="ui row">
+                             <div className={smallColumnWidth}>
+                                <div className="field">
+                                            <label htmlFor="id_frequency">Schedule event to occur on:</label>
+                                    <Select value={this.state.monthlySpecificity}  onChange={this.handleMonthlySpecificityChange} name="monthlySpecificity" options={monthlySpecificityOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                             {this.state.monthlySpecificity == "SPECIFIC_DATES" ?
+
+                            <div  className={smallColumnWidth}>
+
+                                <div className="field fluid">
+
+
+                                    <label htmlFor="id_date">&nbsp;</label>
+                                    <input type="text" placeholder="1, 6, 9-10, 15" name="monthlyDates" id="id_monthlyDates" value={this.state.monthlyDates} onChange={this.handleMonthlyDatesChange}/>
+
+                                </div>
+
+                            </div> :
+                                 <div className={mediumColumnWidth}>
+                             <div className="ui two column grid" >
+                             <div  className="column">
+                                <div className="field">
+                                    <label htmlFor="id_frequency">&nbsp;</label>
+                                    <Select value={this.state.monthlyDayOption}  onChange={this.handleMonthlyDayOptionsChange} name="monthlyDayOption" options={monthlyDayOptions} clearable={false}/>
+
+                                        </div>
+                            </div>
+                             <div className="column">
+                                <div className="field">
+                                            <label htmlFor="id_frequency">&nbsp;</label>
+                                    <Select value={this.state.monthlyDay}  onChange={this.handleMonthlyDayChange} name="monthlyDay" options={dayOptions} clearable={false}/>
+
+
+                                        </div>
+                            </div>
+                                 </div>
+                                     </div>
+                             }
+                             </div>
+                             {startAndEndRecurrenceUI}
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+                )
+
+        }
+
+
 
 
 
         getForm = () => {
+            var hourlyUI = this.getHourlyUI()
+                        var dailyUI = this.getDailyUI()
+                                    var onceUI = this.getOnceUI()
+
+
+
+            var weeklyUI = this.getWeeklyUI()
+                        var monthlyUI = this.getMonthlyUI()
+
 
                         if (this.state.image) {
                 var imageUrl = this.state.image
@@ -1437,7 +2359,7 @@ export class StepModalForm extends React.Component {
             var smallColumnWidth = "four wide column"
         }
           return (
-              <div className="ui page container form">
+              <div  className="ui page container form">
                   <div>{this.props.programHeaderErrors}</div>
                   <div className="ui row">&nbsp;</div>
                                             <Header headerLabel={this.state.id != ""? "Edit Step": "Create Step"} />
@@ -1491,63 +2413,26 @@ export class StepModalForm extends React.Component {
                             </div>
                         </div>
                           </div>
+                  <fieldset  ref="timeBasedUI" style={{marginTop: '25px', marginBottom: '25px', marginLeft:'0px', borderRadius:'4px', border: '1px solid #aaa'}}>
+    <legend>Recurrence Rules</legend>
+                       <div style={{display:'none'}} className="ui grid">
 
-                        <div ref="ref_dateUI" className="ui grid">
+                         <div className="ui row">&nbsp;
 
-
-                        <div className="ui row">
-                            <div className={mediumColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
-
-
-                                        </div>
-                            </div>
+                             </div>
                         </div>
-                         <div ref="ref_dateSet" className="ui row">
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteStartDate">Start Date:</label>
 
-                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
-                                            </div>
-                                        </div>
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteEndDate">End Date:</label>
-
-                                            <DatePicker selected={this.state.absoluteEndDate} onChange={this.handleAbsoluteEndDateChange} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                <div ref="ref_date" className="ui row">
-                                    <div className={smallColumnWidth}>
-                                        <div className="field">
-                                            <label htmlFor="id_absoluteStartDate">Date:</label>
-
-                                            <DatePicker selected={this.state.absoluteStartDate} onChange={this.handleAbsoluteStartDateChange} />
-                                            </div>
-                                        </div>
-                                    </div>
-                        <div className="ui row">
-                            <div className={smallColumnWidth}>
-                                <div className="field">
-                                    <label>Start Time:</label>
-                                    <Select value={this.state.startTime}
-                                            onChange={this.handleStartTimeChange}
-                                            name="startTime"
-                                            options={times}
-                                            clearable={false}/>
+                                              {onceUI}
 
 
-                                    {/* <select className="ui massive input middle aligned" name="amOrPm" id="id_amOrPm"
-                                            onChange={this.handleStartTimeChange}>
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>*/}
-                                </div>
-                            </div></div>
+
+                                              {weeklyUI}
+                            {monthlyUI}
+                                              {hourlyUI}
+                  {dailyUI}
+
+
+<div  className="ui grid">
                                                     <div className="ui row">
 
                             <div className={mediumColumnWidth}>
@@ -1559,65 +2444,20 @@ export class StepModalForm extends React.Component {
                                                                  <ToggleButton  id="id_useRelativeTime" label="Personalized Schedule" value={!this.state.useAbsoluteTime} callback={this.handleUseRelativeTimeChange.bind(this)} />
 <ToggleButton  id="id_useAbsoluteTime" label="Same Schedule" value={this.state.useAbsoluteTime} callback={this.handleUseAbsoluteTimeChange.bind(this)} />
 
-
 </div>
                                                                                     </div>
                         </div></div>
-                        <div className="ui row">
-                            <div className={mediumColumnWidth}>
-                                <div className="field">
-                                    <label htmlFor="id_duration">For how long:</label>
-                                    <Select value={this.state.duration}
-                                            onChange={this.handleDurationChange}
-                                            name="duration"
-                                            options={durations}
-                                            clearable={false}/>
-
-                                </div>
-                                                            </div>
 
 
 
 
-                            </div>
-
-                        <div ref="ref_whichDays" className="ui row">
-
-                            <div className={wideColumnWidth}>
-                                <div className="field fluid">
-                                    <label>Select which days to schedule each week (based on
-                                        a Monday start):</label>
-
-                                    <div className="ui equal width tiny buttons ">
-                                        <ToggleButton id="id_day01" label="M" value={this.state.day01} callback={this.handleDay01Change.bind(this)} />
-                                        <ToggleButton id="id_day02" label="T" value={this.state.day02} callback={this.handleDay02Change.bind(this)} />
-                                        <ToggleButton id="id_day03" label="W" value={this.state.day03} callback={this.handleDay03Change.bind(this)} />
-                                        <ToggleButton id="id_day04" label="Th" value={this.state.day04} callback={this.handleDay04Change.bind(this)} />
-                                        <ToggleButton id="id_day05" label="F" value={this.state.day05} callback={this.handleDay05Change.bind(this)} />
-                                        <ToggleButton id="id_day06" label="Sa" value={this.state.day06} callback={this.handleDay06Change.bind(this)} />
-                                        <ToggleButton id="id_day07" label="Su" value={this.state.day07} callback={this.handleDay07Change.bind(this)} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div ref="ref_whichDates" className="ui row">
-
-                            <div className={smallColumnWidth}>
-
-                                <div className="field fluid">
-
-                                    <label htmlFor="id_date">What date(s) in a month would you like this to occur
-                                        (1-30)?</label>
-                                    <input type="text" name="monthlyDates" id="id_monthlyDates" value={this.state.monthlyDates} onChange={this.handleMonthlyDatesChange}/>
-
-                                </div>
-
-                            </div>
-                        </div>
 
 
 
 </div>
+                          </fieldset>
+
+
 
                     <UpdatesList programId={this.props.parentId} stepId={this.state.id}/>
 
@@ -1631,7 +2471,8 @@ export class StepModalForm extends React.Component {
                               <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
                           </div>
                           <div className="column">
-                              <SaveButton saved={this.state.saved} clicked={this.handleSubmit} />
+
+                              <SaveButton saved={this.state.saved} clicked={this.buildRecurrenceRuleAndSubmit} />
                           </div>
                       </div>
 
@@ -1696,6 +2537,7 @@ export class StepModalForm extends React.Component {
                 }.bind(this),
                 error: function (xhr, status, err) {
                     var serverErrors = xhr.responseJSON;
+                    console.log(serverErrors)
                     this.setState({
                         serverErrors: serverErrors,
                          saved: "Save"
@@ -1851,4 +2693,4 @@ export class StepModalForm extends React.Component {
 }
 
 
-module.exports = {StepModalForm, TimeInput, ToggleButton, StepList, StepDetailView, StepBasicView, StepItemMenu};
+module.exports = {StepModalForm, TimeInput, ToggleButton, StepList, StepDetailView, StepBasicView, StepItemMenu, StepDetailPage};

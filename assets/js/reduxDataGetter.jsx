@@ -347,6 +347,8 @@ this.loadPublicGoalData()
         this.loadSpecificData("profileDataLoaded", "/api/profiles/me/",  (theData) => {
             store.dispatch(setProfile(theData.data))
             store.dispatch(setDataLoaded('profileData'))
+                                    this.setUsersTimezone(theData.data.id)
+
 
             if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
             clearInterval(this.state.intervals[theData.dataLoadedVariable]);
@@ -371,6 +373,7 @@ this.loadPublicGoalData()
 
 
     setUsersTimezone(userProfileId) {
+        console.log("setUsersTimezone")
         var theUrl = '/api/profiles/' + userProfileId + "/";
         var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -416,14 +419,7 @@ this.loadPublicGoalData()
             this.loadSettingsData();
             //this.loadMessageThreadData();
             this.loadContactData();
-            if (this.props.storeRoot.user) {
-                if (this.props.storeRoot.profile != undefined) {
-                    if (this.props.storeRoot.profile.timezone == undefined) {
 
-                        this.setUsersTimezone(this.props.storeRoot.user.profileId)
-                    }
-                }
-            }
         }
 
     }

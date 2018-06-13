@@ -2,19 +2,23 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 import datetime, time
 from time import mktime
-from .celery_setup import app
+from kiterope.celery_setup import app
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from django.contrib.auth.models import User
-from kiterope.views import PeriodViewSet
 from datetime import date
 from kiterope.expoPushNotifications import send_push_message
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+#from kiterope.models import Goal, Program, Step, Label, Message, Contact, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
 import json
 from datetime import timedelta
 from django.core.mail import send_mail
 from kiterope.send_sms import sendMessage
+from scheduler.tasks import RepeatTask
+
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 
 
@@ -36,7 +40,44 @@ app.conf.beat_schedule = {
 app.conf.timezone = 'UTC'
 
 
-#@app.on_after_configure.connect
+@app.task(base=RepeatTask)
+def say_hello():
+    logger.info('saying hello first')
+    print("sayingHello")
+
+    #sendMessage("", "You've got a message")
+
+
+@app.task(base=RepeatTask)
+def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
+        Profile = AppConfig.get_model('kiterope', Profile)
+        PlanOccurrence = AppConfig.get_model('kiterope', 'PlanOccurrence')
+        StepOccurrence = AppConfig.get_model('kiterope', 'StepOccurrence')
+        Update = AppConfig.get_model('kiterope', 'Update')
+        UpdateOccurrence = AppConfig.get_model('kiterope', 'UpdateOccurrence')
+
+
+        print("createStepOccurrence called")
+        theUserProfile = Profile.objects.get(user_id=currentUserId)
+        # theUTCDatetime = toUTC(theDatetime, theUserProfile.timezone)
+        currentDatetime = datetime.now(theUserProfile.timezone)
+        try:
+            thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
+            if (thePlanOccurrence.isSubscribed):
+                aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
+                                                                           currentUserId)
+                # print("aStep.id = %s" % aStep.id )
+                currentStepUpdates = Update.objects.filter(step=theStepId)
+
+                for currentStepUpdate in currentStepUpdates:
+                    # print("inside currentStepUpdates")
+                    anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id,
+                                                                                    currentStepUpdate.id)
+        except:
+            pass
+
+
+        #@app.on_after_configure.connect
 #def setup_periodic_tasks(sender, **kwargs):
     #sender.add_periodic_task(crontab(minute='*/1'), send_notification(), name='send_notification' )
 #    pass
@@ -66,6 +107,13 @@ def send_text_notification(phoneNumber, message ):
     print("here's where a text message would be sent")
     #sendMessage(phoneNumber, message)
 
+@app.task()
+def updateOccurrencesForUserAtMidnight(theUser):
+    periodRangeStart = datetime.datetime.now().date()
+    periodRangeEnd = periodRangeStart + datetime.timedelta(days=1)
+    periodRangeEnd = periodRangeEnd - datetime.timedelta(seconds=1)
+
+    StepOccurrence.objects.updateStepOccurrencesForRange(theUser, periodRangeStart, periodRangeEnd)
 
 
 @app.task()
@@ -120,6 +168,10 @@ def dailyUpdateStepOccurrences():
     schedule = CrontabSchedule.objects.create(hour=theHour, minute=inAFewMinutes, month_of_year=theMonth, day_of_month=theDayOfTheMonth)
     task = PeriodicTask.objects.create(crontab=schedule, name='StepEvent_SendNotification', task='kiterope.tasks.send_notification', args=json.dumps([66]))
     '''
+
+
+
+
 
 
 def updateOccurrences(currentUser, periodRangeStart, periodRangeEnd):

@@ -55,23 +55,30 @@ class InterestSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'name', 'email', 'goal')
 
 class StepSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Step
+        fields = ('id', 'program', 'relativeStartDateTime', 'relativeEndDateTime','endRecurrence', 'monthlySpecificity', 'monthlyDay', 'monthlyDayOption', 'interval', 'numberOfOccurrences','image', 'type', 'croppableImage','croppableImageData','updates','absoluteStartDateTime', 'visualizations','absoluteEndDateTime', 'permissions', 'programStartDateTime', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','useAbsoluteTime', 'recurrenceRule')
+
     program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
-    absoluteStartDate = serializers.DateField()
-    absoluteEndDate = serializers.DateField()
+    absoluteStartDateTime = serializers.DateTimeField()
+    absoluteEndDateTime = serializers.DateTimeField()
+    relativeStartDateTime = serializers.DurationField()
+    relativeEndDateTime = serializers.DurationField()
     useAbsoluteTime = serializers.BooleanField(required=False)
-    programStartDate = serializers.SerializerMethodField(required=False, read_only=True)
+    programStartDateTime = serializers.SerializerMethodField(required=False, read_only=True)
     isAllDay = serializers.SerializerMethodField(required=False, read_only=True)
-    absoluteStartDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
-    absoluteEndDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
+    #absoluteStartDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
+    #absoluteEndDateForCalendar = serializers.SerializerMethodField(required=False, read_only=True)
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
     updates = serializers.SerializerMethodField(required=False, read_only=True)
     visualizations = serializers.SerializerMethodField(required=False, read_only=True)
     croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
 
+
     croppableImageData = serializers.SerializerMethodField()
 
 
-    def get_absoluteStartDateForCalendar(self,obj):
+    '''def get_absoluteStartDateForCalendar(self,obj):
         #date_1 = datetime.datetime.strptime(obj.absoluteStartDate, "%y-%m-%d")
         new_date = obj.absoluteStartDate + datetime.timedelta(days=1)
         return new_date
@@ -82,12 +89,13 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
         #date_1 = datetime.datetime.strptime(obj.absoluteEndDate, "%y-%m-%d")
         new_date = obj.absoluteEndDate + datetime.timedelta(days=1)
         return new_date
+        '''
 
     def get_isAllDay(self,obj):
         return True
 
-    def get_programStartDate(self, obj):
-        return obj.get_programStartDate()
+    def get_programStartDateTime(self, obj):
+        return obj.get_programStartDateTime()
 
     def get_updates(self,obj):
         serializer = UpdateSerializer(obj.get_updates(), many=True)
@@ -118,9 +126,6 @@ class StepSerializer(serializers.HyperlinkedModelSerializer):
         serializer = CroppableImageSerializer(obj.croppableImage, many=False, context=serializer_context)
         return serializer.data
 
-    class Meta:
-        model = Step
-        fields = ('id', 'program', 'image', 'type', 'croppableImage','croppableImageData','updates','absoluteStartDate', 'visualizations','absoluteEndDate', 'permissions','absoluteStartDateForCalendar', 'absoluteEndDateForCalendar','startDate', 'endDate', 'programStartDate', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','startTime','useAbsoluteTime','duration',)
 
 
 class StepLimitedSerializer(serializers.ModelSerializer):
@@ -553,7 +558,7 @@ class KRMessageSerializer(serializers.HyperlinkedModelSerializer):
 class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', )
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -561,7 +566,7 @@ class PlanProgramSerializer(serializers.HyperlinkedModelSerializer):
     timeCommitment = serializers.CharField(max_length=20)
     costFrequencyMetric = serializers.CharField(max_length=20)
     cost = serializers.CharField(max_length=20)
-    startDate = serializers.DateField()
+    startDateTime = serializers.DateTimeField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
 
 
@@ -638,7 +643,7 @@ class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'category','scheduleLength', 'startDate', 'authorName','authorPhoto','isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+        fields = ('id','image','title', 'author', 'description',  'viewableBy', 'category','scheduleLength', 'startDateTime', 'authorName','authorPhoto','isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -648,7 +653,7 @@ class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
     timeCommitment = serializers.CharField(max_length=20)
     costFrequencyMetric = serializers.CharField(max_length=20)
     cost = serializers.CharField(max_length=20)
-    startDate = serializers.DateField()
+    startDateTime = serializers.DateTimeField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     authorName = serializers.SerializerMethodField(required=False, read_only=True)
     authorPhoto = serializers.SerializerMethodField(required=False, read_only=True)
@@ -721,9 +726,9 @@ class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         #instance.steps = validated_data.get('steps', instance.steps)
         instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
-        instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
+        instance.scheduleLength = validated_data.get('scheduleLength', instance.scheduleLength)
 
-        instance.startDate = validated_data.get('startDate', instance.startDate)
+        instance.startDateTime = validated_data.get('startDateTime', instance.startDateTime)
         instance.cost = validated_data.get('cost', instance.cost)
         instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
         instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
@@ -761,7 +766,7 @@ class ProgramVisualizationSerializer(serializers.HyperlinkedModelSerializer):
 class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions', 'isActive', 'visualizations', 'croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions', 'isActive', 'visualizations', 'croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -771,7 +776,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     timeCommitment = serializers.CharField(max_length=20)
     costFrequencyMetric = serializers.CharField(max_length=20)
     cost = serializers.CharField(max_length=20)
-    startDate = serializers.DateField()
+    startDateTime = serializers.DateTimeField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
@@ -870,7 +875,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
         instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
 
-        instance.startDate = validated_data.get('startDate', instance.startDate)
+        instance.startDateTime = validated_data.get('startDateTime', instance.startDateTime)
         instance.cost = validated_data.get('cost', instance.cost)
         instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
         instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
@@ -887,7 +892,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive', 'permissions', 'croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDate', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive', 'permissions', 'croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -897,7 +902,7 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     timeCommitment = serializers.CharField(max_length=20)
     costFrequencyMetric = serializers.CharField(max_length=20)
     cost = serializers.CharField(max_length=20)
-    startDate = serializers.DateField()
+    startDateTime = serializers.DateTimeField()
     author = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     #user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -1012,9 +1017,9 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         #instance.steps = validated_data.get('steps', instance.steps)
         instance.viewableBy = validated_data.get('viewableBy', instance.viewableBy)
-        instance.scheduleLength = validated_data.get('scheduleLength', instance.startDate)
+        instance.scheduleLength = validated_data.get('scheduleLength', instance.scheduleLength)
 
-        instance.startDate = validated_data.get('startDate', instance.startDate)
+        instance.startDateTime = validated_data.get('startDateTime', instance.startDateTime)
         instance.cost = validated_data.get('cost', instance.cost)
         instance.costFrequencyMetric = validated_data.get('costFrequencyMetric', instance.costFrequencyMetric)
         instance.timeCommitment = validated_data.get('timeCommitment', instance.timeCommitment)
@@ -1049,7 +1054,7 @@ class CroppableImageSerializer(serializers.HyperlinkedModelSerializer):
 class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = PlanOccurrence
-        fields=('id', 'program', 'goal', 'programInfo', 'programTitle', 'startDate', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
+        fields=('id', 'program', 'goal', 'programInfo', 'programTitle', 'startDateTime', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
     #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())

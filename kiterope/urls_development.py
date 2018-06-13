@@ -25,7 +25,12 @@ from kiterope.views import schema_view
 #from .views import ApiEndpoint
 #import oauth2_provider.views as oauth2_views
 from django.conf.urls import include, url
+from django.views.i18n import JavaScriptCatalog
 
+# Your normal URLs here...
+
+# If you already have a js_info_dict dictionary, just add
+# 'recurrence' to the existing 'packages' tuple.
 
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -98,6 +103,11 @@ router.register(r'^programRequests', views.ProgramRequestViewSet, base_name="Pro
 
 from django.views.generic.base import RedirectView
 
+js_info_dict = {
+    'packages': ('recurrence', ),
+}
+
+
 
 
 '''oauth2_endpoint_views = [
@@ -147,7 +157,9 @@ urlpatterns = [
       url(r'^twitter', views.twitter, name='twitter'),
 
       url(r'^tinymce/', include('tinymce.urls')),
-      #url(r'^s3/sign$', views.s3_sign_upload, name='s3_sign_upload'),
+      url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
+
+                    #url(r'^s3/sign$', views.s3_sign_upload, name='s3_sign_upload'),
       url(r'^signS3Upload$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),

@@ -20,6 +20,23 @@ STATICFILES_DIRS = (
     #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
+# Celery stuff
+LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
+
+
+
+broker_url = 'amqp://5ebe2294ecd0e0f08eab7690e2a6ee69:eac8d74fae134a9bbedb21ff824605ead6d858ef@localhost:5672'
+result_backend = 'rpc://localhost'
+
+task_serializer = 'json'
+result_serializer = 'json'
+accept_content = ['json']
+beat_scheduler='django_celery_beat.schedulers.DatabaseScheduler',
+
+timezone = 'North America/Los Angeles'
+enable_utc = True
+include='kiterope.tasks'
+
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'bundles-prod/',
@@ -27,7 +44,6 @@ WEBPACK_LOADER = {
     }
 }
 
-LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
 
 
 REACT_SERVICE_URL = 'http://localhost:63578/render'

@@ -155,9 +155,37 @@ export const programCategoryOptions = [
 
 export const frequencyOptions = [
      {value:'ONCE', label: "Don't repeat"},
+        {value:'HOURLY', label: "Hourly"},
     {value:'DAILY', label: "Daily"},
     {value:'WEEKLY', label: "Weekly"},
     {value:'MONTHLY', label: "Monthly"}];
+
+export const monthlySpecificityOptions = [
+     {value:'SPECIFIC_DATES', label: "Specific Dates"},
+        {value:'SPECIFIC_DAYS', label: "Specific Days"},
+    ];
+
+export const dayOptions = [
+     {value:'MONDAY', label: "Monday"},
+        {value:'TUESDAY', label: "Tuesday"},
+    {value:'WEDNESDAY', label: "Wednesday"},
+    {value:'THURSDAY', label: "Thursday"},
+    {value:'FRIDAY', label: "Friday"},
+{value:'SATURDAY', label: "Saturday"},
+{value:'SUNDAY', label: "Sunday"}];
+
+export const monthlyDayOptions = [
+     {value:'FIRST', label: "First"},
+        {value:'SECOND', label: "Second"},
+    {value:'THIRD', label: "Third"},
+    {value:'FOURTH', label: "Fourth"},
+    {value:'LAST', label: "Last"}]
+
+export const endRecurrenceOptions = [
+     {value:'NEVER', label: "Never"},
+        {value:'END_DATE', label: "End on"},
+    {value:'AFTER_NUMBER_OF_OCCURRENCES', label: "After"},
+]
 
 export const programScheduleLengths = [
     {value:'1w', label: "1 week"},
@@ -506,5 +534,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   mobileModalStyle, updateModalStyleHigher, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   mobileModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

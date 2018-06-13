@@ -36,6 +36,11 @@ from datetime import timedelta
 from dateutil.rrule import rrule, DAILY
 from picklefield.fields import PickledObjectField
 from jsonfield import JSONField
+from recurrence.fields import RecurrenceField
+from scheduler.scheduler import TaskScheduler
+from kiterope.celery_setup import app
+from scheduler.tasks import RepeatTask
+from kiterope.tasks import say_hello
 
 
 '''
@@ -125,6 +130,7 @@ TIME_METRIC_CHOICES = (
 
 FREQUENCY_CHOICES = (
     ("ONCE", "Once"),
+    ("HOURLY", "Hourly"),
     ("DAILY", "Daily"),
     ("WEEKLY", "Weekly"),
     ("MONTHLY", "Monthly"),
@@ -288,6 +294,9 @@ NOTIFICATION_METHOD_CHOICES = [
     ('EMAIL', "Email Only"),
     ('NO_NOTIFICATIONS',  "I don't want any notifications"),
 ]
+
+
+
 class NotificationManager(models.Manager):
 
     def create_notification(self, theUserId, sessionId, theType):
@@ -388,13 +397,14 @@ class Program(models.Model):
     viewableBy = models.CharField(max_length=20, choices=PROGRAM_VIEWABLEBY_CHOICES, default="ONLY_ME")
     steps = models.ManyToManyField('Step', blank=True, related_name='steps')
     scheduleLength = models.CharField(max_length=20, null=False, choices=SCHEDULE_LENGTH_CHOICES, default="3m")
-    startDate = models.DateField(null=True, blank=True)
+    startDateTime = models.DateTimeField(null=True, blank=True)
     timeCommitment = models.CharField(max_length=100, choices=TIME_COMMITMENT_CHOICES, blank=True, default="1h")
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
     isActive = models.BooleanField(blank=True, default=True)
     croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="217")
+
 
 
 
@@ -458,19 +468,24 @@ class Step(models.Model):
 
 
     # These dates are absolute dates and are used to calculate the startDate and endDate
-    absoluteStartDate = models.DateField(blank=True, null=True)
-    absoluteEndDate = models.DateField(blank=True, null=True)
+    absoluteStartDateTime = models.DateTimeField(blank=True, null=True)
+    absoluteEndDateTime = models.DateTimeField(blank=True, null=True)
+
+    relativeStartDateTime = models.DurationField(blank=True, null=True)
+    relativeEndDateTime = models.DurationField(blank=True, null=True)
+
+
 
     # Relative start and end dates are in reference to the associated Plan start date
-    startDate = models.IntegerField(blank=True, null=True)
-    endDate = models.IntegerField(blank=True, null=True)
+    #startDate = models.IntegerField(blank=True, null=True)
+    #endDate = models.IntegerField(blank=True, null=True)
 
-    startTime = models.CharField(max_length=20, blank=True, null=True, default="09:00" ,choices=START_TIME_CHOICES,)
+    #startTime = models.CharField(max_length=20, blank=True, null=True, default="09:00" ,choices=START_TIME_CHOICES,)
 
     # If useAbsoluteTime is True, the timezone value will be used to set it so all people on the step will be doing things at the same time
     useAbsoluteTime = models.BooleanField(blank=True, default=False)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
-    duration = models.CharField(max_length=20, choices=DURATION_CHOICES, null=False, default='1')
+    #duration = models.CharField(max_length=20, choices=DURATION_CHOICES, null=False, default='1')
 
     day01 = models.BooleanField(default=False)
     day02 = models.BooleanField(default=False)
@@ -481,6 +496,16 @@ class Step(models.Model):
     day07 = models.BooleanField(default=False)
 
     monthlyDates = models.CharField(max_length=40, blank=True, null=True)
+    #recurrence = RecurrenceField(blank=True, null=True)
+
+    endRecurrence = models.CharField(max_length=100, blank=True, default="")
+    monthlySpecificity = models.CharField(max_length=100, blank=True, default="")
+    monthlyDay = models.CharField(max_length=100, blank=True, default="")
+    monthlyDayOption = models.CharField(max_length=100, blank=True, default="")
+    interval = models.CharField(max_length=100, blank=True, default="")
+    numberOfOccurrences = models.CharField(max_length=100, blank=True, default="")
+    recurrenceRule = models.CharField(max_length=100, blank=True, default="")
+
 
 
 
@@ -495,12 +520,12 @@ class Step(models.Model):
     def get_visualizations(self):
         return Visualization.objects.filter(step=self)
 
-    def get_programStartDate(self):
+    def get_programStartDateTime(self):
         try:
-            programStartDate = Program.objects.get(id=self.program.id).startDate
+            programStartDateTime = Program.objects.get(id=self.program.id).startDateTime
         except:
-            programStartDate = None
-        return programStartDate
+            programStartDateTime = None
+        return programStartDateTime
 
     # Converts the string of monthly dates to an array of integers
     def get_monthlyDatesArray(self):
@@ -609,6 +634,7 @@ class UpdateOccurrence(models.Model):
     boolean = models.BooleanField(default=False)
     datetime = models.DateTimeField(blank=True, null=True)
 
+
     objects = UpdateOccurrenceManager()
 
     def get_stepOccurrenceDate(self):
@@ -651,13 +677,94 @@ class StepOccurrenceManager(models.Manager):
         occurrence.full_clean()
         return occurrence
 
-
-    def create_scheduleBased_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
-
-
+    def create_scheduleBased_occurrence2(self, aStepId, theDateTime, aPlanOccurrenceId, theUserId):
         theStep = Step.objects.get(id=aStepId)
 
+        try:
+            # If the step has a set time
+            theStepStartTimeString = theStep.startTime
+            theStepStartTimeStringComponents = theStepStartTimeString.split(":")
+            theHour = theStepStartTimeStringComponents[0]
+            theMinutes = theStepStartTimeStringComponents[1]
+            theDatetime = aDate + datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
 
+
+        except:
+            theSettingsSet = SettingsSet.objects.get(user=theUserId)
+            try:
+                theStepStartTimeString = theSettingsSet.defaultNotificationSendTime
+                theStepStartTimeStringComponents = theStepStartTimeString.split(":")
+                theHour = theStepStartTimeStringComponents[0]
+                theMinutes = theStepStartTimeStringComponents[1]
+                theDatetime = aDate + datetime.timedelta(hours=int(theHour), minutes=int(theMinutes))
+            except:
+                theDatetime = aDate + datetime.timedelta(hours=int(9), minutes=int(0))
+
+        if theStep.useAbsoluteTime:
+            theProgramAuthorProfileTimezone = theStep.program.author.profile.timezone
+            theUTCDatetime = toUTC(theDatetime, theProgramAuthorProfileTimezone)
+            theUserProfile = Profile.objects.get(user_id=theUserId)
+
+        else:
+
+            theUserProfile = Profile.objects.get(user_id=theUserId)
+            theUTCDatetime = toUTC(theDatetime, theUserProfile.timezone)
+
+        theUTCMonth = theUTCDatetime.month
+        theUTCDayOfTheMonth = theUTCDatetime.day
+
+        theUTCHour = theUTCDatetime.hour
+
+        theUTCMinute = theUTCDatetime.minute
+        theDateString = theUTCDatetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth,
+                                                  day_of_month=theUTCDayOfTheMonth)
+        thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
+        occurrence = self.create(step_id=aStepId, date=theUTCDatetime, type=theStep.type,
+                                 planOccurrence_id=aPlanOccurrenceId, wasCompleted=False, user_id=theUserId)
+        occurrence.full_clean()
+
+        if 'EMAIL' in thePlanOccurrence.notificationMethod:
+            periodicTaskString1 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (
+            occurrence.id, theStep.description)
+
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
+                                               task='kiterope.tasks.send_email_notification',
+                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title,
+                                                                linkToStepOccurrence]))
+
+        if 'APP' in thePlanOccurrence.notificationMethod:
+            # print("inside APP")
+            periodicTaskString2 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+
+            # print("expoToekn")
+            print(theUserProfile.expoPushToken)
+
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
+                                               task='kiterope.tasks.send_app_notification',
+                                               args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
+
+        if 'TEXT' in thePlanOccurrence.notificationMethod:
+            # print("inside TEXT")
+            linkToStepOccurrence = "%s\n\nhttps://kiterope.com/stepOccurrences/%s/\n\n%s" % (
+            theStep.title, occurrence.id, theStep.description)
+
+            periodicTaskString3 = "%s: %s - %s %s" % (
+                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            phoneNumber = "%s" % thePlanOccurrence.notificationPhone
+            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
+                                               task='kiterope.tasks.send_text_notification',
+                                               args=json.dumps([phoneNumber,
+                                                                linkToStepOccurrence]))
+
+        return occurrence
+
+    def create_scheduleBased_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
+        theStep = Step.objects.get(id=aStepId)
 
         try:
             # If the step has a set time
@@ -1187,7 +1294,7 @@ class Contact(models.Model):
 class PlanOccurrence(models.Model):
     program = models.ForeignKey(Program, null=True, blank=True)
     goal = models.ForeignKey(Goal, null=True, blank=True)
-    startDate = models.DateField(blank=True, null=True)
+    startDateTime = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User, null=True, blank=True)
     isSubscribed = models.BooleanField(default=False)
 
@@ -1197,12 +1304,97 @@ class PlanOccurrence(models.Model):
     notificationSendTime = models.CharField(max_length=10, blank=True, choices=START_TIME_CHOICES)
 
 
+    def save(self, *args, **kwargs):
+        print("saving plan occurrence")
+        super(PlanOccurrence, self).save(*args, **kwargs)
+        print(self.isSubscribed)
+
+        if self.isSubscribed == True:
+            print("isSubscribed")
+
+            self.create_step_occurrence_creator_tasks()
+
+
 
     def __str__(self):
         return "Program: %s, User: %s" % (self.program,  self.user)
 
     def get_theProgram(self):
         return Program.objects.get(id=self.program.id)
+
+
+    def create_step_occurrence_creator_tasks(self):
+        print("create_step_occurrence_creator_tasks")
+
+        theProgram = Program.objects.get(id=self.program.id)
+        print(theProgram)
+        for aStep in theProgram.get_steps():
+            # crontabKwargs = []
+            if aStep.type == 'TIME':
+                try:
+                    aStepOccurrenceStartDateTime = self.startDateTime + aStep.relativeStartDateTime
+                    aStepOccurrenceEndDateTime = self.startDateTime + aStep.relativeEndDateTime
+
+                    task_id = TaskScheduler.schedule(say_hello, description="finally", rrule_string='RRULE:FREQ=SECONDLY;INTERVAL=2')
+
+
+
+                    '''task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=aStepOccurrenceStartDateTime,
+                                                     until=aStepOccurrenceEndDateTime,
+                                                     rrule_string=aStep.recurrenceRule,
+                                                     description=aStep.title, args=(self.user.id, aStep.id, self.id))
+
+
+                    task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=None,
+                                                     until=aStepOccurrenceEndDateTime,
+                                                     rrule_string=aStep.recurrenceRule,
+                                                     description=aStep.title, args=(theArgs))
+                                                     '''
+
+
+                except:
+                    pass
+
+                '''
+                timeUntilFirstExecution = aStepOccurrenceStartDateTime - datetime.now()
+                crontabKwargs.append({'is_due': (False, timeUntilFirstExecution.seconds)})
+
+
+                if aStep.frequency == "HOURLY":
+                    crontabKwargs.append({'hour': ( '*/%s' % aStep.interval)})
+
+                if aStep.frequency == "DAILY":
+                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.minute})
+                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.hour})
+
+
+                if aStep.frequency == "WEEKLY":
+                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.minute})
+                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.hour})
+
+                    theDaysOfWeek = []
+                    if day01:
+                        theDaysOfWeek = theDaysOfWeek.append("1")
+                    if day02:
+                        theDaysOfWeek = theDaysOfWeek.append("2")
+                    if day03:
+                        theDaysOfWeek = theDaysOfWeek.append("3")
+                    if day04:
+                        theDaysOfWeek = theDaysOfWeek.append("4")
+                    if day05:
+                        theDaysOfWeek = theDaysOfWeek.append("5")
+                    if day06:
+                        theDaysOfWeek = theDaysOfWeek.append("6")
+                    if day07:
+                        theDaysOfWeek = theDaysOfWeek.append("0")
+
+                    crontabKwargs.append({'day_of_week' : theDaysOfWeek})
+
+'''
+
+
+
+
 
 class ProgramRequest(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)

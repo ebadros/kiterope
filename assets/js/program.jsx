@@ -89,7 +89,7 @@ export class ProgramModalForm extends React.Component {
             title: "",
             description: "",
             croppableImage: defaultProgramCroppableImage,
-            startDate:moment(),
+            startDateTime:moment(),
             scheduleLength:"3m",
             viewableBy: "ONLY_ME",
             timeCommitment: "1h",
@@ -164,11 +164,11 @@ export class ProgramModalForm extends React.Component {
             }
 
 
-            if (data.startDate != null) {
-                var startDate = moment(data.startDate, "YYYY-MM-DD")
+            if (data.startDateTime != null) {
+                var startDateTime = moment(data.startDateTime, 'YYYY-MM-DD HH:mm')
             }
             else {
-                var startDate = moment()
+                var startDateTime = moment()
             }
 
              if (data.scheduleLength != undefined) {
@@ -257,7 +257,7 @@ export class ProgramModalForm extends React.Component {
 
                 title: title,
                 description: description,
-                startDate: startDate,
+                startDateTime: startDateTime,
                 scheduleLength: scheduleLength,
                 viewableBy: viewableBy,
                 timeCommitment: timeCommitment,
@@ -297,8 +297,8 @@ export class ProgramModalForm extends React.Component {
 
     }
 
-    handleStartDateChange(date)   {
-        this.setState({startDate: date});
+    handleStartDateTimeChange(dateTime)   {
+        this.setState({startDateTime: dateTime});
   }
 
 
@@ -531,7 +531,7 @@ this.closeModal()
             var viewableBy = this.state.viewableBy;
             var image = this.state.image;
             var scheduleLength = this.state.scheduleLength;
-            var startDate = moment(this.state.startDate).format("YYYY-MM-DD");
+            var startDateTime = moment(this.state.startDateTime).format('YYYY-MM-DD HH:mm');
             var timeCommitment = this.state.timeCommitment;
             var cost = this.state.cost;
             var costFrequencyMetric = this.state.costFrequencyMetric;
@@ -549,7 +549,7 @@ this.closeModal()
                 scheduleLength: scheduleLength,
                 timeCommitment: timeCommitment,
                 cost: cost,
-                startDate:startDate,
+                startDateTime:startDateTime,
                 costFrequencyMetric: costFrequencyMetric,
                 category : category,
                 isActive: this.state.isActive
@@ -579,7 +579,7 @@ this.closeModal()
                                 croppableImage:defaultProgramCroppableImage,
 
                     description: "",
-                    startDate: moment(),
+                    startDateTime: moment(),
                     scheduleLength: "3m",
                     viewableBy: "ONLY_ME",
                     timeCommitment: "1h",
@@ -726,8 +726,8 @@ this.closeModal()
                                           <span className="tooltiptext">A start date for your program makes scheduling its steps easier. Your users can choose whatever start date they would like.</span>
                                       </label>
 
-                                      <DatePicker selected={this.state.startDate}
-                                                  onChange={this.handleStartDateChange}/>
+                                      <DatePicker selected={this.state.startDateTime}
+                                                  onChange={this.handleStartDateTimeChange}/>
                                   </div>
                               </div>
                           </div>
@@ -2020,7 +2020,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
             notificationMethod:"",
             goalsData:"",
             goal:"",
-            planOccurrenceStartDate:moment(),
+            startDateTime:moment(),
             goalOptions:[],
             subscribed:"Subscribe",
             modalIsOpen: false,
@@ -2145,7 +2145,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
             program: this.state.program,
             goal: this.state.goal,
             user: this.props.storeRoot.user.id,
-            startDate: moment(this.state.planOccurrenceStartDate).format("YYYY-MM-DD"),
+            startDateTime: moment(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
             isSubscribed:true,
             notificationSendTime: this.state.notificationSendTime,
             notificationEmail: this.state.notificationEmail,
@@ -2218,8 +2218,8 @@ export class ProgramSubscriptionModalForm extends React.Component {
         })
     }
 
-    handlePlanOccurrenceStartDateChange(date)   {
-        this.setState({startDate: date});
+    handleStartDateTimeChange(dateTime)   {
+        this.setState({startDateTime: dateTime});
   }
 
 
@@ -2261,7 +2261,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
     resetForm = () => {
     this.setState({
                     program: "",
-                    startDate: moment(),
+                    startDateTime: moment(),
                     modalIsOpen: false,
 
                 },            () =>        { store.dispatch(setSubscriptionModalData(this.state))}
@@ -2310,8 +2310,8 @@ export class ProgramSubscriptionModalForm extends React.Component {
 
                                       <label htmlFor="id_startDate">Start Date:</label>
 
-                                      <DatePicker selected={this.state.planOccurrenceStartDate}
-                                                  onChange={this.handleStartDateChange}/>
+                                      <DatePicker selected={this.state.startDateTime}
+                                                  onChange={this.handleStartDateTimeChange}/>
                                   </div></div>
                         <div className="ui field row">
                                 <div className="ui ten wide column">
@@ -2768,7 +2768,7 @@ export class ProgramBasicView extends React.Component {
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
 
-            var startDate = moment(this.state.data.startDate).format("MMM DD YYYY")
+            var startDateTime = moment(this.state.data.startDateTime).format('YYYY-MM-DD HH:mm')
 
             var authorName
             if (this.state.data.author_name) {
@@ -2823,7 +2823,7 @@ export class ProgramBasicView extends React.Component {
                                             :
                                             <div className="ui left aligned column">
                                             <IconLabelCombo size="extramini" orientation="left"
-                                                            text={startDate} icon="deadline" background="Light"
+                                                            text={startDateTime} icon="deadline" background="Light"
                                                             link="/goalEntry"/>
                                         </div>
 

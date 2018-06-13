@@ -180,7 +180,6 @@ export class Alert extends React.Component {
 
         }
         if (this.state.displayAlert.showAlert) {
-            console.log("showAlert")
             var opacity = '.95'
             var alertHeight = '80px'
             var display = 'block'

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'scheduler',
     'kiterope',
     'storages',
     'allauth',
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'tinymce',
     'colorfield',
+    'recurrence',
     #'allauth.socialaccount.providers.google',
     #'allauth.socialaccount.providers.linkedin_oauth2',
     #'allauth.socialaccount.providers.facebook',
@@ -120,7 +122,6 @@ SERIALIZATION_MODULES = {
     'python': 'tagulous.serializers.python',
     'yaml':   'tagulous.serializers.pyyaml',
 }
-
 
 
 GEOIP_DATABASE = 'static/GeoLiteCity.dat'

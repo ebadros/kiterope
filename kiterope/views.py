@@ -37,13 +37,13 @@ from kiterope.send_sms import sendMessage
 
 from kiterope.permissions import CustomAllowAny, UserPermission, IsPublic, IsAuthorOrReadOnly, PostPutAuthorOrView, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 from celery import shared_task
-from .celery_setup import app
+from kiterope.celery_setup import app
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from kiterope.expoPushNotifications import send_push_message
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
 from kiterope.helpers import toUTC
-
+from scheduler.scheduler import TaskScheduler
 
 import requests
 import json
@@ -88,6 +88,7 @@ from rest_framework.pagination import PageNumberPagination
 from copy import deepcopy
 
 from django.views.generic import TemplateView
+from kiterope.tasks import createStepOccurrence
 
 
 
@@ -616,10 +617,12 @@ class StepViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+        print(self.request.data)
 
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
 
         return Response(serializer.data)
 
@@ -685,7 +688,10 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
 
+
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 
 
 
@@ -991,6 +997,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
     serializer_class = StepOccurrenceSerializer
 
     def list(self, request, *args, **kwargs):
+
         try:
             periodRangeStart = self.kwargs['periodRangeStart']
             periodRangeEnd = self.kwargs['periodRangeEnd']
@@ -1206,8 +1213,9 @@ class ProgramViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        return Response(serializer.data, context={'request': request})
+        #return Response(serializer.data, context={'request': request})
 
+        return Response(serializer.data)
 
     def get_queryset(self):
         try:
@@ -1339,8 +1347,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
 
+        instance = self.get_object()
+        print(self.request.data['timezone'])
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

@@ -25,6 +25,8 @@ from kiterope.views import schema_view
 #from .views import ApiEndpoint
 #import oauth2_provider.views as oauth2_views
 from django.conf.urls import include, url
+from django.views.i18n import JavaScriptCatalog
+
 
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -125,6 +127,9 @@ router.register(r'^programRequest', views.ProgramRequestViewSet, base_name="Prog
 
 
 from django.views.generic.base import RedirectView
+js_info_dict = {
+    'packages': ('recurrence', ),
+}
 
 
 '''
@@ -171,6 +176,8 @@ urlpatterns = [
       url(r'^accounts/', include('allauth.urls')),
       url(r'^secret', views.secret_page, name='secret'),
       url(r'^tinymce/', include('tinymce.urls')),
+      url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
+
       url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
