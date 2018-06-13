@@ -52,7 +52,6 @@ django-picklefield==1.0.0
 django-recurrence==1.5.0
 django-rest-auth==0.9.1
 django-rest-swagger==2.1.2
-django-scheduler==0.1
 django-seo-js==0.3.1
 django-sslserver==0.19
 django-storages==1.5.2
