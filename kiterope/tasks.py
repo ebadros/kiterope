@@ -26,8 +26,8 @@ logger = get_task_logger(__name__)
 
 
 app.conf.beat_schedule = {
-    #'send_notification': {
-    #    'task': 'kiterope.tasks.send_notification',
+    #'say_hello': {
+    #    'task': 'kiterope.tasks.say_hello',
     #    'schedule': crontab(minute="*/1"),
     #},
     #'create_users_daily_step_occurrences': {
@@ -42,8 +42,7 @@ app.conf.timezone = 'UTC'
 
 @app.task(base=RepeatTask)
 def say_hello():
-    logger.info('saying hello first')
-    print("sayingHello")
+    print("say_hello is running")
 
     #sendMessage("", "You've got a message")
 
@@ -81,7 +80,7 @@ def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
 #def setup_periodic_tasks(sender, **kwargs):
     #sender.add_periodic_task(crontab(minute='*/1'), send_notification(), name='send_notification' )
 #    pass
-@app.task()
+@app.task(base=RepeatTask)
 def rebuildSearchIndexes():
     from haystack.management.commands import update_index, rebuild_index
     rebuild_index.Command().handle(interactive=False)

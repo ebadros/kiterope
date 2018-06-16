@@ -336,8 +336,8 @@ export class ProgramCalendar extends React.Component{
                         popup
                         selectable
                         events={this.state.events}
-                        startAccessor='absoluteStartDateForCalendar'
-                        endAccessor='absoluteEndDateForCalendar'
+                        startAccessor='absoluteStartDateTime'
+                        endAccessor='absoluteEndDateTime'
                         allDayAccessor='isAllDay'
                         step={30}
                         timeslots={4}

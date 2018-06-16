@@ -44,6 +44,9 @@ from kiterope.expoPushNotifications import send_push_message
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
 from kiterope.helpers import toUTC
 from scheduler.scheduler import TaskScheduler
+from scheduler.models import ScheduledTask
+from uuid import UUID
+
 
 import requests
 import json
@@ -89,7 +92,8 @@ from copy import deepcopy
 
 from django.views.generic import TemplateView
 from kiterope.tasks import createStepOccurrence
-
+from kiterope.tasks import say_hello
+from kiterope.tasks import rebuildSearchIndexes
 
 
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
@@ -1637,6 +1641,20 @@ class StepDuplicatorViewSet(viewsets.ModelViewSet):
 
 
 
+def testMe(request):
+    print("say hellow must be called")
+    uid = UUID('f9f291a1-9222-441d-a052-8b91db7306fc')
+
+    allScheduledTasks = ScheduledTask.objects.all()
+    for aTask in allScheduledTasks:
+        TaskScheduler.cancel(aTask.id)
+
+
+
+    # rebuildSearchIndexes.delay(scheduled_task_id=uid, rrule_string="RRULE:FREQ=SECONDLY;INTERVAL=10", first_eta=None, eta=None, until=None)
+    #task_id = TaskScheduler.schedule(say_hello, description="finally", until=None, trigger_at=None,
+       #                              rrule_string='RRULE:FREQ=MINUTELY;INTERVAL=5')
+    return HttpResponse('Secret contents!', status=200)
 
 
 

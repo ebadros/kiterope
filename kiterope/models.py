@@ -40,7 +40,7 @@ from recurrence.fields import RecurrenceField
 from scheduler.scheduler import TaskScheduler
 from kiterope.celery_setup import app
 from scheduler.tasks import RepeatTask
-from kiterope.tasks import say_hello
+from kiterope.tasks import say_hello, createStepOccurrence
 
 
 '''
@@ -1324,10 +1324,8 @@ class PlanOccurrence(models.Model):
 
 
     def create_step_occurrence_creator_tasks(self):
-        print("create_step_occurrence_creator_tasks")
 
         theProgram = Program.objects.get(id=self.program.id)
-        print(theProgram)
         for aStep in theProgram.get_steps():
             # crontabKwargs = []
             if aStep.type == 'TIME':
@@ -1335,21 +1333,17 @@ class PlanOccurrence(models.Model):
                     aStepOccurrenceStartDateTime = self.startDateTime + aStep.relativeStartDateTime
                     aStepOccurrenceEndDateTime = self.startDateTime + aStep.relativeEndDateTime
 
-                    task_id = TaskScheduler.schedule(say_hello, description="finally", rrule_string='RRULE:FREQ=SECONDLY;INTERVAL=2')
+                    #task_id = TaskScheduler.schedule(say_hello, description="finally", rrule_string='RRULE:FREQ=SECONDLY;INTERVAL=2')
 
 
 
-                    '''task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=aStepOccurrenceStartDateTime,
+                    task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=aStepOccurrenceStartDateTime,
                                                      until=aStepOccurrenceEndDateTime,
                                                      rrule_string=aStep.recurrenceRule,
-                                                     description=aStep.title, args=(self.user.id, aStep.id, self.id))
+                                                     description=theProgram.title + " - " + aStep.title, args=(self.user.id, aStep.id, self.id))
 
 
-                    task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=None,
-                                                     until=aStepOccurrenceEndDateTime,
-                                                     rrule_string=aStep.recurrenceRule,
-                                                     description=aStep.title, args=(theArgs))
-                                                     '''
+
 
 
                 except:

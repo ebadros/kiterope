@@ -352,6 +352,11 @@ setDateAndTimeInfo() {
                     dateInfo: theAbsoluteStartDateTime
                 });
                 break;
+            case("HOURLY"):
+                this.setState({
+                    dateInfo: "Hourly, " +  theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime,
+                });
+                break;
             case("DAILY"):
                 this.setState({
                     dateInfo: "Daily, " +  theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime,
@@ -460,7 +465,7 @@ export class StepBasicView extends React.Component {
             this.setState({
                 currentView: nextProps.currentView
             });
-            this.setDateAndTimeInfo()
+            this.setDateAndTimeInfo(nextProps.data)
 
         }
     }
@@ -526,6 +531,11 @@ export class StepBasicView extends React.Component {
             case("ONCE"):
                 this.setState({
                     dateInfo: theAbsoluteStartDateTime
+                });
+                break;
+            case("HOURLY"):
+                this.setState({
+                    dateInfo: "Hourly, " +  theAbsoluteStartDateTime + " to " + theAbsoluteEndDateTime,
                 });
                 break;
 
@@ -985,24 +995,23 @@ export class StepModalForm extends React.Component {
             $(this.refs['dailyUI']).hide();
             $(this.refs['hourlyUI']).hide();
             $(this.refs['onceUI']).hide();
-            $(this.refs['endOnUI']).hide();
         $(this.refs['afterUI']).hide();
 
     } else if (frequencyValue == "" ) {
             $(this.refs['weeklyUI']).hide();
             $(this.refs['monthlyUI']).hide();
-                        $(this.refs['hourlyUI']).hide();
-                        $(this.refs['onceUI']).hide();
-                        $(this.refs['dailyUI']).hide();
+            $(this.refs['hourlyUI']).hide();
+            $(this.refs['onceUI']).hide();
+            $(this.refs['dailyUI']).hide();
 
 
 
         } else if (frequencyValue == "ONCE" ) {
-                        $(this.refs['weeklyUI']).hide();
-                        $(this.refs['monthlyUI']).hide();
-                        $(this.refs['hourlyUI']).hide();
-                        $(this.refs['onceUI']).show();
-                        $(this.refs['dailyUI']).hide();
+            $(this.refs['weeklyUI']).hide();
+            $(this.refs['monthlyUI']).hide();
+            $(this.refs['hourlyUI']).hide();
+            $(this.refs['onceUI']).show();
+            $(this.refs['dailyUI']).hide();
 
 
 
@@ -1016,7 +1025,6 @@ export class StepModalForm extends React.Component {
             $(this.refs['dailyUI']).hide();
             $(this.refs['hourlyUI']).hide();
             $(this.refs['onceUI']).hide();
-            $(this.refs['endOnUI']).hide();
 
 
         $(this.refs['afterUI']).hide();
@@ -1030,8 +1038,8 @@ export class StepModalForm extends React.Component {
             $(this.refs['onceUI']).hide();
             $(this.refs['weeklyUI']).hide();
             $(this.refs['monthlyUI']).hide();
-                                    $(this.refs['hourlyUI']).hide();
-                                                $(this.refs['dailyUI']).show();
+            $(this.refs['hourlyUI']).hide();
+            $(this.refs['dailyUI']).show();
 
 
 
@@ -1043,6 +1051,8 @@ export class StepModalForm extends React.Component {
             $(this.refs['weeklyUI']).hide();
             $(this.refs['monthlyUI']).hide();
             $(this.refs['hourlyUI']).show();
+            $(this.refs['dailyUI']).hide();
+
 
 
 
@@ -1068,6 +1078,31 @@ export class StepModalForm extends React.Component {
          }
 
     }
+
+    showAndHideEndRecurrenceUIElements (endRecurrenceValue) {
+        switch(endRecurrenceValue) {
+            case('END_DATE'):
+                $(this.refs['afterUI']).hide();
+                $(this.refs['endOnUI']).show();
+
+            case('NEVER'):
+                $(this.refs['afterUI']).hide();
+                $(this.refs['endOnUI']).hide();
+
+            case('AFTER_NUMBER_OF_OCCURRENCES'):
+                $(this.refs['afterUI']).show();
+                $(this.refs['endOnUI']).hide();
+
+
+
+
+
+        }
+
+
+
+    }
+
 
     loadParentFromServer = () => {
      var theUrl = "/api/programs/" + this.props.parentId;
@@ -1131,21 +1166,24 @@ export class StepModalForm extends React.Component {
         if (stepModalData.data != undefined ) {
 
             var data = stepModalData.data
-            var relativeStartDateTime = moment.duration(data.startDateTime);
+            var relativeStartDateTime = moment.duration(data.relativeStartDateTime);
 
-            var relativeEndDateTime = moment.duration(data.endDateTime);
+            var relativeEndDateTime = moment.duration(data.relativeEndDateTime);
 
 
             var programStartDateInStringForm = data.programStartDateTime;
 
+
             var programStartDateInMomentForm = moment(programStartDateInStringForm);
 
-            var absoluteStartDateTime = programStartDateInMomentForm.add(relativeStartDateTime)
-            var absoluteEndDateTime = programStartDateInMomentForm.add(relativeEndDateTime)
-            console.log("relativeStartDateTime")
-            console.log(relativeStartDateTime)
-            console.log("absoluteStartDateTime")
-            console.log(absoluteStartDateTime)
+
+
+            var absoluteStartDateTime = programStartDateInMomentForm.clone().add(relativeStartDateTime)
+            var absoluteEndDateTime = programStartDateInMomentForm.clone().add(relativeEndDateTime)
+
+
+
+
 
 
 
@@ -1189,6 +1227,8 @@ export class StepModalForm extends React.Component {
                 })
             }
 
+
+
             this.setState({
                 id: data.id,
 
@@ -1227,6 +1267,7 @@ export class StepModalForm extends React.Component {
             },() => {
                 this.showAndHideTypeUIElements(this.state.type)
                 this.showAndHideFrequencyUIElements(this.state.frequency)
+                this.showAndHideEndRecurrenceUIElements(this.state.endRecurrence)
             });
 
 
@@ -1337,7 +1378,6 @@ export class StepModalForm extends React.Component {
 
 }
     handleAbsoluteEndDateTimeChange(date) {
-        console.log("handle called")
     this.setState({
             absoluteEndDateTime: date,
                             saved: "Save"
@@ -1597,25 +1637,7 @@ export class StepModalForm extends React.Component {
 
     handleEndRecurrenceChange (option) {
         this.setState({endRecurrence: option.value})
-        switch(option.value) {
-            case ("NEVER"):
-
-                $(this.refs['endOnUI']).hide();
-                $(this.refs['afterUI']).hide();
-
-                break;
-            case ("END_DATE"):
-                $(this.refs['endOnUI']).show();
-                $(this.refs['afterUI']).hide();
-                break;
-
-             case ("AFTER_NUMBER_OF_OCCURRENCES"):
-                $(this.refs['afterUI']).show();
-                $(this.refs['endOnUI']).hide();
-                break;
-
-
-        }
+        this.showAndHideEndRecurrenceUIElements(option.value)
 
 
     }
@@ -1856,9 +1878,9 @@ export class StepModalForm extends React.Component {
                         <div className="ui row">
                                     <div className={smallColumnWidth}>
                                         <div className="field fluid">
-                                            <label className="tooltip" htmlFor="id_startDate">When:<i
+                                            <label className="tooltip" htmlFor="id_startDate">Start Date/Time:<i
                           className="info circle icon"></i>
-                          <span className="tooltiptext">This is relative to your program start date/time which is highlighted on the calendar.</span>
+                          <span className="tooltiptext">This is relative to your program start date/time: {`${moment(this.state.programStartDateTime).format('MMMM Do YYYY, h:mm a')}`}</span>
                       </label>
 
                                             <DatePicker showTimeSelect
@@ -2120,8 +2142,10 @@ export class StepModalForm extends React.Component {
     <div className="ui row">
                                     <div className={smallColumnWidth}>
                                         <div className="field fluid">
-                                            <label htmlFor="id_absoluteStartDate">Starting:</label>
-
+<label className="tooltip" htmlFor="id_startDate">Start Date/Time:<i
+                          className="info circle icon"></i>
+                          <span className="tooltiptext">This is relative to your program start date/time: {`${moment(this.state.programStartDateTime).format('MMMM Do YYYY, h:mm a')}`}</span>
+                      </label>
                                             <DatePicker showTimeSelect
                                                         showTime = {{ use12hours: true }}
                                                         allowClear={false}
@@ -2422,14 +2446,13 @@ export class StepModalForm extends React.Component {
                              </div>
                         </div>
 
-                                              {onceUI}
+                      {onceUI}
+                                        {dailyUI}
 
+                      {hourlyUI}
+                      {weeklyUI}
+                      {monthlyUI}
 
-
-                                              {weeklyUI}
-                            {monthlyUI}
-                                              {hourlyUI}
-                  {dailyUI}
 
 
 <div  className="ui grid">

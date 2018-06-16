@@ -155,6 +155,7 @@ urlpatterns = [
       url(r'^accounts/', include('allauth.urls')),
       url(r'^secret', views.secret_page, name='secret'),
       url(r'^twitter', views.twitter, name='twitter'),
+      url(r'^testMe', views.testMe, name='testMe'),
 
       url(r'^tinymce/', include('tinymce.urls')),
       url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
