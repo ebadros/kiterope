@@ -820,7 +820,7 @@ export class StepDetailPage extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            data:"",
+            data:[],
 
         }
     }
@@ -829,7 +829,6 @@ export class StepDetailPage extends React.Component {
 
 
     loadStep() {
-        console.log("load plans from server");
     $.ajax({
       url: "/api/steps/" + this.props.params.step_id + "/",
       dataType: 'json',
@@ -860,7 +859,6 @@ export class StepDetailPage extends React.Component {
 
 
   componentDidMount() {
-      console.log("compoentnDidMount")
       this.loadStep()
 
   }
@@ -931,7 +929,25 @@ handleCurrentViewChanged = (currentView) => {
 
             )
         } else {
-            return (<div></div>)
+            return (<div>
+                    <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+                <div className="ui container footerAtBottom">
+                        <div className="spacer">&nbsp;</div>
+                        <div className="ui alert"></div>
+                        <Breadcrumb values={[
+                            {url: "/steps/" + this.props.params.step_id +"/", label: "Step Detail"},
+
+                        ]}/>
+                        <div>&nbsp;</div>
+                                              <div className="ui segment">
+  <div className="ui active inverted dimmer">
+    <div className="ui text loader">Loading</div>
+  </div>
+  <p></p>
+</div>
+                                                  </div>
+                                                  <Footer />
+                </div>)
         }
     }
 }
@@ -2003,16 +2019,31 @@ export class StepModalForm extends React.Component {
         }
 
         buildRecurrenceRule = () => {
+            console.log("buildrecurrence rule")
             var recurrenceRule = "RRULE:"
-            recurrenceRule += "FREQ=" + this.state.frequency + ";"
-            if (this.state.interval != "") {
-                recurrenceRule += "INTERVAL=" + this.state.interval + ";"
+
+            if (this.state.frequency == 'ONCE') {
+                recurrenceRule += "FREQ=HOURLY;"
+                recurrenceRule += "INTERVAL=1;"
+
+                recurrenceRule += "COUNT=1;"
+                //recurrenceRule += "DTSTART=" + this.state.absoluteStartDateTime + ";"
+
+
+
+            } else {
+
+
+                recurrenceRule += "FREQ=" + this.state.frequency + ";"
+                if (this.state.interval != "") {
+                    recurrenceRule += "INTERVAL=" + this.state.interval + ";"
+                }
+                //recurrenceRule += "DTSTART=" + this.state.absoluteStartDateTime + ";"
             }
-            recurrenceRule += "DTSTART=" + this.state.absoluteStartDateTime + ";"
 
             switch (this.state.endRecurrence) {
                 case "END_DATE":
-                    recurrenceRule += "UNTIL=" + this.state.absoluteEndDateTime + ";"
+                    //recurrenceRule += "UNTIL=" + this.state.absoluteEndDateTime + ";"
                     break;
                 case "AFTER_NUMBER_OF_OCCURRENCES":
                     recurrenceRule += "COUNT=" + this.state.numberOfOccurrences + ";"
@@ -2110,7 +2141,9 @@ export class StepModalForm extends React.Component {
                     }
 
             }
-            return recurrenceRule
+
+            var recurrenceRuleWithoutSemicolon = recurrenceRule.slice(0, -1)
+            return recurrenceRuleWithoutSemicolon
 
 
 

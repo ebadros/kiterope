@@ -47,6 +47,8 @@ from scheduler.scheduler import TaskScheduler
 from scheduler.models import ScheduledTask
 from uuid import UUID
 
+from kiterope.tasks import send_email_notification
+
 
 import requests
 import json
@@ -1642,14 +1644,18 @@ class StepDuplicatorViewSet(viewsets.ModelViewSet):
 
 
 def testMe(request):
-    print("say hellow must be called")
-    uid = UUID('f9f291a1-9222-441d-a052-8b91db7306fc')
+    #thePlanOccurrence = PlanOccurrence.objects.get(pk=255)
+    #thePlanOccurrence.create_step_occurrence_creator_tasks()
+    #print("done with test me")
 
-    allScheduledTasks = ScheduledTask.objects.all()
-    for aTask in allScheduledTasks:
-        TaskScheduler.cancel(aTask.id)
+    #send_email_notification("ebadros@gmail.com", "The Subject Line", { 'title': 'The Subject Line', 'message':"<p>Here's the message I'm trying to put out into the world. Who knows if it will be loved</p><p>Here's the message I'm trying to put out into the world. Who knows if it will be loved</p>", 'image': "https://kiterope-static.s3.amazonaws.com:443/uploads/5a6589c2-ffb5-4b6c-b424-53a45b2d27ea-crpcmp.png"})
 
+    #allScheduledTasks = ScheduledTask.objects.all()
+    #for aTask in allScheduledTasks:
+    #    TaskScheduler.cancel(aTask.id)
 
+    currentStepUpdates = Update.objects.filter(steps=17)
+    print(currentStepUpdates)
 
     # rebuildSearchIndexes.delay(scheduled_task_id=uid, rrule_string="RRULE:FREQ=SECONDLY;INTERVAL=10", first_eta=None, eta=None, until=None)
     #task_id = TaskScheduler.schedule(say_hello, description="finally", until=None, trigger_at=None,

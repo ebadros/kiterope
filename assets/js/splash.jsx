@@ -54,10 +54,10 @@ export class SplashPage extends React.Component {
                     this.setState({
                         user: theUser
                     });
-                    store.dispatch(setCurrentUser(theUser));
+                   // store.dispatch(setCurrentUser(theUser));
                    store.dispatch(push("/daily/"))
                 } else {
-                                       store.dispatch(push("/daily/"));
+                    store.dispatch(push("/daily/"));
 
                    //browserHistory.push("/search/")
 
@@ -70,7 +70,7 @@ export class SplashPage extends React.Component {
                 //store.dispatch(push('/search/'))
                                    // props.history.push("/search/")
 
-                store.dispatch(push("/splashGoal/"));
+               store.dispatch(push("/splashGoal/"));
                 //history.push('/search/')
 
 
@@ -82,11 +82,11 @@ export class SplashPage extends React.Component {
 
 
     render() {
-        if (this.props.storeRoot.user) {
-            return (<DailyList />)
-        } else {
-        return (<div></div>)
-        }
+        return(
+            <div>
+                        <StandardSetOfComponents modalIsOpen={false} />
+             </div>
+    )
 
 
 

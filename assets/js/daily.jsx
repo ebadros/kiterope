@@ -291,7 +291,7 @@ export class DailyList extends React.Component{
                 if (this.state.data != undefined) {
                 return (
                     <div>
-                        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}/>
+                        <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen} />
 
                         <div className="fullPageDiv">
                             <div className="ui page container footerAtBottom">

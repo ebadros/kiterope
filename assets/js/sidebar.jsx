@@ -53,7 +53,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     handleClickOutside = (e) => {
 
-        store.dispatch(showSidebar(false));
+        //store.dispatch(showSidebar(false));
 
 
 
@@ -72,10 +72,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
         if (this.props.storeRoot != undefined) {
 
-            if (this.props.storeRoot.gui != undefined) {
-                this.setState({visible: this.props.storeRoot.gui.isSidebarVisible})
+                this.setState({visible: this.props.storeRoot.isSidebarVisible})
 
-            }
+
 
 
             if (this.props.storeRoot.user != undefined) {
@@ -99,9 +98,9 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
     componentWillReceiveProps (nextProps) {
 
-        if (this.state.visible != nextProps.storeRoot.gui.isSidebarVisible) {
+        if (this.state.visible != nextProps.storeRoot.isSidebarVisible) {
             this.setState({
-                visible: nextProps.storeRoot.gui.isSidebarVisible
+                visible: nextProps.storeRoot.isSidebarVisible
             })
         }
         if (this.state.user != nextProps.storeRoot.user) {
@@ -163,22 +162,31 @@ export class SidebarWithoutClickingOutside extends React.Component {
         var style = {
             zIndex: 2000,
 
+
+        }
+
+        if (this.props.isVisible) {
+            var isVisible = "visible"
+        } else
+        {
+            var isVisible = ""
         }
 
 
 
 
 
-        if (this.state.user != undefined) {
+
+
                 return (
-                    <div ref="ref_sidebar"
-                         className="ui right vertical inverted labeled visible icon large sidebar menu"
+                    <div ref="ref_sidebar2"
+                         className={`ui right vertical inverted labeled ${isVisible} icon large sidebar menu`}
                          style={style}>
                         <a className="item"  style={style} onClick={this.handleClose}>
                             <i className="large close icon"></i>
                         </a>
 
-                        <a className="item" style={style} onClick={() => this.handleURLPush('/')}>
+                        <a className="item" style={style} onClick={() => this.handleURLPush('/daily/')}>
                             <i className="large home icon"></i>
                             Home
                         </a>
@@ -224,10 +232,8 @@ export class SidebarWithoutClickingOutside extends React.Component {
                     </div>
                 )
             }
-             else {
-            return <div></div>
-        }
-    }
+
+
 
 
 }

@@ -375,6 +375,7 @@ export class StepOccurrenceItem extends React.Component {
 
     render () {
 
+
         var theInputs = this.getInputs()
         if (this.state.data.step != undefined) {
             return (
@@ -390,9 +391,8 @@ export class StepOccurrenceItem extends React.Component {
                             <i className="chevron up icon" style={{float: "right"}}></i> :
                             <i className="chevron down icon" style={{float: "right"}}></i>}
                         </div>
-                        <div>{this.state.date}</div>
                         <div ref="ref_detail">
-                            {this.state.data.step.type == "TIME" ? <div>{this.state.date}</div> : null}
+                            {this.state.data.step.type == "TIME" ? <div>{moment(this.state.date).format("dddd, MMMM Do, h:mma")}</div> : null}
                             <div className="itemDetailSmall">
                                 <div dangerouslySetInnerHTML={{__html: this.state.description}}></div>
                             </div>

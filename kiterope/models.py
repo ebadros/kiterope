@@ -40,7 +40,8 @@ from recurrence.fields import RecurrenceField
 from scheduler.scheduler import TaskScheduler
 from kiterope.celery_setup import app
 from scheduler.tasks import RepeatTask
-from kiterope.tasks import say_hello, createStepOccurrence
+from kiterope.tasks import say_hello, createStepOccurrence,send_email_notification, send_text_notification, send_app_notification
+from kiterope.expoPushNotifications import send_push_message
 
 
 '''
@@ -911,66 +912,68 @@ class StepOccurrenceManager(models.Manager):
                     self.create_update_occurrences(aStep.id, aStepOccurrence)
                     '''
 
-    def create_scheduleBased_occurrence_new(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
 
+
+    def create_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
         theStep = Step.objects.get(id=aStepId)
-        theUTCDatetime = aDate
 
-        theUTCMonth = theUTCDatetime.month
-        theUTCDayOfTheMonth = theUTCDatetime.day
-
-        theUTCHour = theUTCDatetime.hour
-
-        theUTCMinute = theUTCDatetime.minute
-        theDateString = theUTCDatetime.strftime("%Y-%m-%d %H:%M:%S")
-
-
-
-        schedule = CrontabSchedule.objects.create(hour=theUTCHour, minute=theUTCMinute, month_of_year=theUTCMonth,
-                                                  day_of_month=theUTCDayOfTheMonth)
         thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
-        occurrence = self.create(step_id=aStepId, date=theUTCDatetime, type=theStep.type,
+
+
+        occurrence = self.create(step_id=aStepId, date=aDate, type=theStep.type,
                                  planOccurrence_id=aPlanOccurrenceId, wasCompleted=False, user_id=theUserId)
+
         occurrence.full_clean()
+
         theUserProfile = Profile.objects.get(user_id=theUserId)
 
+
         if 'EMAIL' in thePlanOccurrence.notificationMethod:
-            periodicTaskString1 = "%s: %s - %s %s" % (
-                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
-            linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (
-            occurrence.id, theStep.description)
 
-            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
-                                               task='kiterope.tasks.send_email_notification',
-                                               args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title,
-                                                                linkToStepOccurrence]))
+            linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (occurrence.id, theStep.description)
+            print(thePlanOccurrence.notificationEmail, theStep.title,linkToStepOccurrence)
+
+            send_email_notification(thePlanOccurrence.notificationEmail, theStep.title, { 'title': theStep.title, 'message': theStep.description, 'image': theStep.image})
+
+            #task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString1,
+             #                                  task='kiterope.tasks.send_email_notification',
+              #                                 args=json.dumps([thePlanOccurrence.notificationEmail, theStep.title,
+               #                                                 linkToStepOccurrence]))
 
 
+        '''
         if 'APP' in thePlanOccurrence.notificationMethod:
-            # print("inside APP")
-            periodicTaskString2 = "%s: %s - %s %s" % (
-                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            try:
 
-            # print("expoToekn")
 
-            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
-                                               task='kiterope.tasks.send_app_notification',
-                                               args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
+                # print("inside APP")
+                periodicTaskString2 = "%s: %s - %s %s" % (
+                    theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+
+                # print("expoToekn")
+
+                #task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString2,
+                 #                                  task='kiterope.tasks.send_app_notification',
+                  #                                 args=json.dumps([theUserProfile.expoPushToken, theStep.title]))
+
+                send_app_notification(theUserProfile.expoPushToken, theStep.title)
+            except:
+                pass
 
         if 'TEXT' in thePlanOccurrence.notificationMethod:
-            # print("inside TEXT")
-            linkToStepOccurrence = "%s\n\nhttps://kiterope.com/stepOccurrences/%s/\n\n%s" % (
-            theStep.title, occurrence.id, theStep.description)
 
-            periodicTaskString3 = "%s: %s - %s %s" % (
-                theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
+            print("inside TEXT")
+            linkToStepOccurrence = "%s\n\nhttps://kiterope.com/stepOccurrences/%s/\n\n%s" % (theStep.title, occurrence.id,)
+
+            #periodicTaskString3 = "%s: %s - %s %s" % ( theUserProfile.user, theStep.title, theDateString, datetime.datetime.now().microsecond)
             phoneNumber = "%s" % thePlanOccurrence.notificationPhone
-            task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
-                                               task='kiterope.tasks.send_text_notification',
-                                               args=json.dumps([phoneNumber,
-                                                                linkToStepOccurrence]))
+            #task = PeriodicTask.objects.create(crontab=schedule, name=periodicTaskString3,
+             #                                  task='kiterope.tasks.send_text_notification',
+              #                                 args=json.dumps([phoneNumber,
+               #                                                 linkToStepOccurrence]))
+            send_text_notification(phoneNumber, linkToStepOccurrence)
 
-
+        '''
         return occurrence
 
 
@@ -1305,13 +1308,8 @@ class PlanOccurrence(models.Model):
 
 
     def save(self, *args, **kwargs):
-        print("saving plan occurrence")
         super(PlanOccurrence, self).save(*args, **kwargs)
-        print(self.isSubscribed)
-
         if self.isSubscribed == True:
-            print("isSubscribed")
-
             self.create_step_occurrence_creator_tasks()
 
 
@@ -1326,14 +1324,41 @@ class PlanOccurrence(models.Model):
     def create_step_occurrence_creator_tasks(self):
 
         theProgram = Program.objects.get(id=self.program.id)
+        theUserProfile = Profile.objects.get(user_id=self.user.id)
+        theTimezone = theUserProfile.timezone
+
         for aStep in theProgram.get_steps():
             # crontabKwargs = []
             if aStep.type == 'TIME':
                 try:
                     aStepOccurrenceStartDateTime = self.startDateTime + aStep.relativeStartDateTime
                     aStepOccurrenceEndDateTime = self.startDateTime + aStep.relativeEndDateTime
+                    aStepOccurrenceStartDateTime.replace(tzinfo=theTimezone)
+                    aStepOccurrenceEndDateTime.replace(tzinfo=theTimezone)
+                    if aStepOccurrenceStartDateTime != aStepOccurrenceEndDateTime:
+                        aStepOccurrenceEndDateTime = None
+
+
+                    print(aStep.title)
+                    print("self.startDateTime")
+                    print(self.startDateTime)
+
+                    print("aStep.relativeStartDateTime")
+                    print(aStep.relativeStartDateTime)
+
+
+                    print("aStepOccurrenceStartDateTime")
+                    print(aStepOccurrenceStartDateTime)
+
+                    print("aStepOccurrenceEndDateTime")
+                    print(aStepOccurrenceEndDateTime)
+
+                    print("***********************************")
+
+
 
                     #task_id = TaskScheduler.schedule(say_hello, description="finally", rrule_string='RRULE:FREQ=SECONDLY;INTERVAL=2')
+
 
 
 

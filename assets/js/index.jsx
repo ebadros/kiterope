@@ -123,7 +123,7 @@ ReactDOM.render((
                 <Route path="/goals/:goal_id/plans" component={GoalDetailPage} onEnter={requireAuth}/>
 
                 <Route path="/plans/:plan_id/steps" component={PlanDetailPage} onEnter={requireAuth}/>
-                                <Route path="/steps/:step_id/" component={StepDetailPage} onEnter={requireAuth}/>
+                <Route path="/steps/:step_id/" component={StepDetailPage} onEnter={requireAuth}/>
 
                 <Route path="/stepOccurrences/:stepOccurrence_id/" component={StepOccurrenceDetailPage} onEnter={requireAuth}/>
 

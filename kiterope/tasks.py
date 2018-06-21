@@ -12,9 +12,12 @@ from kiterope.expoPushNotifications import send_push_message
 from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
 import json
 from datetime import timedelta
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from kiterope.send_sms import sendMessage
 from scheduler.tasks import RepeatTask
+from django.apps import AppConfig
+from django.apps import apps
+from django.template.loader import render_to_string
 
 from celery.utils.log import get_task_logger
 
@@ -49,31 +52,41 @@ def say_hello():
 
 @app.task(base=RepeatTask)
 def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
-        Profile = AppConfig.get_model('kiterope', Profile)
-        PlanOccurrence = AppConfig.get_model('kiterope', 'PlanOccurrence')
-        StepOccurrence = AppConfig.get_model('kiterope', 'StepOccurrence')
-        Update = AppConfig.get_model('kiterope', 'Update')
-        UpdateOccurrence = AppConfig.get_model('kiterope', 'UpdateOccurrence')
+    print("createStepOccurrence called")
+
+    Profile = apps.get_model('kiterope', 'Profile')
+    PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
+    StepOccurrence = apps.get_model('kiterope', 'StepOccurrence')
+    Update = apps.get_model('kiterope', 'Update')
+    UpdateOccurrence = apps.get_model('kiterope', 'UpdateOccurrence')
 
 
-        print("createStepOccurrence called")
-        theUserProfile = Profile.objects.get(user_id=currentUserId)
+    theUserProfile = Profile.objects.get(user_id=currentUserId)
         # theUTCDatetime = toUTC(theDatetime, theUserProfile.timezone)
-        currentDatetime = datetime.now(theUserProfile.timezone)
-        try:
-            thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
-            if (thePlanOccurrence.isSubscribed):
-                aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
-                                                                           currentUserId)
-                # print("aStep.id = %s" % aStep.id )
-                currentStepUpdates = Update.objects.filter(step=theStepId)
+    currentDatetime = datetime.datetime.now(theUserProfile.timezone)
+    try:
+        print("1")
+        thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
+        if (thePlanOccurrence.isSubscribed):
+            print("2")
 
-                for currentStepUpdate in currentStepUpdates:
-                    # print("inside currentStepUpdates")
-                    anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id,
-                                                                                    currentStepUpdate.id)
-        except:
-            pass
+            aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
+                                                                       currentUserId)
+            currentStepUpdates = Update.objects.filter(steps=theStepId)
+            print("currentStepUpdates found")
+
+
+
+
+
+            for currentStepUpdate in currentStepUpdates:
+
+                # print("inside currentStepUpdates")
+                anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
+                print("update occurrence created")
+
+    except:
+        pass
 
 
         #@app.on_after_configure.connect
@@ -88,11 +101,24 @@ def rebuildSearchIndexes():
 
 @app.task()
 def send_app_notification(expoPushToken, message ):
+    print("send app notification")
+
     send_push_message(expoPushToken, message)
 
+def _send_email(to_list, subject, message, sender='notifications@kiterope.com'):
+    msg = EmailMessage(subject=subject, body=message, from_email=sender, to=to_list)
+    msg.content_subtype = "html"  # Main content is now text/html
+    return msg.send(fail_silently=False)
 
 @app.task()
-def send_email_notification(emailAddress, subject, message ):
+def send_email_notification(emailAddress, subject, messageParameters ):
+
+    msg_html = render_to_string('stepEmail.html', messageParameters)
+
+    _send_email([emailAddress], subject=subject, message=msg_html, )
+
+
+    '''
     send_mail(
         subject,
         message,
@@ -100,6 +126,7 @@ def send_email_notification(emailAddress, subject, message ):
         [emailAddress],
         fail_silently=False,
     )
+    '''
 
 @app.task()
 def send_text_notification(phoneNumber, message ):

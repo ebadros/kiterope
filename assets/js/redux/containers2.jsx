@@ -28,6 +28,8 @@ const mapStateToProps = (state, ownProps) => {
         birdModalData:{modalIsOpen:false, data:{}},
         displayAlert:{showAlert:false, text:"", style:{}},
         timeLastReloaded: moment().subtract(1,"hours"),
+        isSidebarVisible: false,
+
 
 
         //searchQuery: state.rootReducer.searchQuery,
@@ -36,7 +38,6 @@ const mapStateToProps = (state, ownProps) => {
         gui: {
           forMobile: false,
 
-          isSidebarVisible: false,
           isMessageWindowVisible: false,
 
           dailyPeriod: {
@@ -101,6 +102,8 @@ const mapStateToProps = (state, ownProps) => {
         contactDataLoaded:state.rootReducer.contactDataLoaded,
         timeLastReloaded:state.rootReducer.timeLastReloaded,
         displayAlert:state.rootReducer.displayAlert,
+        isSidebarVisible: state.rootReducer.isSidebarVisible,
+
 
 
 
@@ -110,7 +113,6 @@ const mapStateToProps = (state, ownProps) => {
           searchHitsVisibility: state.rootReducer.searchHitsVisibility,
           forMobile: state.rootReducer.forMobile,
           shouldReload: state.rootReducer.shouldReload,
-          isSidebarVisible: state.rootReducer.isSidebarVisible,
           isMessageWindowVisible: state.rootReducer.isMessageWindowVisible,
           currentThread: state.rootReducer.currentThread,
           openThreads: state.rootReducer.openThreads,

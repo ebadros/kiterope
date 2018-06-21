@@ -333,7 +333,7 @@ var Sidebar = React.createClass({
     }
         return (
 
-            <div className={`ui left vertical inverted labeled icon ${isSidebarVisible} sidebar menu`}>
+            <div className={`ui left vertical inverted labeled icon visible sidebar menu`}>
                             <div className="sidebar-spacer">&nbsp;</div>
 
                 <Link className="item" to="/">

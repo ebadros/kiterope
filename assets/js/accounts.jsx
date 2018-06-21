@@ -61,6 +61,9 @@ import {  mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 
 
+
+
+
 $.ajaxSetup({
     beforeSend: function(xhr) {
         xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
@@ -489,7 +492,9 @@ export class Menubar extends React.Component {
 
     }
     handleSidebarClick (e) {
-        if(this.props.storeRoot.gui.isSidebarVisible)  {
+
+
+        if(this.props.storeRoot.isSidebarVisible)  {
                     store.dispatch(showSidebar(false))
 
 
@@ -505,6 +510,10 @@ export class Menubar extends React.Component {
     goToBlog() {
         store.dispatch(push('/blog'))
 
+    }
+
+    goToHomepage() {
+        store.dispatch(push('/'))
     }
 //
 
@@ -548,10 +557,10 @@ export class Menubar extends React.Component {
         return (
 
              <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0, maxHeight:68}}>
-          <div><a href="/" id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
+          <div><a onClick={this.goToHomepage} id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
                                 src="/static/images/kiterope_logo_v01.png" /></a></div>
                  {loginUI}
-                 <SidebarWithoutClickingOutside  />
+                 <SidebarWithoutClickingOutside  isVisible={this.props.storeRoot.isSidebarVisible} />
 
       </div>
         )
