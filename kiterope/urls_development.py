@@ -86,6 +86,8 @@ router.register(r'goals', views.GoalViewSet, base_name='Goal')
 router.register(r'publicGoals', views.PublicGoalViewSet, base_name='Goal')
 router.register(r'publicPrograms', views.PublicProgramViewSet, base_name='Program')
 
+router.register(r'contactGroups', views.ContactGroupViewSet, base_name='ContactGroup')
+
 router.register(r'contacts', views.ContactViewSet, base_name='Contact')
 router.register(r'^goals/(?P<goal_id>\w+)/planOccurrences', views.GoalPlanOccurrenceViewSet, base_name='PlanOccurrence')
 router.register(r'^goals/(?P<goal_id>\w+)/programs', views.ProgramViewSet, base_name='Program')
@@ -159,6 +161,7 @@ urlpatterns = [
 
       url(r'^tinymce/', include('tinymce.urls')),
       url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
+
 
                     #url(r'^s3/sign$', views.s3_sign_upload, name='s3_sign_upload'),
       url(r'^signS3Upload$', views.sign_s3_upload, name='sign_s3_upload'),

@@ -22,7 +22,7 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setTimeLastReloaded, setPublicGoals, setPublicPrograms, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setTimeLastReloaded, setContactGroups, setPublicGoals, setPublicPrograms, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
 //var sb = new SendBird({
@@ -411,6 +411,7 @@ this.loadPublicGoalData()
             this.loadUpdateOccurrenceData();
             this.loadVisualizationData();
             this.loadUpdateData()
+            this.loadContactGroupData()
 
 
 
@@ -431,6 +432,17 @@ this.loadPublicGoalData()
         this.loadSpecificData("updateDataLoaded", "/api/updates/",  (theData) => {
             store.dispatch(setUpdates(theData.data))
             store.dispatch(setDataLoaded('updateData'))
+
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+            clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+        }
+        })
+    }
+
+    loadContactGroupData() {
+        this.loadSpecificData("contactGroupDataLoaded", "/api/contactGroups/",  (theData) => {
+            store.dispatch(setContactGroups(theData.data))
+            store.dispatch(setDataLoaded('contactGroup'))
 
             if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
             clearInterval(this.state.intervals[theData.dataLoadedVariable]);
@@ -605,7 +617,9 @@ this.loadPublicGoalData()
      loadContactData() {
          this.loadSpecificData("contactDataLoaded", "/api/contacts/",  (theData) => {
              store.dispatch(setDataLoaded('contactData'))
-             this.organizeContacts(theData.data)
+                             store.dispatch(setContacts(theData.data))
+
+             //this.organizeContacts(theData.data)
 
              if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
             clearInterval(this.state.intervals[theData.dataLoadedVariable]);
@@ -673,10 +687,11 @@ this.loadPublicGoalData()
 
 
     organizeContacts(theContactData) {
+
         var theContacts = {};
-            if (this.props.user) {
+            if (this.props.storeRoot.user) {
                 for (var key in theContactData) {
-                    if (theContactData[key].receiverProfile.user == this.props.user.id) {
+                    if (theContactData[key].receiverProfile.user == this.props.storeRoot.user.id) {
                         var theSender = theContactData[key].senderProfile;
 
                         var theContactId = theContactData[key].id;

@@ -33,7 +33,7 @@ import { defaultGoalCroppableImage, defaultProgramCroppableImage, TINYMCE_CONFIG
 
 import Measure from 'react-measure'
 import {SaveButton} from './settings'
-import {GoalModalSMARTForm} from './goalSmartForm'
+import {GoalModalSMARTForm, GoalSMARTForm} from './goalSmartForm'
 
 import Pagination from "react-js-pagination";
 
@@ -140,6 +140,9 @@ export class GoalEntryPage extends React.Component {
                     <div className="ui row">
                                     <div className="centered hugeType">Create a goal that is SMART</div>
                                 </div>
+                    <GoalModalSMARTForm
+                              isListNode={false}
+                              serverErrors={this.state.serverErrors}/>
                         <GoalSMARTForm cancelClicked={this.handleCancelClicked} serverErrors={this.state.serverErrors}/>
                     </div>
                 </div>
@@ -817,7 +820,7 @@ if (this.props.data != undefined) {
 }
 
 
-
+@connect(mapStateToProps, mapDispatchToProps)
 export class GoalStepsHeader extends React.Component {
     constructor(props) {
         super(props);
@@ -825,8 +828,10 @@ export class GoalStepsHeader extends React.Component {
     }
 
     showGoalEntryForm() {
-        console.log("showGoalEntryForm");
-        this.props.goalEntryFormClicked()
+        console.log("show goal Entry form")
+        //this.props.goalEntryFormClicked()
+        var theData = { modalIsOpen:true, data:{croppableImage:defaultGoalCroppableImage}}
+      store.dispatch(setGoalModalData(theData))
 
     }
 

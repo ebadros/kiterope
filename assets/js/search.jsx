@@ -3,7 +3,7 @@ let ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {Sidebar, ProgramViewEditDeleteItem } from './base'
+import {Sidebar, ProgramViewEditDeleteItem, Header, ProfileViewEditDeleteItem } from './base'
 var Datetime = require('react-datetime');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
@@ -19,7 +19,9 @@ import ValidatedInput from './app'
 import Dimensions from 'react-dimensions'
 import TextTruncate from 'react-text-truncate';
 import autobind from 'class-autobind'
-import { ProgramSubscriptionModalForm } from './program'
+import { SubscribeableProgramList, ProgramSubscriptionModalForm, ProgramList } from './program'
+import { ContactList } from './contact'
+import {ProfileList} from './profile'
 
 import Pagination from "react-js-pagination";
 
@@ -29,7 +31,7 @@ import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 import Measure from 'react-measure'
 import {timeCommitmentOptions} from './step'
-import { updateStep, removePlan, setSearchQuery, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, removePlan, setSearchQuery, setProgramModalData, setSearchHitsVisibility, deleteContact, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import {
     SearchBox,
@@ -46,8 +48,9 @@ import {
 InitialLoader,
     } from "searchkit";
 
-import { theServer, elasticSearchDomain } from './constants'
+import { defaultProgramCroppableImage, theServer, elasticSearchDomain } from './constants'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import {PlanSettingsForm} from './plan';
 
 var Searchkit = require('searchkit');
 var imageDirectory = "https://kiterope-static.s3.amazonaws.com/";
@@ -329,6 +332,8 @@ _handleKeyPress = (e) => {
             <StandardSetOfComponents modalIsOpen={this.state.signInOrSignUpModalFormIsOpen}
                                      modalShouldClose={this.handleModalClosed}/>
                             <ProgramSubscriptionModalForm />
+            <PlanSettingsForm />
+            {/*
 
             <div className="ui page container">
 
@@ -341,6 +346,9 @@ _handleKeyPress = (e) => {
                         <div className="ui centered row  massiveType">What do you want to do?</div>
                         <div className="ui row">&nbsp;</div>
                     </div>
+
+                    <div>
+
 
                     <div className="ui grid">
 
@@ -382,8 +390,9 @@ _handleKeyPress = (e) => {
                         </div>
 
                     </div>
-
-
+                    </div>
+*/}
+<div>
                     <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
                 </div>
                 <div className="spacer">&nbsp;</div>
@@ -446,9 +455,8 @@ _handleKeyPress = (e) => {
                             <ProgramSubscriptionModalForm />
 
             <div className="ui page container">
-                <div className="ui mobileSpacer">&nbsp;</div>
 
-                    <div className="ui grid">
+                {/* <div className="ui grid">
 
                         <div className="ui centered row header"><h2>What do you want to do?</h2></div>
 
@@ -486,10 +494,9 @@ _handleKeyPress = (e) => {
 
 
 
-
+*/}
 
                     <SearchHitsGrid needsLogin={this.handleNeedsLogin}/>
-<div className="mobileSpacer">&nbsp;</div>
                 </div>
 
 
@@ -540,6 +547,203 @@ _handleKeyPress = (e) => {
     }
 
 }
+@connect(mapStateToProps, mapDispatchToProps)
+export class SearchBar extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            query:"",
+            placeholder:"",
+            queryUrl:"",
+            placeholderIterator:0,
+            placeholder:placeholderText[0],
+            signInOrSignUpModalFormIsOpen:false,
+            user:"",
+            searchQuery:""
+        }
+    }
+
+    componentDidMount() {
+                if (this.props.params != undefined) {
+
+                    if (this.props.params.search_query != undefined) {
+                        this.setState({searchQuery: this.props.params.search_query})
+                        store.dispatch(setSearchQuery(this.props.params.search_query))
+                    }
+                }
+
+                    var intervalID = setInterval(this.changePlaceholderText, 2000);
+        this.setState({intervalID:intervalID});
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.gui.searchQuery != undefined)
+            this.setState({
+                query: this.props.storeRoot.gui.searchQuery,
+                queryUrl:this.props.storeRoot.gui.searchQuery,
+            })
+        }
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.gui.searchQuery != undefined) {
+                this.setState({
+                    query: nextProps.storeRoot.gui.searchQuery,
+                    queryUrl: nextProps.storeRoot.gui.searchQuery,
+                })
+            }
+        }
+    }
+
+    changePlaceholderText = () => {
+        if ( this.state.placeholderIterator > (placeholderText.length - 1)) {
+            this.setState({ placeholderIterator: 0})
+        }
+        this.setState({
+            placeholder:placeholderText[this.state.placeholderIterator],
+            placeholderIterator: (this.state.placeholderIterator + 1),
+
+        })
+
+    };
+    componentWillUnmount = () => {
+        clearInterval(this.state.intervalID)
+    };
+
+    handleCloseButtonClicked = () => {
+
+        store.dispatch(setSearchQuery(""))
+        store.dispatch(setSearchHitsVisibility(false))
+                    store.dispatch(push("/") )
+
+
+    };
+    handleNeedsLogin = () => {
+            this.setState({
+                signInOrSignUpModalFormIsOpen: true
+            },)
+
+  };
+
+  handleModalClosed = () => {
+      this.setState({
+                signInOrSignUpModalFormIsOpen: false
+            })
+  };
+
+handleChangeQuery = (e) => {
+    this.setState({
+        query: e.target.value,
+    })
+
+};
+_handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+
+      this.handleSubmit(e)
+    }
+  };
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        store.dispatch(setSearchQuery(this.state.query))
+
+        store.dispatch(push("/search/" + this.state.query + "/"));
+
+        this.setState({
+            queryUrl: this.state.query,
+        });
+
+        var theQuery = this.state.query;
+
+
+        this.handleFormSubmit({
+            query: theQuery,
+
+        });
+    };
+
+     handleFormSubmit(query) {
+         store.dispatch(setSearchQuery(query["query"]))
+
+         $.ajax({
+             url: ("/api/searchQuery/"),
+             dataType: 'json',
+             type: 'POST',
+             data: query,
+             success: console.log("success"),
+             error: function (xhr, status, err) {
+                 console.error(this.props.url, status, err.toString());
+             }.bind(this)
+         });
+     }
+
+    render() {
+        if (this.state.query == "") {
+            var showCloseButton = false
+            //$(this.refs["ref_closeButton"]).hide();
+
+        } else {
+            var showCloseButton = true
+            //$(this.refs["ref_closeButton"]).show();
+
+        }
+        var forMobile = false
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+            var width = 400
+        if (forMobile == true) {
+            var width = 250
+        }
+
+
+
+        return (
+            <div className="ui sixteen wide column">
+                            <div className="ui one column grid ">
+                                <div className="column">
+
+                    {showCloseButton ?
+                                    <div className="ui right action left icon input">
+                                        <i className="search icon"></i>
+
+                                    <input placeholder={this.state.placeholder}  style={{width:width - 55}}
+                                           type="text" value={this.state.query} onKeyPress={this._handleKeyPress}
+                                           onChange={this.handleChangeQuery} />
+                                    <div className="ui purple icon button"
+                     ref="ref_closeButton"
+                     onClick={this.handleCloseButtonClicked} >
+
+                    <i className="large close icon"></i>
+                </div></div> :<div className="ui  left icon input">
+                                        <i className="search icon"></i>
+
+                                    <input placeholder={this.state.placeholder} style={{width:width - 55}} className=""
+                                           type="text" value={this.state.query} onKeyPress={this._handleKeyPress}
+                                           onChange={this.handleChangeQuery} />
+                                    </div>}
+
+
+
+
+
+
+                                    </div>
+                                </div>
+
+
+
+                    </div>
+        )
+    }
+
+}
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class SearchHitsGrid extends React.Component {
@@ -553,14 +757,14 @@ export class SearchHitsGrid extends React.Component {
             count:"",
             plans:{},
             query:"",
+            programData: [],
+            contactData: [],
         }
     }
 
 
       loadObjectsFromServer = () =>  {
-          console.log("loadObjectsFromServer ")
         if (this.state.query != "") {
-                      console.log("loadObjectsFromServer " + this.state.query)
 
             if (this.state.activePage != 1) {
                 var theUrl = elasticSearchDomain + "haystack/_search/?page=" + this.state.activePage + "&text__contains=" + this.state.query
@@ -572,12 +776,13 @@ export class SearchHitsGrid extends React.Component {
                 dataType: 'json',
                 cache: false,
                 success: function (data) {
+                    //console.log("succes in loading objects from server")
                     this.setState({
                         count:data.hits.total,
 
                         data: data.hits.hits,
 
-                    }, )
+                    }, ()=> this.updateSearchHitsSubscriptionStatus())
                     store.dispatch(setSearchHitsVisibility(true))
 
                 }.bind(this),
@@ -588,6 +793,83 @@ export class SearchHitsGrid extends React.Component {
 
         }
       };
+
+      groupSearchResults = () => {
+          var contactData = []
+              var programData = []
+          for (var key in this.state.data) {
+              var theDatae = this.state.data[key]
+              if (theDatae._source != undefined && this.props.storeRoot != undefined) {
+                  switch (theDatae._source.model) {
+                      case "Profile":
+                          if (theDatae._source.id == this.props.storeRoot.profile.id) {
+                              break
+                          }
+                          if (this.props.storeRoot.contacts[theDatae._source.id] == undefined) {
+                              var aContactData = Object.assign({}, theDatae._source, {wasConfirmed:""})
+
+                          } else {
+                              var aContactData = Object.assign({}, theDatae._source, {wasConfirmed:this.props.storeRoot.contacts[theDatae._source.id].wasConfirmed})
+
+                          }
+                          contactData.push(aContactData)
+                          break
+                      case "Program":
+                          programData.push(theDatae._source)
+                          break
+
+                  }
+          }
+          }
+
+          this.setState({
+              contactData:contactData,
+              programData:programData,
+
+          })
+      }
+
+      updateSearchHitsSubscriptionStatus = () => {
+          //console.log("updateSearchHistsubscriptionstatus")
+          if (this.state.plans) {
+
+                  var subscribedPlans = {}
+
+
+                  for (var key in this.state.plans) {
+                      if (this.state.plans[key].isSubscribed) {
+                          subscribedPlans[this.state.plans[key].program] = key
+                      }
+
+                  }
+                  //console.log("subscribedPlans", subscribedPlans)
+                  var theSearchData = Object.assign([], this.state.data)
+                  for (var i=0; i < theSearchData.length; i++ ) {
+                      var aSearchHit = theSearchData[i]
+                      if (subscribedPlans[aSearchHit._source.id] != undefined ) {
+
+                          var revisedSearchHit = Object.assign({}, aSearchHit )
+                          var revisedSearchHitSource = Object.assign({}, revisedSearchHit._source, {isSubscribed: true, planId: subscribedPlans[aSearchHit._source.id] }, )
+                          revisedSearchHit._source = revisedSearchHitSource
+                          theSearchData[i] = revisedSearchHit
+
+                      } else {
+                          var revisedSearchHit = Object.assign({}, aSearchHit )
+                          var revisedSearchHitSource = Object.assign({}, revisedSearchHit._source, {isSubscribed: false }, )
+                          revisedSearchHit._source = revisedSearchHitSource
+                          theSearchData[i] = revisedSearchHit
+
+                      }
+                  }
+                                    //console.log("theSearchData", theSearchData)
+
+                  this.setState({data: theSearchData}, () => this.groupSearchResults())
+              }
+
+      }
+
+
+
 
 
       componentDidMount = () => {
@@ -602,6 +884,12 @@ export class SearchHitsGrid extends React.Component {
                 },          this.loadObjectsFromServer)
 
             }
+
+            if (this.props.storeRoot.plans) {
+                    if (this.state.plans != this.props.storeRoot.plans) {
+                        this.setState({plans: this.props.storeRoot.plans}, () => this.updateSearchHitsSubscriptionStatus())
+                    }
+                }
         }
 
           //this.showOrHideSearchHits(this.props.visible)
@@ -623,7 +911,6 @@ export class SearchHitsGrid extends React.Component {
               console.log("showing ref_searchHits")
               $(this.refs["ref_searchHits"]).slideDown();
           } else {
-                            console.log("hiding ref_searchHits")
 
               $(this.refs["ref_searchHits"]).slideUp();
 
@@ -663,8 +950,8 @@ export class SearchHitsGrid extends React.Component {
 
 
                 if (nextProps.storeRoot.plans) {
-                    if (this.state.plans != this.props.storeRoot.plans) {
-                        this.setState({plans: nextProps.storeRoot.plans})
+                    if (this.state.plans != nextProps.storeRoot.plans) {
+                        this.setState({plans: nextProps.storeRoot.plans}, () => this.updateSearchHitsSubscriptionStatus())
                     }
                 }
             }
@@ -695,7 +982,10 @@ export class SearchHitsGrid extends React.Component {
 
       handleYouPlanClick() {
           //store.dispatch(push('/goalEntry'))
-      store.dispatch(push('/goalEntry'))
+      store.dispatch(push('/programs'))
+          var theData = {modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage}}
+      store.dispatch(setProgramModalData(theData))
+
       }
 
 
@@ -720,29 +1010,9 @@ export class SearchHitsGrid extends React.Component {
                 }
 
 
-         if (this.state.data ) {
-            var objectNodes = this.state.data.map(function (objectData) {
-                var theUserPlanOccurrenceId = "";
-
-                if (this.props.storeRoot) {
-                    if (this.props.storeRoot.plans) {
-                        for (var key in this.props.storeRoot.plans) {
-                            if ((this.props.storeRoot.plans[key].program == objectData._source.id) && (this.props.storeRoot.plans[key].isSubscribed)) {
-
-                                objectData._source.isSubscribed = this.props.storeRoot.plans[key].isSubscribed;
-                                 theUserPlanOccurrenceId = key
-
-                            }
-                        }
-
-                    }
-                }
 
 
-
-
-
-                return (
+        {/*return (
                 <ProgramViewEditDeleteItem key={objectData._source.id}
                                            isListNode={true}
                                            currentView="Basic"
@@ -754,16 +1024,28 @@ export class SearchHitsGrid extends React.Component {
                                            editable={false}
                                            needsLogin={this.handleNeedsLogin}
                                            forSearch={true}
-                                           userPlanOccurrenceId = {theUserPlanOccurrenceId}
+                                           userPlanOccurrenceId = {objectData._source.planId}
                                            extendedBasic={false} />
-
+                )
+                } else if (objectData._source.model == 'Profile') {
+                    return (
+                    <ProfileViewEditDeleteItem key={objectData._source.id}
+                                            isListNode={true}
+                                            showCloseButton={false}
+                                            apiUrl="/api/profiles/"
+                                            id={objectData._source.id}
+                                            data={objectData._source}
+                                            currentView="Basic"/>
+                    )
+                }
+*/}
 
                       //  <PlanHit key={objectData.id} result={objectData} />
 
-                )
-            }.bind(this));
 
-        }
+
+
+
         if (this.state.count == 0) {
             if (!forMobile) {
 
@@ -833,14 +1115,25 @@ export class SearchHitsGrid extends React.Component {
 
 
         return (
+                        <div className="ui page container">
+                                                <div className="spacer">&nbsp;</div>
+
+
             <div ref="ref_searchHits">
-            <div className="ui stackable three column grid">
-                {objectNodes}
-                </div>
+                                 {this.state.programData != undefined ? <div>
+                                     <Header headerLabel="Matching Programs" />
+<ProgramList data={this.state.programData}/><div className="ui spacer">&nbsp;</div></div>:null}
+
+
+                {this.state.contactData != undefined ?                                   <div><Header headerLabel="Matching People" />
+<ProfileList data={this.state.contactData}/></div>:null}
+
+
                 {noResultsFoundText}
                 <div className="spacer">&nbsp;</div>
                 {pagination}
             </div>
+                            </div>
             )
     }
 }
@@ -997,10 +1290,10 @@ var OverlayText = React.createClass({
 
     calculateFontSize: function() {
         var numberOfLetters = this.props.text.length;
-        console.log("number of Letters " + numberOfLetters);
+        //console.log("number of Letters " + numberOfLetters);
 
         var screenWidth = $(window).width();
-        console.log("screenWidth " + screenWidth);
+        //console.log("screenWidth " + screenWidth);
 
 
 
@@ -1013,10 +1306,10 @@ var OverlayText = React.createClass({
         var ratio = numberOfLettersRatio;
 
         var fontSize = 20 * ratio;
-        console.log("screenRatio " + screenRatio);
-        console.log("numberOfLettersRatio " + numberOfLettersRatio);
-        console.log("ratio " + ratio);
-                console.log("fontSize " + fontSize);
+        //console.log("screenRatio " + screenRatio);
+        //console.log("numberOfLettersRatio " + numberOfLettersRatio);
+        //console.log("ratio " + ratio);
+                //console.log("fontSize " + fontSize);
 
         return fontSize
 
@@ -1158,7 +1451,7 @@ export class UserLink2 extends React.Component {
     }
 
     componentDidMount () {
-        console.log("componentDidMount");
+        //console.log("componentDidMount");
         this.loadObjectsFromServer()
 
     }
@@ -1198,7 +1491,7 @@ export class UserLink2 extends React.Component {
       }
 }
 
-var Searchbar = React.createClass({
+var Searchbar2 = React.createClass({
     render: function() {
         const SearchkitProvider = Searchkit.SearchkitProvider;
 
@@ -1247,4 +1540,4 @@ function getCookie(name) {
 }
 
 
-module.exports = { SearchPage, SearchHitsGrid };
+module.exports = { SearchPage, SearchHitsGrid, SearchBar };

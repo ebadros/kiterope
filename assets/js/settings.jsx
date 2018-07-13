@@ -41,10 +41,12 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { setCurrentUser, reduxLogout, setCurrentFormValue, setInitialCurrentFormValues, showSidebar, setOpenThreads, submitEvent, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
-
+import {StripeProvider} from 'react-stripe-elements';
+import SubscriptionForm from './stripe/SubscriptionForm'
+import {PaymentSourceEditor} from './payments'
 
 export class SettingsPage extends React.Component {
     constructor(props) {
@@ -87,12 +89,18 @@ export class SettingsPage extends React.Component {
             <SettingsForm  cancelClicked={this.handleCancelClicked} onSubmit={this.handleProfileSubmit} serverErrors={this.state.serverErrors} />
                             </div>
                     </div>
+                                  <PaymentSourceEditor hideIfVerified={false}/>
+
 <div className="spacer">&nbsp;</div>
 
 </div></div><Footer /></div>
     );
   }
 }
+
+
+
+
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class SettingsForm extends React.Component {
@@ -106,6 +114,7 @@ export class SettingsForm extends React.Component {
             defaultNotificationMethod:"",
             defaultNotificationSendTime:"",
             saved: "Saved",
+            stripeSourceId:""
 
         }
     }
@@ -123,6 +132,9 @@ export class SettingsForm extends React.Component {
                     }
                 )
             }
+            if (this.props.storeRoot.profile != undefined) {
+                this.setState({stripeSourceId: this.props.storeRoot.profile.stripeSourceId})
+            }
         }
     }
 
@@ -139,6 +151,10 @@ export class SettingsForm extends React.Component {
 
                 })
             }
+            if (nextProps.storeRoot.profile != undefined) {
+                this.setState({stripeSourceId: nextProps.storeRoot.profile.stripeSourceId})
+            }
+
         }
 
 
@@ -158,6 +174,9 @@ export class SettingsForm extends React.Component {
         }
 
     }
+
+
+
 
     handleProfileSubmit (profile, callback) {
 
@@ -206,53 +225,6 @@ export class SettingsForm extends React.Component {
 
 
 
-
-    getDescriptionEditor () {
-         if (this.props.storeRoot != undefined ) {
-                if (this.props.storeRoot.gui != undefined) {
-                    var forMobile = this.props.storeRoot.gui.forMobile
-                    }
-                }
-
-
-
-            if ((this.props.isListNode) || (forMobile)) {
-             var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "sixteen wide column";
-            var smallColumnWidth = "eight wide column";
-
-           } else {
-
-
-            var wideColumnWidth = "sixteen wide column";
-            var mediumColumnWidth = "eight wide column";
-            var smallColumnWidth = "four wide column"
-        }
-                if (this.state.bio == null) {
-                    return ("")
-                } else {
-                    return (<div className="ui row">
-                        <div className={wideColumnWidth}>
-                            <div className="field fluid">
-                                <label htmlFor="id_description">Bio:</label>
-                                <TinyMCEInput name="bio"
-                                         value={this.state.bio}
-                                         config={{
-          plugins: 'link image code media',
-          menubar: "insert",
-          toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | code | media'
-        }}
-                                         onChange={this.handleEditorChange}
-                                />
-
-
-                            </div>
-                        </div>
-                        <div className="six wide column">&nbsp;</div>
-
-                    </div>)
-                }
-            }
 
 
 
@@ -351,6 +323,13 @@ export class SettingsForm extends React.Component {
             return this.state.serverErrors[fieldName]
         }
     }
+    handleAddCardClicked() {
+        store.dispatch(submitEvent("addOrUpdateCard"))
+    }
+
+    handleDeleteCardClicked() {
+        store.dispatch(submitEvent("deleteCard"))
+    }
 
 
 
@@ -381,7 +360,7 @@ export class SettingsForm extends React.Component {
         }
           return (
               <div className="ui page container">
-                                        <div className="ui grid">
+                                        <div className="ui three column grid">
                                             <div className={wideColumnWidth}>
 
                     <h3 className="ui dividing header">Notifications</h3></div>
@@ -405,7 +384,7 @@ export class SettingsForm extends React.Component {
                     </div>
 
 
-                                { this.state.defaultNotificationMethod.includes("EMAIL") ?
+                                {/* this.state.defaultNotificationMethod.includes("EMAIL") ?
 
                 <div className="ui row">
                             <div className={mediumColumnWidth}>
@@ -424,15 +403,16 @@ export class SettingsForm extends React.Component {
 
                                   />
                                 </div>
-                    </div>:<div></div>}
+                    </div>:<div></div>*/}
 
                                                 { this.state.defaultNotificationMethod.includes("TEXT")  ?
 
                                 <div className="ui row">
                             <div className={mediumColumnWidth}>
                                                 <div className="fluid field">
+<label>At what phone number would you like to receive notification texts?</label>
 
-                <Phone placeholder="At what mobile phone number would like to receive notification texts?"
+                <Phone placeholder="1 212 555 1212"
                        value={ this.state.defaultNotificationPhone }
                        onChange={this.handleDefaultNotificationPhoneChange} />
                                 </div>
@@ -445,7 +425,7 @@ export class SettingsForm extends React.Component {
                 <div className="fluid field">
                 <KSSelect value={this.state.defaultNotificationSendTime}
                                             valueChange={this.handleDefaultNotificationSendTimeChange}
-                                            label="At what time would you like your notifications sent?"
+                                            label="At what time would you like your notifications sent (when not-specified by the plan)?"
                                             isClearable={false}
                                             name="notificationSendTime"
                                             options={times}
@@ -453,7 +433,8 @@ export class SettingsForm extends React.Component {
 
                     </div></div>
                     </div>}
-                                        </div>
+                                            </div>
+
 
 
 
@@ -463,10 +444,10 @@ export class SettingsForm extends React.Component {
                       <div className="ui three column stackable grid">
                           <div className="column">&nbsp;</div>
                           <div className="column">
-                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                              <div className="ui medium fluid button" onClick={this.handleCancelClicked}>Cancel</div>
                           </div>
                           <div className="column">
-                              <SaveButton saved={this.state.saved} clicked={this.handleSubmit} />
+                              <SaveButton buttonSize="medium" saved={this.state.saved} clicked={this.handleSubmit} />
                           </div>
                       </div>
 
@@ -496,6 +477,8 @@ export class SettingsForm extends React.Component {
 
 
 }
+
+
 
 export class SaveButton extends React.Component {
     constructor(props) {
@@ -530,7 +513,7 @@ export class SaveButton extends React.Component {
 
     render() {
         return (
-            <div className={`ui large fluid ${ this.state.saved == "Saved" ? "grey": "blue"} ${ this.state.saved == "Saving" ? "loading": null} button`} style={this.props.style} onClick={this.handleSubmit} >{this.state.saved}</div>
+            <div className={`ui ${this.props.buttonSize != "" ? this.props.buttonSize : 'large'} fluid ${ this.state.saved == "Saved" ? "grey": "blue"} ${ this.state.saved == "Saving" ? "loading": null} button`} style={this.props.style} onClick={this.handleSubmit} >{this.state.saved}</div>
 
 
         )

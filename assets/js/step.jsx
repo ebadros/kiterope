@@ -456,8 +456,8 @@ export class StepBasicView extends React.Component {
         if (this.state.data != nextProps.data) {
             this.setState({
                 data:nextProps.data
-            });
-            this.setDateAndTimeInfo(nextProps.data)
+            }, this.setDateAndTimeInfo(nextProps.data));
+
 
 
         }
@@ -530,7 +530,7 @@ export class StepBasicView extends React.Component {
 
             case("ONCE"):
                 this.setState({
-                    dateInfo: theAbsoluteStartDateTime
+                    dateInfo: "Once, " + theAbsoluteStartDateTime
                 });
                 break;
             case("HOURLY"):
@@ -615,8 +615,8 @@ export class StepBasicView extends React.Component {
                         <div className="row" >
                             <div className="ui one column grid">
                                 <div className="ui left aligned column">
-                                    <IconLabelCombo size="extramini" orientation="left" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
-                                    {this.state.timeInfo ? <IconLabelCombo size="extramini" orientation="left" text={this.state.timeInfo} icon="timeCommitment" background="Light" link="/goalEntry" /> :<div></div>}
+                                    {this.state.data.type == 'TIME' && this.state.dateInfo != undefined ? <IconLabelCombo size="extramini" orientation="left" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />: null}
+                                    {this.state.data.type == 'COMPLETION' ? <IconLabelCombo size="extramini" orientation="left" text="COMPLETION" icon="calendar" background="Light" link="/goalEntry" />: null}
 
 </div>
 
@@ -642,7 +642,6 @@ export class StepBasicView extends React.Component {
                     </div>
                     <div className="right aligned six wide column">
                                     <IconLabelCombo size="extramini" orientation="right" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
-                                    {this.state.timeInfo ? <IconLabelCombo size="extramini" orientation="right" text={this.state.timeInfo} icon="timeCommitment" background="Light" link="/goalEntry" /> :<div></div>}
 </div>
 
                 </div>
@@ -1507,17 +1506,22 @@ export class StepModalForm extends React.Component {
     }
 
     handleSubmit() {
-        this.setState({saved:"Saving"})
-        console.log("handleBuild ******************************************")
-
-
-
+        this.setState({saved:"Saving..."})
 
     if (this.props.storeRoot.user) {
 
         var title = this.state.title;
+        if (this.state.image != undefined) {
+            var image = this.state.image
+        } else {
+            var image = defaultStepCroppableImage.image
+        }
         var image = this.state.image;
-        var croppableImage = this.state.croppableImage.id;
+        if (this.state.croppableImage.id != undefined) {
+            var croppableImage = this.state.croppableImage.id;
+        } else {
+            var croppableImage = defaultStepCroppableImage.id
+        }
         var description = this.state.description;
         var type = this.state.type;
         var frequency = this.state.frequency;
@@ -2433,7 +2437,10 @@ export class StepModalForm extends React.Component {
                   defaultImage={defaultStepCroppableImage.image}
                   forMobile={forMobile}
                   label="Select an image that will help motivate you."
-                  croppableImage={this.state.croppableImage} /></div></div>
+                  croppableImage={this.state.croppableImage}
+                  serverErrors={this.getServerErrors("croppableImage")}
+
+/></div></div>
                           <div className="ui row">
                             <div className={mediumColumnWidth}>
                                               <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
@@ -2579,6 +2586,7 @@ export class StepModalForm extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
+                    console.log("succcess of handle step submit")
                     this.setState({
                         updates:[],
                          saved: "Saved"
@@ -2592,7 +2600,10 @@ export class StepModalForm extends React.Component {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
+                                        console.log("errror in here")
+
                     var serverErrors = xhr.responseJSON;
+                    console.log("server Errors")
                     console.log(serverErrors)
                     this.setState({
                         serverErrors: serverErrors,

@@ -39,7 +39,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { setProfileModalData, updateProfile, clearTempProfile, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { setProfileModalData, addContact, updateProfile, clearTempProfile, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 import Measure from 'react-measure'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 import auth from './auth'
@@ -1755,7 +1755,7 @@ export class ProfileBasicView extends React.Component {
                     <div className="sixteen wide column">
 
                         <div className="row">&nbsp;</div>
-                        <div className="profileTitle">{this.state.data.firstName} {this.state.data.lastName} </div>
+                        <div className="profileTitle">{this.state.data.fullName} </div>
 
                     </div>
                     </div></div>
@@ -1770,7 +1770,7 @@ export class ProfileBasicView extends React.Component {
                     </div>
                     <div className="eight wide column">
                         <div className="fluid row">
-                            <h3>{this.state.data.firstName} {this.state.data.lastName} </h3>
+                            <h3>{this.state.data.fullName} </h3>
                         </div>
                         <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.bio}}/>
                     </div>
@@ -1863,7 +1863,7 @@ export class ProfileView extends React.Component {
 
                     <div className="eight wide column">
                         <div className="row">
-                            <h1> {this.state.data.firstName} {this.state.data.lastName} </h1>
+                            <h1> {this.state.data.fullName} </h1>
                         </div>
                         <div className="row">
 

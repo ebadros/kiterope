@@ -221,9 +221,11 @@ export const timeCommitmentOptions = [
     {value:'8h', label: "8 hours per day"}];
 
 export const costFrequencyMetricOptions = [
-    {value:'MONTH', label: "Per Month"},
-    {value:'WEEK', label: "Per Week"},
-    {value:'ONE_TIME', label: "One Time"}];
+    {value:'once', label: "One Time"},
+    {value:'month', label: "Per Month"},
+    {value:'week', label: "Per Week"},
+    {value:'year', label: "Per Year"},
+{value:'day', label: "Per Day"}];
 
 export const viewableByOptions = [
     {value:'ONLY_ME', label: "Only me"},
@@ -397,6 +399,45 @@ export const stepModalStyle = {
   }
 };
 
+export const cardPaymentModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '25%',
+    left                  : '25%',
+    right                 : '25%',
+    bottom                : '25%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '40px',
+      paddingTop                :'10px',
+  }
+};
+
+export const smallDesktopModalStyle = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+        zIndex: 20,
+  },
+
+  content : {
+    top                   : '20%',
+    left                  : '25%',
+    right                 : '25%',
+    bottom                : '20%',
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '40px',
+      paddingTop                :'10px',
+  }
+};
 
 export const updateModalStyle = {
     overlay : {
@@ -534,5 +575,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   mobileModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   mobileModalStyle, smallDesktopModalStyle, cardPaymentModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

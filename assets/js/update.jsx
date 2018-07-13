@@ -289,8 +289,7 @@ export class UpdateModalForm extends React.Component {
             existingUpdate:"",
             steps_ids:[],
             stepId:"",
-                        nonDefaultProgramUpdates: [],
-
+            nonDefaultProgramUpdates: [],
             updateModalData:{}
 
 
@@ -304,7 +303,6 @@ export class UpdateModalForm extends React.Component {
                 this.setState({
                     updateModalData: this.props.storeRoot.updateModalData,
                     existingUpdate:this.props.storeRoot.updateModalData.id,
-
                     name: this.props.storeRoot.updateModalData.name,
                     units: this.props.storeRoot.updateModalData.units,
                     metricLabel: this.props.storeRoot.updateModalData.metricLabel,
@@ -318,7 +316,7 @@ export class UpdateModalForm extends React.Component {
                 })
             }
              if (this.props.storeRoot.programs != undefined) {
-                 if (this.props.storeRoot.programs.updates != undefined) {
+                 if (this.props.storeRoot.programs[this.props.programId].updates != undefined) {
 
 
                      var theProgramUpdates = []
@@ -355,7 +353,7 @@ export class UpdateModalForm extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.storeRoot != undefined) {
-                                if (nextProps.storeRoot.updateModalData != undefined) {
+            if (nextProps.storeRoot.updateModalData != undefined) {
 
             if (this.state.updateModalData != nextProps.storeRoot.updateModalData) {
                 this.setState({
@@ -375,8 +373,8 @@ export class UpdateModalForm extends React.Component {
                 })
             }
                                 }
-                                if (this.props.storeRoot.programs != undefined) {
-                                    if (this.props.storeRoot.programs.updates != undefined) {
+                                if (nextProps.storeRoot.programs != undefined) {
+                                    if (nextProps.storeRoot.programs[this.props.programId].updates != undefined) {
                                         var theProgramUpdates = []
                                         theProgramUpdates = nextProps.storeRoot.programs[this.props.programId].updates.slice()
                                         theProgramUpdates.unshift({
@@ -667,7 +665,7 @@ export class UpdateModalForm extends React.Component {
                                 </div>
                             </div>
                         }</div>
-                    {this.state.existingUpdate == "CREATE_NEW" || this.state.id != "" ?
+                    {this.state.existingUpdate  == "CREATE_NEW" || this.state.id != "" ?
                     <div ref="ref_create_update" className="ui grid">
                                                 <div className="ui sixteen wide column form">
 
@@ -1005,7 +1003,7 @@ openModal() {
             )
         } else {
             return (
-                <div className="ui orange fluid button plus icon" onClick={this.openModal}>+</div>
+                <div className="ui orange active fluid button plus icon" onClick={this.openModal}>+</div>
 
             )
         }

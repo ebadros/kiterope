@@ -28,6 +28,7 @@ import Phone from 'react-phone-number-input'
 import rrui from 'react-phone-number-input/rrui.css'
 import rpni from 'react-phone-number-input/style.css'
 import {VisualizationsList, VisualizationModalForm, VisualizationsListAndAdd} from './visualization'
+import {PlanSettingsForm} from './plan';
 
 import {UserLink } from './profile'
 
@@ -42,11 +43,14 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { addVisualization, deleteVisualization, setDisplayAlert, setProgramRequestModalData, setSubscriptionModalData, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addVisualization, deleteVisualization, setPlanModalData, setInitialCurrentFormValues, setCurrentFormValue, setDisplayAlert, setProgramRequestModalData, setSubscriptionModalData, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { defaultProgramCroppableImage, mobileModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { defaultProgramCroppableImage, mobileModalStyle, smallDesktopModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
-import {SaveButton, StandardInteractiveButton } from './settings'
+import {SaveButton, StandardInteractiveButton, SettingsForm } from './settings'
+import {StripeProvider} from 'react-stripe-elements';
+import SubscriptionForm from './stripe/SubscriptionForm'
+import {PaymentSourceEditor } from './payments'
 
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -93,8 +97,8 @@ export class ProgramModalForm extends React.Component {
             scheduleLength:"3m",
             viewableBy: "ONLY_ME",
             timeCommitment: "1h",
-            cost: "0.0",
-            costFrequencyMetric: "MONTH",
+            cost: "0",
+            costFrequencyMetric: "month",
             editable:false,
             data:"",
             category:"UNCATEGORIZED",
@@ -583,7 +587,7 @@ this.closeModal()
                     scheduleLength: "3m",
                     viewableBy: "ONLY_ME",
                     timeCommitment: "1h",
-                    cost: "0.0",
+                    cost: "0",
                     costFrequencyMetric: "MONTH",
                     editable: false,
                     serverErrors:"",
@@ -1108,7 +1112,6 @@ export class ProgramDetailPage extends React.Component {
 
        loadProgramDetail() {
            if (this.props.storeRoot.programs == undefined || this.props.storeRoot.programs[this.props.params.program_id].updates == undefined) {
-console.log("programdetail")
                         var theUrl = "/api/programs/" + this.props.params.program_id + "/";
                         $.ajax({
                             url: theUrl,
@@ -1222,6 +1225,9 @@ console.log("programdetail")
     };
 
   componentDidMount() {
+      $(this.refs['ref_calendarView']).hide();
+        $(this.refs['ref_listView']).hide();
+
       this.loadProgramDetail()
           var thePrograms = this.props.storeRoot.programs;
       if (thePrograms != undefined) {
@@ -2010,6 +2016,8 @@ export class ProgramRequestModalForm extends React.Component {
 
 
 
+
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class ProgramSubscriptionModalForm extends React.Component {
     constructor(props) {
@@ -2061,6 +2069,37 @@ export class ProgramSubscriptionModalForm extends React.Component {
         }
     };
 
+    convertCostFrequencyMetric(theMetric) {
+        if (this.state.cost == 0 ){
+            this.setState({costFrequency:""})
+        }
+        switch(theMetric) {
+            case ("Per Day"):
+                return "/day"
+                break;
+            case ("Per Week"):
+                return "/week"
+                break;
+            case ("Per Month"):
+                return "/month"
+                break;
+            case ("Per Year"):
+                return "/year"
+                break;
+            case ("One Time"):
+                return " one time fee"
+                break;
+        }
+    }
+
+    convertCost(theCost) {
+        if (theCost != undefined) {
+            return theCost.replace(".00", "")
+        } else {
+            return "0"
+        }
+    }
+
     setStateToData (subscriptionModalData) {
          this.setState({
             modalIsOpen: subscriptionModalData.modalIsOpen,
@@ -2072,7 +2111,10 @@ export class ProgramSubscriptionModalForm extends React.Component {
 
 
             this.setState({
-                    program: data.program
+                    program: data.id,
+
+                humanizedCost: this.convertCost(data.cost),
+                humanizedCostFrequency: this.convertCostFrequencyMetric(data.costFrequencyMetric)
                 }
             )
         }
@@ -2139,18 +2181,18 @@ export class ProgramSubscriptionModalForm extends React.Component {
     }
 
     handleSubscribeClicked = () => {
-        this.setState({subscribed: "Subscribing"});
+        this.setState({subscribed: "Subscribing..."});
         var theUrl = "/api/planOccurrences/";
         var planOccurrence = {
             program: this.state.program,
-            goal: this.state.goal,
+            //goal: this.state.goal,
             user: this.props.storeRoot.user.id,
-            startDateTime: moment(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
+            startDateTime: moment().format('YYYY-MM-DD HH:mm'),
             isSubscribed:true,
             notificationSendTime: this.state.notificationSendTime,
             notificationEmail: this.state.notificationEmail,
             notificationPhone: this.state.notificationPhone,
-            notificationMethod: this.state.notificationMethod
+            //notificationMethod: this.state.notificationMethod
         };
         $.ajax({
                  url: theUrl,
@@ -2160,17 +2202,19 @@ export class ProgramSubscriptionModalForm extends React.Component {
                  headers: {
                      'Authorization': 'Token ' + localStorage.token
                  },
-                 success: function (data) {
+                 success: function (theData) {
                      this.setState({
-                         data: data,
+                         data: theData,
                          subscribed: "Subscribed"
                      });
+                     this.closeModal()
 
 
-                     store.dispatch(addPlan(data));
+                     store.dispatch(addPlan(theData));
                      store.dispatch(shouldReload("subscribed"));
-                     var goalURL = "/goals/" + data.goal + "/plans"
-                     store.dispatch(push(goalURL))
+                     store.dispatch(setPlanModalData({modalIsOpen:true, data:theData}))
+                     //var goalURL = "/goals/" + data.goal + "/plans"
+                     //store.dispatch(push(goalURL))
 
                      //this.props.formSubmitted()
 
@@ -2252,6 +2296,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
     }
 
     closeModal() {
+        console.log("closeModal called")
         this.setState({modalIsOpen: false});
         this.resetForm()
 
@@ -2302,13 +2347,19 @@ export class ProgramSubscriptionModalForm extends React.Component {
                           <div className="ui page container form">
  <div className="ui row">&nbsp;</div>
                   <Header headerLabel="Subscribe to Plan" />
-                                  <div className="ui three column grid">
-
-     <div className="ui field row">
-         <div className={wideColumnWidth + ' field'}>
+                                  <div className="ui grid">
+                                           <div className="ui row">&nbsp;</div>
 
 
-                                      <label htmlFor="id_startDate">Start Date:</label>
+     <div className="ui  row">
+         <div className={wideColumnWidth} style={{textAlign:'center'}}>
+             <span style={{fontSize:'6em'}}>{`$${this.state.humanizedCost}`}</span>
+             <span style={{fontSize:'2em'}}>{this.state.humanizedCostFrequency}</span>
+         </div></div></div>
+
+
+<PaymentSourceEditor hideIfVerified={true} />
+             {/* <label htmlFor="id_startDate">Start Date:</label>
 
                                       <DatePicker selected={this.state.startDateTime}
                                                   onChange={this.handleStartDateTimeChange}/>
@@ -2331,76 +2382,23 @@ export class ProgramSubscriptionModalForm extends React.Component {
         </div>
     </div>
                             </div>
-                                      <div className="ui field row">
-                        <div className={wideColumnWidth}>
-
-                <div className="fluid field">
-                <KSSelect value={this.state.notificationMethod}
-                                            valueChange={this.handleNotificationMethodChange}
-                                            label="How would you like your notifications sent?"
-                                            isClearable={false}
-                                            name="notificationSendMethod"
-                                            options={notificationSendMethodOptions}
-                                            serverErrors={this.getServerErrors("notificationMethodChange")}
-                                            />
-
-                    </div></div>
-                    </div>
-
-                                      { this.state.notificationMethod.includes("EMAIL") ?
-
-                <div className="ui field row">
-                            <div className={wideColumnWidth}>
-                <ValidatedInput
-                                      type="text"
-                                      name="title"
-                                      label="At what email would you like to receive notifications?"
-                                      id="id_title"
-                                      placeholder="Email Address"
-                                      value={this.state.notificationEmail}
-                                      initialValue={this.state.notificationEmail}
-                                      validators='"!isEmpty(str)"'
-                                      onChange={this.validate}
-                                      stateCallback={this.handleNotificationEmailChange}
-                                      serverErrors={this.getServerErrors("notificationEmail")}
-
-                                  />
-                                </div>
-                    </div>:<div></div>}
-
-                                                { this.state.notificationMethod.includes("TEXT")  ?
-
-                                <div className="ui field row">
-                            <div className={wideColumnWidth}>                <div className="fluid field"><label>At what phone number would you like to receive notification texts?</label>
-
-                <Phone placeholder="At what mobile phone number would like to receive notification texts?"
-                       value={ this.state.notificationPhone }
-                       onChange={this.handleNotificationPhoneChange} />
-                                </div>
-                                    </div></div>:<div></div>}
-                                                            { this.state.notificationMethod.includes("NO") || this.state.notificationMethod == "" ? <div></div>:
-
-                <div className="ui field row">
-                        <div className={wideColumnWidth}>
-
-                <div className="fluid field">
-                <KSSelect value={this.state.notificationSendTime}
-                                            valueChange={this.handleNotificationSendTimeChange}
-                                            label="At what time would you like your notifications sent?"
-                                            isClearable={false}
-                                            name="notificationSendTime"
-                                            options={times}
-                          serverErrors={this.getServerErrors("notificationSendTime")}
-
-                                            />
-
-                    </div></div>
-                    </div>}
-                                                                            </div>
 
 
-                                      <div className="ui three column stackable grid">
-                          <div className="column">&nbsp;</div>
+
+                                  </div>*/}
+
+
+                              {/*<SettingsForm />
+
+		                              */}
+
+
+
+
+
+
+
+                                      <div className="ui two column stackable grid">
                           <div className="column">
                               <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
                           </div>
@@ -2439,7 +2437,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
            } else {
 
 
-                var modalStyle = stepModalStyle
+                var modalStyle = smallDesktopModalStyle
 
         }
 
@@ -2550,6 +2548,7 @@ export class ProgramList extends React.Component {
                                             currentView="Basic"
                                                needsLogin={this.handleNeedsLogin}
                                                reloadItem={this.handleReloadItem}
+                                               userPlanOccurrenceId={program.planId}
                                                                                                   extendedBasic={false}
 
                     />
@@ -2732,7 +2731,7 @@ export class ProgramBasicView extends React.Component {
                     return returnValue
                 }
             }
-            return returnValue
+            return theValue
         }
         else {
             return returnValue
@@ -2748,6 +2747,13 @@ export class ProgramBasicView extends React.Component {
         }
 
 }
+convertCost(theCost) {
+        if (theCost != undefined) {
+            return theCost.replace(".00", "")
+        } else {
+            return "0"
+        }
+    }
     render() {
         //var imageUrl = s3BaseUrl + "uploads/goalItem.svg";
         var theCost;
@@ -2761,7 +2767,7 @@ export class ProgramBasicView extends React.Component {
                 theCost = "Free"
             }
             else {
-                theCost = this.state.data.cost + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
+                theCost = "$" + this.convertCost(this.state.data.cost) + " " + this.findLabel(this.state.data.costFrequencyMetric, costFrequencyMetricOptions)
             }
 
 
@@ -2771,15 +2777,15 @@ export class ProgramBasicView extends React.Component {
             var startDateTime = moment(this.state.data.startDateTime).format('YYYY-MM-DD HH:mm')
 
             var authorName
-            if (this.state.data.author_name) {
-                authorName = this.state.data.author_name
+            if (this.state.data.author_fullName) {
+                authorName = this.state.data.author_fullName
             } else {
                 authorName = this.state.data.authorName
             }
 
             var authorImage
-            if (this.state.data.author_name) {
-                authorImage = this.state.data.author_immage
+            if (this.state.data.author_fullName) {
+                authorImage = this.state.data.author_image
             } else {
                 authorImage = this.state.data.authorPhoto
             }

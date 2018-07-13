@@ -3,12 +3,13 @@ var ReactDOM = require('react-dom');
 var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
-import {ImageUploader, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import {ImageUploader, Header, Breadcrumb, PlanForm2, PlanViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList, StepModalForm, ToggleButton, } from './step';
 import {ProgramCalendar } from './calendar'
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import autobind from 'class-autobind'
+import Modal from 'react-modal'
 
 import { ValidatedInput, KSSelect } from './app'
 import DatePicker  from 'react-datepicker';
@@ -21,14 +22,15 @@ import CurrencyInput from 'react-currency-input';
 import { IconLabelCombo, ClippedImage } from './elements'
 import { Textfit } from 'react-textfit';
 import ShowMore from 'react-show-more';
+import {SaveButton, StandardInteractiveButton, SettingsForm } from './settings'
 
 
 import { makeEditable,  } from './calendar'
 import { MessageWindowContainer } from './message'
 
-import { addPlan, removePlan, shouldReload, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addPlan, removePlan,  shouldReload, setPlan, setPlanModalData, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
-import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, formats, s3ImageUrl, stepModalStyle, mobileModalStyle, smallDesktopModalStyle, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions } from './constants'
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
@@ -54,6 +56,408 @@ function printObject(o) {
     out += p + ': ' + o[p] + '\n';
   }
   alert(out);
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class PlanSettingsForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            program:"",
+            notificationMethod:"",
+            goalsData:"",
+            goal:"",
+            startDateTime:moment(),
+            goalOptions:[],
+            modalIsOpen: false,
+            saved:"Save",
+        }
+    }
+
+    componentDidMount = () => {
+
+
+
+         if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.planModalData != undefined) {
+                this.setState({planModalData:this.props.storeRoot.planModalData})
+                    this.setStateToData(this.props.storeRoot.planModalData)
+
+
+            }
+        }
+
+        if (this.props.storeRoot) {
+            if (this.props.storeRoot.goals) {
+                this.setState({
+                    goalsData: this.props.storeRoot.goals
+                },  this.convertGoalDataToGoalOptions )
+            }
+            if (this.props.storeRoot.settings) {
+                this.setState({
+                    notificationMethod: this.props.storeRoot.settings.defaultNotificationMethod,
+                    notificationPhone:this.props.storeRoot.settings.defaultNotificationPhone,
+                    notificationEmail:this.props.storeRoot.settings.defaultNotificationEmail,
+                    notificationSendTime:this.props.storeRoot.settings.defaultNotificationSendTime,
+
+
+
+                })
+
+            }
+        }
+    };
+
+
+
+    setStateToData (planModalData) {
+         this.setState({
+            modalIsOpen: planModalData.modalIsOpen,
+
+        })
+        if (planModalData.data != undefined ) {
+
+            this.setState({
+                    data: planModalData.data
+                }
+            )
+        }
+
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+
+         if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({
+                serverErrors: nextProps.serverErrors
+            })
+        }
+
+        if (nextProps.storeRoot.planModalData != undefined ) {
+            if (this.state.planModalData != nextProps.storeRoot.planModalData) {
+                this.setState({planModalData:nextProps.storeRoot.planModalData })
+
+                    this.setStateToData(nextProps.storeRoot.planModalData)
+
+                }
+
+
+            }
+
+        if (nextProps.storeRoot) {
+            if (this.state.goalsData != nextProps.storeRoot.goals) {
+                this.setState({
+                    goalsData: nextProps.storeRoot.goals
+                }, this.convertGoalDataToGoalOptions
+                )
+            }
+        }
+    }
+
+    getGoals = () => {
+        var theUrl = '/api/goals/';
+        $.ajax({
+            method: 'GET',
+            url: theUrl,
+            datatype: 'json',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function(goalsData) {
+                this.setState({
+                    goalsData: goalsData.results
+                }, () => this.convertGoalDataToGoalOptions())
+
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            var serverErrors = xhr.responseJSON;
+            this.setState({
+                serverErrors:serverErrors,
+            })
+        }
+        })
+
+    };
+    handleClick() {
+        this.props.click()
+    }
+
+    handleSaveClicked = () => {
+        this.setState({saved: "Saving"});
+        var theUrl = "/api/planOccurrences/" + this.state.data.id + "/";
+        var planOccurrence = {
+            id:this.state.data.id,
+            program: this.state.data.program,
+            goal: this.state.goal,
+            user: this.props.storeRoot.user.id,
+            startDateTime: moment(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
+        };
+        $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: 'PATCH',
+                 data: planOccurrence,
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+                 },
+                 success: function (data) {
+                     this.setState({
+                         data: data,
+                         subscribed: "Subscribed"
+                     });
+
+
+                     store.dispatch(addPlan(data));
+                     store.dispatch(shouldReload("subscribed"));
+                     this.resetForm()
+                     var goalURL = "/goals/" + data.goal + "/plans"
+                     store.dispatch(push(goalURL))
+
+
+                     //this.props.formSubmitted()
+
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                        this.setState({
+                            serverErrors:serverErrors,
+                            subscribed: "Subscribe"
+                    })
+
+
+                 }.bind(this)
+             });
+
+    };
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
+    convertGoalDataToGoalOptions () {
+        var i;
+        var goalsData = this.state.goalsData;
+        var goalOptions = [];
+
+        for (var key in goalsData) {
+            var aGoalOption = {value: goalsData[key].id, label: goalsData[key].title};
+            goalOptions.push(aGoalOption)
+
+        }
+        /*for (i=0; i < goalsData.length; i++) {
+            var aGoalOption = {value: goalsData[i].id, label: goalsData[i].title}
+            goalOptions.push(aGoalOption)
+
+        }*/
+        this.setState({
+            goalOptions: goalOptions
+        })
+    }
+
+    handleStartDateTimeChange(dateTime)   {
+        this.setState({startDateTime: dateTime});
+  }
+
+
+  handleGoalChange(option){
+        this.setState({goal: option.value});
+    }
+
+    handleNotificationMethodChange(option){
+        this.setState({notificationMethod: option.value});
+    }
+
+    handleNotificationPhoneChange(value){
+        this.setState({notificationPhone: value});
+    }
+
+    handleNotificationEmailChange(value){
+        this.setState({notificationEmail: value});
+    }
+
+    handleNotificationSendTimeChange(option){
+        this.setState({notificationSendTime: option.value});
+    }
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
+    closeModal() {
+        this.setState({modalIsOpen: false});
+        this.resetForm()
+
+
+    }
+
+    resetForm = () => {
+    this.setState({
+                    program: "",
+                    startDateTime: moment(),
+                    modalIsOpen: false,
+
+                },            () =>        { store.dispatch(setPlanModalData(this.state))}
+
+
+            )
+
+        }
+
+
+    handleCancelClicked() {
+        this.closeModal()
+    }
+
+    getForm = () => {
+         if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if ((this.props.isListNode) || (forMobile)) {
+             var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "sixteen wide column";
+            var smallColumnWidth = "eight wide column";
+
+           } else {
+
+
+            var wideColumnWidth = "sixteen wide column";
+            var mediumColumnWidth = "eight wide column";
+            var smallColumnWidth = "four wide column"
+        }
+
+        return (
+                          <div className="ui page container form">
+ <div className="ui row">&nbsp;</div>
+                  <Header headerLabel="Plan Settings" />
+                                  <div className="ui three column grid">
+                                           <div className="ui row">&nbsp;</div>
+
+
+     <div className="ui  row">
+         <div className={wideColumnWidth}>
+
+
+
+
+             <label htmlFor="id_startDate">Start Date:</label>
+
+                                      <DatePicker selected={this.state.startDateTime}
+                                                  onChange={this.handleStartDateTimeChange}/>
+                                  </div></div>
+                        <div className="ui field row">
+                                <div className="ui ten wide column">
+<KSSelect value={this.state.goal}
+                                            valueChange={this.handleGoalChange}
+                                            label="Which goal is this plan for?:"
+                                            isClearable={false}
+                                            name="goal"
+                                            options={this.state.goalOptions}
+                                            serverErrors={this.getServerErrors("goal")}
+
+                                            />
+                                    </div>
+                            <div className="ui six wide column" >                <div className="fluid field"><label>&nbsp;</label>
+
+            <div className="ui right floated fluid primary button" onClick={() => store.dispatch(push('/goals/'))} style={{marginTop:'-1px'}} >Add Goal</div>
+        </div>
+    </div>
+                            </div>
+
+
+
+                                  </div>
+
+
+
+
+
+
+
+
+
+
+
+                                      <div className="ui three column stackable grid">
+                                          <div className="column">&nbsp;</div>
+
+                          <div className="column">
+                              <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
+                          </div>
+                          <div className="column">
+                              <StandardInteractiveButton color="purple" initial="Save" processing="Saving" completed="Saved" current={this.state.saved} clicked={this.handleSaveClicked}  />
+
+                          </div>
+                      </div>
+                              </div>
+
+
+
+
+
+
+
+
+        )
+
+    }
+
+    render() {
+
+    var theForm = this.getForm();
+        if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+
+            if (forMobile) {
+             var modalStyle = mobileModalStyle
+
+           } else {
+
+
+                var modalStyle = stepModalStyle
+
+        }
+
+            return(
+
+
+                 <div className="ui form"><Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={modalStyle}>
+                        {theForm}
+
+                    </Modal>
+                </div>
+
+            )
+        }
+
+
+
 }
 
 
@@ -344,6 +748,8 @@ export class PlanDetailPage extends React.Component {
         )
     }
 }
+
+
 
 export class ViewSelector extends React.Component {
     constructor(props) {
@@ -1133,4 +1539,4 @@ function getCookie(name) {
 
 
 
-module.exports = { GoalHeader, PlanDetailPage, SimplePlanForm, PlanForm, PlanBasicView , PlanList,  };
+module.exports = { PlanSettingsForm, GoalHeader, PlanDetailPage, SimplePlanForm, PlanForm, PlanBasicView , PlanList,  };

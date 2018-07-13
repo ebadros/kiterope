@@ -2,11 +2,11 @@ from django.http import Http404
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.conf import settings
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, ProgramRequest, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Contact, ContactGroup, ProgramRequest, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -35,7 +35,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 import pytz
 from kiterope.send_sms import sendMessage
 
-from kiterope.permissions import CustomAllowAny, UserPermission, IsPublic, IsAuthorOrReadOnly, PostPutAuthorOrView, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
+from kiterope.permissions import CustomAllowAny, UserPermission, IsPublic, IsAuthorOrReadOnly, PostPutAuthorOrView, IsProfileOwnerOrNone, IsReceiverOrNone, IsProgramOwnerOrReadOnly, AllAccessPostingOrAdminAll, PostPutAuthorOrNone, IsOwnerOrNone, IsOwnerOrReadOnly, NoPermission, IsReceiverSenderOrReadOnly
 from celery import shared_task
 from kiterope.celery_setup import app
 from celery.task.schedules import crontab
@@ -67,8 +67,10 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ProgramNoStepsSerializer, PlanProgramSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ContactGroupSerializer, ProgramNoStepsSerializer,  ContactProfileSerializer, PlanProgramSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
+
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.serializers import HaystackSerializer
 
@@ -96,6 +98,9 @@ from django.views.generic import TemplateView
 from kiterope.tasks import createStepOccurrence
 from kiterope.tasks import say_hello
 from kiterope.tasks import rebuildSearchIndexes
+import stripe
+
+stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 
 OPENTOK_API_KEY = "45757612"       # Replace with your OpenTok API key.
@@ -122,8 +127,6 @@ def schema_view(request):
 
 class React(TemplateView):
     template_name = 'index.html'
-
-
 
 
 
@@ -673,6 +676,18 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print(self.request.data)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        #return Response(serializer.data, context={'request': request})
+
+        return Response(serializer.data)
+
 
 
     def get_queryset(self):
@@ -687,15 +702,17 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
 
 
-    def create(self, request, *args, **kwargs):
+    '''def create(self, request, *args, **kwargs):
+        print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
+
         headers = self.get_success_headers(serializer.data)
 
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)'''
 
 
 
@@ -854,7 +871,7 @@ class UpdateViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         try:
-            self.request.user.is_authenticated
+            self.request.user.is_authenticated()
             currentUser = self.request.user
 
             aQueryset = Update.objects.filter(program__author=currentUser )
@@ -1109,7 +1126,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
             # TIME-BASED
             #theQueryset = StepOccurrence.objects.filter((userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart & stepOccurrenceStatusFilter & typeIsTimeBasedFilter & isStepOccurrenceActive )).order_by('date')
 
-            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
+            theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & ((dateLessThanEnd & dateLaterThanStart) | typeIsCompletionFilter) ).order_by('date')
             #print(theQueryset)
             #theQueryset = StepOccurrence.objects.filter(userIsCurrentUser & isSubscribed & dateLessThanEnd & dateLaterThanStart ).order_by('date')
 
@@ -1302,6 +1319,7 @@ class ProgramNoStepsViewSet(viewsets.ModelViewSet):
         return theQueryset
 
 
+
 class ContactViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     queryset = Contact.objects.all()
@@ -1313,24 +1331,28 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, context={'request': request}, many=True)
 
         # This is the line that allows us to get at the object without iterating over an array
-        data = {i['id']: i for i in serializer.data}
+        data = {i['connectionId']: i for i in serializer.data}
         return Response(data)
 
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request}, )
 
-        serializer.is_valid(raise_exception=True)
-
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_queryset(self):
         theUser = self.request.user
         #querySet = Contact.objects.all()
         querySet = Contact.objects.filter((Q(sender=theUser.profile) | Q(receiver=theUser.profile)))
         return querySet
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 
@@ -1353,9 +1375,20 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     def update(self, request, *args, **kwargs):
+        print(self.request.data)
+
+        try:
+            if self.request.data['stripeSourceId'] == "" and instance.stripeSourceId != "" and instance.stripeCustomerId != "":
+                customer = stripe.Customer.retrieve(instance.stripeCustomerId)
+                customer.sources.retrieve(instance.stripeSourceId).detach()
+                instance.sourceAttached = False
+
+        except:
+            pass
+
 
         instance = self.get_object()
-        print(self.request.data['timezone'])
+
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -1533,7 +1566,50 @@ class BrowseableProgramViewSet(viewsets.ModelViewSet):
 
 
 
+class ContactGroupViewSet(viewsets.ModelViewSet):
+    serializer_class = ContactGroupSerializer
+    queryset = ContactGroup.objects.all()
+    permission_classes = [IsProfileOwnerOrNone]
+    required_scopes = ['groups']
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #    serializer = self.get_serializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        data = {i['name']: i for i in serializer.data}
+        return Response(data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print("heres the data")
+        print(self.request.data)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+
+            request.data.profile = self.request.user.profile.id
+
+            print(request.data.profile)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+        theProfile = self.request.user.profile
+        querySet = ContactGroup.objects.filter(profile=theProfile)
+        return querySet
 
 
 
@@ -1653,9 +1729,25 @@ def testMe(request):
     #allScheduledTasks = ScheduledTask.objects.all()
     #for aTask in allScheduledTasks:
     #    TaskScheduler.cancel(aTask.id)
+    #theUsers = User.objects.all()
+    #for theUser in theUsers:
+    #    if not ContactGroup.objects.filter(user=theUser).exists():
+    #        ContactGroup.objects.create(user=theUser, name="All")
+    #contactGroups = ContactGroup.objects.all()
+    #for theContactGroup in contactGroups:
+    #    theContactGroup.isDefault = True
+    #    theContactGroup.save()
 
-    currentStepUpdates = Update.objects.filter(steps=17)
-    print(currentStepUpdates)
+    #currentProfiles = Profile.objects.all()
+    #for theCurrentProfile in currentProfiles:
+    #    ContactGroup.objects.all(profile=theCurrentProfile, name="All")
+    #    ContactGroup.objects.get_or_create(profile=theCurrentProfile, name="Sent Requests")
+    #    ContactGroup.objects.get_or_create(profile=theCurrentProfile, name="Received Requests")
+    #    if theCurrentProfile.croppableImage == None:
+    #        theCurrentProfile.croppableImage == CroppableImage.objects.get(id=214)
+
+    #currentStepUpdates = Update.objects.filter(steps=17)
+    #print(currentStepUpdates)
 
     # rebuildSearchIndexes.delay(scheduled_task_id=uid, rrule_string="RRULE:FREQ=SECONDLY;INTERVAL=10", first_eta=None, eta=None, until=None)
     #task_id = TaskScheduler.schedule(say_hello, description="finally", until=None, trigger_at=None,

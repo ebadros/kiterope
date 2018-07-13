@@ -49,10 +49,15 @@ def say_hello():
 
     #sendMessage("", "You've got a message")
 
+@app.task()
+def createTimeBasedTasks(thePlanOccurrenceId):
+    PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
+    thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
+    thePlanOccurrence.create_step_occurrence_creator_tasks()
+
 
 @app.task(base=RepeatTask)
 def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
-    print("createStepOccurrence called")
 
     Profile = apps.get_model('kiterope', 'Profile')
     PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
@@ -60,30 +65,22 @@ def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
     Update = apps.get_model('kiterope', 'Update')
     UpdateOccurrence = apps.get_model('kiterope', 'UpdateOccurrence')
 
-
     theUserProfile = Profile.objects.get(user_id=currentUserId)
         # theUTCDatetime = toUTC(theDatetime, theUserProfile.timezone)
     currentDatetime = datetime.datetime.now(theUserProfile.timezone)
     try:
-        print("1")
         thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
         if (thePlanOccurrence.isSubscribed):
-            print("2")
 
             aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
                                                                        currentUserId)
             currentStepUpdates = Update.objects.filter(steps=theStepId)
-            print("currentStepUpdates found")
-
-
-
 
 
             for currentStepUpdate in currentStepUpdates:
 
                 # print("inside currentStepUpdates")
                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
-                print("update occurrence created")
 
     except:
         pass

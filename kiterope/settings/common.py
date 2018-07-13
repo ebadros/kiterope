@@ -43,6 +43,14 @@ TWILIO_PHONE_NUMBER = 'Kiterope'
 SENDSMS_BACKEND = 'sendsms.backends.twiliorest.SmsBackend'
 
 
+# Stripe
+STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_LIVE_PUBLIC_KEY", "<your publishable key>")
+STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
+STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "pk_test_PvGr7zfPVvMOFtDo1Kbk4fTo")
+STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "sk_test_Lfwtks7H5baMUFMZh0v5tPDq")
+STRIPE_LIVE_MODE = False
+
+
 # Application definition
 
 INSTALLED_APPS = [

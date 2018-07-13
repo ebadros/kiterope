@@ -19,13 +19,16 @@ var auth = require('./auth');
 var Modal = require('react-modal');
 import {MessageWindowContainer} from './message'
 import ReduxDataGetter from './reduxDataGetter'
-
+import {SearchBar, SearchHitsGrid} from './search'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 import {SaveButton, StandardInteractiveButton } from './settings'
 
 import { setCurrentUser, setPlans,  setDisplayAlert, setSignInOrSignupModalData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
+import {StripeProvider} from 'react-stripe-elements';
+import SubscriptionForm from './stripe/SubscriptionForm'
+import FormSubmitter from './formSubmitter'
 
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
@@ -223,6 +226,7 @@ export class StandardSetOfComponents extends React.Component {
     }
 
     componentDidMount () {
+
         $(this.refs["ref_messageWindowContainer"]).hide();
         var date = new Date();
 
@@ -285,12 +289,16 @@ export class StandardSetOfComponents extends React.Component {
                 <Alert />
                 <ReduxDataGetter  />
 
+
                 {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
                 <MessageButton />*/}
 
 <SignInOrSignUpModalForm />
 
-                <Menubar shouldRefresh={this.state.refreshUser} /></div>
+
+                <Menubar shouldRefresh={this.state.refreshUser} />
+
+            </div>
         )
     }
 }
@@ -520,6 +528,14 @@ export class Menubar extends React.Component {
 
     render() {
         var loginUI = null
+
+         var forMobile;
+      if (this.props.storeRoot != undefined) {
+          if (this.props.storeRoot.gui != undefined) {
+              forMobile = this.props.storeRoot.gui.forMobile
+          }
+      }
+
         if (this.props.storeRoot != undefined) {
 
             if (!this.props.storeRoot.user) {
@@ -533,6 +549,8 @@ export class Menubar extends React.Component {
 
             } else {
                  loginUI = <div className="right menu">
+                                          <div className="ui item"><SearchBar /></div>
+
 
                     <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick}><i
                         className="large sidebar icon" style={{margin: 0}}/></div>
@@ -557,8 +575,14 @@ export class Menubar extends React.Component {
         return (
 
              <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0, maxHeight:68}}>
-          <div><a onClick={this.goToHomepage} id="logo"><img style={{marginLeft: 1 + 'rem', marginTop: 1 + 'rem'}} height="50"
-                                src="/static/images/kiterope_logo_v01.png" /></a></div>
+          <div className="left menu">{forMobile ?
+              <div className="item">
+              <a onClick={this.goToHomepage} id="logo"><img style={{cursor:'pointer', marginTop: 1 + 'rem'}} height={50}
+                                src="https://s3-us-west-1.amazonaws.com/kiterope-static/icons/kiterope_k_logo_v01.png" /></a></div>
+              :
+              <div className="item"><a onClick={this.goToHomepage} id="logo"><img style={{cursor:'pointer', marginTop: 1 + 'rem'}} height={50}
+                                src="/static/images/kiterope_logo_v01.png" /></a></div>}
+          </div>
                  {loginUI}
                  <SidebarWithoutClickingOutside  isVisible={this.props.storeRoot.isSidebarVisible} />
 
@@ -760,7 +784,7 @@ export class LoginPage extends React.Component {
   componentWillReceiveProps (nextProps) {
       if (this.state.rehydrated != nextProps.storeRoot.rehydrated) {
           this.setState({rehydrated: nextProps.storeRoot.rehydrated})
-          if (nextProps.storeRoot.rehydrated) {
+          if (nextProps.storeRoot.rehydrated ) {
               if (nextProps.storeRoot.user != undefined) {
                   store.dispatch(push("/"))
               } else {

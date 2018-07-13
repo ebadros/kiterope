@@ -31,7 +31,7 @@ import { Menubar, StandardSetOfComponents, ErrorReporter, Footer } from './accou
 
 
 import  {store} from "./redux/store"
-import { setCurrentUser, setPlans,  setModalFormData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setPlans,  setCurrentFormValue, setModalFormData, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 
 import {testForm, FormFactory} from './formFactory'
 
@@ -203,6 +203,7 @@ export class KRCheckBox extends React.Component {
 
 }
 
+@connect(mapStateToProps, mapDispatchToProps)
 export class KSSelect extends React.Component {
     constructor(props) {
         super(props);
@@ -229,6 +230,7 @@ export class KSSelect extends React.Component {
     handleValueChange(option){
         this.setState({value: option.value});
         this.props.valueChange(option)
+
     }
 
     componentWillReceiveProps (nextProps) {
@@ -270,8 +272,12 @@ export class KSSelect extends React.Component {
              <div className="field error">
                  <label htmlFor={this.props.name}>{this.props.label}</label>
                  <Select value={this.state.value}
-                                              onChange={this.handleValueChange} name={this.props.name} searchable={this.props.searchable}
-                                              options={this.props.options} clearable={this.props.isClearable} />
+                         onChange={this.handleValueChange}
+                         {...props}
+                         name={this.props.name}
+                         searchable={this.props.searchable}
+                         options={this.props.options}
+                         clearable={this.props.isClearable} />
                  <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
 
                  </div>
@@ -281,8 +287,11 @@ export class KSSelect extends React.Component {
              <div className="field">
                  <label htmlFor={this.props.name}>{this.props.label}</label>
                  <Select value={this.state.value}
-                                              onChange={this.handleValueChange} name={this.props.name} searchable={this.props.searchable}
-                                              options={this.props.options} clearable={this.props.isClearable} />
+                         onChange={this.handleValueChange}
+                         name={this.props.name}
+                         searchable={this.props.searchable}
+                         options={this.props.options}
+                         clearable={this.props.isClearable} />
                  </div>
         )}
     }

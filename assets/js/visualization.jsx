@@ -638,6 +638,7 @@ export class VisualizationAddAndEditItemForm extends React.Component {
 
     removeVisualizationFromProgram() {
 
+
         var theUrl = "/api/visualizations/" + this.state.data.id + "/";
         var programs_ids
         programs_ids = this.state.data.programs_ids.slice()
@@ -688,6 +689,7 @@ export class VisualizationAddAndEditItemForm extends React.Component {
                 this.openModal();
                 break;
              case ("Remove from Program"):
+                 console.log("inside reomove from program")
                 this.removeVisualizationFromProgram();
                 break;
         }

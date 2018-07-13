@@ -14,6 +14,12 @@ export const shouldReload = (shouldReload) => {
     }
 };
 
+export const clearModalData = () => {
+    return {
+        type: 'CLEAR_MODAL_DATA'
+    }
+}
+
 export const setPlans = (thePlans) => {
     return {
         type: 'SET_PLANS',
@@ -25,6 +31,13 @@ export const setSettings = (theSettings) => {
     return {
         type: 'SET_SETTINGS',
         settings: theSettings,
+    }
+};
+
+export const setContactGroups = (theContactGroups) => {
+    return {
+        type: 'SET_CONTACT_GROUPS',
+        contactGroups: theContactGroups,
     }
 };
 
@@ -127,6 +140,15 @@ export const deleteGoal = (theGoalId) => {
         goalId: theGoalId,
     }
 };
+
+export const replaceContact = (theContactsProfileId, theContact) => {
+    return {
+        type: 'REPLACE_CONTACT',
+        contactsProfileId: theContactsProfileId,
+        contact: theContact,
+    }
+};
+
 
 export const setContacts = (theContacts) => {
     return {
@@ -362,6 +384,13 @@ export const setUpdateModalData = (theUpdateModalData) => {
     }
 };
 
+export const setPlanModalData = (thePlanModalData) => {
+    return {
+        type: 'SET_PLAN_MODAL_DATA',
+        planModalData: thePlanModalData,
+    }
+};
+
 export const setStepModalData = (theStepModalData) => {
     return {
         type: 'SET_STEP_MODAL_DATA',
@@ -404,6 +433,13 @@ export const setSubscriptionModalData = (theSubscriptionModalData) => {
     }
 };
 
+export const setContactGroupModalData = (theContactGroupModalData) => {
+    return {
+        type: 'SET_CONTACT_GROUP_MODAL_DATA',
+        contactGroupModalData: theContactGroupModalData,
+    }
+};
+
 export const setSignInOrSignupModalData = (theSignInOrSignupModalData) => {
     return {
         type: 'SET_SIGN_IN_OR_SIGNUP_MODAL_DATA',
@@ -417,6 +453,31 @@ export const setVisualizationModalData = (theVisualizationModalData) => {
         visualizationModalData: theVisualizationModalData,
     }
 };
+
+export const setInitialCurrentFormValues = (theFormValues) => {
+    return {
+        type: 'SET_INITIAL_CURRENT_FORM_VALUES',
+        formValues: theFormValues,
+    }
+};
+
+
+export const setCurrentFormValue = (theFieldName, theFieldValue) => {
+    console.log("setcurrentformvalue")
+    return {
+        type: 'SET_CURRENT_FORM_VALUE',
+        fieldName: theFieldName,
+        fieldValue: theFieldValue,
+    }
+};
+
+
+export const returnServerErrors = (theServerErrors) => {
+    return {
+        type: 'RETURN_SERVER_ERRORS',
+        serverErrors: theServerErrors
+    }
+}
 
 export const editVisualization = (theVisualizationId, theVisualization) => {
     return {
@@ -530,6 +591,23 @@ export const setTimeLastReloaded = () => {
     }
 };
 
+export const submitEvent = (theEventName) => {
+    return {
+        type: 'SUBMIT_EVENT',
+        event: theEventName,
+
+    }
+};
+
+export const setPayload = (thePayload) => {
+    return {
+        type: 'SET_PAYLOAD',
+        payload: thePayload,
+
+    }
+};
+
+
 export const setProgramRequestModalData = (programRequestModalData) => {
     return {
         type: 'SET_PROGRAM_REQUEST_MODAL_DATA',
@@ -540,6 +618,13 @@ export const setProgramRequestModalData = (programRequestModalData) => {
     }
 };
 
+export const addContactGroup = (theContactGroup) => {
+    return {
+        type: 'ADD_CONTACT_GROUP',
+        contactGroup: theContactGroup
+    }
+}
+
 export const updateDataItem =  (theForm, theReduxKey, theDataItem) => {
     return {
         type: "UPDATE_DATA_ITEM",
@@ -549,12 +634,21 @@ export const updateDataItem =  (theForm, theReduxKey, theDataItem) => {
     }
 }
 
-export const addDataItem = (theForm, theReduxKey, theDataItem) => {
+export const addDataItem = (theForm, theReduxKey, theReduxModelKey, theDataItem) => {
     return {
         type: 'ADD_DATA_ITEM',
         form:theForm,
         reduxKey: theReduxKey,
+        reduxModelKey: theReduxModelKey,
         dataItem: theDataItem,
+    }
+}
+
+export const deleteDataItem = (theReduxKey, theDataItemId) => {
+    return {
+        type: 'DELETE_DATA_ITEM',
+        reduxKey: theReduxKey,
+        dataItemId: theDataItemId,
     }
 }
 
@@ -569,7 +663,18 @@ export const setModalFormData = (theFormName, theModalFormData) => {
 
 
 
+export const setSelectedContactGroup = (theContactGroup) => {
+    return {
+        type: 'SET_SELECTED_CONTACT_GROUP',
+        contactGroup: theContactGroup,
+    }
+}
 
 
 
-module.exports = { setDataLoaded, setModalFormData, setGoalSearchQuery, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicPrograms, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+
+
+
+
+
+module.exports = { replaceContact, setSelectedContactGroup, deleteDataItem, setDataLoaded, setContactGroupModalData, addContactGroup, setContactGroups, setInitialCurrentFormValues, setPlanModalData, setCurrentFormValue, submitEvent, clearModalData, setModalFormData, setGoalSearchQuery, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicPrograms, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

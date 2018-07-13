@@ -40,7 +40,7 @@ export const rootReducer = (state = {}, action) => {
 
         case 'SET_DATA_LOADED':
 
-            switch(action.dataSet) {
+            switch (action.dataSet) {
                 case "userData":
                     return Object.assign({}, state, {userDataLoaded: true});
                     break;
@@ -75,7 +75,11 @@ export const rootReducer = (state = {}, action) => {
                     return Object.assign({}, state, {programDataLoaded: true});
                     break;
                 case "contactData":
+                    console.log("contact data loaded")
                     return Object.assign({}, state, {contactDataLoaded: true});
+                    break;
+                case "contactGroupData":
+                    return Object.assign({}, state, {contactGroupDataLoaded: true});
                     break;
 
             }
@@ -84,12 +88,35 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {displayAlert: action.alert});
             break;
 
+        case 'SUBMIT_EVENT':
+            return Object.assign({}, state, {currentEvent: action.event});
+            break;
+
+        case 'SET_PAYLOAD':
+            return Object.assign({}, state, {currentPayload: action.payload});
+            break;
+
         case 'SET_DATA_TO_BE_SUBMITTED_AFTER_LOGIN':
             return Object.assign({}, state, {data: action.data});
             break;
 
+        case 'CLEAR_MODAL_DATA':
+            return Object.assign({}, state, {
+                stepModalData: {},
+                goalModalData: {},
+                profileModalData: {},
+                visualizationModalData: {},
+                updateModalData: {},
+                smartGoalFormData: {},
+                programModalData: {},
+                subscriptionModalData: {},
+                programRequestModalData: {},
+                signInOrSignupModalData: {}
+            });
+            break;
+
         case 'SET_REHYDRATED':
-            return Object.assign({}, state, {rehydrated:action.rehydrated})
+            return Object.assign({}, state, {rehydrated: action.rehydrated})
 
 
         case 'SET_UPDATE_MODAL_DATA':
@@ -111,9 +138,18 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {programModalData: action.programModalData});
             break;
 
+        case 'SET_PLAN_MODAL_DATA':
+            return Object.assign({}, state, {planModalData: action.planModalData});
+            break;
+
         case 'SET_SUBSCRIPTION_MODAL_DATA':
             return Object.assign({}, state, {subscriptionModalData: action.subscriptionModalData});
             break;
+
+        case 'SET_CONTACT_GROUP_MODAL_DATA':
+            return Object.assign({}, state, {contactGroupModalData: action.contactGroupModalData});
+            break;
+
         case 'SET_PROGRAM_REQUEST_MODAL_DATA':
             return Object.assign({}, state, {programRequestModalData: action.programRequestModalData});
             break;
@@ -142,6 +178,9 @@ export const rootReducer = (state = {}, action) => {
         case 'SET_SETTINGS':
             return Object.assign({}, state, {settings: action.settings});
             break;
+        case 'SET_CONTACT_GROUPS':
+            return Object.assign({}, state, {contactGroups: action.contactGroups});
+            break;
 
 
         case 'SET_CURRENT_CONTACT':
@@ -163,22 +202,68 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {publicPrograms: action.publicPrograms});
             break;
 
-         case 'SET_TIME_LAST_RELOADED':
+        case 'SET_TIME_LAST_RELOADED':
 
             return Object.assign({}, state, {timeLastReloaded: moment()});
             break;
 
+        case 'ADD_CONTACT':
+
+            var theContacts = Object.assign({}, state.contacts);
+            theContacts[action.contact.id] = action.contact;
+            return Object.assign({}, state, {contacts: theContacts});
+            break;
+
+        case 'REPLACE_CONTACT':
+            var theContacts = Object.assign({}, state.contacts);
+            theContacts[action.contactsProfileId] = action.contact;
+            return Object.assign({}, state, {contacts: theContacts});
+
+
+            break;
+
+
         case 'ADD_GOAL':
 
-            var theGoals = Object.assign({},state.goals);
+            var theGoals = Object.assign({}, state.goals);
             theGoals[action.goal.id] = action.goal;
             return Object.assign({}, state, {goals: theGoals});
             break;
+        case 'ADD_CONTACT_GROUP':
+
+            var theContactGroups = Object.assign({}, state.contactGroups);
+            theContactGroups[action.contactGroup.name] = action.contactGroup;
+            return Object.assign({}, state, {contactGroups: theContactGroups});
+            break;
 
         case 'ADD_DATA_ITEM':
-            var theDataItems = Object.assign({}, state[action.theReduxKey])
-            theDataItems[action[theDataItem.id]] = action.theDataItem;
-            return Object.assign({}, state, {[theReduxKey]:theDataItems})
+            var theDataItems = Object.assign({}, state[action.reduxKey])
+            theDataItems[action.dataItem[action.reduxModelKey]] = action.dataItem;
+            return Object.assign({}, state, {[action.reduxKey]: theDataItems})
+            break;
+
+        case 'DELETE_DATA_ITEM':
+            var theDataItems = Object.assign({}, state[action.reduxKey])
+            delete theDataItems[action.dataItemId]
+            return Object.assign({}, state, {[action.reduxKey]: theDataItems})
+            break;
+
+
+        case 'SET_INITIAL_CURRENT_FORM_VALUES':
+            return Object.assign({}, state, {currentForm: action.formValues})
+            break;
+
+
+
+
+        case 'SET_CURRENT_FORM_VALUE':
+            console.log("setcurrentformvalue", action.fieldName, action.fieldValue)
+            var theCurrentFormData = Object.assign({}, state.currentForm.data)
+            theCurrentFormData[action.fieldName] = action.fieldValue
+            var theCurrentForm = Object.assign({}, state.currentForm)
+            theCurrentForm['data'] = theCurrentFormData
+
+            return Object.assign({}, state, {currentForm: theCurrentForm})
             break;
 
         case 'UPDATE_GOAL':
@@ -244,6 +329,9 @@ export const rootReducer = (state = {}, action) => {
 
             }
             break;
+
+        case 'SET_SELECTED_CONTACT_GROUP':
+            return Object.assign({}, state, {selectedContactGroup: action.contactGroup})
 
         case 'ADD_PROGRAM':
 

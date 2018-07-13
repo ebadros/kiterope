@@ -24,11 +24,16 @@ const mapStateToProps = (state, ownProps) => {
         profileDataLoaded:false,
         settingsDataLoaded:false,
         contactDataLoaded:false,
+        contactGroupDataLoaded:false,
+
         smartGoalFormData:{modalIsOpen:false, data:{}},
         birdModalData:{modalIsOpen:false, data:{}},
         displayAlert:{showAlert:false, text:"", style:{}},
         timeLastReloaded: moment().subtract(1,"hours"),
         isSidebarVisible: false,
+        currentEvent:"",
+        currentPayload:"",
+        currentForm:"",
 
 
 
@@ -60,7 +65,6 @@ const mapStateToProps = (state, ownProps) => {
         rehydrated:state.rootReducer.rehydrated,
         user: state.rootReducer.user,
         profile: state.rootReducer.profile,
-
         settings: state.rootReducer.settings,
         goals: state.rootReducer.goals,
         plans: state.rootReducer.plans,
@@ -73,6 +77,8 @@ const mapStateToProps = (state, ownProps) => {
         updates: state.rootReducer.updates,
         publicGoals: state.rootReducer.publicGoals,
         publicPrograms: state.rootReducer.publicPrograms,
+        contactGroups:state.rootReducer.contactGroups,
+
 
         updateModalData: state.rootReducer.updateModalData,
         stepModalData: state.rootReducer.stepModalData,
@@ -84,7 +90,16 @@ const mapStateToProps = (state, ownProps) => {
         signInOrSignupModalData: state.rootReducer.signInOrSignupModalData,
         subscriptionModalData: state.rootReducer.subscriptionModalData,
          programRequestModalData: state.rootReducer.programRequestModalData,
+        planModalData: state.rootReducer.planModalData,
+        contactGroupModalData: state.rootReducer.contactGroupModalData,
+        newContactGroupModalData:state.rootReducer.newContactGroupModalData,
+        editContactGroupModalData:state.rootReducer.editContactGroupModalData,
+        addToContactGroupModalData:state.rootReducer.addToContactGroupModalData,
+        selectedContactGroup:state.rootReducer.selectedContactGroup,
+
+
         birdModalData:state.rootReducer.birdModalData,
+        currentForm:state.rootReducer.currentForm,
 
 
 
@@ -103,7 +118,8 @@ const mapStateToProps = (state, ownProps) => {
         timeLastReloaded:state.rootReducer.timeLastReloaded,
         displayAlert:state.rootReducer.displayAlert,
         isSidebarVisible: state.rootReducer.isSidebarVisible,
-
+        currentEvent:state.rootReducer.currentEvent,
+        currentPayload:state.rootReducer.currentPayload,
 
 
 

@@ -74,6 +74,8 @@ router.register(r'labels', views.LabelViewSet, base_name='Label')
 router.register(r'channels/(?P<channel_id>\w+)/messageThread', views.MessageThreadChannelViewSet, base_name='MessageThreadChannel')
 
 router.register(r'channels', views.KChannelViewSet, base_name='Room')
+router.register(r'contactGroups', views.ContactGroupViewSet, base_name='ContactGroup')
+
 
 router.register(r'channelUsers/(?P<receiver_id>\w+)', views.ReceiverKChannelViewSet, base_name='KChannel')
 
@@ -177,6 +179,7 @@ urlpatterns = [
       url(r'^secret', views.secret_page, name='secret'),
       url(r'^tinymce/', include('tinymce.urls')),
       url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
+
 
       url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),

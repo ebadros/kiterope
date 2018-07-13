@@ -27,7 +27,7 @@ require('react-datepicker/dist/react-datepicker.css');
 import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
-import {SaveButton} from './settings'
+import {SaveButton, StandardInteractiveButton} from './settings'
 import {ImageUploader,  NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput, KSSelect } from './app'
@@ -45,7 +45,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'rea
 import { Provider, connect, dispatch } from 'react-redux'
 import  {store} from "./redux/store";
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
-import { addStep, deleteStep, setModalFormData, addDataItem, updateDataItem, clearTempStep, addUpdate, updateStep, setUpdateModalData, setStepModalData, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addStep, deleteStep, setModalFormData, addDataItem, deleteDataItem, updateDataItem, clearTempStep, addUpdate, updateStep, setUpdateModalData, setStepModalData, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 
 $.ajaxSetup({
@@ -63,6 +63,7 @@ export const testForm = {
     formName: "bird",
     formLabel: "Bird",
     reduxKey: "birds",
+    reduxModelKey: "name", //this could also be "id" or "array", if array then it creates an array
     formFields: {
         author: {
             fieldType: "UserField",
@@ -137,8 +138,10 @@ export const testForm = {
     },
     order: ['author', 'id', 'title', 'deadline', 'description','metric', 'why', 'obstacles',
         'croppableImage', 'coreValues', 'viewableBy'],
-    submissionUrl: "api/goals/",
-    saveStatuses:["Create", "Save", "Saving", "Saved"]
+    submissionUrl: "/api/goals/",
+    saveStatuses:["Create", "Save", "Saving", "Saved"],
+    mobileModalStyle: {stepModalStyle},
+    fullscreenModalStyle: {updateModalStyle},
 }
 
 /*
@@ -166,11 +169,12 @@ export class FormFactory extends React.Component {
             modalIsOpen: false,
             serverErrors: {},
             data: {},
-            saveStatus: "",
+            saveStatus: this.props.form.saveStatuses[0],
             wideColumnWidth: "sixteen wide column",
             mediumColumnWidth:"eight wide column",
             smallColumnWidth:"four wide column",
-            forMobile: false
+            forMobile: false,
+            saveStatuses: ["Save", "Saving...", "Saved"]
     }
     }
 
@@ -184,7 +188,9 @@ export class FormFactory extends React.Component {
 
         if (this.props.storeRoot != undefined) {
             if (this.props.storeRoot[this.props.form.formName + "ModalData"] != undefined) {
-                this.setState({data: this.props.storeRoot[this.props.form.formName + "ModalData"]})
+                this.setState({
+                    data: this.props.storeRoot[this.props.form.formName + "ModalData"].data,
+                })
                 this.setStateToData(this.props.storeRoot[this.props.form.formName + "ModalData"])
 
 
@@ -226,7 +232,7 @@ export class FormFactory extends React.Component {
 
         if (nextProps.storeRoot != undefined) {
             if (nextProps.storeRoot[nextProps.form.formName + "ModalData"] != undefined) {
-                this.setState({data: nextProps.storeRoot[nextProps.form.formName + "ModalData"]})
+                this.setState({data: nextProps.storeRoot[nextProps.form.formName + "ModalData"].data})
                 this.setStateToData(nextProps.storeRoot[nextProps.form.formName + "ModalData"])
 
 
@@ -254,8 +260,10 @@ export class FormFactory extends React.Component {
     }
 
     setStateToData(theFormValues) {
-        console.log("setStateToData called " + theFormValues.modalIsOpen)
-        this.setState({modalIsOpen: theFormValues.modalIsOpen})
+        this.setState({
+            modalIsOpen: theFormValues.modalIsOpen,
+            saveStatuses:this.props.form.saveStatuses
+        })
 
 
         if (theFormValues.data != undefined) {
@@ -266,9 +274,11 @@ export class FormFactory extends React.Component {
             var theSaveStatuses = this.props.form.saveStatuses
 
 
+
             for (var i = 0; i < theFieldOrder.length; i++) {
                 var theFieldName = theFieldOrder[i]
                 var theCurrentField = theFields[theFieldName]
+
                 switch (theCurrentField.fieldType) {
                     case "DateField":
                         if (data[theFieldName] != null) {
@@ -332,25 +342,27 @@ export class FormFactory extends React.Component {
     handleImageChange = (callbackData) => {
         this.setState({
             image: callbackData.image,
-            saveStatus: this.props.saveStatuses[1],
+            saveStatus: this.props.form.saveStatuses[1],
             croppableImage: callbackData
         })
     }
 
 
     closeModal() {
-        this.setState({modalIsOpen: false});
-        this.resetForm()
+        this.setState({modalIsOpen: false}, () => this.resetForm());
+
     }
 
     handleCancelClicked() {
         this.closeModal()
     }
 
+
+
     handleFormSubmit = (theFormData) => {
 
         if ((theFormData.id != "" ) && (theFormData.id != undefined )) {
-            var theUrl = this.props.submissionUrl + theFormData.id + "/"
+            var theUrl = this.props.form.submissionUrl + theFormData.id + "/"
 
             $.ajax({
                 url: theUrl,
@@ -361,7 +373,7 @@ export class FormFactory extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    store.dispatch(updateDataItem(this.props.formName, this.props.reduxKey, data));
+                    store.dispatch(updateDataItem(this.props.formName, this.props.form.reduxKey, this.props.form.reduxModelKey, data));
                     this.closeModal();
 
 
@@ -370,14 +382,14 @@ export class FormFactory extends React.Component {
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,
-                        saveStatus: this.props.saveStatuses[1]
+                        saveStatus: this.props.form.saveStatuses[0]
                     })
 
                 }.bind(this)
             });
         }
         else {
-            theUrl = this.props.submissionUrl
+            theUrl = this.props.form.submissionUrl
 
             $.ajax({
                 url: theUrl,
@@ -388,7 +400,7 @@ export class FormFactory extends React.Component {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    store.dispatch(addDataItem(this.props.formName, this.props.reduxKey, data));
+                    store.dispatch(addDataItem(this.props.formName, this.props.form.reduxKey, this.props.form.reduxModelKey, data));
                     this.closeModal();
 
 
@@ -397,7 +409,7 @@ export class FormFactory extends React.Component {
                     var serverErrors = xhr.responseJSON;
                     this.setState({
                         serverErrors: serverErrors,
-                        saveStatus: this.props.saveStatuses[1]
+                        saveStatus: this.props.form.saveStatuses[0]
                     })
 
                 }.bind(this)
@@ -407,13 +419,43 @@ export class FormFactory extends React.Component {
 
     }
 
+    handleDeleteClicked() {
+          if (this.state.id != undefined) {
+            var theUrl = this.props.form.submissionUrl + this.state.id + "/"
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'DELETE',
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    store.dispatch(deleteDataItem(this.props.form.reduxKey, this.state.data[this.props.form.reduxModelKey]));
+                    this.closeModal();
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                        saveStatus: this.props.form.saveStatuses[0]
+                    })
+
+                }.bind(this)
+            });
+        }
+
+    }
+
     handlePrepareSubmit() {
-        this.setState({saveStatus: this.props.saveStatuses[2]})
+        this.setState({saveStatus: this.props.form.saveStatuses[2]})
 
         if ((this.props.storeRoot.user)) {
             var theFieldOrder = this.props.form.order
             var theFields = this.props.form.formFields
-            var theData
+            var theData = {}
 
             for (var i = 0; i < theFieldOrder.length; i++) {
 
@@ -432,7 +474,11 @@ export class FormFactory extends React.Component {
 
                 }
             }
-            this.handleFormSubmit(theData)
+            if (this.props.form.overrideSaveFunction == false) {
+                this.handleFormSubmit(theData)
+            } else {
+                this.props.overriddenSaveFunction(this.state)
+            }
 
         } else {
             this.setState({
@@ -452,22 +498,17 @@ export class FormFactory extends React.Component {
         var theFields = this.props.formFields
         var theData
 
-        for (var i = 0; i < theFieldOrder.length; i++) {
+        for (var key in theFields) {
 
-            var theFieldName = theFieldOrder[i]
-            var theCurrentField = theFields[theFieldName]
+            var theCurrentField = theFields[key]
             this.setState({[theFieldName]: theCurrentField["default"]})
 
 
         }
-        store.dispatch(setModalFormData(this.props.formName, this.state))
+        store.dispatch(setModalFormData(this.props.form.formName, this.state))
     }
 
     getField = (fieldProperties) => {
-        console.log("getField")
-        console.log(fieldProperties)
-
-
         switch(fieldProperties.fieldType) {
             case "DateField":
                 var theField = this.getDateField(fieldProperties)
@@ -481,7 +522,7 @@ export class FormFactory extends React.Component {
             case "DropdownField":
                 var theField = this.getDropdownField(fieldProperties)
                 break;
-            case "MultiselectField":
+            case "MultiSelectField":
                 var theField = this.getMultiSelectField(fieldProperties)
                 break;
             case "ImageField":
@@ -490,6 +531,7 @@ export class FormFactory extends React.Component {
             case "CheckboxField":
                 var theField = this.getCheckboxField(fieldProperties)
                 break;
+
             default:
                 return null
                 break;
@@ -526,6 +568,8 @@ export class FormFactory extends React.Component {
 
 
     }
+
+
 
     getTextField = (fieldProperties) => {
         return (
@@ -596,11 +640,25 @@ export class FormFactory extends React.Component {
 
     getMultiSelectField = (fieldProperties) => {
 
+            return (
+                <div className="ui row">
+                    <div className={this.state.mediumColumnWidth}>
+                        <Select value={this.state[fieldProperties.fieldName]}
+                                onChange={this.handleChange.bind(this, fieldProperties.fieldName)}
+                                label={fieldProperties.fieldLabel}
+                                clearable={false}
+                                name={fieldProperties.fieldName}
+                                options={this.props[fieldProperties.fieldOptions]}
+
+                        />
+                    </div>
+                </div>
+            )
+
 
     }
 
     getImageField = (theFieldProperties) =>{
-        console.log(theFieldProperties)
         var theImage = theFieldProperties.fieldDefault.image
         return (
              <div className="ui row">
@@ -638,12 +696,10 @@ export class FormFactory extends React.Component {
 
         var theFieldsOrder = this.props.form.order
         var theFields = this.props.form.formFields
-        console.log(theFields)
 
 
         var theFieldsHtml = theFieldsOrder.map((fieldName) => {
             var currentField = theFields[fieldName]
-            console.log(fieldName)
             var theField = this.getField(currentField)
             return (theField)
         })
@@ -655,7 +711,7 @@ export class FormFactory extends React.Component {
             <div className="ui page container form">
                 <div className="ui row">&nbsp;</div>
                 <Header
-                    headerLabel={this.state.id != "" & this.state.id != undefined ? "Edit " + this.props.formLabel : "Create " + this.props.form.formLabel}/>
+                    headerLabel={ this.props.form.formLabel}/>
                 <div className="ui three column grid">
 
                     {theFieldsHtml}
@@ -670,19 +726,26 @@ export class FormFactory extends React.Component {
     }
 
     getButtons() {
-        return (
-            <div className="ui three column stackable grid">
-                <div className="column">&nbsp;</div>
-                <div className="column">
-                    <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
-                </div>
-                <div className="column">
-                    <div className="ui large fluid blue button" onClick={this.handleSubmit}>{this.state.saveStatus}</div>
-                </div>
-            </div>
 
-        )
-    }
+
+
+            return (
+                <div className="ui three column stackable grid">
+
+
+
+                    {this.props.form.includeDeleteButton == true ? <div className="column"><div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div></div> :<div className="column">&nbsp;</div>}
+                    { this.props.form.includeDeleteButton == true ? < div className="column"><div className="ui large fluid button" onClick={this.handleDeleteClicked}>Delete</div></div> : <div className="column"><div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div></div>}
+
+                     <div className="column">
+                     <StandardInteractiveButton color="purple" initial={this.state.saveStatuses[0]} processing={this.state.saveStatuses[1]} completed={this.state.saveStatuses[2]} current={this.state.saveStatus} clicked={this.handlePrepareSubmit}  />
+
+                     </div>
+                </div>
+
+            )
+        }
+
 
     render() {
 
@@ -691,12 +754,12 @@ export class FormFactory extends React.Component {
 
 
         if (this.state.forMobile) {
-            var modalStyle = mobileModalStyle
+            var modalStyle = this.props.form.mobileModalStyle
 
         } else {
 
 
-            var modalStyle = stepModalStyle
+            var modalStyle = this.props.form.fullscreenModalStyle
 
         }
 

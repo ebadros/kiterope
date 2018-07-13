@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, ProgramRequest, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, ContactGroup, ProgramRequest, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -54,16 +54,19 @@ class InterestSerializer(serializers.HyperlinkedModelSerializer):
         model= Interest
         fields = ('id', 'name', 'email', 'goal')
 
+
+
+
 class StepSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Step
         fields = ('id', 'program', 'relativeStartDateTime', 'relativeEndDateTime','endRecurrence', 'monthlySpecificity', 'monthlyDay', 'monthlyDayOption', 'interval', 'numberOfOccurrences','image', 'type', 'croppableImage','croppableImageData','updates','absoluteStartDateTime', 'visualizations','absoluteEndDateTime', 'permissions', 'programStartDateTime', 'title', 'description', 'isAllDay', 'frequency', 'day01', 'day02', 'day03', 'day04', 'day05', 'day06', 'day07', 'monthlyDates','useAbsoluteTime', 'recurrenceRule')
 
     program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
-    absoluteStartDateTime = serializers.DateTimeField()
-    absoluteEndDateTime = serializers.DateTimeField()
-    relativeStartDateTime = serializers.DurationField()
-    relativeEndDateTime = serializers.DurationField()
+    absoluteStartDateTime = serializers.DateTimeField(required=False)
+    absoluteEndDateTime = serializers.DateTimeField(required=False)
+    relativeStartDateTime = serializers.DurationField(required=False)
+    relativeEndDateTime = serializers.DurationField(required=False)
     useAbsoluteTime = serializers.BooleanField(required=False)
     programStartDateTime = serializers.SerializerMethodField(required=False, read_only=True)
     isAllDay = serializers.SerializerMethodField(required=False, read_only=True)
@@ -295,13 +298,13 @@ class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Visualization
         #fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'plan','user', 'permissions')
-        fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'plan','user', 'permissions' )
+        fields = ('id','name', 'kind', 'dependentVariable', 'independentVariable', 'mediatorVariable', 'program', 'plan','user', 'permissions', 'updateOccurrences' )
 
 
     program = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=Program.objects.all())
     plan = serializers.PrimaryKeyRelatedField(required=False, many=False, queryset=PlanOccurrence.objects.all())
 
-    #updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
+    updateOccurrences = serializers.SerializerMethodField(required=False, read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
     dependentVariable = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Update.objects.all())
     independentVariable = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Update.objects.all())
@@ -402,7 +405,7 @@ class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
         try:
             return obj.croppableImage.image
         except:
-            return obj.image
+            return obj.croppableImage.image
 
     def get_croppableImageData(self, obj):
 
@@ -422,10 +425,12 @@ class ContactProfileSerializer(serializers.HyperlinkedModelSerializer):
             return False
 
 
+
+
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ( 'id', 'bio', 'isCoach', 'utcMidnight', 'permissions','croppableImage', 'croppableImageData','firstName', 'timezone', 'lastName', 'zipCode', 'image', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken',  )
+        fields = ( 'id', 'bio', 'isCoach', 'utcMidnight', 'permissions','stripeSourceId', 'fullName', 'croppableImage', 'croppableImageData','firstName', 'timezone', 'lastName', 'zipCode', 'image', 'notificationChannel', 'notificationChannelLabel','user', 'expoPushToken',  )
 
 
     bio = serializers.CharField(max_length=2000, required=False)
@@ -440,6 +445,8 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 
     croppableImageData = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
+    fullName = serializers.SerializerMethodField(required=False, read_only=True)
+
 
     def get_image(self, obj):
         try:
@@ -467,6 +474,8 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
             return True
         else:
             return False
+    def get_fullName(self,obj):
+        return obj.get_fullName()
 
 
     def get_notificationChannelLabel(self, obj):
@@ -480,6 +489,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
             return obj.get_utcMidnight()
         except:
             return ""
+
 
 class SettingsSetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -512,26 +522,27 @@ class ProgramRequestSerializer(serializers.HyperlinkedModelSerializer):
         serializer = GoalSerializer(obj.goal, many=False, context=serializer_context)
         return serializer.data
 
-
-
-
 class ContactSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Contact
-        fields = ('id', 'sender', 'receiver', 'senderProfile', 'receiverProfile', 'wasConfirmed', 'relationship',  )
+        fields = ('id',  'connectionId', 'sender', 'receiver', 'bio', 'wasConfirmed', 'fullName' , 'image', 'notificationChannelLabel' )
 
     sender = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
     receiver = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
-    senderProfile= serializers.SerializerMethodField(required=False, read_only=True)
-    receiverProfile = serializers.SerializerMethodField(required=False, read_only=True)
+    #senderProfile = serializers.SerializerMethodField(required=False, read_only=True)
+    #receiverProfile = serializers.SerializerMethodField(required=False, read_only=True)
+    bio = serializers.SerializerMethodField(required=False, read_only=True)
+    fullName = serializers.SerializerMethodField(required=False, read_only=True)
+    image = serializers.SerializerMethodField(required=False, read_only=True)
+    notificationChannelLabel = serializers.SerializerMethodField(required=False, read_only=True)
+    connectionId = serializers.SerializerMethodField(required=False, read_only=True)
     wasConfirmed = serializers.CharField(max_length=20, )
-    relationship = serializers.CharField(max_length=20, )
 
     def get_senderProfile(self,obj):
         serializer_context = {'request': self.context.get('request')}
         #theProfile = Profile.objects.get(id=obj.sender)
 
-        serializer = ProfileSerializer(obj.sender, context=serializer_context )
+        serializer = ContactProfileSerializer(obj.sender, context=serializer_context )
         #data = {i['id']: i for i in serializer.data}
 
         return serializer.data
@@ -541,11 +552,109 @@ class ContactSerializer(serializers.HyperlinkedModelSerializer):
         #theProfile = Profile.objects.get(id=obj.receiver)
 
 
-        serializer = ProfileSerializer(obj.receiver, context=serializer_context)
+        serializer = ContactProfileSerializer(obj.receiver, context=serializer_context)
         #data = {i['id']: i for i in serializer.data}
 
         return serializer.data
 
+    def get_bio(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.bio
+        else:
+            return obj.sender.bio
+
+    def get_fullName(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.get_fullName()
+        else:
+            return obj.sender.get_fullName()
+
+    def get_image(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.croppableImage.image
+        else:
+            return obj.sender.croppableImage.image
+
+    def get_notificationChannelLabel(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.notificationChannel.label
+        else:
+            return obj.sender.notificationChannel.label
+
+    def get_connectionId(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.id
+        else:
+            return obj.sender.id
+
+
+class ContactSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ('id',  'connectionId', 'sender', 'receiver','bio', 'wasConfirmed', 'fullName' , 'image', 'notificationChannelLabel' )
+
+    sender = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
+    receiver = serializers.PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
+    #senderProfile = serializers.SerializerMethodField(required=False, read_only=True)
+    #receiverProfile = serializers.SerializerMethodField(required=False, read_only=True)
+    bio = serializers.SerializerMethodField(required=False, read_only=True)
+    fullName = serializers.SerializerMethodField(required=False, read_only=True)
+    image = serializers.SerializerMethodField(required=False, read_only=True)
+    notificationChannelLabel = serializers.SerializerMethodField(required=False, read_only=True)
+    connectionId = serializers.SerializerMethodField(required=False, read_only=True)
+
+
+
+    wasConfirmed = serializers.CharField(max_length=20, )
+
+    def get_senderProfile(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+        #theProfile = Profile.objects.get(id=obj.sender)
+
+        serializer = ContactProfileSerializer(obj.sender, context=serializer_context )
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+
+    def get_receiverProfile(self,obj):
+        serializer_context = {'request': self.context.get('request')}
+        #theProfile = Profile.objects.get(id=obj.receiver)
+
+
+        serializer = ContactProfileSerializer(obj.receiver, context=serializer_context)
+        #data = {i['id']: i for i in serializer.data}
+
+        return serializer.data
+
+    def get_bio(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.bio
+        else:
+            return obj.sender.bio
+
+    def get_fullName(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.get_fullName()
+        else:
+            return obj.sender.get_fullName()
+
+    def get_image(self,obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.croppableImage.image
+        else:
+            return obj.sender.croppableImage.image
+
+    def get_notificationChannelLabel(self, obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.notificationChannel.label
+        else:
+            return obj.sender.notificationChannel.label
+
+    def get_connectionId(self, obj):
+        if self.context['request'].user.profile == obj.sender:
+            return obj.receiver.id
+        else:
+            return obj.sender.id
 
 
 
@@ -639,6 +748,9 @@ class BrowseableProgramSerializer(serializers.HyperlinkedModelSerializer):
         except:
             return False
 
+class CurrentUserProfileDefault(serializers.CurrentUserDefault):
+    def __call__(self):
+        return self.user.profile
 
 class ProgramNoStepsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -1057,13 +1169,13 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
         fields=('id', 'program', 'goal', 'programInfo', 'programTitle', 'startDateTime', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
     #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
-    program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
+    program = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Program.objects.all())
     programInfo = serializers.SerializerMethodField()
     programTitle = serializers.SerializerMethodField()
 
 
 
-    goal = serializers.PrimaryKeyRelatedField(many=False, queryset=Goal.objects.all())
+    goal = serializers.PrimaryKeyRelatedField(many=False, required=False, queryset=Goal.objects.all())
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     isSubscribed = serializers.BooleanField()
 
@@ -1292,6 +1404,16 @@ class MessageThreadSerializer(serializers.HyperlinkedModelSerializer):
     def get_latestMessage(self, obj):
         return obj.get_latest_message()
 
+class ContactGroupSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = ContactGroup
+        fields = ('id', 'name', 'contacts', 'profile', 'contacts_ids', 'isDefault' )
+
+    profile = serializers.PrimaryKeyRelatedField(read_only=True, default=CurrentUserProfileDefault())
+    contacts = ContactSerializer(many=True, read_only=True)
+    contacts_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Contact.objects.all(), source='contacts')
+
 
 
 
@@ -1327,5 +1449,6 @@ class RateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model= Rate
         fields = ('id','inPersonRate', 'inPersonRateUnit', 'realtimeRate', 'realtimeRateUnit', 'feedbackRate', 'feedbackTurnaroundTime', 'turnaroundUnit', 'answerRate', 'activePlanManagementRate', 'activePlanManagementRateUnit')
+
 
 

@@ -16,6 +16,7 @@ import {Provider, connect, dispatch} from 'react-redux'
 import {SearchPage} from './search'
 import {SettingsPage} from './settings'
 import {StepOccurrenceDetailPage} from './stepOccurrence'
+import {ContactListPage } from './contact'
 
 import {Page404} from './Page404'
 
@@ -132,7 +133,7 @@ ReactDOM.render((
                 <Route path="/profiles/:profile_id" component={ProfileDetailPage}/>
 
                 <Route path="/clients" component={ClientListPage} onEnter={requireAuth}/>
-                <Route path="/contacts" component={() => (<ProfileListPage myContacts={true}/>)} onEnter={requireAuth}/>
+                <Route path="/contacts" component={() => (<ContactListPage />)} onEnter={requireAuth}/>
                 <Route path="/tos" component={TermsOfServicePage} />
 
 

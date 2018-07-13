@@ -1,0 +1,5 @@
+{{ object.fullName }}
+{{ object.bio }}
+{{ object.notificationChannelLabel }}
+{{ object.image }}
+{{ object.user }}

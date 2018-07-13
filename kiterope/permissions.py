@@ -112,6 +112,13 @@ class IsOwnerOrNone(permissions.BasePermission):
         else:
             return False
 
+class IsProfileOwnerOrNone(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.profile == request.user.profile :
+            return True
+        else:
+            return False
+
 class CustomAllowAny(permissions.BasePermission):
 
     def has_permission(self, request, view, obj=None):

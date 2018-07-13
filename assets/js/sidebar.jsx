@@ -23,7 +23,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'rea
 
 
 import onClickOutside  from 'react-onclickoutside';
-import { setCurrentUser, reduxLogout, showSidebar } from './redux/actions'
+import { setCurrentUser, clearModalData, reduxLogout, showSidebar } from './redux/actions'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
@@ -137,6 +137,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
     };
 
     handleURLPush(theURL) {
+        store.dispatch(clearModalData())
 
         store.dispatch(push(theURL))
     }
@@ -192,27 +193,23 @@ export class SidebarWithoutClickingOutside extends React.Component {
                         </a>
                         <a className="item" style={style} onClick={() => this.handleURLPush('/goals/')}>
                         <i className="large block layout icon"/>
-                        My Goals
+                        Goals
                     </a>
 
                         <a className="item" style={style} onClick={() => this.handleURLPush('/programs/')}  >
                             <i className="large cubes icon"/>
-                            My Programs
+                            Programs
                         </a>
                         <a className="item" style={style} onClick={() => this.handleURLPush('/contacts/')} >
                             <i className="large users icon"/>
-                            My Contacts
+                            Contacts
                         </a>
 
                                     <a className="item" style={style} onClick={() => this.handleURLPush(`/profiles/${this.props.storeRoot.user.profileId}/`)}  >
                                         <i className="large user icon"/>
-                                        My Profile
+                                        Profile
                                     </a>
 
-                        <a className="item"  style={style} onClick={() => this.handleURLPush('/search/')}>
-                            <i className="large search icon"/>
-                            Search
-                        </a>
 
 
                         {/*<a className="item" style={style}onClick={() => this.handleURLPush('/messages/')}>

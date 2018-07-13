@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setContactGroups, setModalFormData, addContactGroup, addContact, replaceContact, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -41,7 +41,7 @@ import { Menubar, SignInOrSignUpModalForm, StandardSetOfComponents, ErrorReporte
 
 import {  selectImageStyle, defaultGoalCroppableImage, cropImageStyle, theServer, s3BaseUrl, s3IconUrl,  frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,TINYMCE_CONFIG, times, durations, userSharingOptions, notificationSendMethodOptions,metricFormatOptions } from './constants'
 
-import { ContactItemMenu } from './contact'
+import { ContactItemMenu, ContactBasicView } from './contact'
 function printObject(o) {
   var out = '';
   for (var p in o) {
@@ -1098,7 +1098,7 @@ export class MyReactS3Uploader extends ReactS3Uploader {
 
 
             return (<div><div className="ui large fluid grey button" style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
-                <SaveButton style={rightButtonStyle} saved={this.state.saved} clicked={this.uploadFile} />
+                <SaveButton buttonSize="large" style={rightButtonStyle} saved={this.state.saved} clicked={this.uploadFile} />
 </div>)
         } else return(
             <div></div>
@@ -1165,6 +1165,10 @@ export class NewImageUploader extends React.Component {
 
             })
         }
+        if (this.state.serverErrors != this.props.serverErrors) {
+            this.setState({serverErrors: this.props.serverErrors})
+        }
+
     }
 
     componentWillReceiveProps (nextProps) {
@@ -1191,9 +1195,31 @@ export class NewImageUploader extends React.Component {
              }
          }
 
+         if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
+        }
+
 
 
     }
+
+    buildErrors = () => {
+        var i;
+        var errorsHTML = "";
+        if (this.state.serverErrors) {
+            for (i = 0; i < this.state.serverErrors.length; i++) {
+                errorsHTML += "<div>" + this.state.serverErrors[i] + "</div>"
+            }
+        } else {
+            if (typeof this.state.errors !== 'undefined' && this.state.errors.length > 0) {
+                for (i = 0; i < this.state.errors.length; i++) {
+                    errorsHTML += "<div>" + this.state.errors[i] + "</div>"
+                }
+            }
+        }
+        return errorsHTML
+
+    };
 
     readFileAsDataURL(file){
     var reader = new FileReader();
@@ -1467,6 +1493,9 @@ xhr.send();
         } else {
             var theImage = this.props.defaultImage
         }
+
+        var errorsHTML = this.buildErrors();
+
         //var theFilename = theImage.replace("uploads/", "");
 
 
@@ -1517,7 +1546,7 @@ return(
                           <div className="ui row" style={editInterfaceStyle}>
 
                 <div className={wideColumnWidth}>
-<div style={{width: '225px', height: theCropperWidth, display: 'inline-block', marginBottom: '5px'}}>
+<div style={{width: '225px', height: theCropperWidth, display: 'inline-block', marginBottom: '5px', marginRight:'20px'}}>
 
             <Cropper
                 ready={this.handleCropperReady}
@@ -1555,7 +1584,6 @@ return(
 
 
                     <div style={{
-                        marginLeft: '20px',
                         display: 'inline-block',
                         cursor: 'pointer',
                     }}>{this.state.finalImage != "" ?
@@ -1593,6 +1621,8 @@ return(
                                        </div>
                               </div>
                 </div>
+                {errorsHTML != ""? <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>:null}
+
                 </div>
 
 
@@ -2497,7 +2527,7 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
 
         if (this.props.storeRoot.user != undefined) {
-            var theData ={modalIsOpen:true, data:{program:this.state.id}}
+            var theData = {modalIsOpen:true, data:this.state.data}
             store.dispatch(setSubscriptionModalData(theData))
 
             }
@@ -2524,8 +2554,12 @@ hideComponent = () => {
     };
 
     handleUnsubscribeClick = () => {
+                console.log("handleUnsubscribe click ProgramViewEditDeleteItem")
+
+
         this.setState({subscribeButtonText: "Unsubscribing..."})
         if (this.state.userPlanOccurrenceId) {
+            console.log("inside the state change")
             var theUrl = "/api/planOccurrences/" + this.state.userPlanOccurrenceId + "/";
             var planOccurrence = {
                 isSubscribed: false,
@@ -2541,8 +2575,9 @@ hideComponent = () => {
                 },
                 success: function (data) {
                     console.log("success");
-                    this.setState({data:Object.assign(this.state.data, {isSubscribed:false})})
-                    //this.state.data.isSubscribed = false;
+                    console.log(data)
+                    this.setState({data:data})
+                    this.state.data.isSubscribed = false;
                             this.setState({subscribeButtonText: "Subscribe"})
 
                     store.dispatch(removePlan(this.state.userPlanOccurrenceId))
@@ -2841,10 +2876,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     handleUnsubscribeClick = () => {
+        console.log("handleUnsubscribe click PlanViewEditDeleteItem")
         if (this.state.id) {
             var theUrl = "/api/planOccurrences/" + this.state.id + "/";
+            console.log(theUrl)
             var planOccurrence = {
                 isSubscribed: false,
+                id:this.state.id,
 
             };
             $.ajax({
@@ -2856,8 +2894,11 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    this.setState({data:Object.assign(this.state.data, {isSubscribed:false})})
-                    this.state.data.isSubscribed = false;
+                    console.log("success");
+                    console.log(data)
+                    this.setState({data:data})
+                    this.setState({subscribeButtonText: "Subscribe"})
+
                     store.dispatch(removePlan(this.state.id))
 
 
@@ -2934,6 +2975,428 @@ hideComponent = () => {
         )
     }
 
+}
+
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class ContactViewEditDeleteItem extends ViewEditDeleteItem {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            data: "",
+            currentView: "Basic",
+            serverErrors: "",
+            editable: false,
+            contacts: {},
+
+
+        }
+    }
+
+    callDeleteReducer() {
+        store.dispatch(deleteContact(this.props.contact))
+    }
+
+    componentDidMount = () => {
+
+        //$(this.refs["ref_form"]).hide();
+        $(this.refs["ref_detail"]).hide();
+
+        if (this.props.currentView != undefined) {
+            this.setState({
+                data: this.props.data,
+                currentView: this.props.currentView,
+
+            })
+        }
+        else {
+            this.setState({
+                data: this.props.data,
+                currentView: "Basic",
+                serverErrors: this.props.serverErrors
+
+            })
+
+        }
+
+        this.showHideUIElements(this.props.currentView)
+
+    };
+
+    switchToEditView = () => {
+
+        this.setState({
+            modalIsOpen: true,
+        }, () => {
+            store.dispatch(setProfileModalData(this.state))
+        })
+
+
+    };
+
+    removeContact = () => {
+        var theUrl = "/api/contacts/" + this.props.contact + "/";
+
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'DELETE',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: () => {
+                this.hideComponent();
+                this.callDeleteReducer();
+                //this.reload()
+            },
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }
+        });
+    };
+
+
+    handleProfileSubmit(profile, callback) {
+
+        var theURL = "/api/profiles/" + profile.id + "/";
+        $.ajax({
+            url: theURL,
+            dataType: 'json',
+            type: 'PUT',
+            data: profile,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                console.log("success");
+
+                this.switchToBasicView();
+
+                this.setState({
+                    data: data,
+                    currentView: "Basic"
+                });
+
+
+                callback
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.log("error");
+
+                console.error(theURL, status, err.toString());
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this),
+            complete: function (jqXHR, textStatus) {
+                if (textStatus == "success") {
+                    this.switchToBasicView();
+
+                }
+            }.bind(this)
+        });
+    }
+
+
+    handleComponentWillReceivePropsSpecificActions = (nextProps) => {
+        if (this.state.data != nextProps.data) {
+            this.setState({
+                data: nextProps.data,
+            })
+        }
+
+
+        if (this.state.id != nextProps.id) {
+            this.setState({
+                id: nextProps.id,
+            });
+            this.determineOptions()
+        }
+        if (nextProps.storeRoot != undefined) {
+            if (this.state.user != nextProps.storeRoot.user) {
+                this.setState({
+                    user: nextProps.storeRoot.user
+                })
+            }
+            if (this.state.contacts != nextProps.storeRoot.contacts) {
+            this.setState({
+                    contacts: nextProps.storeRoot.contacts
+                })
+        }
+        }
+
+
+        if (this.state.userPlanOccurrenceId != nextProps.userPlanOccurrenceId) {
+            this.setState({userPlanOccurrenceId: nextProps.userPlanOccurrenceId})
+        }
+
+    };
+
+
+    handleClick = (callbackData) => {
+        switch (callbackData) {
+            case("Add Contact to Group"):
+                store.dispatch(setModalFormData("addToContactGroup", {modalIsOpen:true, data:{contactId:this.state.data.id}}))
+
+                //this.addContact();
+                break;
+            case("Remove Contact from Group"):
+                this.handleRemoveContactFromGroup()
+
+                //this.removeContact();
+                break;
+            default:
+                this.setState({
+                    currentView: callbackData
+                }, () => this.showHideUIElements(callbackData));
+                break;
+
+        }
+    };
+
+    handleRemoveContactFromGroup() {
+        var theUrl = "/api/contactGroups/" + this.props.storeRoot.selectedContactGroup.id + "/"
+        var theContactGroupContacts = []
+        var theContactGroupContacts = this.props.storeRoot.contactGroups[this.props.storeRoot.selectedContactGroup.value].contacts_ids.slice()
+        console.log(theContactGroupContacts)
+
+        console.log(this.state.data.id)
+        var index = theContactGroupContacts.indexOf(this.state.data.id);
+        console.log(index)
+        console.log(theContactGroupContacts[index])
+        theContactGroupContacts.splice(index, 1)
+
+
+
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'PATCH',
+            data: { contacts_ids: theContactGroupContacts},
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addContactGroup(data))
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this)
+        });
+    }
+
+
+
+    addContact = () => {
+        var theUrl = "/api/contacts/";
+        var theContact = {
+            sender: this.state.user.id,
+            receiver: this.state.data.id,
+            relationship: "coach",
+            wasConfirmed: "sender",
+        };
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'POST',
+            data: theContact,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addContact(data))
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this)
+        });
+
+    };
+
+
+    getControlBar = () => {
+
+        var thePermissions = false;
+        if (this.state.data) {
+            thePermissions = this.state.data.permissions
+        }
+        return (
+            <ItemControlBar myRef="ref_itemControlBar"
+                            label="Contact"
+                            click={this.handleClick}
+                            currentView={this.state.currentView}
+                            editable={thePermissions}
+                            showCloseButton={this.props.showCloseButton}
+                            data={this.state.data}
+            />
+        )
+    };
+
+
+    getBasicView = () => {
+        return (
+            <div ref="ref_basic">
+
+                <ContactBasicView data={this.state.data} isListNode={this.props.isListNode}/>
+            </div>
+        )
+    };
+
+    /*getEditView = () => {
+     return(
+     <div ref="ref_form">
+
+     <ProfileForm isListNode={this.props.isListNode}
+     myRef="ref_form" editable={true}
+     onSubmit={this.handleProfileSubmit}
+     cancelClicked={this.cancelClicked}
+     data={this.state.data}
+     serverErrors={this.state.serverErrors} />
+     </div>
+     )
+     };*/
+
+    getDetailView = () => {
+
+        return (
+            <div ref="ref_detail">
+                <div className="itemDetailSmall">
+                    <div dangerouslySetInnerHTML={{__html: this.state.data.bio}}></div>
+                </div>
+            </div>
+        )
+
+
+    };
+    handleContactClicked = () => {
+        store.dispatch(setMessageWindowVisibility(true));
+        store.dispatch(setCurrentContact(this.state.data));
+
+
+    };
+
+    handleConfirmContactClicked = () => {
+
+
+        var theUrl = "/api/contacts/" + this.state.data.id + "/";
+        var theContact = {
+            wasConfirmed: "both",
+        };
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'PATCH',
+            data: theContact,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                this.handleUpdateContactGroups()
+
+                store.dispatch(replaceContact(this.state.data.connectionId, data))
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this)
+        });
+
+}
+
+    handleUpdateContactGroups = () => {
+        var theUrl = "/api/contactGroups/"
+
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'GET',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(setContactGroups(data))
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this)
+        });
+
+    }
+
+
+
+
+    hideComponent = () => {
+        //this.props.methodChange({isVisible:false})
+        $(this.refs['ref_profileItem_' + this.props.id]).slideUp();
+
+
+    };
+
+
+    render() {
+
+        var controlBar = this.getControlBar();
+        var detailView = this.getDetailView();
+        var basicView = this.getBasicView();
+
+        if (this.props.storeRoot.user) {
+            return (
+
+
+
+                <div ref={`ref_profileItem_${this.props.id}`} className="ui column">
+                    {controlBar}
+
+
+                    <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                        <div>{basicView}</div>
+                        {detailView}
+                    </div>
+
+                    { this.state.data.wasConfirmed == "sender" && this.state.data.receiver != this.props.id ? <div className="ui purple bottom attached large button" onClick={this.handleConfirmContactClicked}>Accept Contact</div>:null}
+
+
+                { this.state.data.wasConfirmed == "sender" && this.state.data.receiver == this.props.id ? <div className="ui grey bottom attached large button" onClick={this.handleContactClicked}>Awaiting Confirmation</div>:null}
+
+                { this.state.data.wasConfirmed == "both" ? <div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Send Message</div>:null}
+
+
+                </div>
+
+            )
+        }
+
+    }
 }
 
 
@@ -3096,7 +3559,7 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     handleClick = (callbackData) => {
         switch (callbackData) {
             case("Add Contact"):
-                this.addAsCoach();
+                this.addContact();
                 break;
             case("Add as Client"):
                 this.addAsClient();
@@ -3114,11 +3577,11 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
 
-    addAsCoach = () => {
+    addContact = () => {
         var theUrl = "/api/contacts/";
         var theContact = {
             sender:this.state.user.id,
-            receiver: this.state.data.user,
+            receiver: this.state.data.id,
             relationship: "coach",
             wasConfirmed:"sender",
         };
@@ -3146,6 +3609,8 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
              });
 
     };
+
+
 
 
 
@@ -3215,6 +3680,37 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
 
     };
 
+    handleAddContactClicked = () => {
+        var theUrl = "/api/contacts/";
+        var theContact = {
+            sender: this.state.user.profileId,
+            receiver: this.state.data.id,
+            wasConfirmed: "sender",
+        };
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'POST',
+            data: theContact,
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+            },
+            success: function (data) {
+                store.dispatch(addContact(data))
+
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                var serverErrors = xhr.responseJSON;
+                this.setState({
+                    serverErrors: serverErrors,
+                })
+
+            }.bind(this)
+        });
+
+    };
+
 
 hideComponent = () => {
         //this.props.methodChange({isVisible:false})
@@ -3243,26 +3739,16 @@ hideComponent = () => {
 
 
 
-                </div>{ this.props.storeRoot.user.id != this.state.data.user ? <div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>:null}
+                </div>
+                { this.props.storeRoot.contacts[this.state.id] == undefined ? <div className="ui purple bottom attached large button" onClick={this.handleAddContactClicked}>+ Add Contact</div>:null}
+                { this.state.data.wasConfirmed == "sender" || this.state.data.wasConfirmed == "receiver" ? <div className="ui grey bottom attached large button" onClick={this.handleContactClicked}>Awaiting Confirmation</div>:null}
+
+                { this.state.data.wasConfirmed == "both" ? <div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Send Message</div>:null}
 
             </div>
 
         )}
-        else return (
-
-            <div ref={`ref_profileItem_${this.props.id}`} className="ui column">
-                {controlBar}
-
-
-                <div className="ui segment noBottomMargin noTopMargin noTopRadius">
-                    <div>{basicView}</div>
-                    {detailView}
-
-
-
-                </div><div className="ui purple bottom attached large button" onClick={this.handleContactClicked}>Contact</div>
-
-            </div>
+        else return (null
 
         )
     }
@@ -3719,7 +4205,6 @@ export class ItemControlBarButton extends React.Component {
      }
 
      handleClick = (callbackData) => {
-         console.log("button clicked")
          this.props.click(callbackData)
      };
 
@@ -3737,7 +4222,7 @@ export class ItemControlBarButton extends React.Component {
             case("Menu"):
                 switch(this.props.menuType) {
                     case("Contact"):
-                        return (<ContactItemMenu click={this.handleClick}/>);
+                        return (<ContactItemMenu click={this.handleClick} data={this.props.data}/>);
                     case("Profile"):
                         return (<ProfileItemMenu click={this.handleClick}/>);
                     case("Goal"):
@@ -3868,7 +4353,7 @@ export class CancelControlBar extends ControlBarButtonConfiguration {
 
         }
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>;
+                                              data={this.props.data} click={this.handleMenuClicked}/>;
 
 
         return (
@@ -3908,7 +4393,7 @@ export class DetailControlBar extends ControlBarButtonConfiguration {
         }
 
              var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>;
+                                              data={this.props.data} click={this.handleMenuClicked}/>;
 
 
         return (
@@ -3945,7 +4430,7 @@ export class MenuControlBar extends ControlBarButtonConfiguration {
     render() {
 
         var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>;
+                                              data={this.props.data} click={this.handleMenuClicked}/>;
 
 
         return (
@@ -3980,7 +4465,7 @@ export class EditDeleteControlBar extends ControlBarButtonConfiguration {
     render() {
 
         var menuButton =  <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                              click={this.handleMenuClicked}/>;
+                                              data={this.props.data} click={this.handleMenuClicked}/>;
 
 
         return (
@@ -4023,7 +4508,7 @@ export class DetailEditDeleteControlBar extends ControlBarButtonConfiguration {
 
         }
         var menuButton = <ItemControlBarButton myRef="ref_menuButton" label="Menu" menuType={this.props.label}
-                                               click={this.handleMenuClicked}
+                                               data={this.props.data} click={this.handleMenuClicked}
                                                style={{display: 'block', width: '100%'}}/>;
 
 
@@ -4099,22 +4584,22 @@ export class ItemControlBar extends React.Component {
 
         if (this.state.editable) {
             if (this.state.currentView == "Basic" || this.state.currentView == "Edit") {
-                buttonConfiguration = <DetailEditDeleteControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <DetailEditDeleteControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             } else if (this.state.currentView == "UpdateBasic" ) {
-                buttonConfiguration = <EditDeleteControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <EditDeleteControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             } else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <CancelControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             }
         } else {
             if (this.state.currentView == "Basic" || this.state.currentView == "Edit") {
-                buttonConfiguration = <DetailControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <DetailControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             } else if (this.state.currentView == "UpdateBasic" ) {
-                buttonConfiguration = <MenuControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <MenuControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
 
             }else {
-                buttonConfiguration = <CancelControlBar click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
+                buttonConfiguration = <CancelControlBar data={this.props.data} click={this.handleClick} label={this.props.label} extendedBasic={this.props.extendedBasic}/>
             }
 
         }
@@ -4176,7 +4661,7 @@ export class ItemControlBar extends React.Component {
 
 
         return (
-            <div ref={this.props.myRef} className={`ui top attached ${color} button`} style={{display:'flex',}}>
+            <div ref={this.props.myRef} className={`ui top attached ${color} active button`} style={{display:'flex',}}>
 
                     {buttonConfiguration}
 
@@ -4289,6 +4774,7 @@ module.exports = {
     DynamicSelectButton2,
     GoalViewEditDeleteItem,
     PlanViewEditDeleteItem,
+    ContactViewEditDeleteItem,
     Breadcrumb,
     ProgramViewEditDeleteItem,
     VideoUploader,

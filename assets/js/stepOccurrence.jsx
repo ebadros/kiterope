@@ -66,7 +66,7 @@ export class StepOccurrenceList extends React.Component {
         super(props);
         autobind(this);
         this.state = {
-            data: []
+            data: [],
 
 
         }
@@ -85,6 +85,7 @@ export class StepOccurrenceList extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (this.state.data != nextProps.data) {
+
             this.setState({data: nextProps.data})
         }
 
@@ -97,22 +98,26 @@ export class StepOccurrenceList extends React.Component {
 
     render() {
         if ((this.state.data != undefined) && (this.state.data.length != 0 )){
-            console.log("here's the data")
-            console.log(this.state.data)
+            var someCompleted = false
+            var someToDo = false
+            var someNeverCompleted = false
 
             var objectNodes = this.state.data.map(function (objectData) {
                 if ((this.state.status == "COMPLETED") && (objectData.wasCompleted == true)) {
+                    someCompleted = true
 
                     return (
                         <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
                                             stepOccurrenceData={objectData}/>
                     )
                 } else if ((this.state.status == "TODO") && (objectData.wasCompleted == false)) {
+                    someToDo = true
                     return (
                         <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
                                             stepOccurrenceData={objectData}/>
                     )
                 } else if ((this.state.status == "NEVER_COMPLETED") && (objectData.wasCompleted == false) && (objectData.date < moment())) {
+                    someNeverCompleted = true
                     return (
                         <StepOccurrenceItem key={`ref_stepOccurrenceItem_${objectData.id}`}
                                             stepOccurrenceData={objectData}/>
@@ -143,6 +148,12 @@ var objectNodes = <div style={{padding:'0px'}}><div className="largeItalic" styl
                     <div className="centeredContent">
 
                       <div className='ui three column  stackable grid'>
+                          {someToDo == false && this.state.status == "TODO" ? <div><div className="largeItalic">Congratulations! You've completed all your steps for this period.</div>
+                </div>: null}
+                          {someCompleted == false && this.state.status == "COMPLETED" ? <div><div className="largeItalic">You've not completed any steps for this period.</div>
+                </div>: null}
+                          {someNeverCompleted == false && this.state.status == "NEVER_COMPLETED" ? <div><div className="largeItalic">No steps are locked and uncompleted for this period.</div>
+                </div>: null}
 
                 {objectNodes}
             </div>

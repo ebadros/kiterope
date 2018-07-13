@@ -18,6 +18,7 @@ ROOT_URLCONF = 'kiterope.urls_development'
 #ALLOWED_HOSTS = ['*']
 
 
+
 #TEMPLATE_DEBUG = True
 THUMBNAIL_DEBUG = True
 

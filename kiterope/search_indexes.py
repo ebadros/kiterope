@@ -1,8 +1,45 @@
 import datetime
 from haystack import indexes
-from kiterope.models import Program
+from kiterope.models import Program, Profile
 from django.db.models import Q
 
+class ProfileIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(document=True, use_template=True)
+    id = indexes.CharField(model_attr="id")
+    bio = indexes.CharField(model_attr="bio")
+    notificationChannel = indexes.CharField(model_attr="notificationChannel")
+    notificationChannelLabel = indexes.CharField(model_attr="notificationChannel")
+    #croppableImage = indexes.CharField(model_attr="croppableImage")
+
+    user = indexes.CharField(model_attr="user")
+    image = indexes.CharField(model_attr="croppableImage", null=True)
+    fullName = indexes.CharField(model_attr="firstName")
+    model = indexes.CharField(model_attr='id')
+
+    def prepare_model(self, obj):
+        return "Profile"
+
+
+    def get_model(self):
+        return Profile
+
+    def prepare_notificationChannelLabel(self,obj):
+        return obj.get_notificationChannelLabel()
+
+    def prepare_fullName(self,obj):
+        return obj.get_fullName()
+
+    def prepare_image(self,obj):
+        return obj.get_image()
+
+    def index_queryset(self, using=None):
+        print("indexing queryset")
+
+        """Used when the entire index for model is updated."""
+
+        # return self.get_model().objects.filter(pub_date__lte=datetime.datetime.now())
+
+        return self.get_model().objects.all()
 
 
 class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
@@ -21,9 +58,12 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
     author_fullName = indexes.CharField(model_attr='author')
     author_image = indexes.CharField(model_attr='author')
     isActive = indexes.BooleanField(model_attr='isActive')
-
-
     category = indexes.CharField(model_attr="category")
+    model = indexes.CharField(model_attr='id')
+
+
+    def prepare_model(self,obj):
+        return "Program"
 
     def prepare_timeCommitment(self, obj):
         return obj.get_timeCommitment_display()
@@ -50,7 +90,6 @@ class ProgramIndex(indexes.SearchIndex, indexes.Indexable):
         return Program
 
     def should_update(self, instance, **kwargs):
-        print("should update")
         if instance.isActive:
             return True
         else:

@@ -386,6 +386,97 @@ export class ClippedImage2 extends React.Component {
      }
 }
 
+export class SimpleModalInput extends React.Component {
+    constructor(props) {
+        super(props)
+        autobind(this)
+        this.state = {
+            value:"",
+            modalIsOpen:false,
+        }
+    }
+
+    componentDidMount() {
+        if (this.props.storeRoot != undefined) {
+            if (this.state.value != this.props.storeRoot[this.props.reduxKey]) {
+                this.setState({value: this.props.storeRoot[this.props.reduxKey]})
+            }
+        }
+
+
+    }
+
+    componentWillReceiveProps (nextProps) {
+    if (nextProps.storeRoot != undefined) {
+            if (this.state.value != nextProps.storeRoot[this.props.reduxKey]) {
+                this.setState({value: nextProps.storeRoot[this.props.reduxKey]})
+            }
+        }
+
+
+    }
+
+    getForm() {
+        return (
+            <ValidatedInput
+                                type="text"
+                                name={this.props.name}
+                                label={this.props.label}
+                                id={`id_${this.props.name}`}
+                                placeholder={this.props.placeholder}
+                                value={this.state.value}
+                                initialValue={this.state.value}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleChange}
+                                isDisabled={false}
+                                serverErrors={this.getServerErrors(this.props.name)}
+
+
+                            />
+        )
+    }
+
+    closeModal() {
+            this.setState({modalIsOpen: false});
+            this.resetForm()
+
+
+        }
+
+    render() {
+          if (this.props.storeRoot != undefined ) {
+                if (this.props.storeRoot.gui != undefined) {
+                    var forMobile = this.props.storeRoot.gui.forMobile
+                    }
+                }
+
+
+        if (forMobile) {
+      var modalStyle = stepModalStyle
+
+    } else {
+
+
+      var modalStyle = cardPaymentModalStyle
+
+    }
+
+
+        var theForm = this.getForm()
+        return (
+             <div className="ui form"><Modal
+                isOpen={this.state.modalIsOpen}
+                onAfterOpen={this.afterOpenModal}
+                onRequestClose={this.closeModal}
+                style={modalStyle}>
+                {theForm}
+
+            </Modal>
+            </div>
+        )
+    }
+}
 
 export class ClippedImage extends React.Component {
     constructor(props) {
@@ -418,6 +509,18 @@ export class ClippedImage extends React.Component {
              var containerHeight = 9 / 16 * width;
              var classDescriptor = "reverseSegmentMargin";
              var position = "relative"
+              var myStyle = {
+                         width: width,
+                         position: position,
+                         left:left,
+                         height: containerHeight,
+                         minWidth:width,
+                         minHeight:containerHeight,
+
+                         display: isVisible
+
+
+                     }
 
          } else if (this.props.item =='goal') {
              var width = '100%';
@@ -425,17 +528,40 @@ export class ClippedImage extends React.Component {
              var containerHeight = height;
              var classDescriptor = "";
              var position = "relative"
+              var myStyle = {
+                         width: width,
+                         position: position,
+                         left:left,
+                         height: containerHeight,
+                         minWidth:width,
+                         minHeight:containerHeight,
+
+                         display: isVisible
+
+
+                     }
 
          }
          else if (this.props.item =='profile') {
-             var width = '100%';
-             var left = 0;
-             var height = 'auto'
+             var width = '70%';
+             var left = '15%';
+             var height = '100%'
              //var height = width;
              var containerHeight = width;
              var classDescriptor = "center aligned";
              var isCircular = "ui circular image";
              var position = "relative"
+              var myStyle = {
+                         width: width,
+                         position: position,
+                         left:left,
+                         height: containerHeight,
+                         minWidth:width,
+
+                         display: isVisible
+
+
+                     }
          }
          var heightString = containerHeight + "px !important";
 
@@ -452,67 +578,8 @@ export class ClippedImage extends React.Component {
              isVisible = "block";
          }
 
-         var myStyle = {
-                         width: width,
-                         position: position,
-                         left:left,
-                         height: containerHeight,
-                         minWidth:width,
-                         minHeight:containerHeight,
-
-                         display: isVisible
 
 
-                     }
-                     /*
-         if (this.state.imageHeight) {
-             if (this.state.imageHeight >= this.state.imageWidth) {
-                 var myStyle = {
-                     position: position,
-                     width: width,
-                     height: "auto",
-                     left:left,
-                     display: isVisible
-
-                 }
-
-             } else {
-
-
-                 if (this.props.item=='goal') {
-
-                      var myStyle = {
-                         position: position,
-                         height: containerHeight,
-                          minHeight:containerHeight,
-
-                          width: "auto",
-                          minWidth:containerHeight,
-
-                          display: isVisible
-
-
-
-                     }
-
-                 }
-                 else {
-                     var myStyle = {
-                         width: width,
-                         position: position,
-                         left:left,
-                         height: containerHeight,
-                         minWidth:width,
-                         minHeight:containerHeight,
-
-                         display: isVisible
-
-
-                     }
-                 }
-
-             }
-         }*/
 
                     return (
                         <div className={classDescriptor} style={containerStyle}>
@@ -694,4 +761,4 @@ export class Test extends React.Component {
      }
 }
 
-module.exports = { Test , IconLabelCombo , ItemMenu, ClippedImage, ChoiceModal, ContextualMenuItem, ChoiceModalButton, ChoiceModalButtonsList, ClippedImageOverlayedText };
+module.exports = { Test , IconLabelCombo , SimpleModalInput, ItemMenu, ClippedImage, ChoiceModal, ContextualMenuItem, ChoiceModalButton, ChoiceModalButtonsList, ClippedImageOverlayedText };

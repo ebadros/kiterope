@@ -1,4 +1,4 @@
-from django.db import models
+from django.db.models import Model, ForeignKey, CASCADE
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
@@ -40,9 +40,12 @@ from recurrence.fields import RecurrenceField
 from scheduler.scheduler import TaskScheduler
 from kiterope.celery_setup import app
 from scheduler.tasks import RepeatTask
-from kiterope.tasks import say_hello, createStepOccurrence,send_email_notification, send_text_notification, send_app_notification
+from kiterope.tasks import say_hello, createStepOccurrence,send_email_notification, send_text_notification, send_app_notification, createTimeBasedTasks
 from kiterope.expoPushNotifications import send_push_message
+from django.db.models.deletion import PROTECT
+import stripe
 
+stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 '''
 rruleFrequencies = (
@@ -118,9 +121,13 @@ PROGRAM_VIEWABLEBY_CHOICES =(
     )
 
 PROGRAM_COST_FREQUENCY_METRIC_CHOICES = (
-    ("MONTH", "Per Month" ),
-    ("WEEK", "Per Week" ),
-    ("ONE_TIME", "One Time" ),
+
+    ("once", "One Time"),
+    ("month", "Per Month" ),
+    ("week", "Per Week" ),
+    ("day", "Per Day" ),
+    ("year", "Per Year"),
+
 
 )
 TIME_METRIC_CHOICES = (
@@ -320,9 +327,9 @@ class NotificationManager(models.Manager):
         return obj
 
 class Notification(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=CASCADE,)
     type = models.CharField(max_length=20, choices=NOTIFICATION_CHOICES)
-    call = models.ForeignKey("Session")
+    call = models.ForeignKey("Session", on_delete=CASCADE,)
 
     objects = NotificationManager()
 
@@ -358,10 +365,10 @@ class Goal(models.Model):
     image = models.CharField(max_length=200, null=True, blank=True)
     votes = models.IntegerField(null=True, blank=True)
     viewableBy = models.CharField(max_length=20, choices=VIEWABLE_CHOICES, default="ONLY_ME")
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=CASCADE,)
     wasAchieved = models.BooleanField(default=False)
     metric = models.CharField(max_length=100, blank=True, null=True)
-    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="215")
+    croppableImage = models.ForeignKey(CroppableImage, on_delete=CASCADE, null=True, blank=True, default="215")
     goalInAlignmentWithCoreValues = models.BooleanField(default=False)
     isThisReasonable = models.BooleanField(default=False)
 
@@ -387,12 +394,12 @@ def date_handler(obj):
     else:
         raise TypeError
 
-
-
+class StripePlan(models.Model):
+    planId = models.CharField(max_length=100, blank=True, default="")
 
 class Program(models.Model):
     title = models.CharField(max_length=200, default=" ")
-    author = models.ForeignKey(User, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=True)
     description = models.CharField(max_length=1000, default=" ")
     image = models.CharField(max_length=200, null=True, blank=True)
     viewableBy = models.CharField(max_length=20, choices=PROGRAM_VIEWABLEBY_CHOICES, default="ONLY_ME")
@@ -404,7 +411,63 @@ class Program(models.Model):
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
     isActive = models.BooleanField(blank=True, default=True)
-    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True, default="217")
+    croppableImage = models.ForeignKey(CroppableImage, on_delete=CASCADE, null=True, blank=True, default="217")
+    stripeProductId = models.CharField(max_length=100, blank=True, default="")
+    stripePlanId = models.CharField(max_length=100, blank=True, default="")
+
+    def save(self, *args, **kwargs):
+        try:
+            product = stripe.Product.retrieve(self.stripeProductId)
+            product.modify(name=self.title)
+            plan = stripe.Plan.retrieve(self.stripePlanId)
+            theInterval = self.costFrequencyMetric
+            theIntervalCount = None
+            if theInterval == 'once':
+                theIntervalCount=1
+                theInterval = 'year'
+
+            if plan.interval != theInterval or amount != int(self.cost.replace('.','')):
+
+                newPlan = stripe.Plan.create(
+                    nickname=self.title + " " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    product=product.id,
+                    amount=int(self.cost.replace('.','')),
+                    currency="usd",
+                    interval=theInterval,
+                    interval_count=None
+                )
+            self.stripePlanId = newPlan.id
+            super(Program, self).save(*args, **kwargs)
+
+        except:
+
+            product = stripe.Product.create(
+                name=self.title,
+                type='service',
+            )
+            self.stripeProductId = product.id
+
+            theInterval = self.costFrequencyMetric
+            theIntervalCount = None
+            if theInterval == 'once':
+                theIntervalCount = 1
+                theInterval = 'year'
+
+            newPlan = stripe.Plan.create(
+                nickname=self.title + " " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                product=product.id,
+                amount=int(str(self.cost).replace('.','')),
+                currency="usd",
+                interval=theInterval,
+                interval_count=theIntervalCount,
+            )
+            self.stripePlanId = newPlan.id
+            super(Program, self).save(*args, **kwargs)
+
+
+
+
+
 
 
 
@@ -458,12 +521,12 @@ class Program(models.Model):
 
 class Step(models.Model):
 
-    program = models.ForeignKey(Program, null=True, blank=True)
+    program = models.ForeignKey(Program, on_delete=CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100, blank=False, default="")
     description = models.CharField(max_length=1000, default="")
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, null=False, default='ONCE')
     image = models.CharField(max_length=200, null=True, blank=True, default="images/stepDefaultImage.svg")
-    croppableImage = models.ForeignKey(CroppableImage, null=True, blank=True)
+    croppableImage = models.ForeignKey(CroppableImage, on_delete=CASCADE, null=True, blank=True)
 
     type = models.CharField(max_length=30, null=False, choices=STEP_TYPE_CHOICES, default='COMPLETION')
 
@@ -557,7 +620,7 @@ class Update(models.Model):
     format = models.CharField(max_length=10, choices=METRIC_FORMAT_CHOICES, default="text")
     metricLabel = models.CharField(max_length=100, default="Please provide an update:")
     steps = models.ManyToManyField(Step, null=True, blank=True, related_name="kiterope_stepupdate")
-    program = models.ForeignKey(Program, null=True, blank=True, )
+    program = models.ForeignKey(Program, on_delete=CASCADE, null=True, blank=True, )
     default = models.BooleanField(default=False)
 
 
@@ -619,9 +682,9 @@ class UpdateOccurrenceManager(models.Manager):
 
 
 class UpdateOccurrence(models.Model):
-    update = models.ForeignKey(Update, null=False, related_name="update")
-    stepOccurrence = models.ForeignKey("StepOccurrence", null=False,  related_name="stepOccurrence")
-    author = models.ForeignKey(User, null=True, blank=True)
+    update = models.ForeignKey(Update, on_delete=CASCADE,null=False, related_name="update")
+    stepOccurrence = models.ForeignKey("StepOccurrence",  on_delete=CASCADE,null=False,  related_name="stepOccurrence")
+    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
 
     time = models.TimeField(null=True, blank=True)
     integer = models.IntegerField(null=True, blank=True)
@@ -675,6 +738,14 @@ class StepOccurrenceManager(models.Manager):
         theUserProfile = Profile.objects.get(user_id=theUserId)
         occurrence = self.create(step_id=aStepId, type=theStep.type, planOccurrence_id=aPlanOccurrenceId,
                                  wasCompleted=False, user_id=theUserId)
+
+
+        currentStepUpdates = Update.objects.filter(steps=aStepId)
+
+        for currentStepUpdate in currentStepUpdates:
+            # print("inside currentStepUpdates")
+            anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(occurrence.id, currentStepUpdate.id)
+
         occurrence.full_clean()
         return occurrence
 
@@ -1236,12 +1307,12 @@ class StepOccurrenceManager(models.Manager):
 
 
 class StepOccurrence(models.Model):
-    step = models.ForeignKey(Step, null=True, blank=True)
+    step = models.ForeignKey(Step, on_delete=CASCADE, null=True, blank=True,)
     type = models.CharField(max_length=30, null=False, choices=STEP_TYPE_CHOICES, default='COMPLETION')
     date = models.DateTimeField(blank=True, null=True)
-    planOccurrence = models.ForeignKey("PlanOccurrence", null=True, blank=True)
+    planOccurrence = models.ForeignKey("PlanOccurrence", on_delete=CASCADE, null=True, blank=True, )
     wasCompleted = models.BooleanField(default=False)
-    user = models.ForeignKey(User, null=True, blank = True)
+    user = models.ForeignKey(User, on_delete=CASCADE, null=True, blank = True)
     posts = models.ManyToManyField('Post', blank=True, )
     previouslySaved = models.BooleanField(default=False)
 
@@ -1269,13 +1340,24 @@ class StepOccurrence(models.Model):
         return updateOccurrences
 
 
+class ContactGroup(models.Model):
+    name = models.CharField(max_length=20, default="")
+    profile = models.ForeignKey('Profile', on_delete=PROTECT, null=True, blank=True, default="")
+    contacts = models.ManyToManyField('Contact', blank=True, )
+    isDefault = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return "%s - %s" % ("",self.name)
 
 
 class Contact(models.Model):
-    sender = models.ForeignKey('Profile', related_name="contact_sender")
-    receiver = models.ForeignKey('Profile', related_name="contact_receiver")
-    relationship = models.CharField(max_length=20, default=" ")
+    sender = models.ForeignKey('Profile', on_delete=CASCADE, related_name="contact_sender")
+    receiver = models.ForeignKey('Profile', on_delete=CASCADE, related_name="contact_receiver")
     wasConfirmed = models.CharField(max_length=20, default=" ", blank=True)
+    contactGroups = models.ManyToManyField('ContactGroup', through=ContactGroup.contacts.through, blank=True)
+
+
 
     def get_senderBio(self):
         return self.sender.bio
@@ -1291,26 +1373,97 @@ class Contact(models.Model):
 
         return theQueryset
 
+    def __str__(self):
+        return "%s %s" % (self.sender.get_fullName(), self.receiver.get_fullName())
+
+    def save(self, *args, **kwargs):
+        super(Contact, self).save(*args, **kwargs)
+        if self.wasConfirmed == 'sender':
+            senderRequestsSentGroup = ContactGroup.objects.get(profile=self.sender, name="Sent Requests")
+            receiverRequestsSentGroup = ContactGroup.objects.get(profile=self.receiver, name="Received Requests")
+            senderRequestsSentGroup.contacts.add(self.id)
+            receiverRequestsSentGroup.contacts.add(self.id)
+        elif self.wasConfirmed == 'both':
+            senderRequestsSentGroup = ContactGroup.objects.get(profile=self.sender, name="Sent Requests")
+            senderRequestsSentGroup.contacts.remove(self)
+            senderAllGroup = ContactGroup.objects.get(profile=self.sender, name="All")
+            senderAllGroup.contacts.add(self.id)
+
+            receiverRequestsSentGroup = ContactGroup.objects.get(profile=self.receiver, name="Received Requests")
+            receiverAllGroup = ContactGroup.objects.get(profile=self.receiver, name="All")
+            receiverRequestsSentGroup.contacts.remove(self)
+            receiverAllGroup.contacts.add(self.id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 class PlanOccurrence(models.Model):
-    program = models.ForeignKey(Program, null=True, blank=True)
-    goal = models.ForeignKey(Goal, null=True, blank=True)
+    program = models.ForeignKey(Program, on_delete=PROTECT, null=True, blank=True)
+    goal = models.ForeignKey(Goal, on_delete=PROTECT, null=True, blank=True)
     startDateTime = models.DateTimeField(blank=True, null=True)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=PROTECT, null=True, blank=True)
     isSubscribed = models.BooleanField(default=False)
 
     notificationEmail = models.EmailField(max_length=70, blank=True)
     notificationPhone = PhoneNumberField(blank=True)
-    notificationMethod = models.CharField(max_length=20, blank=False, default='NO_NOTIFICATIONS', choices=NOTIFICATION_METHOD_CHOICES)
+    notificationMethod = models.CharField(max_length=20, blank=False, default='EMAIL', choices=NOTIFICATION_METHOD_CHOICES)
     notificationSendTime = models.CharField(max_length=10, blank=True, choices=START_TIME_CHOICES)
+    stripePlanId = models.CharField(max_length=100, blank=True, default="")
+    stripeSubscriptionId = models.CharField(max_length=100, blank=True, default="")
+
 
 
     def save(self, *args, **kwargs):
-        super(PlanOccurrence, self).save(*args, **kwargs)
-        if self.isSubscribed == True:
-            self.create_step_occurrence_creator_tasks()
+        if self.isSubscribed == True and self.stripePlanId == "":
+
+            theProgram = Program.objects.get(id=self.program.id)
+            self.stripePlanId = theProgram.stripePlanId
+
+            subscription = stripe.Subscription.create(
+                customer=self.user.profile.stripeCustomerId,
+                items=[
+                    {
+                        "plan": theProgram.stripePlanId,
+                        "quantity": 1,
+                    },
+                ]
+            )
+            self.stripeSubscriptionId = subscription.id
+            super(PlanOccurrence, self).save(*args, **kwargs)
+            createTimeBasedTasks.apply_async(args=[self.id])
+
+            #self.create_step_occurrence_creator_tasks()
+            #self.create_step_occurrence_creator_tasks()
+
+        if self.isSubscribed == False and self.stripeSubscriptionId != "":
+            subscription = stripe.Subscription.retrieve(self.stripeSubscriptionId)
+            subscription.delete()
+
+            super(PlanOccurrence, self).save(*args, **kwargs)
+            #createTimeBasedTasks.apply_async(args=[self.id])
+
+            # self.create_step_occurrence_creator_tasks()
+            #self.create_step_occurrence_creator_tasks()
+
+
+
+
+
+
+
 
 
 
@@ -1338,30 +1491,6 @@ class PlanOccurrence(models.Model):
                     if aStepOccurrenceStartDateTime != aStepOccurrenceEndDateTime:
                         aStepOccurrenceEndDateTime = None
 
-
-                    print(aStep.title)
-                    print("self.startDateTime")
-                    print(self.startDateTime)
-
-                    print("aStep.relativeStartDateTime")
-                    print(aStep.relativeStartDateTime)
-
-
-                    print("aStepOccurrenceStartDateTime")
-                    print(aStepOccurrenceStartDateTime)
-
-                    print("aStepOccurrenceEndDateTime")
-                    print(aStepOccurrenceEndDateTime)
-
-                    print("***********************************")
-
-
-
-                    #task_id = TaskScheduler.schedule(say_hello, description="finally", rrule_string='RRULE:FREQ=SECONDLY;INTERVAL=2')
-
-
-
-
                     task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=aStepOccurrenceStartDateTime,
                                                      until=aStepOccurrenceEndDateTime,
                                                      rrule_string=aStep.recurrenceRule,
@@ -1370,55 +1499,25 @@ class PlanOccurrence(models.Model):
 
 
 
-
+                except:
+                    pass
+            elif aStep.type == 'COMPLETION':
+                try:
+                    StepOccurrence.objects.create_completionBased_occurrence(aStep.id, self.id, self.user.id)
                 except:
                     pass
 
-                '''
-                timeUntilFirstExecution = aStepOccurrenceStartDateTime - datetime.now()
-                crontabKwargs.append({'is_due': (False, timeUntilFirstExecution.seconds)})
 
 
-                if aStep.frequency == "HOURLY":
-                    crontabKwargs.append({'hour': ( '*/%s' % aStep.interval)})
-
-                if aStep.frequency == "DAILY":
-                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.minute})
-                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.hour})
-
-
-                if aStep.frequency == "WEEKLY":
-                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.minute})
-                    crontabKwargs.append({'minute': aStepOccurrenceStartDateTime.hour})
-
-                    theDaysOfWeek = []
-                    if day01:
-                        theDaysOfWeek = theDaysOfWeek.append("1")
-                    if day02:
-                        theDaysOfWeek = theDaysOfWeek.append("2")
-                    if day03:
-                        theDaysOfWeek = theDaysOfWeek.append("3")
-                    if day04:
-                        theDaysOfWeek = theDaysOfWeek.append("4")
-                    if day05:
-                        theDaysOfWeek = theDaysOfWeek.append("5")
-                    if day06:
-                        theDaysOfWeek = theDaysOfWeek.append("6")
-                    if day07:
-                        theDaysOfWeek = theDaysOfWeek.append("0")
-
-                    crontabKwargs.append({'day_of_week' : theDaysOfWeek})
-
-'''
 
 
 
 
 
 class ProgramRequest(models.Model):
-    user = models.ForeignKey(User, null=False, blank=False)
-    goal = models.ForeignKey(Goal, null=False, blank=False)
-    receiver = models.ForeignKey(User, null=True, blank=True, related_name='programRequest_receiver')
+    user = models.ForeignKey(User, on_delete=PROTECT,null=False, blank=False)
+    goal = models.ForeignKey(Goal, on_delete=PROTECT, null=False, blank=False)
+    receiver = models.ForeignKey(User, on_delete=PROTECT, null=True, blank=True, related_name='programRequest_receiver')
 
 
 
@@ -1435,14 +1534,14 @@ class SettingsSet(models.Model):
 
 class Visualization(models.Model):
     name = models.CharField(max_length=50, blank=True, )
-    user = models.ForeignKey(User, null=True, blank=True)
-    step = models.ForeignKey(Step, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=PROTECT, null=True, blank=True)
+    step = models.ForeignKey(Step, on_delete=PROTECT, null=True, blank=True)
     kind = models.CharField(max_length=15, blank=True, choices=VISUALIZATION_CHOICES)
-    dependentVariable = models.ForeignKey(Update, blank=True, null=True, related_name='visualization_dependendentVariable')
-    independentVariable = models.ForeignKey(Update, blank=True, null=True, related_name='visualization_independendentVariable' )
-    mediatorVariable = models.ForeignKey(Update, blank=True, null=True, related_name='visualization_mediatorVariable' )
-    program = models.ForeignKey(Program, null=True, blank=True, )
-    plan = models.ForeignKey("PlanOccurrence", null=True, blank=True)
+    dependentVariable = models.ForeignKey(Update, on_delete=CASCADE, blank=True, null=True, related_name='visualization_dependendentVariable')
+    independentVariable = models.ForeignKey(Update, on_delete=CASCADE, blank=True, null=True, related_name='visualization_independendentVariable' )
+    mediatorVariable = models.ForeignKey(Update, on_delete=CASCADE, blank=True, null=True, related_name='visualization_mediatorVariable' )
+    program = models.ForeignKey(Program, on_delete=CASCADE, null=True, blank=True, )
+    plan = models.ForeignKey("PlanOccurrence", on_delete=CASCADE, null=True, blank=True)
 
     def __str__(self):
         return "Name: %s, Kind: %s, User: %s" % (self.name, self.kind, self.user)
@@ -1483,21 +1582,19 @@ class Visualization(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.CharField(max_length=2000, default=" ", blank=True)
+    bio = models.CharField(max_length=2000, default=" ", blank=True, null=True)
     isCoach = models.BooleanField(default=False)
     firstName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     lastName = models.CharField(max_length=100, default=" ", null=True, blank=True)
     zipCode = models.CharField(max_length=10, blank=True, null=True)
-    image = models.CharField(max_length=200, null=True, blank=True, default="images/user.svg")
-    notificationChannel = models.OneToOneField('KChannel', null=True, blank=True)
+    notificationChannel = models.ForeignKey('KChannel', on_delete=CASCADE, null=True, blank=True)
     expoPushToken = models.CharField(max_length=100, blank=True, null=True)
     timezone = TimeZoneField(blank=True, null=True, default='America/Los_Angeles' )
     utcMidnight = models.CharField(max_length=5, blank=True, null=True, default='00:00')
-    croppableImage = models.ForeignKey(CroppableImage, null=True, default="214")
-
-
-
-
+    croppableImage = models.ForeignKey(CroppableImage, on_delete=PROTECT, null=True, default="214")
+    stripeCustomerId = models.CharField(max_length=100, blank=True, default="")
+    stripeSourceId = models.CharField(max_length=100, blank=True, default="")
+    sourceAttached = models.BooleanField(default=False)
 
     def get_utcMidnight(self):
         try:
@@ -1515,13 +1612,11 @@ class Profile(models.Model):
         return self.utcMidnight
 
 
-
-
-
-
     def get_image(self):
-        return self.croppableImage.image
-
+        try:
+            return self.croppableImage.image
+        except:
+            return ""
 
 
     def get_notificationChannel(self):
@@ -1552,15 +1647,38 @@ class Profile(models.Model):
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            Profile.objects.create(user=instance, firstName=instance.first_name, lastName = instance.last_name)
+            theProfile = Profile.objects.create(user=instance, firstName=instance.first_name, lastName = instance.last_name)
             SettingsSet.objects.create(user=instance, defaultNotificationEmail=instance.email)
+            ContactGroup.objects.create(profile=theProfile, name="All")
+            ContactGroup.objects.create(profile=theProfile, name="Sent Requests")
+            ContactGroup.objects.create(profile=theProfile, name="Received Requests")
+
             Goal.objects.create(user=instance, title="My first goal")
+            customer = stripe.Customer.create(
+                email=self.user.email,
+            )
+            self.stripeCustomerId = customer.id
+            self.save()
 
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
         instance.profile.save()
 
     def save(self, *args, **kwargs):
+        if self.stripeCustomerId == "":
+            customer = stripe.Customer.create(
+                email=self.user.email,
+            )
+            self.stripeCustomerId = customer.id
+        if self.stripeSourceId != "" and self.stripeCustomerId != "" and self.sourceAttached == False:
+            customer = stripe.Customer.retrieve(self.stripeCustomerId)
+            customer.sources.create(source=self.stripeSourceId)
+            self.sourceAttached = True
+
+
+
+
+
         super(Profile, self).save(*args, **kwargs)
         if self.notificationChannel == None:
             self.notificationChannel = KChannel.objects.create_channel([self.user.id], 'ONLYRECEIVER_ANYSENDER')
@@ -1640,7 +1758,7 @@ class Session(models.Model):
     endTime = models.DateTimeField(null=True)
     duration = models.DurationField(null=True)
     type = models.CharField(max_length=20, choices=SESSION_TYPE_CHOICES, default="TRIAL")
-    rate = models.ForeignKey("Rate", blank=True, null=True)
+    rate = models.ForeignKey("Rate", on_delete=PROTECT, blank=True, null=True)
     tokBoxSessionId = models.CharField(max_length=100, blank=True)
     tokBoxToken = models.CharField(max_length=100, blank=True)
 
@@ -1658,7 +1776,7 @@ class Label(models.Model):
     text = models.CharField(max_length=20, blank=False, default = "")
     color = ColorField(default="#2199E8", )
     type = models.CharField(max_length=20, blank=False, default = "")
-    user = models.ForeignKey(User, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete=CASCADE, null=False, blank=False)
 
     def __str__(self):
         return "%s" % (self.text)
@@ -1666,8 +1784,8 @@ class Label(models.Model):
 class Message(models.Model):
     text = models.CharField(max_length=1000, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
-    thread = models.ForeignKey('MessageThread', null=False, blank=False, related_name="messageThread")
-    sender = models.ForeignKey(User, null=False, blank=False, related_name="messageSender")
+    thread = models.ForeignKey('MessageThread', on_delete=CASCADE, null=False, blank=False, related_name="messageThread")
+    sender = models.ForeignKey(User, null=False, on_delete=CASCADE, blank=False, related_name="messageSender")
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     typeOfMessage = models.TextField(choices=NOTIFICATION_CHOICES)
 
@@ -1677,10 +1795,10 @@ class Message(models.Model):
         return "%s" % (self.text)
 
 class KRMessage(models.Model):
-    channel = models.ForeignKey('KChannel', related_name='krmessages')
+    channel = models.ForeignKey('KChannel', on_delete=CASCADE, related_name='krmessages')
     typeOfMessage = models.TextField(choices=NOTIFICATION_CHOICES)
     message = models.TextField()
-    sender = models.ForeignKey(User, null=True, blank=False)
+    sender = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=False)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
@@ -1741,8 +1859,8 @@ class KChannel(models.Model):
 
 
 class KChannelUser(models.Model):
-    channel = models.ForeignKey(KChannel )
-    user = models.ForeignKey(User)
+    channel = models.ForeignKey(KChannel ,on_delete=CASCADE )
+    user = models.ForeignKey(User, on_delete=CASCADE)
 
     def __str__(self):
         return "ChannelLabel: %s %s " % (self.channel.label, self.user)
@@ -1753,10 +1871,10 @@ class KChannelUser(models.Model):
 
 
 class MessageThread(models.Model):
-    sender = models.ForeignKey(User, null=False, blank=False, related_name="sender")
-    receiver = models.ForeignKey(User, null=False, blank=False, related_name="receiver")
+    sender = models.ForeignKey(User, on_delete=CASCADE, null=False, blank=False, related_name="sender")
+    receiver = models.ForeignKey(User, on_delete=CASCADE, null=False, blank=False, related_name="receiver")
     labels = models.ManyToManyField('Label', blank=True, related_name="labels")
-    channel = models.OneToOneField('KChannel', blank=True, null=True)
+    channel = models.OneToOneField('KChannel', on_delete=CASCADE, blank=True, null=True)
 
     def get_latest_message(self):
         try:
@@ -1821,8 +1939,8 @@ class ParticipantManager(models.Manager):
         return obj
 
 class Participant(models.Model):
-    session = models.ForeignKey(Session, null=False)
-    user = models.ForeignKey(User)
+    session = models.ForeignKey(Session, on_delete=CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=CASCADE)
     role = models.CharField(max_length=20, choices=PARTICIPANT_CHOICES)
     joiningTime = models.DateTimeField(null=True, blank=True)
     leavingTime = models.DateTimeField(null=True, blank=True)
@@ -1833,9 +1951,9 @@ class Review(models.Model):
     rating = models.FloatField(null=True)
     description = models.CharField(max_length=1000, null=True)
     title = models.CharField(max_length=80, null=True)
-    author = models.ForeignKey(User, null=True, blank=True, related_name='author')
+    author = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=True, related_name='author')
     isStudentReviewed = models.BooleanField(default=False)
-    reviewedUser = models.OneToOneField(User, null=True, related_name='reviewedUser')
+    reviewedUser = models.OneToOneField(User, on_delete=CASCADE, null=True, related_name='reviewedUser')
     
 
 
@@ -1846,23 +1964,23 @@ class Review(models.Model):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(User, null=True, blank=True)
-    goal = models.ForeignKey(Goal, null=True)
+    author = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=True)
+    goal = models.ForeignKey(Goal, on_delete=CASCADE, null=True)
     comments = models.ManyToManyField('Post', blank=True, )
     text = models.CharField(max_length=2000, null=True)
 
 
 class Question(models.Model):
     text = models.CharField(max_length=2000, default=" ")
-    author = models.ForeignKey(User, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
     needAnswerBy = models.DateTimeField(null=True)
     answers = models.ManyToManyField('Answer', blank=True, related_name='answers')
     media = models.URLField(null=True)
     price = models.IntegerField(null=True)
     
 class Answer(models.Model):
-    question = models.ForeignKey(Question, null=True)
-    author = models.ForeignKey(User, null=True, blank=True)
+    question = models.ForeignKey(Question, on_delete=CASCADE,null=True)
+    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
     text = models.CharField(max_length=2000, default=" ")
     media = models.URLField(null=True)
     votes = models.IntegerField(null=True)
@@ -1875,7 +1993,7 @@ class StudentSettings(models.Model):
 
 
 class BlogPost(models.Model):
-    author = models.ForeignKey(User, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
     title = models.CharField(max_length=200, default=" ")
     description = HTMLField()
     created = models.DateTimeField(editable=False)

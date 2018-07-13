@@ -40,6 +40,7 @@ django-channels-ssl==0.1.1
 django-colorfield==0.1.14
 django-contrib-comments==1.8.0
 django-cors-headers==2.1.0
+django-filter==1.1.0
 django-grappelli==2.9.1
 django-group-by==0.3.1
 django-haystack==2.6.1
@@ -59,7 +60,7 @@ django-tagging==0.4.5
 django-taggit==0.22.1
 django-timezone-field==2.0
 django-tinymce==2.6.0
-django-twilio==0.8.0
+django-twilio==0.9.0
 django-webpack-loader==0.5.0
 django-xmlrpc==0.1.7
 djangorestframework==3.6.3
@@ -94,6 +95,7 @@ jsonfield==2.0.2
 jsonschema==2.6.0
 kombu==4.2.1
 libmagic==1.0
+Markdown==2.6.11
 MarkupSafe==1.0
 mots-vides==2015.5.11
 msgpack-python==0.4.8
@@ -136,12 +138,13 @@ simplejson==3.10.0
 six==1.11.0
 sorl-thumbnail==12.3
 sqlparse==0.2.3
+stripe==1.82.2
 tabulate==0.7.5
 termcolor==1.1.0
 texttable==0.9.1
 tweepy==3.5.0
 twilio==6.3.0
-Twisted==17.5.0
+Twisted==18.4.0
 txaio==2.8.0
 typing==3.6.1
 tzlocal==1.4
@@ -154,4 +157,4 @@ wcwidth==0.1.7
 webencodings==0.5.1
 websocket-client==0.40.0
 winappdbg==1.5
-zope.interface==4.4.1
+zope.interface==4.5.0

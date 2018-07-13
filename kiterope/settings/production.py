@@ -20,6 +20,7 @@ STATICFILES_DIRS = (
     #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
 
+
 # Celery stuff
 LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
 
