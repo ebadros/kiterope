@@ -62,6 +62,7 @@ const mapStateToProps = (state, ownProps) => {
 
     return {
       storeRoot: {
+        domain: state.rootReducer.domain,
         rehydrated:state.rootReducer.rehydrated,
         user: state.rootReducer.user,
         profile: state.rootReducer.profile,

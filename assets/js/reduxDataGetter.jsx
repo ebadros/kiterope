@@ -22,9 +22,8 @@ import {MessageWindowContainer} from './message'
 import { Sidebar, SidebarWithoutClickingOutside } from './sidebar'
 import Global from 'react-global';
 
-import { setCurrentUser, setTimeLastReloaded, setContactGroups, setPublicGoals, setPublicPrograms, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
+import { setCurrentUser, setTimeLastReloaded, setDomain, setContactGroups, setPublicGoals, setPublicPrograms, setPlans,setSignInOrSignupModalData, setRehydrated, setSmartGoalFormData, setDataLoaded, setUpdateOccurrences, setUpdates, setVisualizations, removeStepFromUpdate, addStepToUpdate, editUpdate, reduxLogout, setProfile, setSettings, setForMobile, showSidebar, setContacts, setMessageWindowVisibility, setOpenThreads, setGoals, setPrograms, setMessageThreads,  setStepOccurrences } from './redux/actions'
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
-
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
 //});
@@ -69,6 +68,10 @@ $.ajaxSetup({
 
     }
 });
+
+var d = document.getElementsByClassName('ui fluid purple button').style = {
+    backgroundColor:'black'
+}
 
 
 
@@ -182,6 +185,7 @@ export default class ReduxDataGetter extends React.Component {
 
 
     getAllData() {
+        this.loadDomainData()
 
         store.dispatch(setSmartGoalFormData({modalIsOpen: false, data: {}}))
 this.loadPublicGoalData()
@@ -201,6 +205,49 @@ this.loadPublicGoalData()
             clearInterval(this.state.intervalID);
 
         }
+    }
+
+    /*
+    loadDomainData() {
+
+        console.log("loadDomainData called")
+
+        this.loadSpecificData("domainDataLoaded", "/api/domains/i/", (theData) => {
+            console.log(theData)
+
+            store.dispatch(setDataLoaded('domainData'))
+            store.dispatch(setDomain(theData.data));
+
+
+
+            if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
+                    clearInterval(this.state.intervals[theData.dataLoadedVariable]);
+                }
+
+
+
+
+        })
+    }*/
+
+    loadDomainData () {
+        var theUrl = "/api/domains/i/";
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+
+                store.dispatch(setDataLoaded('domainData'))
+            store.dispatch(setDomain(data));
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+
+            }.bind(this),
+
+        });
     }
 
 
@@ -373,7 +420,6 @@ this.loadPublicGoalData()
 
 
     setUsersTimezone(userProfileId) {
-        console.log("setUsersTimezone")
         var theUrl = '/api/profiles/' + userProfileId + "/";
         var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -481,7 +527,6 @@ this.loadPublicGoalData()
 
 
     loadProgramData() {
-        console.log("loadProgramData")
         this.loadSpecificData("programDataLoaded", "/api/programs/",  (theData) => {
             store.dispatch(setPrograms(theData.data))
             store.dispatch(setDataLoaded('programData'))
@@ -546,7 +591,7 @@ this.loadPublicGoalData()
     }
 
     loadUpdateOccurrenceData() {
-        /*
+
         this.loadSpecificData("updateOccurrenceDataLoaded", "/api/updateOccurrences/",  (theData) => {
             this.formatUpdateOccurrenceData(theData.data)
             store.dispatch(setDataLoaded('updateOccurrenceData'))
@@ -554,7 +599,7 @@ this.loadPublicGoalData()
             if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
             clearInterval(this.state.intervals[theData.dataLoadedVariable]);
         }
-        })*/
+        })
     }
 
 

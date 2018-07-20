@@ -379,6 +379,23 @@ export const mobileModalStyleHigher = {
   }
 };
 
+export const kiteropeColors = {
+    color1bg:'#2199E8',
+    color1txt: '#FFFFFF',
+    color2bg:'#A333C8',
+    color2txt:'#FFFFFF',
+    color3bg:'#06D6A0',
+    color3txt:'#FFFFFF',
+    color4bg:'#eb3b49',
+    color4txt:'#FFFFFF',
+
+
+
+}
+
+export const kiteropeMobileLogo = "https://s3-us-west-1.amazonaws.com/kiterope-static/icons/kiterope_k_logo_v01.png"
+    export const kiteropeDesktopLogo = "/static/images/kiterope_logo_v01.png"
+
 export const stepModalStyle = {
     overlay : {
 
@@ -539,6 +556,8 @@ function printObject(o) {
   alert(out);
 }
 
+
+
 export const selectImageStyle = {
              overflow: 'hidden',
              display: 'block',
@@ -575,5 +594,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   mobileModalStyle, smallDesktopModalStyle, cardPaymentModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   kiteropeColors, kiteropeMobileLogo, kiteropeDesktopLogo, mobileModalStyle, smallDesktopModalStyle, cardPaymentModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

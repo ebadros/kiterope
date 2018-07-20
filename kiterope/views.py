@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from kiterope.models import Goal, Program, Step, Label, Message, Contact, ContactGroup, ProgramRequest, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
+from kiterope.models import Goal, Program, Step, Label, Message, Domain, Contact, ContactGroup,  ProgramRequest, CroppableImage, SettingsSet, Visualization, KChannel, MessageThread, SearchQuery, BlogPost, KChannelUser, Participant, KChannelManager, Notification, Session, Review, Profile, Update, Rate, Question, Answer, Interest, StepOccurrence, PlanOccurrence, UpdateOccurrence, UpdateOccurrenceManager, StepOccurrenceManager
 import datetime, time
 from time import mktime
 from datetime import datetime
@@ -16,6 +16,7 @@ from django.core.mail import EmailMessage
 #from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from urllib.parse import urlparse
 
 #from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
@@ -67,7 +68,7 @@ from kiterope.helpers import formattime
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from kiterope.serializers import UserSerializer, ContactGroupSerializer, ProgramNoStepsSerializer,  ContactProfileSerializer, PlanProgramSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
+from kiterope.serializers import UserSerializer, ContactGroupSerializer, DomainSerializer,  ProgramNoStepsSerializer,   ContactProfileSerializer, PlanProgramSerializer, ProgramVisualizationSerializer, ProgramRequestSerializer, PublicGoalSerializer, AllProgramSerializer, CroppableImageSerializer, VisualizationSerializer, ContactSerializer,  SettingsSetSerializer, BlogPostSerializer, BrowseableProgramSerializer, KChannelSerializer, LabelSerializer, MessageSerializer, MessageThreadSerializer, SearchQuerySerializer, NotificationSerializer, UpdateOccurrenceSerializer, UpdateSerializer, ProfileSerializer, GoalSerializer, ProgramSerializer, StepSerializer, StepOccurrenceSerializer, PlanOccurrenceSerializer
 
 from kiterope.serializers import SessionSerializer, UpdateSerializer, ProgramSearchSerializer, RateSerializer, InterestSerializer
 
@@ -155,6 +156,63 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(UserSerializer(request.user, context={'request': request}).data)
 
         return super(UserViewSet, self).retrieve(request, pk)
+
+'''
+class ClientViewSet(viewsets.ModelViewSet):
+    model=Client
+    queryset = Client.objects.all().order_by('-date_joined')
+
+    serializer_class = ClientSerializer
+    permission_classes = [AllowAny]
+    required_scopes = ['groups']
+
+    def retrieve(self, request, pk=None):
+
+
+        if pk == 'i':
+            print("the client is")
+
+            url = request.META['HTTP_HOST']
+
+            parse = urlparse(url)
+
+            print(parse.path.split('.')[0])
+            #send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
+
+            return Response(ClientSerializer(request.tenant, context={'request': request}).data)
+
+        return super(ClientViewSet, self).retrieve(request, pk)
+'''
+
+class DomainViewSet(viewsets.ModelViewSet):
+    model=Domain
+    queryset = Domain.objects.all()
+
+    serializer_class = DomainSerializer
+    permission_classes = [CustomAllowAny]
+    required_scopes = ['groups']
+
+    def retrieve(self, request, pk=None):
+
+        if pk == 'i':
+            print("the domain is")
+
+            url = request.META['HTTP_HOST']
+
+            parse = urlparse(url)
+
+            print(parse.path.split('.')[0])
+            try:
+                theDomain = Domain.objects.get(subdomain=parse.path.split('.')[0])
+            #send_push_message('ExponentPushToken[2BErIjItiQadkO-bFdABGR]',"did you get this?")
+
+            except:
+                theDomain = Domain.objects.get(id=2)
+
+            return Response(DomainSerializer(theDomain, context={'request': request}).data)
+
+        return super(DomainViewSet, self).retrieve(request, pk)
+
 
 class ExpoPushTokenViewSet(viewsets.ModelViewSet):
     model = Profile
@@ -676,17 +734,6 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        print(self.request.data)
-
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        #return Response(serializer.data, context={'request': request})
-
-        return Response(serializer.data)
 
 
 
@@ -702,7 +749,7 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
 
 
 
-    '''def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         print(self.request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -712,7 +759,7 @@ class PlanOccurrenceViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
 
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)'''
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 
@@ -873,8 +920,10 @@ class UpdateViewSet(viewsets.ModelViewSet):
         try:
             self.request.user.is_authenticated()
             currentUser = self.request.user
+            currentUserIsAuthor = Q(program__author=currentUser)
+            isDefaultUpdate = Q(default=True)
 
-            aQueryset = Update.objects.filter(program__author=currentUser )
+            aQueryset = Update.objects.filter(currentUserIsAuthor | isDefaultUpdate )
         except:
             aQueryset = Update.objects.none()
 
@@ -895,6 +944,7 @@ class UpdateViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        print(request.data)
 
         serializer.is_valid(raise_exception=True)
 
@@ -1475,7 +1525,7 @@ class SettingsSetViewSet(viewsets.ModelViewSet):
 
 
 
-
+'''
 class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
@@ -1486,6 +1536,7 @@ class ClientViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         theUser = self.request.user
         return Profile.objects.filter(coach=theUser.id)
+        '''
 
 
 
@@ -1737,6 +1788,19 @@ def testMe(request):
     #for theContactGroup in contactGroups:
     #    theContactGroup.isDefault = True
     #    theContactGroup.save()
+
+    #defaultIsTrue = Q(default=True)
+    #currentStepUpdates = Update.objects.filter(defaultIsTrue).count()
+    #print("here I am")
+    #print(currentStepUpdates)
+
+    #for currentStepUpdate in currentStepUpdates:
+        #print(currentStepUpdate)
+        #anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
+    #stepOccurrenceNotPreviouslySaved = Q(stepOccurrence__previouslySaved=False)
+    #fiveDaysAgo = Q(stepOccurrence__date__lt=datetime.datetime.today())
+    #timeBased = Q(stepOccurrence__type="TIME")
+    #UpdateOccurrence.objects.filter(timeBased & fiveDaysAgo & stepOccurrenceNotPreviouslySaved).delete
 
     #currentProfiles = Profile.objects.all()
     #for theCurrentProfile in currentProfiles:

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from kiterope.models import Goal, SearchQuery, Label, Contact, Visualization, ContactGroup, ProgramRequest, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
+from kiterope.models import Goal, SearchQuery, Label, Contact,  Visualization, Domain, ContactGroup, ProgramRequest, SettingsSet, CroppableImage, Message, BlogPost, KRMessage, MessageThread, KChannel, Program, Step, Profile, Update, Participant, Notification, Session, Review, Answer, Question, Rate, Interest, StepOccurrence, PlanOccurrence, Metric, UpdateOccurrence
 from rest_framework import serializers
 
 from drf_haystack.serializers import HaystackSerializer
@@ -292,6 +292,8 @@ class UpdateSerializer(serializers.ModelSerializer):
     #steps = StepLimitedSerializer(many=True, read_only=True)
     steps_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Step.objects.all(), source='steps')
     program = serializers.PrimaryKeyRelatedField(many=False, required=False, queryset=Program.objects.all())
+    default = serializers.BooleanField(required=False)
+
 
 
 class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
@@ -878,7 +880,7 @@ class ProgramVisualizationSerializer(serializers.HyperlinkedModelSerializer):
 class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions', 'isActive', 'visualizations', 'croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'permissions', 'isActive',  'croppableImage', 'croppableImageData', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment',  )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -897,7 +899,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
     croppableImageData = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField(required=False, read_only=True)
-    visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+    #visualizations = serializers.SerializerMethodField(required=False, read_only=True)
 
 
     def get_visualizations(self, obj):
@@ -1004,7 +1006,7 @@ class AllProgramSerializer(serializers.HyperlinkedModelSerializer):
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Program
-        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive', 'permissions', 'croppableImage', 'croppableImageData','visualizations', 'updates', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
+        fields = ('id','image', 'title', 'author', 'description',  'viewableBy', 'isActive', 'permissions', 'croppableImage', 'croppableImageData', 'updates', 'category','scheduleLength', 'startDateTime', 'isSubscribed', 'cost', 'costFrequencyMetric', 'userPlanOccurrenceId', 'timeCommitment', 'steps', )
 
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
@@ -1024,7 +1026,7 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     isSubscribed = serializers.SerializerMethodField(required=False, read_only=True)
     userPlanOccurrenceId = serializers.SerializerMethodField(required=False, read_only=True)
     updates = serializers.SerializerMethodField(required=False, read_only=True)
-    visualizations = serializers.SerializerMethodField(required=False, read_only=True)
+    #visualizations = serializers.SerializerMethodField(required=False, read_only=True)
     croppableImage = serializers.PrimaryKeyRelatedField(many=False, queryset=CroppableImage.objects.all())
 
     croppableImageData = serializers.SerializerMethodField()
@@ -1144,7 +1146,12 @@ class ProgramSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
-
+'''
+class ClientSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Client
+        fields = ('id', 'domain_url', 'schema_name',  'name', )
+'''
 
 class CroppableImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -1168,13 +1175,9 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
         model = PlanOccurrence
         fields=('id', 'program', 'goal', 'programInfo', 'programTitle', 'startDateTime', 'user', 'isSubscribed', 'notificationEmail', 'notificationPhone', 'notificationMethod', 'notificationSendTime', )
 
-    #program = serializers.PrimaryKeyRelatedField(many=False, queryset=Program.objects.all())
     program = serializers.PrimaryKeyRelatedField(required=True, many=False, queryset=Program.objects.all())
     programInfo = serializers.SerializerMethodField()
     programTitle = serializers.SerializerMethodField()
-
-
-
     goal = serializers.PrimaryKeyRelatedField(many=False, required=False, queryset=Goal.objects.all())
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     isSubscribed = serializers.BooleanField()
@@ -1191,7 +1194,10 @@ class PlanOccurrenceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-
+class DomainSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Domain
+        fields=('id', 'subdomain', 'name', 'desktopLogo', 'mobileLogo', 'color1bg', 'color2bg', 'color3bg', 'color4bg', 'color1txt','color2txt','color3txt','color4txt',)
 
 
 

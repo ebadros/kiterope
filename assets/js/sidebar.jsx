@@ -181,7 +181,7 @@ export class SidebarWithoutClickingOutside extends React.Component {
 
                 return (
                     <div ref="ref_sidebar2"
-                         className={`ui right vertical inverted labeled ${isVisible} icon large sidebar menu`}
+                         className={`ui right vertical inverted labeled ${isVisible} icon sidebar menu`}
                          style={style}>
                         <a className="item"  style={style} onClick={this.handleClose}>
                             <i className="large close icon"></i>

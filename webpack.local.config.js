@@ -47,12 +47,16 @@ module.exports = {
       'window.$':'jquery',
     })
   ],
+    cssx: {
+    minify: false
+  },
 
   module: {
     loaders: [
       { test: /\.jsx?$/,
         exclude: /node_modules/,
-        loaders: ['react-hot','babel-loader']},
+        loaders: ['react-hot','babel-loader',]},
+
         //query:
       //{
         //presets:['react','es2015',  'stage-2'],
@@ -61,6 +65,11 @@ module.exports = {
       //}},
       { test: /\.css$/, loader: "style-loader!css-loader" },
         {test: /\.json$/, loader: 'json-loader'}
+        {
+        test: /(\.js)$/,
+        loader: 'cssx-loader',
+        exclude: /node_modules/
+      }
 // to transform JSX into JS
     ],
   },

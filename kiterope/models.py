@@ -59,7 +59,7 @@ rruleFrequencies = (
 
 )
 '''
-
+#from tenant_schemas.models import TenantMixin
 
 TIME_COMMITMENT_CHOICES = (
 ("10m", "10 minutes per day"),
@@ -394,6 +394,43 @@ def date_handler(obj):
     else:
         raise TypeError
 
+
+'''
+class Client(TenantMixin):
+    name = models.CharField(max_length=100)
+    paid_until =  models.DateField()
+    on_trial = models.BooleanField()
+    created_on = models.DateField(auto_now_add=True)
+
+    # default true, schema will be automatically created and synced when it is saved
+    auto_create_schema = True
+tenant = Client(domain_url='localhost', # don't add your port or www here! on a local server you'll want to use localhost here
+                schema_name='public',
+                name='Kiterope',
+                paid_until='2016-12-05',
+                on_trial=False)
+                '''
+
+class Domain(models.Model):
+    subdomain = models.CharField(max_length=255, blank=False, null=False)
+    desktopLogo = models.CharField(max_length=255, default="")
+    mobileLogo = models.CharField(max_length=255, default="")
+    name = models.CharField(max_length=255, default="")
+    color1bg = ColorField(default='#FF0000')
+    color2bg = ColorField(default='#FF0000')
+    color3bg = ColorField(default='#FF0000')
+    color4bg = ColorField(default='#FF0000')
+    color1txt = ColorField(default='#FFFFFF')
+    color2txt = ColorField(default='#FFFFFF')
+    color3txt = ColorField(default='#FFFFFF')
+    color4txt = ColorField(default='#FFFFFF')
+    adminUser = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=True)
+    users = models.ManyToManyField(User, blank=True, related_name='users')
+
+
+
+
+
 class StripePlan(models.Model):
     planId = models.CharField(max_length=100, blank=True, default="")
 
@@ -615,10 +652,10 @@ class Step(models.Model):
 
 class Update(models.Model):
     name = models.CharField(max_length=60, blank=True)
-    measuringWhat = models.CharField(max_length=30, default="emotions and thoughts")
-    units = models.CharField(max_length=10, null=True, blank=True, default=" ")
-    format = models.CharField(max_length=10, choices=METRIC_FORMAT_CHOICES, default="text")
-    metricLabel = models.CharField(max_length=100, default="Please provide an update:")
+    measuringWhat = models.CharField(max_length=50, default="")
+    units = models.CharField(max_length=30, null=True, blank=True, default=" ")
+    format = models.CharField(max_length=30, choices=METRIC_FORMAT_CHOICES, default="text")
+    metricLabel = models.CharField(max_length=100, default=" ")
     steps = models.ManyToManyField(Step, null=True, blank=True, related_name="kiterope_stepupdate")
     program = models.ForeignKey(Program, on_delete=CASCADE, null=True, blank=True, )
     default = models.BooleanField(default=False)
@@ -632,9 +669,10 @@ class Update(models.Model):
     def create_step_default_updates(sender, instance, created, **kwargs):
         if created:
             ThroughModel = Update.steps.through
-            defaultUpdates = Update.objects.filter(program=instance.program, default=True )
+            defaultUpdates = Update.objects.filter(program=instance.program, default=True)
             for defaultUpdate in defaultUpdates:
                 ThroughModel.objects.bulk_create([ThroughModel(step_id=instance.pk, update_id=defaultUpdate.pk)])
+
 
 
     @receiver(post_save, sender=Program)
@@ -643,12 +681,13 @@ class Update(models.Model):
             completionUpdate = Update.objects.create(measuringWhat="Completion", format="boolean",metricLabel="Was the step completed?", program=instance, default=True)
             absoluteDateTimeUpdate = Update.objects.create(measuringWhat="Absolute Date/Time", format="datetime", metricLabel="What was the absolute start date?", program=instance,default=True)
             relativeDateTimeUpdate = Update.objects.create(measuringWhat="Relative Date/Time", units="days", format="integer", metricLabel="What was the date in relation to plan start date?", program=instance, default=True)
-
-
-
-
-
-
+        elif Update.objects.filter(default=True).count() == 0:
+            print("no updates")
+            theDefaultUpdates = Update.objects.filter(default=True)
+            for anUpdate in theDefaultUpdates:
+                anUpdate.program = instance
+                anUpdate.save()
+    # TODO:Only one set of standard default updates should be shared across all programs/steps
 
 class UpdateOccurrenceManager(models.Manager):
 
@@ -683,7 +722,7 @@ class UpdateOccurrenceManager(models.Manager):
 
 class UpdateOccurrence(models.Model):
     update = models.ForeignKey(Update, on_delete=CASCADE,null=False, related_name="update")
-    stepOccurrence = models.ForeignKey("StepOccurrence",  on_delete=CASCADE,null=False,  related_name="stepOccurrence")
+    stepOccurrence = models.ForeignKey("StepOccurrence",  on_delete=CASCADE, null=False,  related_name="stepOccurrence")
     author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
 
     time = models.TimeField(null=True, blank=True)
@@ -1045,6 +1084,7 @@ class StepOccurrenceManager(models.Manager):
             send_text_notification(phoneNumber, linkToStepOccurrence)
 
         '''
+        print("returning occurrence")
         return occurrence
 
 
@@ -1427,6 +1467,8 @@ class PlanOccurrence(models.Model):
 
 
     def save(self, *args, **kwargs):
+        print("save called")
+        print(self.goal)
         if self.isSubscribed == True and self.stripePlanId == "":
 
             theProgram = Program.objects.get(id=self.program.id)
@@ -1445,10 +1487,11 @@ class PlanOccurrence(models.Model):
             super(PlanOccurrence, self).save(*args, **kwargs)
             createTimeBasedTasks.apply_async(args=[self.id])
 
+
             #self.create_step_occurrence_creator_tasks()
             #self.create_step_occurrence_creator_tasks()
 
-        if self.isSubscribed == False and self.stripeSubscriptionId != "":
+        elif self.isSubscribed == False and self.stripeSubscriptionId != "":
             subscription = stripe.Subscription.retrieve(self.stripeSubscriptionId)
             subscription.delete()
 
@@ -1457,6 +1500,8 @@ class PlanOccurrence(models.Model):
 
             # self.create_step_occurrence_creator_tasks()
             #self.create_step_occurrence_creator_tasks()
+        else:
+            super(PlanOccurrence, self).save(*args, **kwargs)
 
 
 
@@ -1556,7 +1601,8 @@ class Visualization(models.Model):
             independentVariableIsUpdate = Q(update=self.independentVariable)
             mediatorVariableIsUpdate = Q(update=self.mediatorVariable)
             userIsProgramAuthor = Q(update__program__author=currentUser)
-            return UpdateOccurrence.objects.filter((dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate) & userIsProgramAuthor )
+            stepOccurrencePreviouslySaved = Q(stepOccurrence__previouslySaved = True)
+            return UpdateOccurrence.objects.filter(userIsProgramAuthor).filter( dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate)
 
         elif self.plan:
             # Return all update occurrences owned by a user associated with a specific plan
@@ -1567,7 +1613,7 @@ class Visualization(models.Model):
             independentVariableIsUpdate = Q(update=self.independentVariable)
             mediatorVariableIsUpdate = Q(update=self.mediatorVariable)
             userOwnsPlan = Q(author=currentUser)
-            return UpdateOccurrence.objects.filter((dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate) & userOwnsPlan)
+            return UpdateOccurrence.objects.filter(userOwnsPlan).filter(dependentVariableIsUpdate | independentVariableIsUpdate | mediatorVariableIsUpdate)
 
         else:
             # Return all update occurrences owned by a user

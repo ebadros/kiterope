@@ -9,13 +9,13 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import { ValidatedInput } from './app'
+import { ValidatedInput, KSSelect } from './app'
 import { IconLabelCombo } from './elements'
 
 import Modal from 'react-modal'
 import autobind from 'class-autobind'
 import Select from 'react-select'
-
+import {StandardInteractiveButton } from './settings'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
@@ -290,7 +290,10 @@ export class UpdateModalForm extends React.Component {
             steps_ids:[],
             stepId:"",
             nonDefaultProgramUpdates: [],
-            updateModalData:{}
+            updateModalData:{},
+            serverErrors:{},
+            saved:"Save"
+
 
 
         }
@@ -396,6 +399,14 @@ export class UpdateModalForm extends React.Component {
 
     }
 
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
+        }
+    }
+
     openModal() {
         this.setState({
             modalIsOpen: true
@@ -459,35 +470,48 @@ export class UpdateModalForm extends React.Component {
 
 
     handleNameChange(value) {
-        this.setState({name: value});
+        this.setState({
+            name: value,
+            saved:"Save",
+
+        });
 
     }
 
     handleMeasuringWhatChange(value) {
-        this.setState({measuringWhat: value});
+        this.setState({measuringWhat: value,
+            saved:"Save",});
     }
 
     handleMetricLabelChange(value) {
 
-        this.setState({metricLabel: value});
+        this.setState({metricLabel: value,
+            saved:"Save",});
     }
 
     handleUnitsChange(value) {
 
-        this.setState({units: value});
+        this.setState({units: value,
+            saved:"Save",});
     }
 
     handleFormatChange(option) {
 
-        this.setState({format: option.value});
+        this.setState({format: option.value,
+            saved:"Save",});
     }
 
     handleExistingUpdateChange(option) {
 
-        this.setState({existingUpdate: option.value});
+        this.setState({existingUpdate: option.id,
+            saved:"Save",});
     }
 
-    handleSubmit(e) {
+    handleSubmit() {
+        console.log("inside handle Submit")
+        this.setState({
+            saved:"Saving..."
+        })
         var name = this.state.name;
         var measuringWhat = this.state.measuringWhat;
         var metricLabel = this.state.metricLabel;
@@ -521,9 +545,7 @@ export class UpdateModalForm extends React.Component {
 
 ////FIGURE OUT HOW TO EDIT AN UPDATE WITHOUT THE OTHER UPDATES NOT DISAPPEARING
 
-        // If this is an entirely new update that's been created from scratch
-        if (this.state.existingUpdate == "CREATE_NEW") {
-            this.submitToServer({
+        var theUpdate = {
                     name: name,
                     measuringWhat: measuringWhat,
                     metricLabel: metricLabel,
@@ -532,24 +554,23 @@ export class UpdateModalForm extends React.Component {
                     steps_ids: steps_ids,
                     program: program
 
-                },
-                this.finishSubmit());
+                }
+        for (var key in theUpdate) {
+            if (theUpdate[key] == "") {
+                delete theUpdate[key]
+
+            }
+        }
+
+        // If this is an entirely new update that's been created from scratch
+        if (this.state.existingUpdate == "CREATE_NEW") {
+            this.submitToServer(theUpdate);
         }
         // If this is an existing update that's being revised for all steps
         // TODO: make sure there's a dialog that pops up that lets everyone know that this is going to change all of them
         else if (this.state.id != "") {
-            this.submitToServer({
-                id: this.state.id,
-                name: name,
-                measuringWhat: measuringWhat,
-                metricLabel: metricLabel,
-                units: units,
-                format: format,
-                steps_ids: steps_ids,
-                program: program
-
-
-            }, this.finishSubmit());
+            theUpdate['id'] = this.state.id
+            this.submitToServer(theUpdate);
         }
         // If this is an existing update that's just being added to a specific step
         else {
@@ -559,7 +580,7 @@ export class UpdateModalForm extends React.Component {
                 program: program
 
 
-            }, this.finishSubmit());
+            });
         }
 
 
@@ -594,6 +615,8 @@ export class UpdateModalForm extends React.Component {
                      else {
                          store.dispatch(addUpdate(data))
                      }
+                     this.finishSubmit()
+
 
 
                      //this.props.updateAdded(data);
@@ -612,6 +635,29 @@ export class UpdateModalForm extends React.Component {
          }
 
     finishSubmit = () => {
+        this.state = {
+            id: "",
+            currentView: "",
+            editable: false,
+            serverErrors: "",
+            data: "",
+            modalIsOpen: false,
+            name: "",
+            units: "",
+            metricLabel: "",
+            measuringWhat: "",
+            format: "",
+            updateData: "",
+            programUpdates: [],
+            existingUpdate:"",
+            steps_ids:[],
+            stepId:"",
+            nonDefaultProgramUpdates: [],
+            updateModalData:{},
+            serverErrors:{}
+
+
+        }
         this.closeModal();
         //this.props.reloadItem()
     };
@@ -655,9 +701,19 @@ export class UpdateModalForm extends React.Component {
                                     <div className="sixteen wide column">
                                         <div className="field">
                                             <label htmlFor="format">Choose an Update:</label>
-                                            <Select value={this.state.existingUpdate} valueKey="id" labelKey="name"
+                                            {/*<Select value={this.state.existingUpdate} valueKey="id" labelKey="name"
                                                     onChange={this.handleExistingUpdateChange} name="existingUpdate"
-                                                    options={ this.state.nonDefaultProgramUpdates} clearable={false}/>
+                                                    options={ this.state.nonDefaultProgramUpdates} clearable={false}/>*/}
+
+                                            <KSSelect value={this.state.existingUpdate}
+                                                      valueKey="id"
+                                                      labelKey="name"
+                                                      valueChange={this.handleExistingUpdateChange}
+                                                      name="existingUpdate"
+                                                      options={this.state.nonDefaultProgramUpdates}
+                                                      serverErrors={this.getServerErrors("existingUpdate")}
+                                                      isClearable={false}
+                                            />
 
 
                                         </div>
@@ -682,6 +738,7 @@ export class UpdateModalForm extends React.Component {
                                             validators='"!isEmpty(str)"'
                                             onChange={this.validate}
                                             stateCallback={this.handleNameChange}
+                                            serverErrors={this.getServerErrors("name")}
                                         />
 
                                     </div>
@@ -701,6 +758,7 @@ export class UpdateModalForm extends React.Component {
                                             validators='"!isEmpty(str)"'
                                             onChange={this.validate}
                                             stateCallback={this.handleMeasuringWhatChange}
+                                            serverErrors={this.getServerErrors("measuringWhat")}
                                         />
                                     </div>
                                 </div>
@@ -719,6 +777,7 @@ export class UpdateModalForm extends React.Component {
                                             validators='"!isEmpty(str)"'
                                             onChange={this.validate}
                                             stateCallback={this.handleUnitsChange}
+                                            serverErrors={this.getServerErrors("units")}
                                         />
 
                                     </div>
@@ -730,8 +789,15 @@ export class UpdateModalForm extends React.Component {
                                     <div className="sixteen wide column">
                                         <div className="field">
                                             <label htmlFor="format">What type of input?</label>
-                                            <Select value={this.state.format} onChange={this.handleFormatChange}
-                                                    name="format" options={metricFormatOptions} clearable={false}/>
+                                            {/*<Select value={this.state.format} onChange={this.handleFormatChange}
+                                                    name="format" options={metricFormatOptions} clearable={false}/>*/}
+                                            <KSSelect value={this.state.format}
+                                                      valueChange={this.handleFormatChange}
+                                                      name="format"
+                                                      options={metricFormatOptions}
+                                                      serverErrors={this.getServerErrors("format")}
+                                                      isClearable={false}
+                                            />
 
 
                                         </div>
@@ -752,6 +818,7 @@ export class UpdateModalForm extends React.Component {
                                             validators='"!isEmpty(str)"'
                                             onChange={this.validate}
                                             stateCallback={this.handleMetricLabelChange}
+                                            serverErrors={this.getServerErrors("metricLabel")}
                                         />
                                     </div>
                                 </div>
@@ -768,8 +835,11 @@ export class UpdateModalForm extends React.Component {
                                             <div className="ui fluid button" onClick={this.closeModal}>Cancel</div>
                                         </div>
                                         <div className="ui  column">
-                                            <div className="ui primary fluid button" onClick={this.handleSubmit}>Save
-                                            </div>
+
+
+                                            <StandardInteractiveButton color="purple" initial="Save" processing="Saving..." completed="Saved" current={this.state.saved} clicked={this.handleSubmit}  />
+
+
                                         </div>
                                         <div className="ui row">&nbsp;</div>
                                     </div>
@@ -968,6 +1038,8 @@ openModal() {
         }
 
     }
+
+
 
 
     getAdditionalUI() {

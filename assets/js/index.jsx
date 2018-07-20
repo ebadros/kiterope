@@ -65,6 +65,8 @@ import {
     costFrequencyMetricOptions
 } from './constants'
 import {TermsOfServicePage} from './tos'
+import { StyleCacheProvider } from 'react-css-component'
+import PropTypes from 'prop-types'
 
 function requireAuth(nextState, replace) {
     if (!auth.loggedIn()) {
@@ -83,6 +85,8 @@ function requireAuth(nextState, replace) {
 
 
 ReactDOM.render((
+      <StyleCacheProvider>
+
     <Provider store={store}>
 
         <Router history={history}>
@@ -151,6 +155,6 @@ ReactDOM.render((
 
 
             </div>
-        </Router></Provider>), document.getElementById('react-app')
+        </Router></Provider></StyleCacheProvider>), document.getElementById('react-app')
 );
 

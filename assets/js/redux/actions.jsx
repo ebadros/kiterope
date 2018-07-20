@@ -83,6 +83,13 @@ export const setCurrentUser = (theUser) => {
     }
 };
 
+export const setDomain = (theDomain) => {
+    return {
+        type: 'SET_DOMAIN',
+        domain: theDomain
+    }
+};
+
 export const setProfile = (theProfile) => {
     return {
         type: 'SET_PROFILE',
@@ -328,6 +335,8 @@ export const removeStepFromUpdate = (theUpdateId, theStepId) => {
         stepId: theStepId,
     }
 }
+
+
 
 export const addStepToUpdate = (theUpdateId, theStepId) => {
     return {
@@ -677,4 +686,4 @@ export const setSelectedContactGroup = (theContactGroup) => {
 
 
 
-module.exports = { replaceContact, setSelectedContactGroup, deleteDataItem, setDataLoaded, setContactGroupModalData, addContactGroup, setContactGroups, setInitialCurrentFormValues, setPlanModalData, setCurrentFormValue, submitEvent, clearModalData, setModalFormData, setGoalSearchQuery, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicPrograms, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };
+module.exports = { replaceContact,  setDomain, setSelectedContactGroup, deleteDataItem, setDataLoaded, setContactGroupModalData, addContactGroup, setContactGroups, setInitialCurrentFormValues, setPlanModalData, setCurrentFormValue, submitEvent, clearModalData, setModalFormData, setGoalSearchQuery, updateDataItem, addDataItem, setProgramRequestModalData, setSubscriptionModalData, setTimeLastReloaded, setPublicPrograms, setPublicGoals, setRehydrated, setDisplayAlert, setSignInOrSignupModalData, setGoalModalData, setSmartGoalFormData, setProfileModalData, updateProfile, clearTempProfile, clearTempStep,  updateUpdateOccurrence, updateStepOccurrence, setUpdateOccurrences, setProgramModalData,  setVisualizations, setUpdateModalData, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, addUpdateWithoutStep, setStepModalData, setUpdates, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, updateGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences };

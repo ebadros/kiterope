@@ -43,6 +43,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
+router.register(r'domains', views.DomainViewSet)
+
 router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 
 
@@ -118,7 +120,7 @@ router.register(r'^stepOccurrences', views.StepOccurrenceViewSet, base_name='Ste
 router.register(r'^updateOccurrences', views.UpdateOccurrenceViewSet, base_name='UpdateOccurrence')
 
 
-router.register(r'^clients', views.ClientViewSet, base_name='Profile')
+#router.register(r'^clients', views.ClientViewSet, base_name='Profile')
 router.register(r'^settings', views.SettingsSetViewSet, base_name='SettingsSet')
 
 

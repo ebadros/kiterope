@@ -52,8 +52,10 @@ STRIPE_LIVE_MODE = False
 
 
 # Application definition
+'''
+SHARED_APPS = [
+    'tenant_schemas',
 
-INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -88,7 +90,83 @@ INSTALLED_APPS = [
     'django_twilio',
     'phonenumber_field',
     'django_celery_beat',
-    'django_seo_js'
+    'django_seo_js',
+
+
+]
+'''
+
+'''TENANT_APPS = [
+    'django.contrib.contenttypes',
+    'scheduler',
+    'kiterope',
+    'storages',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'tinymce',
+    'colorfield',
+    'recurrence',
+    'sorl.thumbnail',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_auth.registration',
+    'haystack',
+    #'oauth2_provider', #django-oauth-toolkit
+    'corsheaders',
+    'timezone_field',
+    'webpack_loader',
+    'rest_framework_swagger',
+    'channels',
+    'django_twilio',
+    'phonenumber_field',
+    'django_celery_beat',
+    'django_seo_js',
+
+
+]'''
+
+#DEFAULT_FILE_STORAGE = 'tenant_schemas.storage.TenantFileSystemStorage'
+
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'scheduler',
+    'kiterope',
+    'storages',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'tinymce',
+    'colorfield',
+    'recurrence',
+
+    #'allauth.socialaccount.providers.google',
+    #'allauth.socialaccount.providers.linkedin_oauth2',
+    #'allauth.socialaccount.providers.facebook',
+    'sorl.thumbnail',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_auth.registration',
+    'haystack',
+    #'oauth2_provider', #django-oauth-toolkit
+    'corsheaders',
+    'timezone_field',
+    'webpack_loader',
+    'rest_framework_swagger',
+    'channels',
+    'django_twilio',
+    'phonenumber_field',
+    'django_celery_beat',
+    'django_seo_js',
 
 
 ]
@@ -233,6 +311,8 @@ DATABASES = {
     }
 }
 
+
+
 WSGI_APPLICATION = 'kiterope.wsgi.application'
 
 
@@ -291,7 +371,10 @@ DEBUG_TOOLBAR_PANELS = [
 
 # Django-allauth Settings
 
-
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.request',
+    #...
+)
 
 
 

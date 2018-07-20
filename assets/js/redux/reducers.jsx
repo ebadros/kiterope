@@ -44,6 +44,9 @@ export const rootReducer = (state = {}, action) => {
                 case "userData":
                     return Object.assign({}, state, {userDataLoaded: true});
                     break;
+                case "clientData":
+                    return Object.assign({}, state, {clientDataLoaded: true});
+                    break;
                 case "planData":
                     return Object.assign({}, state, {planDataLoaded: true});
                     break;
@@ -75,7 +78,6 @@ export const rootReducer = (state = {}, action) => {
                     return Object.assign({}, state, {programDataLoaded: true});
                     break;
                 case "contactData":
-                    console.log("contact data loaded")
                     return Object.assign({}, state, {contactDataLoaded: true});
                     break;
                 case "contactGroupData":
@@ -169,6 +171,10 @@ export const rootReducer = (state = {}, action) => {
 
         case 'SET_CURRENT_USER':
             return Object.assign({}, state, {user: action.user});
+            break;
+
+        case 'SET_DOMAIN':
+            return Object.assign({}, state, {domain: action.domain});
             break;
 
         case 'SET_PROFILE':
@@ -451,6 +457,8 @@ export const rootReducer = (state = {}, action) => {
             return Object.assign({}, state, {updates: theUpdates});
             break;
 
+
+
         case 'EDIT_UPDATE':
             var theUpdates = Object.assign({},state.updates);
             theUpdates[action.updateId] = action.update
@@ -500,13 +508,24 @@ export const rootReducer = (state = {}, action) => {
             break;
 
         case 'DELETE_VISUALIZATION':
+            var allVisualizations = Object.assign({},state.visualizations)
+
+            var allVisualizationProgram = allVisualizations[action.visualizationId].program
+
+            delete allVisualizations[action.visualizationId]
+
             var thePrograms = Object.assign({},state.programs)
-            var theProgram = thePrograms[action.visualization.program]
-            var theVisualizations = theProgram.visualizations
+            var theProgram = thePrograms[action.p]
+            var theProgramVisualizations = theProgram.visualizations
 
-            delete theVisualizations[action.visualizationId]
 
-            return Object.assign({}, state, {programs: thePrograms});
+
+
+
+            delete theProgramVisualizations[action.visualizationId]
+
+            return Object.assign({}, state, {programs: thePrograms, visualizations:allVisualizations});
+
             break;
 
 

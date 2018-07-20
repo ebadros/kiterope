@@ -47,6 +47,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 router = routers.DefaultRouter()
 
 router.register(r'users', views.UserViewSet)
+router.register(r'domains', views.DomainViewSet)
 router.register(r'expoPushToken', views.ExpoPushTokenViewSet)
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'visualizations', views.VisualizationViewSet, base_name='Visualization')
@@ -94,7 +95,7 @@ router.register(r'^goals/(?P<goal_id>\w+)/programs', views.ProgramViewSet, base_
 router.register(r'^stepOccurrences/(?P<stepOccurrence_id>\w+)/updateOccurrences', views.UpdateOccurrenceViewSet, base_name='UpdateOccurrence')
 router.register(r'^stepOccurrences', views.StepOccurrenceViewSet, base_name='StepOccurrence')
 router.register(r'^updateOccurrences', views.UpdateOccurrenceViewSet, base_name='UpdateOccurrence')
-router.register(r'^clients', views.ClientViewSet, base_name='Profile')
+#router.register(r'^clients', views.ClientViewSet, base_name='Profile')
 router.register(r'^settings', views.SettingsSetViewSet, base_name='SettingsSet')
 router.register(r'^profiles', views.ProfileViewSet, base_name='Profile')
 router.register(r'^program/search', views.ProgramSearchViewSet, base_name="program-search")

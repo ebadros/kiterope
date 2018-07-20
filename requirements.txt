@@ -37,10 +37,9 @@ django-appconf==1.0.2
 django-braces==1.11.0
 django-celery-beat==1.0.1
 django-channels-ssl==0.1.1
-django-colorfield==0.1.14
+django-colorfield==0.1.10
 django-contrib-comments==1.8.0
 django-cors-headers==2.1.0
-django-filter==1.1.0
 django-grappelli==2.9.1
 django-group-by==0.3.1
 django-haystack==2.6.1
@@ -95,7 +94,6 @@ jsonfield==2.0.2
 jsonschema==2.6.0
 kombu==4.2.1
 libmagic==1.0
-Markdown==2.6.11
 MarkupSafe==1.0
 mots-vides==2015.5.11
 msgpack-python==0.4.8
@@ -144,7 +142,7 @@ termcolor==1.1.0
 texttable==0.9.1
 tweepy==3.5.0
 twilio==6.3.0
-Twisted==18.4.0
+Twisted==17.5.0
 txaio==2.8.0
 typing==3.6.1
 tzlocal==1.4
@@ -157,4 +155,4 @@ wcwidth==0.1.7
 webencodings==0.5.1
 websocket-client==0.40.0
 winappdbg==1.5
-zope.interface==4.5.0
+zope.interface==4.4.1

@@ -36,7 +36,7 @@ function findLabel (theValue, theArray) {
     }
 
 
-import {LineGraph, Spreadsheet, VisualizationChartForm} from './charts'
+import {LineGraph, Spreadsheet, VisualizationChart, VisualizationChartForm} from './charts'
 
 $.ajaxSetup({
     // This traditional setting takes off the bracket on the variable name that can cause problems. This makes steps_ids[] => steps_ids
@@ -159,7 +159,6 @@ export class VisualizationsPage extends React.Component {
 
                 <VisualizationsList visualizations={this.state.visualizations}/>
 
-                {/* <Spreadsheet /> */}
 
             </div>
                 </div>
@@ -168,6 +167,82 @@ export class VisualizationsPage extends React.Component {
                 </div>
         )
     }
+}
+
+export class VisualizationChartView extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            data:"",
+            type:""
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            data:this.props.data,
+            currentView: this.props.currentView,
+            type:"LINE"
+        })
+
+    }
+    componentWillReceiveProps (nextProps) {
+        if (this.state.data != nextProps.data) {
+            this.setState({
+                data:nextProps.data
+            });
+        }
+
+
+        if (this.state.currentView != nextProps.currentView) {
+            this.setState({
+                currentView: nextProps.currentView
+            });
+
+
+        }
+    }
+
+    findLabel (theValue, theArray) {
+        var returnValue = "Not available";
+        if (theValue) {
+            for (var i = 0; i < theArray.length; i++) {
+                if (theValue == theArray[i].value) {
+                    returnValue =  theArray[i].label;
+                    return returnValue
+                }
+            }
+            return returnValue
+        }
+        else {
+            return returnValue
+        }
+    }
+    getChart () {
+        switch(this.props.type) {
+            case ("LINE"):
+                return (<LineGraph  visualization={this.state.data} />)
+                break;
+            case ("SPREADSHEET"):
+                return (<Spreadsheet  visualization={this.state.data} />)
+                break;
+
+        }
+    }
+
+
+    render() {
+
+        var chart = this.getChart()
+            return(
+                <div className="ui segment">
+            {chart}
+                    </div>
+            )
+
+        }
+
 }
 
 export class VisualizationBasicView extends React.Component {
@@ -282,8 +357,8 @@ export class VisualizationsList extends React.Component {
                         if (objectData != undefined) {
                                     return (
                                         <div key={`key_visualization_${objectData.id}`} className="column">
+                                            <VisualizationChart data={objectData}/>
 
-                <VisualizationViewEditDeleteItem  data={objectData} />
                                         </div>
 
                                     )
@@ -300,7 +375,7 @@ export class VisualizationsList extends React.Component {
     render() {
         var individualVisualizations = this.getIndividualVisualizations()
             return (
-                                <div className="ui three column grid">
+                                <div className="ui one column grid">
                                     {individualVisualizations}
 
 
@@ -522,7 +597,7 @@ export class VisualizationItemMenu extends React.Component {
                       <div className="menu" style={{right: '0',left: 'auto'}}>
 
                           <div className="ui item">
-                              <IconLabelCombo size="extramini" orientation="left" text="Remove from Program" icon="trash" background="Light" click={this.handleClick} />
+                              <IconLabelCombo size="extramini" orientation="left" text="Delete Visualization" icon="trash" background="Light" click={this.handleClick} />
                               </div>
 
                       </div>
@@ -623,7 +698,7 @@ export class VisualizationAddAndEditItemForm extends React.Component {
 
             }, () => { store.dispatch(setVisualizationModalData(this.state))})
         } else {
-             store.dispatch(setVisualizationModalData({modalIsOpen:true, data:{programId:this.state.programId}}))
+             store.dispatch(setVisualizationModalData({modalIsOpen:true, data:{ programId:this.state.programId}}))
          }
 
 
@@ -636,29 +711,22 @@ export class VisualizationAddAndEditItemForm extends React.Component {
         //this.refs.subtitle.style.color = '#f00';
     }
 
-    removeVisualizationFromProgram() {
+    deleteVisualization() {
 
 
         var theUrl = "/api/visualizations/" + this.state.data.id + "/";
-        var programs_ids
-        programs_ids = this.state.data.programs_ids.slice()
-        removeItem(programs_ids, this.state.programId)
-        if (programs_ids.length == 0) {
-            programs_ids = []
-        }
 
-        var updatedPrograms = {programs_ids: programs_ids}
+
         $.ajax({
             url: theUrl,
             dataType: 'json',
-            type: 'PATCH',
-            data: updatedPrograms,
+            type: 'DELETE',
             headers: {
                 'Authorization': 'Token ' + localStorage.token
                 },
 
             success: (data) => {
-                store.dispatch(removeProgramFromVisualization(this.state.data.id, this.state.programId))
+                store.dispatch(deleteVisualization(this.state.data.id))
                 //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
 
                 //this.props.reloadItem()
@@ -688,9 +756,8 @@ export class VisualizationAddAndEditItemForm extends React.Component {
             case ("Edit"):
                 this.openModal();
                 break;
-             case ("Remove from Program"):
-                 console.log("inside reomove from program")
-                this.removeVisualizationFromProgram();
+             case ("Delete Visualization"):
+                this.deleteVisualization();
                 break;
         }
 
@@ -955,7 +1022,7 @@ return thePlans
 
             programUpdatesArray.map((theUpdate) => {
                 if (this.state.programId != undefined) {
-                    if (this.state.programId == theUpdate.program) {
+                    if (this.state.programId == theUpdate.program || theUpdate.default==true) {
 
 
                         if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
@@ -981,7 +1048,7 @@ return thePlans
                     if (this.props.storeRoot != undefined) {
                         if (this.props.storeRoot.plans != undefined) {
                             theProgramId = this.props.storeRoot.plans[this.state.planId].program
-                            if (theProgramId == theUpdate.program) {
+                            if (theProgramId == theUpdate.program || theUpdate.default==true) {
 
                                 if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
                                         name: theUpdate.name,
@@ -1034,14 +1101,13 @@ return thePlans
 
 
     setStateToData (visualizationModalData) {
-        console.log("setStateToData")
 
-        console.log(visualizationModalData)
         this.setState({
             modalIsOpen: visualizationModalData.modalIsOpen,
 
         })
         if (visualizationModalData.data != undefined ) {
+
 
             var data = visualizationModalData.data
 
@@ -1077,7 +1143,8 @@ return thePlans
                 mediatorVariable: mediatorVariable,
                 programUpdates: programUpdates,
                 programId: programId,
-                planId: planId
+                planId: planId,
+                sourceDataType: data.sourceDataType
 
             }, () => {this.createUniqueProgramUpdates()});
 
@@ -1120,7 +1187,8 @@ return thePlans
             independentVariable: "",
             mediatorVariable: "",
             programId: "",
-            planId:""
+            planId:"",
+            sourceDataType:""
 
         }, () => {
             store.dispatch(setVisualizationModalData(this.state))
@@ -1299,14 +1367,30 @@ return thePlans
 
                         <div className="ui row">
                                 <div className="sixteen wide column">
+                                                                            {/*this.state.programId == undefined && this.state.planId == undefined?
+
+                                                                                <div className="field">
+
+
+                                        <label htmlFor="kind">Use Only Data from Specific Program:</label>
+                                        <Select value={this.state.programId} valueKey="id" labelKey="programTitle"
+                                                onChange={this.handleProgramChange}
+                                                options={this.state.programOptions} clearable={false}/>
+
+
+                                    </div>
+                                                                                    :
+
                                     <div className="field">
+
+
                                         <label htmlFor="kind">Use Only Data from Specific Plan:</label>
                                         <Select value={this.state.planId} valueKey="id" labelKey="programTitle"
                                                 onChange={this.handlePlanChange}
                                                 options={this.state.planOptions} clearable={false}/>
 
 
-                                    </div>
+                                    </div>*/}
                                 </div>
                             </div>
                         <div className="ui row">&nbsp;</div></div>
@@ -1408,4 +1492,4 @@ return thePlans
     }
 }
 
-module.exports = {VisualizationAddAndEditItemForm, VisualizationsPage, VisualizationsListAndAdd, VisualizationModalForm, VisualizationsList, VisualizationBasicView, VisualizationItemMenu}
+module.exports = {VisualizationAddAndEditItemForm, VisualizationChartView, VisualizationsPage, VisualizationsListAndAdd, VisualizationModalForm, VisualizationsList, VisualizationBasicView, VisualizationItemMenu}

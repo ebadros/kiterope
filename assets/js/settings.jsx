@@ -534,7 +534,7 @@ export class StandardInteractiveButton extends React.Component {
 
     componentWillMount() {
         this.setState({
-            current: this.props.initial
+            current: this.props.current
         })
     }
 

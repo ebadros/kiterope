@@ -18,6 +18,8 @@ from scheduler.tasks import RepeatTask
 from django.apps import AppConfig
 from django.apps import apps
 from django.template.loader import render_to_string
+from django.db.models import Q
+
 
 from celery.utils.log import get_task_logger
 
@@ -58,6 +60,7 @@ def createTimeBasedTasks(thePlanOccurrenceId):
 
 @app.task(base=RepeatTask)
 def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
+    print("createStepOccurrence")
 
     Profile = apps.get_model('kiterope', 'Profile')
     PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
@@ -71,19 +74,20 @@ def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
     try:
         thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
         if (thePlanOccurrence.isSubscribed):
-
             aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
                                                                        currentUserId)
-            currentStepUpdates = Update.objects.filter(steps=theStepId)
+            defaultIsTrue = Q(default=True)
+            stepIsCurrentStep = Q(steps=theStepId)
+            currentStepUpdates = Update.objects.filter(defaultIsTrue | stepIsCurrentStep)
 
 
             for currentStepUpdate in currentStepUpdates:
-
-                # print("inside currentStepUpdates")
                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
 
-    except:
-        pass
+
+    except Exception as ex:
+        print("Error in tasks>createStepOccurrence")
+        print(ex)
 
 
         #@app.on_after_configure.connect
@@ -138,6 +142,14 @@ def updateOccurrencesForUserAtMidnight(theUser):
 
     StepOccurrence.objects.updateStepOccurrencesForRange(theUser, periodRangeStart, periodRangeEnd)
 
+
+@app.task()
+def removeOldUncompletedTimeBasedStepOccurrences():
+    print("removeOldUncompletedTimeBasedStepOccurrences")
+    stepOccurrenceNotPreviouslySaved = Q(stepOccurrence__previouslySaved=False)
+    fiveDaysAgo = Q(date__lt=datetime.datetime.today())
+    timeBased = Q(type="TIME")
+    StepOccurrence.objects.filter(timeBased & fiveDaysAgo & stepOccurrenceNotPreviouslySaved).delete
 
 @app.task()
 def updateOccurrencesAtUTCMidnight():

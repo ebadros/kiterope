@@ -211,7 +211,9 @@ export class KSSelect extends React.Component {
         this.state = {
             serverErrors:"",
             errors:"",
-            value:""
+            value:"",
+            options:"",
+            formattedOptions:"",
         }
     }
 
@@ -220,14 +222,38 @@ export class KSSelect extends React.Component {
             value: this.props.value
         })
 
+        if (this.props.options != this.state.options) {
+            this.setState({
+                options:this.props.options,
+                formattedOptions:this.props.options
+            })
+                        if (this.props.valueKey != undefined && this.props.labelKey != undefined) {
+
+                            this.buildOptions(this.props.options)
+                        }
+        }
+
         if (this.state.serverErrors != this.props.serverErrors) {
             this.setState({serverErrors: this.props.serverErrors})
         }
     }
 
+    buildOptions(theOptions) {
+        var theFormattedOptions = []
+        for (var anOption in theOptions) {
+            theFormattedOptions.unshift({value:anOption[this.props.valueKey], label:anOption[this.props.labelKey]})
+        }
+        this.setState({
+            formattedOptions: theFormattedOptions
+        })
+    }
+
+
+
 
 
     handleValueChange(option){
+
         this.setState({value: option.value});
         this.props.valueChange(option)
 
@@ -241,6 +267,17 @@ export class KSSelect extends React.Component {
         }
         if (this.state.serverErrors != nextProps.serverErrors) {
             this.setState({serverErrors: nextProps.serverErrors})
+        }
+
+        if (nextProps.options != this.state.options) {
+            this.setState({
+                options:nextProps.options,
+                formattedOptions:nextProps.options
+            }
+            )
+            if (nextProps.valueKey != undefined && nextProps.labelKey != undefined) {
+                this.buildOptions(nextProps.options)
+            }
         }
     }
 
@@ -273,9 +310,11 @@ export class KSSelect extends React.Component {
                  <label htmlFor={this.props.name}>{this.props.label}</label>
                  <Select value={this.state.value}
                          onChange={this.handleValueChange}
-                         {...props}
                          name={this.props.name}
                          searchable={this.props.searchable}
+                         valueKey={this.props.valueKey}
+                         labelKey={this.props.labelKey}
+
                          options={this.props.options}
                          clearable={this.props.isClearable} />
                  <div className="errorText" dangerouslySetInnerHTML={{__html: errorsHTML}}/>
@@ -291,6 +330,8 @@ export class KSSelect extends React.Component {
                          name={this.props.name}
                          searchable={this.props.searchable}
                          options={this.props.options}
+                         valueKey={this.props.valueKey}
+                         labelKey={this.props.labelKey}
                          clearable={this.props.isClearable} />
                  </div>
         )}

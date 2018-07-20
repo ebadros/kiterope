@@ -29,6 +29,8 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 import {StripeProvider} from 'react-stripe-elements';
 import SubscriptionForm from './stripe/SubscriptionForm'
 import FormSubmitter from './formSubmitter'
+import { UniversalStyle as Style } from 'react-css-component'
+import PropTypes from 'prop-types'
 
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
@@ -52,7 +54,7 @@ import 'react-select/dist/react-select.css';
 
 var UpdatesList = require('./update');
 
-import { theServer, s3IconUrl, s3ImageUrl, customModalStyles, stepModalStyle, loginJoinModalStyleMobile, loginJoinModalStyle, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, kiteropeColors, kiteropeMobileLogo, kiteropeDesktopLogo, s3ImageUrl, customModalStyles, stepModalStyle, loginJoinModalStyleMobile, loginJoinModalStyle, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions } from './constants'
 
 import { Provider, connect, dispatch } from 'react-redux'
@@ -210,6 +212,7 @@ top:'80px',zIndex:'100',
 
 
 
+
 @connect(mapStateToProps, mapDispatchToProps)
 export class StandardSetOfComponents extends React.Component {
     constructor(props) {
@@ -219,6 +222,7 @@ export class StandardSetOfComponents extends React.Component {
             user:"",
             modalIsOpen:false,
             form:"SignIn",
+            domain: ""
             //signInOrSignUpModalFormIsOpen:false,
 
 
@@ -231,6 +235,12 @@ export class StandardSetOfComponents extends React.Component {
         var date = new Date();
 
         var offsetInHours = date.getTimezoneOffset() / 60;
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.domain != undefined)
+            if (this.props.storeRoot.domain != this.state.domain) {
+                this.setState({domain: this.props.storeRoot.domain})
+            }
+        }
     }
 
 
@@ -241,6 +251,13 @@ export class StandardSetOfComponents extends React.Component {
                 signInOrSignUpModalFormIsOpen: nextProps.modalIsOpen,
             })
         }*/
+
+        if (nextProps.storeRoot != undefined) {
+            if (nextProps.storeRoot.domain != undefined)
+            if (nextProps.storeRoot.domain != this.state.domain) {
+                this.setState({domain: nextProps.storeRoot.domain})
+            }
+        }
 
 
 
@@ -267,10 +284,53 @@ export class StandardSetOfComponents extends React.Component {
 
 
 
-
-
-
     render() {
+
+        if (this.state.domain != undefined) {
+
+            var theDomain = this.state.domain
+
+
+            var css = `.blue {
+            background-color: ${theDomain.color1bg} !important;
+        }
+        
+        .purple {
+            background-color: ${theDomain.color2bg} !important;
+        }
+        
+        .green {
+            background-color: ${theDomain.color3bg} !important;
+        }
+        .red {
+            background-color: ${theDomain.color4bg} !important;
+        }
+        }`
+        } else {
+
+
+            var css = `.blue {
+            background-color: ${kiteropeColors.color1bg} !important;
+        }
+        
+        .purple {
+            background-color: ${kiteropeColors.color2bg} !important;
+        }
+        
+        .green {
+            background-color: ${kiteropeColors.color3bg} !important;
+        }
+        .red {
+            background-color: ${kiteropeColors.color4bg} !important;
+        }
+        }`
+        }
+
+        const theCSS = css
+
+    
+
+
 
         /*
         if (this.props.storeRoot.gui.isMessageWindowVisible == true) {
@@ -286,8 +346,11 @@ export class StandardSetOfComponents extends React.Component {
         return (
 
             <div>
+
                 <Alert />
                 <ReduxDataGetter  />
+                {this.state.domain != undefined ? <Style css={theCSS}  />: null}
+
 
 
                 {/*<div ref="ref_messageWindowContainer"><MessageWindowContainer /></div>
@@ -405,8 +468,6 @@ export class Menubar extends React.Component {
         autobind(this);
         this.state = {
         }
-
-
     }
 
     componentDidMount() {
@@ -523,6 +584,10 @@ export class Menubar extends React.Component {
     goToHomepage() {
         store.dispatch(push('/'))
     }
+
+    getLoginUI() {
+
+    }
 //
 
 
@@ -539,21 +604,21 @@ export class Menubar extends React.Component {
         if (this.props.storeRoot != undefined) {
 
             if (!this.props.storeRoot.user) {
-                 loginUI = <div className="right menu">
-                    <button className="ui button item" onClick={this.goToBlog}>Blog</button>
-
-
-                    <button className="ui button item" onClick={this.joinKiteropeHandler}>Join Kiterope</button>
-                    <button className="ui button item" onClick={this.loginHandler}>Sign In</button>
-                </div>
+                 loginUI =
+                     <div className="right menu">
+                        <button className="ui button item" onClick={this.goToBlog}>Blog</button>
+                        <button className="ui button item" onClick={this.joinKiteropeHandler}>Join Kiterope</button>
+                        <button className="ui button item" onClick={this.loginHandler}>Sign In</button>
+                    </div>
 
             } else {
-                 loginUI = <div className="right menu">
-                                          <div className="ui item"><SearchBar /></div>
+                 loginUI =
+                     <div className="right menu">
+                         <div className="ui item"><SearchBar /></div>
 
 
-                    <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick}><i
-                        className="large sidebar icon" style={{margin: 0}}/></div>
+                    <div ref="ref_sidebar_menuButton" className="ui button item" onClick={this.handleSidebarClick}>
+                        <i className="large sidebar icon" style={{margin: 0}}/></div>
 
                     <div className="ui simple dropdown item">
                         { this.props.storeRoot.user.image ? <div className="ui extratiny circular image"><img
@@ -572,21 +637,44 @@ export class Menubar extends React.Component {
             }
         }
 
+        if (this.props.storeRoot.domain != undefined) {
+            if (forMobile) {
+                var logo = this.props.storeRoot.domain.mobileLogo
+            } else {
+                var logo = this.props.storeRoot.domain.desktopLogo
+            }
+        } else {
+            if (forMobile) {
+                var logo = kiteropeMobileLogo
+            }
+            else {
+                var logo = kiteropeDesktopLogo
+            }
+        }
+
+
         return (
+            <div>
+        {this.props.storeRoot.domain != undefined?
 
              <div className="ui fixed top inverted blue menu onTop menuShortener" style={{marginTop:0, maxHeight:68}}>
-          <div className="left menu">{forMobile ?
+          <div className="left menu">
               <div className="item">
-              <a onClick={this.goToHomepage} id="logo"><img style={{cursor:'pointer', marginTop: 1 + 'rem'}} height={50}
-                                src="https://s3-us-west-1.amazonaws.com/kiterope-static/icons/kiterope_k_logo_v01.png" /></a></div>
-              :
-              <div className="item"><a onClick={this.goToHomepage} id="logo"><img style={{cursor:'pointer', marginTop: 1 + 'rem'}} height={50}
-                                src="/static/images/kiterope_logo_v01.png" /></a></div>}
+                  <a onClick={this.goToHomepage} id="logo"><img style={{cursor:'pointer', marginTop: 1 + 'rem'}} height={50}
+                                src={logo}  /></a>
+
+              </div>
+
+
+
+
+
           </div>
                  {loginUI}
                  <SidebarWithoutClickingOutside  isVisible={this.props.storeRoot.isSidebarVisible} />
 
-      </div>
+      </div>:null}
+                </div>
         )
     }
 }
@@ -1130,6 +1218,7 @@ export class LoginForm extends React.Component {
     }
 
   render() {
+
       return (
           <div className="ui eight wide segment column">
                           <div className="ui row">
@@ -1176,7 +1265,7 @@ export class LoginForm extends React.Component {
                                       <div className="float-right"><a style={{cursor:'pointer'}} onClick={this.handleForgotPasswordClick}>Forgot Password?</a>
                                       </div>
                                   </div>
-                                  <button className="ui fluid purple button" type="submit">Sign In</button>
+                                  <button className="ui fluid purple button" type="submit" >Sign In</button>
                               </form>
                               <hr />
                                   <div className="ui row">&nbsp;</div>
@@ -1265,6 +1354,7 @@ export class PasswordConfirmForm extends React.Component {
   }
 
     render() {
+
         return (
             <div className="ui eight wide segment column">
                 <div className="ui row">
@@ -1299,7 +1389,7 @@ export class PasswordConfirmForm extends React.Component {
 
 
                         <div className="ui row">&nbsp;</div>
-                        <button className="ui fluid purple button" type="submit">Change Password</button>
+                        <button className="ui fluid purple button" type="submit" >Change Password</button>
                     </form>
                 </div>
             </div>
@@ -1357,6 +1447,7 @@ export class PasswordResetForm extends React.Component {
     };
 
     render() {
+
         return (
             <div className="ui eight wide segment column">
                 <div className="ui row">
@@ -1380,7 +1471,7 @@ export class PasswordResetForm extends React.Component {
 
 
                         <div className="ui row">&nbsp;</div>
-                        <button className="ui fluid purple button" type="submit">Reset Password</button>
+                        <button className="ui fluid purple button" type="submit" >Reset Password</button>
                     </form>
 <div class="ui row">&nbsp;</div>
                     <div>Please <a href="mailto:support@kiterope.com">contact us</a> if you have any trouble resetting your password.</div>
@@ -1649,7 +1740,7 @@ _handleKeyPress = (e) => {
                                           />
 
 
-                                      <button className="ui fluid purple button" type="submit">{this.state.buttonLabel}</button>
+                                      <button className="ui fluid purple button" type="submit" >{this.state.buttonLabel}</button>
                                   </form>
 
                               <hr />

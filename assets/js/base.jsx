@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setContactGroups, setModalFormData, addContactGroup, addContact, replaceContact, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setContactGroups, setModalFormData, deleteVisualization, addContactGroup, addContact, replaceContact, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -4131,6 +4131,48 @@ export class VisualizationViewEditDeleteItem extends ViewEditDeleteItem {
 
         //$(this.refs["ref_form"]).slideUp()
     };
+
+    handleClick (theClick) {
+        switch(theClick) {
+            case ("Edit"):
+                this.openModal();
+                break;
+             case ("Delete Visualization"):
+                 console.log("inside reomove from program")
+                this.deleteVisualization();
+                break;
+        }
+
+    }
+
+    deleteVisualization() {
+
+
+        var theUrl = "/api/visualizations/" + this.state.data.id + "/";
+
+
+        $.ajax({
+            url: theUrl,
+            dataType: 'json',
+            type: 'DELETE',
+            headers: {
+                'Authorization': 'Token ' + localStorage.token
+                },
+
+            success: (data) => {
+                store.dispatch(deleteVisualization(this.state.data.id))
+                //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
+
+                //this.props.reloadItem()
+
+            },
+            error: function (xhr, status, err) {
+                console.error(theUrl, status, err.toString());
+            }
+        });
+
+
+    }
 
 
     getControlBar = () => {

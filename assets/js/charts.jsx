@@ -6,9 +6,13 @@ var forms = require('newforms');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 // require `react-d3-core` for Chart component, which help us build a blank svg and chart title.
 import { VictoryBar, VictoryLine, VictoryChart, VictoryAxis, VictoryTheme, VictoryTooltip } from 'victory';
+import {VisualizationViewEditDeleteItem, ImageUploader, Breadcrumb,  ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+
 import  ReactDataGrid  from 'react-data-grid';
 import { ReactDataGridPlugins } from 'react-data-grid-addons';
+import {VisualizationBasicView, VisualizationChartView} from './visualization'
 
+var moment = require('moment');
 
 import autobind from 'class-autobind'
 
@@ -46,8 +50,10 @@ function printObject(o) {
 }
 
 
+
+
 @connect(mapStateToProps, mapDispatchToProps)
-export class VisualizationChartForm extends React.Component {
+export class VisualizationChart extends React.Component {
     constructor(props) {
         super(props);
         autobind(this);
@@ -144,21 +150,37 @@ export class VisualizationChartForm extends React.Component {
 
 
     render() {
-        return (
-            <div>
+        return (<div className="ui page container">
+            <div className="ui form three column stackable grid">
+                <div className="ui column field">
+                 <label>Chart Type:</label>
                  <Select value={this.state.kind} onChange={this.handleKindChange} name="kind"
                                                 options={visualizationChoices} clearable={false}/>
+                    </div>
+<div className="ui column field">
+                     <label>Dependent Variable:</label>
 
              <Select value={this.state.dependentVariable}
                                                 onChange={this.handleDependentVariableChange} name="dependentVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
+    </div>
+    <div className="ui column field">
+                             <label>Independent Variable:</label>
+
              <Select value={this.state.independentVariable}
                                                 onChange={this.handleIndependentVariableChange} name="independentVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
+        </div>
+                {/*
+        <div className="column field">
                  <Select value={this.state.mediatorVariable}
                                                 onChange={this.handleMediatorVariableChange} name="mediatorVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
+            </div>*/}
                 </div>
+                                <VisualizationChartView  data={this.props.data} type={this.state.kind}/>
+
+            </div>
 
 
         )
@@ -222,7 +244,6 @@ export class Spreadsheet extends React.Component {
                 for (var j=0; j < theKeys.length; j++) {
                     var theKey = theKeys[j]
                     if (theDataOptionsUnique.indexOf(theKey) === -1) {
-                    console.log("theKey is " + theKey)
                         theDataOptionsUnique.push(theKey)
                         theDataOptions.push({key:theKey, name:theKey})
                     }
@@ -322,27 +343,37 @@ export class LineGraph extends React.Component {
 
                         <div className="centered chart header"><h3>{this.state.visualization.name}</h3></div>
                         <VictoryChart
-                            domainPadding={20}
+                            domainPadding={30}
+                            height={200}
+
                             theme={VictoryTheme.material}
-                            scale={{x: "time"}}
 
                         >
-
-                            <VictoryAxis
-
-                            />
-                            <VictoryAxis
+                             <VictoryAxis
                                 dependentAxis
-                                tickFormat={(x) => (`${x}`)}
+                                                            style={{tickLabels:{fontSize:6,padding:6}, axisLabel: {fontSize: 4},}}
+
+
                             />
+
+                            <VictoryAxis
+                                independentAxis
+                                tickCount={2}
+
+                                tickFormat={(x) => (`${moment(x).format("M/D")}`)}
+                                style={{tickLabels:{fontSize:6,padding:6}, axisLabel: {fontSize: 4},}}
+
+
+                            />
+
 
                             <VictoryLine
-                                data={this.state.updateOccurrences}
+                                data={this.state.visualization.updateOccurrences}
                                 labelComponent={<VictoryTooltip/>}
                                 sortKey="x"
-                                style={{data: {opacity: 0.7}, labels: {fontSize: 8},}}
-                                x="Absolute Date/Time"
-                                y="pushups"
+                                style={{data: {opacity: 0.7}, labels: {fontSize: 2},}}
+                                x="stepOccurrenceDate"
+                                y="integer"
 
                             /></VictoryChart>
                     </div>
@@ -358,5 +389,5 @@ export class LineGraph extends React.Component {
 }
 
 
-module.exports = { LineGraph, Spreadsheet, VisualizationChartForm }
+module.exports = { VisualizationChart, LineGraph, Spreadsheet }
 

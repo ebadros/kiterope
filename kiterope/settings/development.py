@@ -68,6 +68,7 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE_CLASSES = [
+    #'tenant_schemas.middleware.DefaultTenantMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
@@ -87,6 +88,9 @@ MIDDLEWARE_CLASSES = [
 
 ]
 
+#TENANT_MODEL = "kiterope.Client" # app.Model
+
+
 SEO_JS_ENABLED = False
 
 
@@ -103,6 +107,11 @@ DATABASES = {
             },
         }
 }
+
+'''DATABASE_ROUTERS = (
+    'tenant_schemas.routers.TenantSyncRouter',
+)
+'''
 '''
 DATABASES = {
         'default': {

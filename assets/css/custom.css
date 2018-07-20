@@ -325,7 +325,7 @@ ul.days2 {
 }
 
 .purple {
-    background-color:#A333C8 !important;
+    background-color:#A333C8 ;
     color:white;
 }
 .purple-inverted {
@@ -335,17 +335,17 @@ ul.days2 {
 
 
 .green {
-    background-color:#06D6A0 !important;
+    background-color:#06D6A0;
     color:white;
 }
 
 .yellow {
-    background-color:#FFD166 !important;
+    background-color:#FFD166;
     color:white;
 }
 
 .red {
-    background-color: #eb3b49 !important;
+    background-color: #eb3b49;
     color:white;
 }
 
@@ -977,9 +977,7 @@ img.listNodeImage {
   height: auto;
 }
 
-.ui.purple.button {
-    background-color:#a333c8 !important
-}
+
 
 
 .iconLabel {

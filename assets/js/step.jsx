@@ -1906,7 +1906,7 @@ export class StepModalForm extends React.Component {
                                             <DatePicker showTimeSelect
                                                         showTime = {{ use12hours: true }}
                                                         allowClear={false}
-                                                        timeFormat="HH:mm"
+                                                        timeFormat='hh:mm a'
                                                         timeIntervals={15}
                                                         dateFormat="LLL"
                                                         timeCaption="time"
@@ -2186,7 +2186,7 @@ export class StepModalForm extends React.Component {
                                             <DatePicker showTimeSelect
                                                         showTime = {{ use12hours: true }}
                                                         allowClear={false}
-                                                        timeFormat="HH:mm"
+                                                        timeFormat='hh:mm a'
                                                         timeIntervals={15}
                                                         dateFormat="LLL"
                                                         timeCaption="time"
@@ -2234,7 +2234,7 @@ export class StepModalForm extends React.Component {
                                             <DatePicker showTimeSelect
                                                         showTime = {{ use12hours: true }}
                                                         use12Hours = {true}
-                                                        timeFormat="HH:mm"
+                                                        timeFormat='hh:mm a'
                                                         timeIntervals={15}
                                                         dateFormat="LLL"
                                                         timeCaption="time"
