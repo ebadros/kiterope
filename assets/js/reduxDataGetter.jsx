@@ -149,6 +149,7 @@ export default class ReduxDataGetter extends React.Component {
          'routing',
          'gui',
          'smartGoalFormData',
+             'domain',
 
          ]
          }, () => {

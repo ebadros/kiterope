@@ -427,6 +427,9 @@ class Domain(models.Model):
     adminUser = models.ForeignKey(User, on_delete=CASCADE, null=True, blank=True)
     users = models.ManyToManyField(User, blank=True, related_name='users')
 
+    def __str__(self):
+        return "%s" % (self.name)
+
 
 
 
