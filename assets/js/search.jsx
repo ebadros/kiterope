@@ -1120,12 +1120,12 @@ export class SearchHitsGrid extends React.Component {
 
 
             <div ref="ref_searchHits">
-                                 {this.state.programData != undefined ? <div>
+                                 {this.state.programData.length != 0 ? <div>
                                      <Header headerLabel="Matching Programs" />
 <ProgramList data={this.state.programData}/><div className="ui spacer">&nbsp;</div></div>:null}
 
 
-                {this.state.contactData != undefined ?                                   <div><Header headerLabel="Matching People" />
+                {this.state.contactData.length != 0 ?                                   <div><Header headerLabel="Matching People" />
 <ProfileList data={this.state.contactData}/></div>:null}
 
 

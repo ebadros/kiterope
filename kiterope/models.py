@@ -1027,9 +1027,8 @@ class StepOccurrenceManager(models.Manager):
 
 
 
-    def create_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId):
+    def create_occurrence(self, aStepId, aDate, aPlanOccurrenceId, theUserId, timeToRun=None):
         theStep = Step.objects.get(id=aStepId)
-
         thePlanOccurrence = PlanOccurrence.objects.get(id=aPlanOccurrenceId)
 
 
@@ -1038,13 +1037,14 @@ class StepOccurrenceManager(models.Manager):
 
         occurrence.full_clean()
 
+
         theUserProfile = Profile.objects.get(user_id=theUserId)
 
 
         if 'EMAIL' in thePlanOccurrence.notificationMethod:
 
             linkToStepOccurrence = "https://kiterope.com/stepOccurrences/%s/\n\n%s" % (occurrence.id, theStep.description)
-            print(thePlanOccurrence.notificationEmail, theStep.title,linkToStepOccurrence)
+            #print(thePlanOccurrence.notificationEmail, theStep.title,linkToStepOccurrence)
 
             send_email_notification(thePlanOccurrence.notificationEmail, theStep.title, { 'title': theStep.title, 'message': theStep.description, 'image': theStep.image})
 
@@ -1529,14 +1529,25 @@ class PlanOccurrence(models.Model):
         theTimezone = theUserProfile.timezone
 
         for aStep in theProgram.get_steps():
+            print("aStep")
+            print(aStep)
             # crontabKwargs = []
             if aStep.type == 'TIME':
                 try:
+                    print("createStepOccurrence creator tasks")
+
                     aStepOccurrenceStartDateTime = self.startDateTime + aStep.relativeStartDateTime
-                    aStepOccurrenceEndDateTime = self.startDateTime + aStep.relativeEndDateTime
                     aStepOccurrenceStartDateTime.replace(tzinfo=theTimezone)
-                    aStepOccurrenceEndDateTime.replace(tzinfo=theTimezone)
-                    if aStepOccurrenceStartDateTime != aStepOccurrenceEndDateTime:
+
+                    if aStep.endRecurrence == 'NEVER':
+                        aStepOccurrenceEndDateTime = None
+
+
+                    else:
+                        aStepOccurrenceEndDateTime = self.startDateTime + aStep.relativeEndDateTime
+                        aStepOccurrenceEndDateTime.replace(tzinfo=theTimezone)
+
+                    if aStepOccurrenceStartDateTime == aStepOccurrenceEndDateTime:
                         aStepOccurrenceEndDateTime = None
 
                     task_id = TaskScheduler.schedule(createStepOccurrence, trigger_at=aStepOccurrenceStartDateTime,

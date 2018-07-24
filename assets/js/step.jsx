@@ -1383,7 +1383,6 @@ export class StepModalForm extends React.Component {
   }
 
   updateRelativeDates () {
-      console.log("updateRelativeDates")
     var relativeStartDateTime = moment.duration(this.state.absoluteStartDateTime.diff(this.state.programStartDateTime)).format("d hh:mm:ss.SS")
         var relativeEndDateTime = moment.duration(this.state.absoluteEndDateTime.diff(this.state.programStartDateTime)).format("d hh:mm:ss.SS")
         this.setState({

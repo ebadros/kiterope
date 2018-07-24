@@ -19,6 +19,8 @@ from django.apps import AppConfig
 from django.apps import apps
 from django.template.loader import render_to_string
 from django.db.models import Q
+from django.utils.dateparse import parse_datetime
+from scheduler.scheduler import TaskScheduler
 
 
 from celery.utils.log import get_task_logger
@@ -47,8 +49,7 @@ app.conf.timezone = 'UTC'
 
 @app.task(base=RepeatTask)
 def say_hello():
-    print("say_hello is running")
-
+    print("saying hello")
     #sendMessage("", "You've got a message")
 
 @app.task()
@@ -59,29 +60,41 @@ def createTimeBasedTasks(thePlanOccurrenceId):
 
 
 @app.task(base=RepeatTask)
-def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId):
-    print("createStepOccurrence")
+def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId, eta=None):
+    #print("createStepOccurrence")
+    #print("datetime now")
+    #print(datetime.datetime.now)
+    #print(TaskScheduler.strptime(eta))
 
     Profile = apps.get_model('kiterope', 'Profile')
     PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
+    # NEED TO put timeTo Run in there
     StepOccurrence = apps.get_model('kiterope', 'StepOccurrence')
     Update = apps.get_model('kiterope', 'Update')
     UpdateOccurrence = apps.get_model('kiterope', 'UpdateOccurrence')
 
     theUserProfile = Profile.objects.get(user_id=currentUserId)
         # theUTCDatetime = toUTC(theDatetime, theUserProfile.timezone)
-    currentDatetime = datetime.datetime.now(theUserProfile.timezone)
+    if eta:
+        stepDateTime = TaskScheduler.strptime(eta)
+    else:
+        stepDateTime = datetime.datetime.now(theUserProfile.timezone)
     try:
         thePlanOccurrence = PlanOccurrence.objects.get(id=thePlanOccurrenceId)
         if (thePlanOccurrence.isSubscribed):
-            aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, currentDatetime, thePlanOccurrenceId,
+            aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, stepDateTime, thePlanOccurrenceId,
                                                                        currentUserId)
+
             defaultIsTrue = Q(default=True)
+
             stepIsCurrentStep = Q(steps=theStepId)
+
             currentStepUpdates = Update.objects.filter(defaultIsTrue | stepIsCurrentStep)
 
 
+
             for currentStepUpdate in currentStepUpdates:
+
                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
 
 

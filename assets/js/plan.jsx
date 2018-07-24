@@ -187,37 +187,98 @@ export class PlanSettingsForm extends React.Component {
 
     handleSaveClicked = () => {
         this.setState({saved: "Saving"});
-        var theUrl = "/api/planOccurrences/" + this.state.data.id + "/";
-        var planOccurrence = {
-            id:this.state.data.id,
+
+        if (this.state.data.id) {
+            var theUrl = "/api/planOccurrences/" + this.state.data.id + "/";
+            var planOccurrence = {
+                id: this.state.data.id,
+                program: this.state.data.program,
+                goal: this.state.goal,
+                user: this.props.storeRoot.user.id,
+                startDateTime: moment.utc(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
+            };
+
+
+            $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'PATCH',
+                data: planOccurrence,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({
+                        data: data,
+                        subscribed: "Subscribed"
+                    });
+
+
+                    store.dispatch(addPlan(data));
+                    store.dispatch(shouldReload("subscribed"));
+                    this.resetForm()
+                    var goalURL = "/goals/" + data.goal + "/plans"
+                    store.dispatch(push(goalURL))
+
+
+                    //this.props.formSubmitted()
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    console.error(theUrl, status, err.toString());
+                    var serverErrors = xhr.responseJSON;
+                    this.setState({
+                        serverErrors: serverErrors,
+                        subscribed: "Subscribe"
+                    })
+
+
+                }.bind(this)
+            });
+        } else {
+             var planOccurrence = {
+
             program: this.state.data.program,
-            goal: this.state.goal,
+            //goal: this.state.goal,
             user: this.props.storeRoot.user.id,
-            startDateTime: moment(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
+            isSubscribed:true,
+            notificationSendTime: this.state.notificationSendTime,
+            notificationEmail: this.state.notificationEmail,
+            notificationPhone: this.state.notificationPhone,
+                 goal: this.state.goal,
+                startDateTime: moment.utc(this.state.startDateTime).format('YYYY-MM-DD HH:mm'),
+            //notificationMethod: this.state.notificationMethod
         };
-        $.ajax({
+                        var theUrl = "/api/planOccurrences/"
+
+             $.ajax({
+
                  url: theUrl,
                  dataType: 'json',
-                 type: 'PATCH',
+                 type: 'POST',
                  data: planOccurrence,
                  headers: {
                      'Authorization': 'Token ' + localStorage.token
                  },
-                 success: function (data) {
+                 success: function (theData) {
                      this.setState({
-                         data: data,
+                         data: theData,
                          subscribed: "Subscribed"
                      });
+                     this.closeModal()
 
 
-                     store.dispatch(addPlan(data));
-                     store.dispatch(shouldReload("subscribed"));
-                     this.resetForm()
-                     var goalURL = "/goals/" + data.goal + "/plans"
-                     store.dispatch(push(goalURL))
+
+                    store.dispatch(addPlan(theData));
+                    store.dispatch(shouldReload("subscribed"));
+                    this.resetForm()
+                    var goalURL = "/goals/" + theData.goal + "/plans"
+                    store.dispatch(push(goalURL))
 
 
-                     //this.props.formSubmitted()
+
+
 
 
                  }.bind(this),
@@ -232,6 +293,7 @@ export class PlanSettingsForm extends React.Component {
 
                  }.bind(this)
              });
+        }
 
     };
 
@@ -351,16 +413,24 @@ export class PlanSettingsForm extends React.Component {
                                            <div className="ui row">&nbsp;</div>
 
 
-     <div className="ui  row">
+     <div className="ui field row">
          <div className={wideColumnWidth}>
 
 
 
 
              <label htmlFor="id_startDate">Start Date:</label>
+             <DatePicker showTimeSelect
+                                                        showTime = {{ use12hours: true }}
+                                                        allowClear={false}
+                                                        timeFormat='hh:mm a'
+                                                        timeIntervals={15}
+                                                        dateFormat="LLL"
+                                                        timeCaption="time"
+                                                        selected={this.state.startDateTime}
+                                                        onChange={this.handleStartDateTimeChange} />
 
-                                      <DatePicker selected={this.state.startDateTime}
-                                                  onChange={this.handleStartDateTimeChange}/>
+
                                   </div></div>
                         <div className="ui field row">
                                 <div className="ui ten wide column">

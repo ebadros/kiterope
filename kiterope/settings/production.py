@@ -7,7 +7,7 @@ DEBUG = False
 IN_PRODUCTION = True
 
 DOMAIN_NAME = 'kiterope.com'
-ALLOWED_HOSTS = ['localhost', 'kiterope.com', 'https://kiterope.com', 'http://kiterope.com','kiterope-dev.us-west-1.elasticbeanstalk.com', '54.183.105.27']
+ALLOWED_HOSTS = ['localhost', '.kiterope.com', 'kiterope.com', 'https://kiterope.com', 'http://kiterope.com','kiterope-dev.us-west-1.elasticbeanstalk.com', '54.183.105.27']
 
 #STATIC_ROOT ='/opt/python/current/app/kiterope/static/'
 
@@ -19,7 +19,6 @@ STATICFILES_DIRS = (
 
     #    '/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/static/',
 )
-
 
 # Celery stuff
 LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'

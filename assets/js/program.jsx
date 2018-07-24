@@ -2194,7 +2194,13 @@ export class ProgramSubscriptionModalForm extends React.Component {
             notificationPhone: this.state.notificationPhone,
             //notificationMethod: this.state.notificationMethod
         };
+
+                             store.dispatch(setPlanModalData({modalIsOpen:true, data:planOccurrence}))
+                             this.closeModal()
+
+        /*
         $.ajax({
+
                  url: theUrl,
                  dataType: 'json',
                  type: 'POST',
@@ -2231,6 +2237,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
 
                  }.bind(this)
              });
+    */
 
     };
 

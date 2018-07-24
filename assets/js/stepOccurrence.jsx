@@ -5,7 +5,7 @@ global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import autobind from 'class-autobind'
 import DatePicker  from 'react-datepicker';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import Pagination from "react-js-pagination";
 import Select from 'react-select'
 import TinyMCE from 'react-tinymce';
