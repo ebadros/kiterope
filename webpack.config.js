@@ -28,7 +28,8 @@ module.exports = {
 
   plugins: [
           new webpack.HotModuleReplacementPlugin(),
-          new webpack.NoErrorsPlugin(), // don't reload if there is an error
+          new webpack.NoErrorsPlugin(),
+    //, don't reload if there is an error
 
 
     new BundleTracker({filename: './webpack-local-stats.json'}),
@@ -41,10 +42,24 @@ module.exports = {
   ],
 
   module: {
+      rules: [
+    { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+  ],
+
+
+  noParse: [/aws\-sdk/],
+
     loaders: [
       { test: /\.jsx?$/,
         exclude: /node_modules/,
         loaders: ['react-hot','babel-loader']},
+      {
+        test: /\.svg$/,
+        loader: 'svg-inline-loader'
+    },
+
+
+
 
         //query:
       //{
@@ -60,6 +75,10 @@ module.exports = {
 
   externals: {
   },
+  node: {
+   fs: "empty",
+    module:"empty",
+},
 
   resolve: {
     modulesDirectories: ['node_modules', 'bower_components', ],

@@ -27,6 +27,20 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
 //});
+const axios = require('axios');
+axios.defaults.headers.common['Authorization'] = 'Token ' + localStorage.token;
+axios.defaults.headers.common['Accept'] = 'Token ' + 'application/json';
+
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.get['Content-Type'] = 'application/json';
+axios.defaults.headers.patch['Content-Type'] = 'application/json';
+
+
+var defaultAxios = axios.create({
+
+  headers: {'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken'), 'Authorization': ('Token ' + localStorage.token)},
+});
+
 
 function printObject(o) {
   var out = '';
@@ -343,7 +357,23 @@ this.loadPublicGoalData()
 
 
     loadSpecificDataCall(dataLoadedVariable, theApiUrl, methodCall) {
+        /*
+        defaultAxios.get(theApiUrl)
 
+            .then(function (response) {
+                methodCall({data:response.data, dataLoadedVariable: dataLoadedVariable})
+                // handle success
+
+                console.log(response);
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+              })
+            .then(function () {
+                // always executed
+              })
+*/
 
             $.ajax({
                 method: 'GET',
@@ -595,6 +625,8 @@ this.loadPublicGoalData()
 
         this.loadSpecificData("updateOccurrenceDataLoaded", "/api/updateOccurrences/",  (theData) => {
             this.formatUpdateOccurrenceData(theData.data)
+            //store.dispatch(setUpdateOccurrences(theData.data))
+
             store.dispatch(setDataLoaded('updateOccurrenceData'))
 
             if (this.state.intervals[theData.dataLoadedVariable] != undefined) {
@@ -607,11 +639,13 @@ this.loadPublicGoalData()
 
 
     formatUpdateOccurrenceData(theUpdateOccurrences) {
-        //console.log("formatUpdateOccurrenceData")
+        console.log("formatUpdateOccurrenceData")
             var theData = []
             var uniqueStepOccurrenceIds = []
 
             for (var i=0; i < theUpdateOccurrences.length; i++) {
+                                console.log("i " + i)
+
 
                 //Compile all unique step occurrences
                 var theStepOccurrenceId = theUpdateOccurrences[i].stepOccurrence
@@ -625,26 +659,40 @@ this.loadPublicGoalData()
 
 
             for (var i=0; i < uniqueStepOccurrenceIds.length; i++) {
+                console.log("i " + i)
                 var theStepOccurrenceId = uniqueStepOccurrenceIds[i]
                                     var theStepOccurrenceSetOfData = {}
 
                 for (var j=0; j < theUpdateOccurrences.length; j++) {
+                                    console.log("j " + j)
+
                     var theCurrentUpdateOccurrence = theUpdateOccurrences[j]
-                    var theCurrentUpdateOccurrenceStepId = theCurrentUpdateOccurrence.stepOccurrence
-                    if (theStepOccurrenceId == theCurrentUpdateOccurrenceStepId) {
+                    var theCurrentUpdateOccurrenceStepOccurrenceId = theCurrentUpdateOccurrence.stepOccurrence
+                    if (theStepOccurrenceId == theCurrentUpdateOccurrenceStepOccurrenceId) {
+                        console.log("formatUpdate")
                         var measuringWhat = theCurrentUpdateOccurrence.update.measuringWhat
                         var theFormat = theCurrentUpdateOccurrence.update.format
+                                                console.log("formatUpdate 2")
+
                         if (theFormat == 'datetime') {
                              var theConvertedTime = convertDate(theCurrentUpdateOccurrence[theFormat], 0, "dateFormat", "absoluteTime")
                             var updateOccurrenceValue = theConvertedTime
 
-                        } else {
+                        } else if (theFormat == 'picture') {
+                            var updateOccurrenceValue = theCurrentUpdateOccurrence["pictures"]
+
+
+                        }
+                        else
+                         {
                             var updateOccurrenceValue = theCurrentUpdateOccurrence[theFormat]
 
                         }
+                        var theUpdateOccurrenceItem = {format: theFormat, value: updateOccurrenceValue}
 
+                        theStepOccurrenceSetOfData[measuringWhat] = theUpdateOccurrenceItem
+                                                //theStepOccurrenceSetOfData[measuringWhat] = updateOccurrenceValue
 
-                        theStepOccurrenceSetOfData[measuringWhat] = updateOccurrenceValue
 
                     }
                 }
@@ -652,7 +700,10 @@ this.loadPublicGoalData()
 
 
 
+
             }
+            console.log("theData")
+        console.log(theData)
                                 store.dispatch(setUpdateOccurrences(theData))
 
 
@@ -765,6 +816,7 @@ this.loadPublicGoalData()
 
     render() {
         if (!this.props.storeRoot.rehydrated) {
+
             return (null)
 
         } else {

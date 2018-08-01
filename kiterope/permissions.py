@@ -70,7 +70,8 @@ class PostPutAuthorOrNone(permissions.BasePermission):
             return True
 
         # Instance must have an attribute named `author`.
-        return obj.author == request.user
+
+        return obj.author == self.request.user
 
 class PostPutAuthorOrView(permissions.BasePermission):
     """
@@ -88,6 +89,7 @@ class PostPutAuthorOrView(permissions.BasePermission):
             return True
 
         # Instance must have an attribute named `author`.
+
         return obj.author == request.user
 
 class IsAuthorOrReadOnly(permissions.BasePermission):

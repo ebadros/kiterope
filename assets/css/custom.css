@@ -324,6 +324,25 @@ ul.days2 {
     color:white;
 }
 
+.fileContainer {
+    box-shadow:none !important;
+        padding-top:0;
+    margin-top:0;
+
+
+}
+
+.fileContainer .chooseFileButton {
+    border-radius:4px !important;
+    margin-top:0;
+    margin-bottom:0;
+    padding-top: 0.785714em;
+    padding-right: 1.5em;
+    padding-bottom: 0.785714em;
+    padding-left: 1.5em;
+    font-weight: 700;
+}
+
 .purple {
     background-color:#A333C8 ;
     color:white;

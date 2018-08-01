@@ -16,6 +16,7 @@ from allauth.utils import email_address_exists
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
 from django.utils import six
+from .fields import StringArrayField
 
 
 
@@ -362,12 +363,16 @@ class VisualizationSerializer(serializers.HyperlinkedModelSerializer):
         return serializer.data
         return
 
+
+
 class UpdateOccurrenceSerializer(serializers.ModelSerializer):
 
     #update = UpdateSerializer()
     stepOccurrence = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     update = UpdateSerializer(read_only=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    pictures = serializers.JSONField(required=False)
+
 
     stepOccurrenceDate = serializers.SerializerMethodField(required=False, read_only=True)
     previouslySaved = serializers.SerializerMethodField(required=False, read_only=True)
@@ -381,7 +386,7 @@ class UpdateOccurrenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UpdateOccurrence
-        fields = ('id','update', 'previouslySaved', 'stepOccurrence', 'author', 'integer', 'boolean', 'datetime','stepOccurrenceDate', 'decimal', 'audio', 'video', 'picture', 'url', 'text', 'longText', 'time' )
+        fields = ('id','update', 'previouslySaved', 'stepOccurrence', 'author', 'integer', 'boolean', 'datetime','duration','stepOccurrenceDate', 'decimal', 'audio', 'video', 'pictures', 'url', 'text', 'longText', 'time' )
 
 
 class ContactListingField(serializers.RelatedField):

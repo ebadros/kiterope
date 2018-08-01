@@ -1,6 +1,6 @@
 import os
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-
+print(ROOT_PATH)
 # You can key the configurations off of anything - I use project path.
 configs = {'/Users/eric/Dropbox/_syncFolder/Business/kiterope/code/kiterope/kiterope/settings': 'development',
     '/opt/python/current/app/kiterope/settings': 'production',

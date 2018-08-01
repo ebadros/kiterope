@@ -44,8 +44,9 @@ from kiterope.tasks import say_hello, createStepOccurrence,send_email_notificati
 from kiterope.expoPushNotifications import send_push_message
 from django.db.models.deletion import PROTECT
 import stripe
-
+from django.contrib.postgres.fields import ArrayField
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
 
 '''
 rruleFrequencies = (
@@ -169,6 +170,7 @@ METRIC_FORMAT_CHOICES = (
     ("audio", "audio"),
     ("boolean", "boolean"),
     ("datetime", "datetime"),
+    ("duration", "duration"),
 
 )
 
@@ -655,7 +657,7 @@ class Step(models.Model):
 
 class Update(models.Model):
     name = models.CharField(max_length=60, blank=True)
-    measuringWhat = models.CharField(max_length=50, default="")
+    measuringWhat = models.CharField(max_length=50, blank=False, null=False,)
     units = models.CharField(max_length=30, null=True, blank=True, default=" ")
     format = models.CharField(max_length=30, choices=METRIC_FORMAT_CHOICES, default="text")
     metricLabel = models.CharField(max_length=100, default=" ")
@@ -668,18 +670,19 @@ class Update(models.Model):
         return "Program: %s, Name: %s, %s, metric: %s in %s using %s" % (self.program, self.name, self.metricLabel, self.measuringWhat, self.units, self.format)
         #return "%s, metric: %s in %s using %s" % (self.metricLabel, self.measuringWhat, self.units, self.format)
 
-    @receiver(post_save, sender=Step)
+    '''@receiver(post_save, sender=Step)
     def create_step_default_updates(sender, instance, created, **kwargs):
         if created:
             ThroughModel = Update.steps.through
             defaultUpdates = Update.objects.filter(program=instance.program, default=True)
             for defaultUpdate in defaultUpdates:
                 ThroughModel.objects.bulk_create([ThroughModel(step_id=instance.pk, update_id=defaultUpdate.pk)])
+                '''
 
 
 
-    @receiver(post_save, sender=Program)
-    def create_program_default_updates(sender, instance, created, **kwargs):
+    '''@receiver(post_save, sender=Step)
+    def create_step_default_updates(sender, instance, created, **kwargs):
         if created:
             completionUpdate = Update.objects.create(measuringWhat="Completion", format="boolean",metricLabel="Was the step completed?", program=instance, default=True)
             absoluteDateTimeUpdate = Update.objects.create(measuringWhat="Absolute Date/Time", format="datetime", metricLabel="What was the absolute start date?", program=instance,default=True)
@@ -691,66 +694,7 @@ class Update(models.Model):
                 anUpdate.program = instance
                 anUpdate.save()
     # TODO:Only one set of standard default updates should be shared across all programs/steps
-
-class UpdateOccurrenceManager(models.Manager):
-
-    def create_occurrence(self, aStepOccurrenceId, anUpdateId):
-        #print("inside create_occurrence")
-        #print("aStepId %d" % aStepId)
-        #print("aDate %s" % aDate)
-        #print("aPlanOccurrenceId %d" % aPlanOccurrenceId)
-        #print("theUser %d" % theUser)
-        occurrence = self.create(stepOccurrence_id= aStepOccurrenceId, update_id=anUpdateId)
-
-
-        occurrence.full_clean()
-        # do something with the book
-        return occurrence
-
-    def create(self, **kwargs):
-        """
-        Creates a new object with the given kwargs, saving it to the database
-        and returning the created object.
-        """
-        obj = self.model(**kwargs)
-
-        self._for_write = True
-
-        obj.save(force_insert=True, using=self.db)
-
-        return obj
-
-
-
-
-class UpdateOccurrence(models.Model):
-    update = models.ForeignKey(Update, on_delete=CASCADE,null=False, related_name="update")
-    stepOccurrence = models.ForeignKey("StepOccurrence",  on_delete=CASCADE, null=False,  related_name="stepOccurrence")
-    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
-
-    time = models.TimeField(null=True, blank=True)
-    integer = models.IntegerField(null=True, blank=True)
-    decimal = models.FloatField(null=True, blank=True)
-    audio = models.CharField(max_length=100, blank=True, null=True)
-    video = models.CharField(max_length=100, blank=True,null=True)
-    picture = models.CharField(max_length=100, blank=True,null=True)
-    url = models.URLField(null=True, blank=True)
-    text = models.CharField(max_length=100, blank=True,)
-    longText = models.CharField(max_length=1000, blank=True, )
-    boolean = models.BooleanField(default=False)
-    datetime = models.DateTimeField(blank=True, null=True)
-
-
-    objects = UpdateOccurrenceManager()
-
-    def get_stepOccurrenceDate(self):
-        theStepOccurrence = StepOccurrence.objects.get(id=self.stepOccurrence.id)
-        return theStepOccurrence.date
-
-    def __str__(self):
-        return "Name: %s Step: %s" % (self.update.name,  self.stepOccurrence)
-
-
+    '''
 class StepOccurrenceManager(models.Manager):
 
     def getStepStartTimeDelta(self, theStepStartTime, theUserId):
@@ -781,12 +725,14 @@ class StepOccurrenceManager(models.Manager):
         occurrence = self.create(step_id=aStepId, type=theStep.type, planOccurrence_id=aPlanOccurrenceId,
                                  wasCompleted=False, user_id=theUserId)
 
+        '''defaultIsTrue = Q(default=True)
 
-        currentStepUpdates = Update.objects.filter(steps=aStepId)
+        stepIsCurrentStep = Q(steps=aStepId)
+
+        currentStepUpdates = Update.objects.filter(defaultIsTrue | stepIsCurrentStep)
 
         for currentStepUpdate in currentStepUpdates:
-            # print("inside currentStepUpdates")
-            anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(occurrence.id, currentStepUpdate.id)
+            anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(occurrence.id, currentStepUpdate.id)'''
 
         occurrence.full_clean()
         return occurrence
@@ -1348,7 +1294,6 @@ class StepOccurrenceManager(models.Manager):
             anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(theStepOccurrence.id, currentStepUpdate.id)
 
 
-
 class StepOccurrence(models.Model):
     step = models.ForeignKey(Step, on_delete=CASCADE, null=True, blank=True,)
     type = models.CharField(max_length=30, null=False, choices=STEP_TYPE_CHOICES, default='COMPLETION')
@@ -1381,6 +1326,71 @@ class StepOccurrence(models.Model):
     def get_updateOccurrences(self):
         updateOccurrences = UpdateOccurrence.objects.filter(stepOccurrence=self)
         return updateOccurrences
+
+class UpdateOccurrenceManager(models.Manager):
+    def create_occurrence(self, aStepOccurrenceId, anUpdateId):
+        print("inside create_occurrence")
+        #print("aStepId %d" % aStepId)
+        #print("aDate %s" % aDate)
+        #print("aPlanOccurrenceId %d" % aPlanOccurrenceId)
+        #print("theUser %d" % theUser)
+
+        occurrence = self.create(stepOccurrence_id=aStepOccurrenceId, update_id=anUpdateId)
+
+
+        #occurrence.full_clean()
+        # do something with the book
+        return occurrence
+
+
+
+    @receiver(post_save, sender=StepOccurrence)
+    def create_updateOccurrences(sender, instance, created, **kwargs):
+        if created:
+            defaultIsTrue = Q(default=True)
+
+            stepIsCurrentStep = Q(steps=instance.step.id)
+            currentStepUpdates = Update.objects.filter(defaultIsTrue | stepIsCurrentStep)
+
+            for currentStepUpdate in currentStepUpdates:
+
+                UpdateOccurrence.objects.create(stepOccurrence=instance, update=currentStepUpdate)
+
+
+
+
+class UpdateOccurrence(models.Model):
+    update = models.ForeignKey(Update, on_delete=CASCADE,null=False, related_name="update")
+    stepOccurrence = models.ForeignKey("StepOccurrence",  on_delete=CASCADE, null=False,  related_name="stepOccurrence")
+    author = models.ForeignKey(User, on_delete=CASCADE,null=True, blank=True)
+
+    time = models.TimeField(null=True, blank=True)
+    integer = models.IntegerField(null=True, blank=True)
+    decimal = models.FloatField(null=True, blank=True)
+    audio = models.CharField(max_length=100, blank=True, null=True)
+    video = models.CharField(max_length=100, blank=True,null=True)
+
+    pictures =  JSONField()
+    url = models.URLField(null=True, blank=True)
+    text = models.CharField(max_length=100, blank=True,)
+    longText = models.CharField(max_length=1000, blank=True, )
+    boolean = models.BooleanField(default=False)
+    datetime = models.DateTimeField(blank=True, null=True)
+    duration = models.DurationField(blank=True, null=True)
+
+
+    objects = UpdateOccurrenceManager()
+
+    def get_stepOccurrenceDate(self):
+        theStepOccurrence = StepOccurrence.objects.get(id=self.stepOccurrence.id)
+        return theStepOccurrence.date
+
+    def __str__(self):
+        return "Name: %s Step: %s" % (self.update.name,  self.stepOccurrence)
+
+
+
+
 
 
 class ContactGroup(models.Model):
@@ -1470,9 +1480,8 @@ class PlanOccurrence(models.Model):
 
 
     def save(self, *args, **kwargs):
-        print("save called")
-        print(self.goal)
         if self.isSubscribed == True and self.stripePlanId == "":
+
 
             theProgram = Program.objects.get(id=self.program.id)
             self.stripePlanId = theProgram.stripePlanId
@@ -1488,10 +1497,12 @@ class PlanOccurrence(models.Model):
             )
             self.stripeSubscriptionId = subscription.id
             super(PlanOccurrence, self).save(*args, **kwargs)
-            createTimeBasedTasks.apply_async(args=[self.id])
 
 
-            #self.create_step_occurrence_creator_tasks()
+            #createTimeBasedTasks.apply_async(args=[self.id])
+
+
+            self.create_step_occurrence_creator_tasks()
             #self.create_step_occurrence_creator_tasks()
 
         elif self.isSubscribed == False and self.stripeSubscriptionId != "":
@@ -1523,18 +1534,16 @@ class PlanOccurrence(models.Model):
 
 
     def create_step_occurrence_creator_tasks(self):
+        print("create step occurrence creator tasks")
 
         theProgram = Program.objects.get(id=self.program.id)
         theUserProfile = Profile.objects.get(user_id=self.user.id)
         theTimezone = theUserProfile.timezone
 
         for aStep in theProgram.get_steps():
-            print("aStep")
             print(aStep)
-            # crontabKwargs = []
             if aStep.type == 'TIME':
                 try:
-                    print("createStepOccurrence creator tasks")
 
                     aStepOccurrenceStartDateTime = self.startDateTime + aStep.relativeStartDateTime
                     aStepOccurrenceStartDateTime.replace(tzinfo=theTimezone)
@@ -1561,8 +1570,11 @@ class PlanOccurrence(models.Model):
                 except:
                     pass
             elif aStep.type == 'COMPLETION':
+                print("aStep type == COMPLETION" )
                 try:
-                    StepOccurrence.objects.create_completionBased_occurrence(aStep.id, self.id, self.user.id)
+                    if (self.isSubscribed):
+                        aStepOccurrence = StepOccurrence.objects.create_completionBased_occurrence(aStep.id, self.id, self.user.id)
+
                 except:
                     pass
 

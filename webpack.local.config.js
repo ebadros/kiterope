@@ -36,7 +36,7 @@ module.exports = {
 
   plugins: [
           new webpack.HotModuleReplacementPlugin(),
-          new webpack.NoErrorsPlugin(), // don't reload if there is an error
+          new webpack.NoErrorsPlugin(),
 
 
     new BundleTracker({filename: './webpack-local-stats.json'}),
@@ -47,15 +47,28 @@ module.exports = {
       'window.$':'jquery',
     })
   ],
-    cssx: {
-    minify: false
-  },
+    node: {
+   fs: "empty",
+    module:"empty",
+},
+
 
   module: {
+      rules: [
+    { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+  ],
+
+
+  //noParse: [/aws\-sdk/],
     loaders: [
       { test: /\.jsx?$/,
         exclude: /node_modules/,
         loaders: ['react-hot','babel-loader',]},
+        {
+        test: /\.svg$/,
+        loader: 'svg-inline-loader'
+    },
+
 
         //query:
       //{
@@ -64,7 +77,7 @@ module.exports = {
 
       //}},
       { test: /\.css$/, loader: "style-loader!css-loader" },
-        {test: /\.json$/, loader: 'json-loader'},
+        {test: /\.json$/, loader: 'json'},
 
 // to transform JSX into JS
     ],
@@ -74,7 +87,7 @@ module.exports = {
   },
 
   resolve: {
-    modulesDirectories: ['node_modules', 'bower_components', ],
+    modulesDirectories: ['node_modules', 'src','bower_components', ],
     extensions: ['', '.js', '.jsx'],
     fallback: path.join(__dirname, "node_modules"),
     alias: {

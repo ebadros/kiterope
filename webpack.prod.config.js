@@ -30,11 +30,13 @@ module.exports = {
       'window.jQuery': 'jquery',
       'window.$':'jquery',
     }),
+
       new webpack.DefinePlugin({ // <-- key to reducing React's size
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
       }
     }),
+
     new webpack.optimize.DedupePlugin(), //dedupe similar code
     new webpack.optimize.UglifyJsPlugin(), //minify everything
     new webpack.optimize.AggressiveMergingPlugin(),//Merge chunks
@@ -50,10 +52,20 @@ module.exports = {
 
 
   module: {
+    rules: [
+    { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+  ],
+
+  //noParse: [/aws\-sdk/],
     loaders: [
       { test: /\.jsx?$/,
         exclude: /node_modules/,
         loaders: ['babel-loader']},
+        {
+        test: /\.svg$/,
+        loader: 'svg-inline-loader'
+    },
+
 
         //query:
       //{
@@ -62,13 +74,17 @@ module.exports = {
 
       //}},
       { test: /\.css$/, loader: "style-loader!css-loader" },
-        {test: /\.json$/, loader: 'json-loader'}
+        {test: /\.json$/, loader: 'json'}
 // to transform JSX into JS
     ],
   },
 
   externals: {
   },
+  node: {
+   fs: "empty",
+    module:"empty",
+},
 
   resolve: {
     modulesDirectories: ['node_modules', 'bower_components', ],

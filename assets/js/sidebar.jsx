@@ -200,6 +200,10 @@ export class SidebarWithoutClickingOutside extends React.Component {
                             <i className="large cubes icon"/>
                             Programs
                         </a>
+                        {/*<a className="item" style={style} onClick={() => this.handleURLPush('/visualizations/')}>
+                            <i className="large data icon"/>
+                            Data
+                        </a>*/}
                         <a className="item" style={style} onClick={() => this.handleURLPush('/contacts/')} >
                             <i className="large users icon"/>
                             Contacts

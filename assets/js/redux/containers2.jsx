@@ -97,6 +97,7 @@ const mapStateToProps = (state, ownProps) => {
         editContactGroupModalData:state.rootReducer.editContactGroupModalData,
         addToContactGroupModalData:state.rootReducer.addToContactGroupModalData,
         selectedContactGroup:state.rootReducer.selectedContactGroup,
+        visualizationViewerData:state.rootReducer.visualizationViewerData,
 
 
         birdModalData:state.rootReducer.birdModalData,

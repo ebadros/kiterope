@@ -28,9 +28,10 @@ import 'react-select/dist/react-select.css';
 var MaskedInput = require('react-maskedinput');
 import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from './dateConverter'
 
+const uuidv4 = require('uuid/v4');
 
 
-import {ImageUploader,   VideoUploader, AudioUploader, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
+import {VideoUploader, AudioUploader, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import { ValidatedInput } from './app'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
@@ -40,11 +41,15 @@ import { Provider, connect, store, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
 
-import { TINYMCE_CONFIG, theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { TINYMCE_CONFIG, theServer, s3IconUrl, uploadFileToAWS, s3BaseUrl, s3config, formats, s3ImageUrl, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, times, durations,  } from './constants'
 import Measure from 'react-measure'
 BigCalendar.momentLocalizer(moment);
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import ImageUploader from 'react-images-upload';
+import * as AWS from 'aws-sdk'
+import Gallery from 'react-photo-gallery';
+var base64Img = require('base64-img');
 
 function printObject(o) {
   var out = '';
@@ -163,6 +168,7 @@ export class UpdateOccurrenceList extends React.Component {
         this.setState({needsSavingArray: theNeedsSavingArray})
 
 }
+
 
  handleHasBeenSaved(theNeedsSavingIndex) {
         console.log("handle has been saved " + theNeedsSavingIndex)
@@ -283,6 +289,53 @@ handleSubmit(updateOccurrence, theNeedsSavingIndex) {
 
 }
 
+export class MultipleImageViewer extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            lightboxIsOpen: false,
+            pictures:[]
+        }
+    }
+
+    componentDidMount () {
+        if (this.state.pictures != this.props.pictures) {
+                this.setState({pictures:this.props.pictures})
+            }
+    }
+        componentWillReceiveProps(nextProps) {
+            if (this.state.pictures != nextProps.pictures) {
+                this.setState({pictures:nextProps.pictures})
+            }
+        }
+
+
+	closeLightbox () {
+		this.setState({
+			currentImage: 0,
+			lightboxIsOpen: false,
+		});
+	}
+        render() {
+            var thePictureNodes = this.state.pictures.map((thePicture, theIndex) => {
+                return (
+                    <div key={this.props.updateOccurrenceId + "_" + theIndex} className="ui row">
+                        <img src={thePicture.src} width="100%" />
+                        </div>
+                )
+
+            })
+        return (
+            <div>
+                {thePictureNodes}
+            </div>
+
+
+        )}
+
+}
+
 
 export class UpdateOccurrenceInput extends React.Component {
     constructor(props) {
@@ -301,12 +354,15 @@ export class UpdateOccurrenceInput extends React.Component {
             integer: "",
             time: "",
             url: "",
-            picture: "",
+            pictures: new Array(),
             video: "",
             audio: "",
             boolean: false,
             doneSaving:true,
-            default: false
+            default: false,
+            picturesForUpload:[],
+            showPreview:true,
+
 
         }
     }
@@ -321,6 +377,27 @@ export class UpdateOccurrenceInput extends React.Component {
     }
 
     setStateToData(){
+        /*
+
+        // TODO: Incorporate the files that are already in a picture Update Occurrence Input into the Image Uploader
+        if (this.state.data.pictures != undefined) {
+            console.log("inside setStateToData")
+
+            var theDataForPicturesForUpload = []
+            console.log(this.state.data.pictures.length)
+            for (var i=0; i < this.state.data.pictures.length; i++ ) {
+                console.log("here again")
+                var theData = base64Img.base64Sync(this.state.data.pictures[i])
+
+                base64Img.base64(this.state.data.pictures[i], function(err, data) {
+                    theDataForPicturesForUpload.push(theData)
+                    this.setState({picturesForUpload: theDataForPicturesForUpload})
+
+                })
+
+            }
+
+        }*/
     this.setState({
         id: this.state.data.id,
         measuringWhat: this.state.data.update.measuringWhat,
@@ -335,11 +412,14 @@ export class UpdateOccurrenceInput extends React.Component {
         integer: this.state.data.integer,
         time: this.state.data.time,
         url: this.state.data.url,
-        picture: this.state.data.picture,
+        pictures: this.state.data.pictures,
         video: this.state.data.video,
         audio: this.state.data.audio,
         boolean: this.state.data.boolean,
+
     })
+
+
 
 }
 
@@ -398,9 +478,9 @@ export class UpdateOccurrenceInput extends React.Component {
         })
     }
 
-    if (this.state.picture == undefined) {
+    if (this.state.pictures == undefined) {
         this.setState({
-            picture:""
+            pictures: new Array()
         })
     }
 
@@ -534,7 +614,68 @@ export class UpdateOccurrenceInput extends React.Component {
             </div>
     }
 
+    onDrop(picture) {
+
+
+        this.setState({
+            picturesForUpload: picture,
+            showPreview:true,
+        });
+                this.props.needsSaving(this.props.needsSavingIndex)
+
+    }
+
+
+
+
+
+
     getPictureInput () {
+        var imageDecoratorArray = []
+        if (this.state.pictures != undefined) {
+            for (var i = 0; i < this.state.pictures.length; i++) {
+                var item = {
+                    src: this.state.pictures[i],
+                    sizes: ['(min-width: 480px) 100vw,(min-width: 1024px) 33.3vw'],
+
+
+                }
+                imageDecoratorArray.push(item)
+
+            }
+        }
+        return (
+            <div className="ui form">
+            <div className="field">
+                <label>{this.state.metricLabel}</label>
+            </div>
+
+            <Measure onMeasure={(dimensions) => {
+                this.setState({dimensions})
+            }}>
+
+        <div className="ui form  row">
+            {imageDecoratorArray ? <MultipleImageViewer updateOccurrenceId={this.state.id} pictures={imageDecoratorArray} />: null}
+
+
+ <ImageUploader
+     buttonClassName="ui large fluid blue button"
+     className=""
+                withIcon={false}
+                buttonText='Choose Pictures'
+                onChange={this.onDrop}
+                imgExtension={['.jpg', '.gif', '.png', '.gif']}
+                maxFileSize={5242880}
+                withPreview={this.state.showPreview}
+     withLabel={false}
+            />
+
+
+
+            </div></Measure></div>
+
+
+        );
     }
 
     handleVideoChange = (callbackData) => {
@@ -613,36 +754,97 @@ export class UpdateOccurrenceInput extends React.Component {
         )
     }
 
+
+
     handleSubmit() {
-        var id = this.state.id;
-        var theBoolean = this.state.boolean;
+        if (this.state.format == "picture") {
+                        this.setState({showPreview:false})
 
-        var text = this.state.text;
-        var decimal = this.state.decimal;
-        var longText = this.state.longText;
-        var integer = this.state.integer;
-        var time = this.state.time;
-        var url = this.state.url;
-        var picture = this.state.picture;
-        var video = this.state.video;
-        var audio = this.state.audio;
+            if(this.state.picturesForUpload.length == 0) {
+                console.log("here I am")
 
-        var updateOccurrence = {
-            id: id,
-            text: text,
-            decimal: decimal,
-            longText: longText,
-            integer: integer,
-            time: time,
-            url: url,
-            picture: picture,
-            video: video,
-            audio: audio,
-            boolean: theBoolean ,
-        };
-        this.props.handleSubmit(updateOccurrence, this.props.needsSavingIndex)
+                this.setState({pictures: []}, () => this.sendUpdateOccurrenceToServer())
+            }
 
+
+
+            //var client = s3.createClient(s3config)
+
+            var allPictures = this.state.picturesForUpload
+            var allPicturesLocations = []
+            for (var i = 0; i < allPictures.length; i++) {
+                //console.log(i)
+                var baseFilename = uuidv4()
+                var fileExt = allPictures[i].name.split('.').pop();
+
+
+                var theKey = "uploads/" + baseFilename + "." + fileExt
+                uploadFileToAWS(allPictures[i], theKey)
+                    .then(response => {
+                        var theUrl = s3BaseUrl + theKey
+                        allPicturesLocations.push(response.Location)
+                        if (i == allPictures.length ) {
+                            this.savePicturesState(allPicturesLocations)
+                        }
+
+
+                    })
+                    .catch(console.error);
+
+            }
+
+
+
+        } else {
+            this.sendUpdateOccurrenceToServer()
         }
+
+
+
+
+
+
+    }
+
+    savePicturesState(allPicturesLocations) {
+
+
+        this.setState({pictures: allPicturesLocations,
+            picturesForUpload:[],
+        }, () => this.sendUpdateOccurrenceToServer())
+
+
+    }
+
+    sendUpdateOccurrenceToServer() {
+        var id = this.state.id;
+             var theBoolean = this.state.boolean;
+
+             var text = this.state.text;
+             var decimal = this.state.decimal;
+             var longText = this.state.longText;
+             var integer = this.state.integer;
+             var time = this.state.time;
+             var url = this.state.url;
+             var pictures = JSON.stringify(this.state.pictures);
+             var video = this.state.video;
+             var audio = this.state.audio;
+
+             var updateOccurrence = {
+             id: id,
+             text: text,
+             decimal: decimal,
+             longText: longText,
+             integer: integer,
+             time: time,
+             url: url,
+             pictures: pictures,
+             video: video,
+             audio: audio,
+             boolean: theBoolean ,
+             };
+             this.props.handleSubmit(updateOccurrence, this.props.needsSavingIndex)
+    }
 
 
     render() {

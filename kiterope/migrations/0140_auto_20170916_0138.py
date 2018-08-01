@@ -27,10 +27,9 @@ class Migration(migrations.Migration):
             name='audio',
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='updateoccurrence',
             name='picture',
-            field=models.CharField(blank=True, max_length=100, null=True),
         ),
         migrations.AlterField(
             model_name='updateoccurrence',

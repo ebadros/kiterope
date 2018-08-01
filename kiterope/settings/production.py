@@ -44,7 +44,19 @@ WEBPACK_LOADER = {
     }
 }
 
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ebdb',
+        'USER': 'kiteropeAdmin',
+        'PASSWORD': 'regul8or1',
+        'HOST': 'kiterope-production.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
 
 REACT_SERVICE_URL = 'http://localhost:63578/render'
 

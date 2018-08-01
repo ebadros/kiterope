@@ -501,6 +501,8 @@ export class UpdateModalForm extends React.Component {
             saved:"Save",});
     }
 
+
+
     handleExistingUpdateChange(option) {
 
         this.setState({existingUpdate: option.id,
@@ -745,7 +747,46 @@ export class UpdateModalForm extends React.Component {
                                 </div>
                                                                                                         <div className="ui row">&nbsp;</div>
 
-                                <div className="ui row">
+                                                    <div className="ui row">
+                                    <div className="sixteen wide column">
+                                        <div className="field">
+                                            <label htmlFor="format">What type of input?</label>
+                                            {/*<Select value={this.state.format} onChange={this.handleFormatChange}
+                                                    name="format" options={metricFormatOptions} clearable={false}/>*/}
+                                            <KSSelect value={this.state.format}
+                                                      valueChange={this.handleFormatChange}
+                                                      name="format"
+                                                      options={metricFormatOptions}
+                                                      serverErrors={this.getServerErrors("format")}
+                                                      isClearable={false}
+                                            />
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                                                    <div className="ui row">&nbsp;</div>
+
+                                <div ref="ref_metricLabel" className="ui row">
+                                    <div className="sixteen wide column">
+                                        <ValidatedInput
+                                            type="text"
+                                            name="metricLabel"
+                                            label="How do you want to label this measurement?"
+                                            placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
+                                            id="id_metricLabel"
+                                            value={this.state.metricLabel}
+                                            initialValue={this.state.metricLabel}
+                                            validators='"!isEmpty(str)"'
+                                            onChange={this.validate}
+                                            stateCallback={this.handleMetricLabelChange}
+                                            serverErrors={this.getServerErrors("metricLabel")}
+                                        />
+                                    </div>
+                                </div>
+                                                                                                        <div className="ui row">&nbsp;</div>
+
+                                <div ref="ref_measuringWhat" className="ui row">
                                     <div className="sixteen wide column">
                                         <ValidatedInput
                                             type="text"
@@ -764,7 +805,7 @@ export class UpdateModalForm extends React.Component {
                                 </div>
                                  <div className="ui row">&nbsp;</div>
 
-                                                    <div className="ui row">
+                                                    <div ref="ref_units" className="ui row">
                                     <div className="sixteen wide column">
                                         <ValidatedInput
                                             type="text"
@@ -785,43 +826,8 @@ export class UpdateModalForm extends React.Component {
 
                                 <div className="ui row">&nbsp;</div>
 
-                                <div className="ui row">
-                                    <div className="sixteen wide column">
-                                        <div className="field">
-                                            <label htmlFor="format">What type of input?</label>
-                                            {/*<Select value={this.state.format} onChange={this.handleFormatChange}
-                                                    name="format" options={metricFormatOptions} clearable={false}/>*/}
-                                            <KSSelect value={this.state.format}
-                                                      valueChange={this.handleFormatChange}
-                                                      name="format"
-                                                      options={metricFormatOptions}
-                                                      serverErrors={this.getServerErrors("format")}
-                                                      isClearable={false}
-                                            />
 
 
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="ui row">&nbsp;</div>
-
-                                <div className="ui row">
-                                    <div className="sixteen wide column">
-                                        <ValidatedInput
-                                            type="text"
-                                            name="metricLabel"
-                                            label="How do you want to label this measurement?"
-                                            placeholder="How far did you run today?, How many pounds did you lift?, How long did you practice today?, etc."
-                                            id="id_metricLabel"
-                                            value={this.state.metricLabel}
-                                            initialValue={this.state.metricLabel}
-                                            validators='"!isEmpty(str)"'
-                                            onChange={this.validate}
-                                            stateCallback={this.handleMetricLabelChange}
-                                            serverErrors={this.getServerErrors("metricLabel")}
-                                        />
-                                    </div>
-                                </div>
                                 <div className="ui row">&nbsp;</div>
                                                     </div>
                                                 </div>:null}

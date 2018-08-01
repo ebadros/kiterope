@@ -1,3 +1,5 @@
+import * as AWS from 'aws-sdk'
+
 export const elasticSearchDomain = "https://search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com/";
 export const getTheServer = () => {
      if (typeof window !== 'undefined') {
@@ -9,7 +11,6 @@ export const theServer = getTheServer();
 export const s3IconUrl = "https://kiterope-static.s3.amazonaws.com:443/icons/";
 export const s3ImageUrl = "https://kiterope-static.s3.amazonaws.com:443/";
 export const s3BaseUrl = "https://kiterope-static.s3.amazonaws.com:443/";
-
 
 export const TINYMCE_CONFIG = {
   'language'  : 'en',
@@ -25,6 +26,32 @@ export const TINYMCE_CONFIG = {
     'theme_modern_toolbar_location' : 'top',
   'theme_modern_toolbar_align': 'left'
 };
+
+export const uploadFileToAWS = function (file, key) {
+    console.log("the key is")
+    console.log(key)
+
+
+  return new Promise((resolve, reject) => {
+    let s3 = new AWS.S3({accessKeyId: REACT_APP_S3_ACCESS_KEY_ID, region:'us-west-1', secretAccessKey: REACT_APP_S3_SECRET_ACCESS_KEY});
+    s3.upload({
+      Bucket: 'kiterope-static',
+      ACL: 'public-read',
+      Key: key,
+      Body: file
+    }, function (err, data) {
+      if (err) {
+        console.log('Something went wrong')
+        reject(err);
+      } else {
+
+        console.log('Successfully uploaded image');
+        resolve(data);
+      }
+    });
+  });
+
+}
 
 
 
@@ -66,6 +93,20 @@ export const stepOccurrenceTypeOptions = [
     {value:"NEVER_COMPLETED", label:"Never Completed"},
 
 ]
+
+const REACT_APP_S3_ACCESS_KEY_ID = 'AKIAJBHT4Q2VVU5CLFHQ'
+const REACT_APP_S3_SECRET_ACCESS_KEY = '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'
+
+export const s3config = {
+
+        accessKeyId: 'AKIAJBHT4Q2VVU5CLFHQ',
+        secretAccessKey: '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',
+        //bucketName: 'kiterope-static',
+        //dirName: 'uploads', /* optional */
+        region: 'us-west-1',
+
+
+    }
 export const times = [
     {value:'00:00', label: "12:00 am"},
     {value:'00:30', label: "12:30 am"},
@@ -187,6 +228,8 @@ export const endRecurrenceOptions = [
     {value:'AFTER_NUMBER_OF_OCCURRENCES', label: "After"},
 ]
 
+
+
 export const programScheduleLengths = [
     {value:'1w', label: "1 week"},
     {value:'2w', label: "2 weeks"},
@@ -260,6 +303,10 @@ export const metricFormatOptions = [
     {value: "picture", label: "picture"},
     {value: "video", label: "video"},
     {value: "audio", label: "audio"},
+            {value: "datetime", label: "datetime"},
+
+        {value: "duration", label: "duration"},
+
 ];
 
 
@@ -498,6 +545,28 @@ export const updateModalStyleHigher = {
   }
 };
 
+
+
+export const desktopModalStyleHigher = {
+    overlay : {
+
+    backgroundColor   : 'rgba(0, 0, 0, 0.75)',
+                zIndex: 30,
+
+  },
+
+  content : {
+    top                   : '15%',
+    left                  : '15%',
+    right                 : '15%',
+    bottom                : '10%',
+
+    WebkitOverflowScrolling    : 'touch',
+    borderRadius               : '4px',
+    outline                    : 'none',
+    padding                    : '30px 30px 30px 30px',
+  }
+};
 export const defaultUserCroppableImage = {
     id: 214,
     image: "https://s3-us-west-1.amazonaws.com/kiterope-static/uploads/user.svg",
@@ -594,5 +663,5 @@ export const cropImageStyle = {
 
 
 
-module.exports = {   kiteropeColors, kiteropeMobileLogo, kiteropeDesktopLogo, mobileModalStyle, smallDesktopModalStyle, cardPaymentModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
+module.exports = {   s3config, uploadFileToAWS, kiteropeColors, desktopModalStyleHigher, kiteropeMobileLogo, kiteropeDesktopLogo, mobileModalStyle, smallDesktopModalStyle, cardPaymentModalStyle, updateModalStyleHigher, endRecurrenceOptions, dayOptions, monthlyDayOptions, monthlySpecificityOptions, defaultProgramCroppableImage, loginJoinModalStyleMobile, mobileModalStyleHigher, loginJoinModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, selectImageStyle, cropImageStyle, theServer, s3BaseUrl, periodOptions, stepModalStyle, visualizationChoices, s3IconUrl, programCategoryOptions, s3ImageUrl, updateModalStyle, customModalStyles, frequencyOptions, programScheduleLengths, timeCommitmentOptions, costFrequencyMetricOptions, viewableByOptions, formats, customStepModalStyles,
     TINYMCE_CONFIG, times, durations, userSharingOptions, subscribeModalStyle, stepOccurrenceTypeOptions, notificationSendMethodOptions,metricFormatOptions, stepTypeOptions, elasticSearchDomain };

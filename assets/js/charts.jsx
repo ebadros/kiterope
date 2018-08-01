@@ -7,12 +7,14 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 // require `react-d3-core` for Chart component, which help us build a blank svg and chart title.
 import { VictoryBar, VictoryLine, VictoryChart, VictoryAxis, VictoryTheme, VictoryTooltip } from 'victory';
 import {VisualizationViewEditDeleteItem, ImageUploader, Breadcrumb,  ProgramViewEditDeleteItem, FormAction, Sidebar, FormHeaderWithActionButton, DetailPage} from './base';
+import { setUpdates, addVisualization, setVisualizationViewerData, deleteVisualization, editVisualization, setVisualizationModalData, setUpdateModalData, addUpdateWithoutStep, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import  ReactDataGrid  from 'react-data-grid';
 import { ReactDataGridPlugins } from 'react-data-grid-addons';
 import {VisualizationBasicView, VisualizationChartView} from './visualization'
-
+import {StandardInteractiveButton } from './settings'
 var moment = require('moment');
+import  { ValidatedInput } from './app'
 
 import autobind from 'class-autobind'
 
@@ -65,8 +67,20 @@ export class VisualizationChart extends React.Component {
             dataOptions:[],
 
             data: [],
-            visualization: {}
+            visualization: {},
+            saved: "View Data",
+            name:""
 
+        }
+    }
+
+
+
+    getServerErrors(fieldName) {
+        if (this.state.serverErrors == undefined) {
+            return ""
+        } else {
+            return this.state.serverErrors[fieldName]
         }
     }
 
@@ -78,12 +92,35 @@ export class VisualizationChart extends React.Component {
                 if (this.state.updateOccurrences != this.props.storeRoot.updateOccurrences) {
                     this.setState({updateOccurrences: this.props.storeRoot.updateOccurrences})
 
-                    this.setState({stringifiedUpdateOccurrences: JSON.parse(JSON.stringify(this.props.storeRoot.updateOccurrences))})
+                    this.buildStringifiedUpdateOccurrences(this.props.storeRoot.updateOccurrences)
 
                     this.buildDataOptions(this.props.storeRoot.updateOccurrences)
                 }
             }
         }
+
+    }
+
+    buildStringifiedUpdateOccurrences(theUpdateOccurrences) {
+        var theStringifiedUpdateOccurrences = []
+        for (var i=0; i < theUpdateOccurrences.length ; i++) {
+            var theUpdateOccurrence = theUpdateOccurrences[i]
+            var theKeys = Object.keys(theUpdateOccurrence)
+            var theRevisedUpdateOccurrence = {}
+            for (var j=0; j< theKeys.length; j++) {
+                var theKey = theKeys[j]
+                var theItem = theUpdateOccurrence[theKey]
+                var theRevisedItem = {[theKey]: theItem.value}
+                theRevisedUpdateOccurrence[theKey] = theRevisedItem
+
+
+            }
+            theStringifiedUpdateOccurrences.push(theRevisedUpdateOccurrence)
+
+
+
+        }
+        this.setState({stringifiedUpdateOccurrences: theStringifiedUpdateOccurrences})
 
     }
 
@@ -94,7 +131,7 @@ export class VisualizationChart extends React.Component {
              if (nextProps.storeRoot.updateOccurrences != undefined) {
 
                  if (this.state.updateOccurrences != nextProps.storeRoot.updateOccurrences) {
-                     this.setState({stringifiedUpdateOccurrences: JSON.parse(JSON.stringify(nextProps.storeRoot.updateOccurrences))})
+                    this.buildStringifiedUpdateOccurrences(nextProps.storeRoot.updateOccurrences)
 
                      this.setState({updateOccurrences: nextProps.storeRoot.updateOccurrences})
                      this.buildDataOptions(nextProps.storeRoot.updateOccurrences)
@@ -148,37 +185,97 @@ export class VisualizationChart extends React.Component {
         this.setState({mediatorVariable: option.value});
     }
 
+    handleNameChange(value) {
+        this.setState({name: value})
+    }
+
+    handleViewDataClicked() {
+        var theVisualizationData = {
+            dependentVariable:this.state.dependentVariable,
+            independentVariable: this.state.independentVariable,
+            mediatorVariable: this.state.mediatorVariable,
+            kind: this.state.kind,
+            name: this.state.name,
+        }
+
+        var theUrl = "/api/tempVisualization/"
+
+        $.ajax({
+                url: theUrl,
+                dataType: 'json',
+                type: 'POST',
+                data: theVisualizationData,
+                headers: {
+                    'Authorization': 'Token ' + localStorage.token
+                },
+                success: function (data) {
+                    this.setState({data: data})
+
+
+
+                }.bind(this),
+                error: function (xhr, status, err) {
+                    var serverErrors = xhr.responseJSON;
+                    console.log(theUrl, err)
+                    this.setState({
+                        serverErrors: serverErrors,
+                         saved: "Save"
+                    })
+
+                }.bind(this)
+            });
+        }
+
+
+
+
 
     render() {
-        return (<div className="ui page container">
-            <div className="ui form three column stackable grid">
+        return (<div>
+                {/*
+            <div className="ui three column stackable grid">
                 <div className="ui column field">
                  <label>Chart Type:</label>
                  <Select value={this.state.kind} onChange={this.handleKindChange} name="kind"
                                                 options={visualizationChoices} clearable={false}/>
                     </div>
-<div className="ui column field">
+<div className="ui column  field">
                      <label>Dependent Variable:</label>
 
              <Select value={this.state.dependentVariable}
                                                 onChange={this.handleDependentVariableChange} name="dependentVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
     </div>
-    <div className="ui column field">
+    <div className="ui column  field">
                              <label>Independent Variable:</label>
 
              <Select value={this.state.independentVariable}
                                                 onChange={this.handleIndependentVariableChange} name="independentVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
         </div>
-                {/*
-        <div className="column field">
-                 <Select value={this.state.mediatorVariable}
-                                                onChange={this.handleMediatorVariableChange} name="mediatorVariable"
-                                                options={this.state.dataOptions} clearable={false}/>
-            </div>*/}
+                <div className="ui column"> <ValidatedInput
+                                        type="text"
+                                        name="name"
+                                        label="Visualization Name"
+                                        id="id_title"
+                                        value={this.state.name}
+                                        initialValue={this.state.name}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleNameChange}
+                                        serverErrors={this.getServerErrors("name")}
+
+
+                                    /></div>
+                                <div className="ui column">&nbsp;</div>
+                <div className="ui column">
+
+                <StandardInteractiveButton color="purple" initial="View Data" processing="Building..." completed="Viewing" current={this.state.saved} clicked={this.handleViewDataClicked}  />
+</div>
+
+
                 </div>
-                                <VisualizationChartView  data={this.props.data} type={this.state.kind}/>
+                                <VisualizationChartView  data={this.props.data} type={this.state.kind}/>*/}
 
             </div>
 
@@ -208,8 +305,7 @@ export class Spreadsheet extends React.Component {
                 if (this.state.updateOccurrences != this.props.storeRoot.updateOccurrences) {
                     this.setState({updateOccurrences: this.props.storeRoot.updateOccurrences})
 
-                    this.setState({stringifiedUpdateOccurrences: JSON.parse(JSON.stringify(this.props.storeRoot.updateOccurrences))})
-
+                    this.buildStringifiedUpdateOccurrences(this.props.storeRoot.updateOccurrences)
                     this.buildDataOptions(this.props.storeRoot.updateOccurrences)
                 }
             }
@@ -224,7 +320,7 @@ export class Spreadsheet extends React.Component {
              if (nextProps.storeRoot.updateOccurrences != undefined) {
 
                  if (this.state.updateOccurrences != nextProps.storeRoot.updateOccurrences) {
-                     this.setState({stringifiedUpdateOccurrences: JSON.parse(JSON.stringify(nextProps.storeRoot.updateOccurrences))})
+                     this.buildStringifiedUpdateOccurrences(nextProps.storeRoot.updateOccurrences)
 
                      this.setState({updateOccurrences: nextProps.storeRoot.updateOccurrences})
                      this.buildDataOptions(nextProps.storeRoot.updateOccurrences)
@@ -232,6 +328,33 @@ export class Spreadsheet extends React.Component {
                  }
              }
          }
+    }
+
+    buildStringifiedUpdateOccurrences(theUpdateOccurrences) {
+        var theStringifiedUpdateOccurrences = []
+        for (var i=0; i < theUpdateOccurrences.length ; i++) {
+            var theUpdateOccurrence = theUpdateOccurrences[i]
+            var theKeys = Object.keys(theUpdateOccurrence)
+            var theRevisedUpdateOccurrence = {}
+            for (var j=0; j< theKeys.length; j++) {
+                var theKey = theKeys[j]
+                var theItem = theUpdateOccurrence[theKey]
+                if (theItem.value != undefined && theItem.value != null && !isNaN(theItem.value.getTime())) {
+                    theRevisedUpdateOccurrence[theKey] = theItem.value
+                } else {
+                                        theRevisedUpdateOccurrence[theKey] = null
+
+                }
+
+
+            }
+            theStringifiedUpdateOccurrences.push(theRevisedUpdateOccurrence)
+
+
+
+        }
+        this.setState({stringifiedUpdateOccurrences: theStringifiedUpdateOccurrences})
+
     }
 
     buildDataOptions(theUpdateOccurrences) {
@@ -244,8 +367,10 @@ export class Spreadsheet extends React.Component {
                 for (var j=0; j < theKeys.length; j++) {
                     var theKey = theKeys[j]
                     if (theDataOptionsUnique.indexOf(theKey) === -1) {
+                        var theFormat = theUpdateOccurrence.format
+
                         theDataOptionsUnique.push(theKey)
-                        theDataOptions.push({key:theKey, name:theKey})
+                        theDataOptions.push({key:theKey, name:theKey,})
                     }
 
                 }
@@ -281,7 +406,7 @@ export class Spreadsheet extends React.Component {
                 <ReactDataGrid
                     columns={this.state.dataOptions}
                     rowGetter={this.rowGetter}
-                    rowsCount={this.state.updateOccurrences.length}
+                    rowsCount={this.state.stringifiedUpdateOccurrences.length}
                     minHeight={200}/>
 
             )

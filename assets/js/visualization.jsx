@@ -15,17 +15,17 @@ import { IconLabelCombo } from './elements'
 import Modal from 'react-modal'
 import autobind from 'class-autobind'
 import Select from 'react-select'
-
+import {StandardInteractiveButton} from './settings'
 import { Provider, connect, dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 import  {store} from "./redux/store";
 import {StandardSetOfComponents } from './accounts'
 
-import { theServer, s3IconUrl, updateModalStyle, mobileModalStyle, updateModalStyleHigher, mobileModalStyleHigher, formats, s3ImageUrl, customStepModalStyles, customModalStyles, visualizationChoices, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
+import { theServer, s3IconUrl, updateModalStyle, desktopModalStyleHigher, mobileModalStyle, updateModalStyleHigher, mobileModalStyleHigher, formats, s3ImageUrl, customStepModalStyles, customModalStyles, visualizationChoices, dropzoneS3Style, uploaderProps, frequencyOptions, planScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, metricFormatOptions} from './constants'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
-import { setUpdates, addVisualization, deleteVisualization, editVisualization, setVisualizationModalData, setUpdateModalData, addUpdateWithoutStep, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { setUpdates, addVisualization, setVisualizationViewerData, deleteVisualization, editVisualization, setVisualizationModalData, setUpdateModalData, addUpdateWithoutStep, addUpdate, addStepToUpdate, removeStepFromUpdate, editUpdate, setCurrentUser, setSearchHitsVisibility, setSearchQuery, setSettings, setDailyPeriod, shouldReload, setProfile, deleteContact, setForMobile, setPlans, addContact, addPlan, removePlan, setMessageWindowVisibility, setCurrentContact, reduxLogout, addOpenThread, addMessage, closeOpenThread, reduxLogin, showSidebar, addThread, setMessageThreads, setOpenThreads, updateProgram, setCurrentThread, setPrograms, addProgram, deleteProgram, addStep, updateStep, deleteStep, setGoals, addGoal, deleteGoal, updateGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 function findLabel (theValue, theArray) {
         for (var i=0; theArray.length; i++ ) {
@@ -162,7 +162,7 @@ export class VisualizationsPage extends React.Component {
 
             </div>
                 </div>
-                                        <VisualizationModalForm />
+                                        <VisualizationModalForm2 />
 
                 </div>
         )
@@ -828,6 +828,1231 @@ export class VisualizationAddAndEditItemForm extends React.Component {
 
 
 }}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class VisualizationChartModalForm extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            currentView: "",
+            editable: false,
+            serverErrors: "",
+            data: "",
+            modalIsOpen: false,
+
+            visualizationData: "",
+            name: "",
+            kind: "",
+            dependentVariable: "",
+            independentVariable: "",
+            mediatorVariable: "",
+            programUpdates: [],
+            programId: "",
+            planId:"ALL",
+            visualizationModalData: "",
+            planOptions:[],
+            programOptions:[],
+
+
+
+        }
+    }
+
+    componentDidMount() {
+                    $(this.refs['ref_mediatorVariableSelect']).hide();
+
+
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.visualizationModalData != undefined) {
+                this.setState({visualizationModalData:this.props.storeRoot.visualizationModalData})
+                    this.setStateToData(this.props.storeRoot.visualizationModalData)
+
+
+            }
+            if (this.props.storeRoot.programs != undefined) {
+                var programOptions = this.buildOptionsFromList(this.props.storeRoot.programs)
+
+                this.setState({programOptions: programOptions})
+            }
+ if(this.state.updates != this.props.storeRoot.updates ) {
+                if (this.props.storeRoot.updates != undefined) {
+                    this.setState({updates: this.props.storeRoot.updates}, () => {this.createUniqueProgramUpdates()})
+
+                }
+            }
+             if (this.props.storeRoot.plans != undefined) {
+                 var planOptions = this.buildOptionsFromList(this.props.storeRoot.plans)
+                 var filteredPlanOptions = this.removeDisabledPlans(planOptions)
+                 filteredPlanOptions.unshift({id:'ALL', programTitle:"Use All Available Data"})
+
+
+                 this.setState({planOptions: filteredPlanOptions})
+             }
+        }
+        if (this.props.programId !=  undefined) {
+            $(this.refs['ref_programSelect']).hide();
+             this.setState({programId: this.props.programId})
+            if (this.props.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        } else {
+            $(this.refs['ref_programSelect']).hide();
+                        $(this.refs['ref_planSelect']).show();
+
+
+        }
+        /*if (this.state.programId != this.props.programId) {
+
+            this.setState({programId: this.props.programId})
+            if (this.props.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        }
+
+        if (this.state.planId != this.props.planId) {
+            this.setState({planId: this.props.planId})
+        }*/
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
+        }
+
+        if (nextProps.storeRoot.visualizationModalData != undefined) {
+            if (this.state.visualizationModalData != nextProps.storeRoot.visualizationModalData) {
+                this.setState({visualizationModalData: nextProps.storeRoot.visualizationModalData})
+
+                this.setStateToData(nextProps.storeRoot.visualizationModalData)
+
+            }
+
+            if (nextProps.storeRoot.programs != undefined) {
+                var programOptions = this.buildOptionsFromList(nextProps.storeRoot.programs)
+
+                this.setState({programOptions: programOptions})
+            }
+            if(this.state.updates != nextProps.storeRoot.updates ) {
+                if (nextProps.storeRoot.updates != undefined) {
+                    this.setState({updates: nextProps.storeRoot.updates}, () => {this.createUniqueProgramUpdates()})
+
+
+
+                }
+            }
+
+            if (nextProps.storeRoot.plans != undefined) {
+                 var planOptions = this.buildOptionsFromList(nextProps.storeRoot.plans)
+
+                 var filteredPlanOptions = this.removeDisabledPlans(planOptions)
+                                 filteredPlanOptions.unshift({id:'ALL', programTitle:"Use All Available Data"})
+
+
+
+                 this.setState({planOptions: filteredPlanOptions})
+             }
+
+
+        }
+
+        if (nextProps.programId != undefined) {
+            $(this.refs['ref_programSelect']).hide();
+            $(this.refs['ref_planSelect']).hide();
+
+             this.setState({programId: nextProps.programId})
+            if (nextProps.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        } else {
+            $(this.refs['ref_programSelect']).hide();
+                        $(this.refs['ref_planSelect']).show();
+
+
+        }
+        /*}
+        if (this.state.programId != nextProps.programId) {
+            this.setState({programId: nextProps.programId})
+
+            if (nextProps.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+        }
+
+
+            if (this.state.planId != nextProps.planId) {
+                this.setState({planId: nextProps.planId})
+            }*/
+
+
+        }
+
+
+    buildOptionsFromList( theList) {
+        var theListAsArray = Object.keys(theList).map((key) => {
+            return theList[key]
+        })
+        return theListAsArray
+
+    }
+
+    removeDisabledPlans(thePlans) {
+        for(var i = thePlans.length - 1; i >= 0; i--) {
+    if(thePlans[i].isSubscribed == false) {
+       thePlans.splice(i, 1);
+    }
+}
+return thePlans
+    }
+
+    createUniqueProgramUpdates() {
+        var programUpdates = this.state.updates
+        var uniqueProgramUpdates = []
+        var uniqueProgramUpdatesTester = []
+        if (programUpdates != undefined ) {
+            var programUpdatesArray = Object.keys(programUpdates).map((key) => {
+                return programUpdates[key]
+            })
+
+            programUpdatesArray.map((theUpdate) => {
+                if (this.state.programId != undefined) {
+                    if (this.state.programId == theUpdate.program || theUpdate.default==true) {
+
+
+                        if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            })) == -1) {
+                            uniqueProgramUpdates.push(theUpdate)
+                            uniqueProgramUpdatesTester.push(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            }))
+
+                        }
+                    }
+                } else if ((this.state.planId != undefined) && (this.state.planId != 'ALL')) {
+                    var theProgramId
+                    if (this.props.storeRoot != undefined) {
+                        if (this.props.storeRoot.plans != undefined) {
+                            theProgramId = this.props.storeRoot.plans[this.state.planId].program
+                            if (theProgramId == theUpdate.program || theUpdate.default==true) {
+
+                                if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    })) == -1) {
+                                    uniqueProgramUpdates.push(theUpdate)
+                                    uniqueProgramUpdatesTester.push(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    }))
+                                }
+
+                            }
+                        }
+                    }
+                } else {
+                    if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                            name: theUpdate.name,
+                            measuringWhat: theUpdate.measuringWhat,
+                            units: theUpdate.units,
+                            metricLabel: theUpdate.metricLabel,
+                            format: theUpdate.format
+                        })) == -1) {
+                        uniqueProgramUpdates.push(theUpdate)
+                        uniqueProgramUpdatesTester.push(JSON.stringify({
+                            name: theUpdate.name,
+                            measuringWhat: theUpdate.measuringWhat,
+                            units: theUpdate.units,
+                            metricLabel: theUpdate.metricLabel,
+                            format: theUpdate.format
+                        }))
+
+                    }
+                }
+
+
+            })
+            this.setState({uniqueProgramUpdatesTester: uniqueProgramUpdatesTester})
+            this.setState({programUpdates: uniqueProgramUpdates})
+        }
+    }
+
+
+
+
+    setStateToData (visualizationModalData) {
+
+        this.setState({
+            modalIsOpen: visualizationModalData.modalIsOpen,
+
+        })
+        if (visualizationModalData.data != undefined ) {
+
+
+            var data = visualizationModalData.data
+
+            var name = data.name;
+            var kind = data.kind;
+            var dependentVariable = data.dependentVariable;
+            var independentVariable = data.independentVariable;
+            var mediatorVariable = data.mediatorVariable;
+            var programUpdates = data.programUpdates;
+            var programId = data.programId;
+            var planId = data.planId;
+
+
+
+            if (data.id != undefined) {
+                this.setState({
+                    id: data.id,
+                    saved:"Saved"
+                })
+            } else {
+                this.setState({
+                    id:"",
+                    saved:"Create"
+                })
+            }
+
+            this.setState({
+                id: data.id,
+                name: name,
+                kind: kind,
+                dependentVariable: dependentVariable,
+                independentVariable: independentVariable,
+                mediatorVariable: mediatorVariable,
+                programUpdates: programUpdates,
+                programId: programId,
+                planId: planId,
+                sourceDataType: data.sourceDataType
+
+            }, () => {this.createUniqueProgramUpdates()});
+
+
+
+        }
+    }
+
+
+
+    openModal() {
+        this.setState({
+            modalIsOpen: true
+        })
+
+        if (this.state.visualizationModalData) {
+            this.setState({
+                modalIsOpen: true,
+                id: this.state.visualizationModalData.id,
+                name: this.state.visualizationModalData.name,
+                kind: this.state.visualizationModalData.kind,
+                program: this.state.visualizationModalData.programId,
+                plan: this.state.visualizationModalData.planId,
+                dependentVariable: this.state.visualizationModalData.dependentVariable,
+                independentVariable: this.state.visualizationModalData.independentVariable,
+                mediatorVariable: this.state.visualizationModalData.mediatorVariable,
+            })
+        }
+
+    }
+
+    closeModal() {
+
+        this.setState({
+            modalIsOpen: false,
+
+            name: "",
+            kind: "",
+            dependentVariable: "",
+            independentVariable: "",
+            mediatorVariable: "",
+            programId: "",
+            planId:"",
+            sourceDataType:""
+
+        }, () => {
+            store.dispatch(setVisualizationModalData(this.state))
+        });
+
+
+    }
+
+    handleProgramChange(option) {
+        this.setState({programId: option.id}, () => {this.createUniqueProgramUpdates()})
+        this.setState({planId:""})
+    }
+
+    handlePlanChange(option) {
+            this.setState({planId: option.id})
+            this.setState({programId: undefined}, () => {
+                this.createUniqueProgramUpdates()
+            })
+
+
+    }
+
+    handleNameChange(value) {
+        this.setState({name: value});
+    }
+
+    handleKindChange(option) {
+
+        this.setState({kind: option.value});
+    }
+
+    handleDependentVariableChange(option) {
+        console.log(option.id)
+
+        this.setState({dependentVariable: option.id});
+    }
+
+    handleIndependentVariableChange(option) {
+
+        this.setState({independentVariable: option.id});
+    }
+
+    handleMediatorVariableChange(option) {
+
+
+        this.setState({mediatorVariable: option.id});
+    }
+
+    handleSubmit() {
+        var name = this.state.name;
+        var kind = this.state.kind;
+        var dependentVariable = this.state.dependentVariable;
+        var independentVariable = this.state.independentVariable;
+        var mediatorVariable = this.state.mediatorVariable;
+        var program = this.state.programId;
+        var plan = this.state.planId
+        if (plan = "ALL") {
+            plan=""
+        }
+        var visualizationData = {
+            name: name,
+                kind: kind,
+                dependentVariable: dependentVariable,
+                independentVariable: independentVariable,
+                mediatorVariable: mediatorVariable,
+                program: program,
+                plan:plan
+        }
+        console.log("visualizationData")
+        console.log(visualizationData)
+
+
+        if (this.state.id != "") {
+            visualizationData.id = this.state.id
+
+
+        }
+        // If this is an existing update that's just being added to a specific step
+        this.submitToServer(visualizationData);
+
+    }
+
+    submitToServer = (visualization) => {
+             if (visualization.id) {
+                 var theUrl = "/api/visualizations/" + visualization.id + "/";
+                 var theType = 'PATCH';
+
+             }
+             else {
+                 var theUrl = "/api/visualizations/";
+                 var theType = 'POST';
+             }
+             $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: theType,
+                 data: visualization,
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+                 },
+                 success: function (data) {
+                     console.log(data)
+
+                     if (visualization.id) {
+                         store.dispatch(editVisualization(data.id, data))
+                         this.closeModal()
+                     }
+                     else {
+                         store.dispatch(addVisualization(data))
+                         this.closeModal()
+                     }
+
+
+                     //this.props.updateAdded(data);
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                     this.setState({
+                         serverErrors: serverErrors,
+                     })
+
+                 }.bind(this)
+             })
+         }
+
+
+
+    render() {
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.gui != undefined) {
+                var forMobile = this.props.storeRoot.gui.forMobile
+            }
+        }
+
+
+        if ((this.props.isListNode) || (forMobile)) {
+            var updateModal = mobileModalStyleHigher
+
+        } else {
+
+
+            var updateModal = desktopModalStyleHigher
+
+        }
+        return (
+
+            <Modal
+                isOpen={this.state.modalIsOpen}
+                onAfterOpen={this.afterOpenModal}
+                onRequestClose={this.closeModal}
+                style={updateModal}>
+
+                <div className="ui grid">
+                    <div className="header sixteen wide column"><h2>Visualization</h2></div>
+
+
+                   <VisualizationChart />
+                    </div>
+            </Modal>
+        )
+    }
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+export class VisualizationModalForm2 extends React.Component {
+    constructor(props) {
+        super(props);
+        autobind(this);
+        this.state = {
+            id: "",
+            currentView: "",
+            editable: false,
+            serverErrors: "",
+            data: "",
+            modalIsOpen: false,
+
+            visualizationData: "",
+            name: "",
+            kind: "",
+            dependentVariable: "",
+            independentVariable: "",
+            mediatorVariable: "",
+            programUpdates: [],
+            programId: "",
+            planId:"ALL",
+            visualizationModalData: "",
+            planOptions:[],
+            programOptions:[],
+            visualizationViewerData:{}
+
+
+
+        }
+    }
+
+    componentDidMount() {
+                    $(this.refs['ref_mediatorVariableSelect']).hide();
+
+
+        if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.visualizationModalData != undefined) {
+                this.setState({visualizationModalData:this.props.storeRoot.visualizationModalData})
+                    this.setStateToData(this.props.storeRoot.visualizationModalData)
+
+
+            }
+            if (this.props.storeRoot.programs != undefined) {
+                var programOptions = this.buildOptionsFromList(this.props.storeRoot.programs)
+
+                this.setState({programOptions: programOptions})
+            }
+ if(this.state.updates != this.props.storeRoot.updates ) {
+                if (this.props.storeRoot.updates != undefined) {
+                    this.setState({updates: this.props.storeRoot.updates}, () => {this.createUniqueProgramUpdates()})
+
+                }
+            }
+             if (this.props.storeRoot.plans != undefined) {
+                 var planOptions = this.buildOptionsFromList(this.props.storeRoot.plans)
+                 var filteredPlanOptions = this.removeDisabledPlans(planOptions)
+                 filteredPlanOptions.unshift({id:'ALL', programTitle:"Use All Available Data"})
+
+
+                 this.setState({planOptions: filteredPlanOptions})
+             }
+        }
+        if (this.props.programId !=  undefined) {
+            $(this.refs['ref_programSelect']).hide();
+             this.setState({programId: this.props.programId})
+            if (this.props.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        } else {
+            $(this.refs['ref_programSelect']).hide();
+                        $(this.refs['ref_planSelect']).show();
+
+
+        }
+        /*if (this.state.programId != this.props.programId) {
+
+            this.setState({programId: this.props.programId})
+            if (this.props.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        }
+
+        if (this.state.planId != this.props.planId) {
+            this.setState({planId: this.props.planId})
+        }*/
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+
+        if (this.state.serverErrors != nextProps.serverErrors) {
+            this.setState({serverErrors: nextProps.serverErrors})
+        }
+
+        if (nextProps.storeRoot.visualizationModalData != undefined) {
+            if (this.state.visualizationModalData != nextProps.storeRoot.visualizationModalData) {
+                this.setState({visualizationModalData: nextProps.storeRoot.visualizationModalData})
+
+                this.setStateToData(nextProps.storeRoot.visualizationModalData)
+
+            }
+
+            if (nextProps.storeRoot.programs != undefined) {
+                var programOptions = this.buildOptionsFromList(nextProps.storeRoot.programs)
+
+                this.setState({programOptions: programOptions})
+            }
+            if(this.state.updates != nextProps.storeRoot.updates ) {
+                if (nextProps.storeRoot.updates != undefined) {
+                    this.setState({updates: nextProps.storeRoot.updates}, () => {this.createUniqueProgramUpdates()})
+
+
+
+                }
+            }
+
+            if (nextProps.storeRoot.plans != undefined) {
+                 var planOptions = this.buildOptionsFromList(nextProps.storeRoot.plans)
+
+                 var filteredPlanOptions = this.removeDisabledPlans(planOptions)
+                                 filteredPlanOptions.unshift({id:'ALL', programTitle:"Use All Available Data"})
+
+
+
+                 this.setState({planOptions: filteredPlanOptions})
+             }
+
+
+        }
+
+        if (nextProps.programId != undefined) {
+            $(this.refs['ref_programSelect']).hide();
+            $(this.refs['ref_planSelect']).hide();
+
+             this.setState({programId: nextProps.programId})
+            if (nextProps.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+
+        } else {
+            $(this.refs['ref_programSelect']).hide();
+                        $(this.refs['ref_planSelect']).show();
+
+
+        }
+        /*}
+        if (this.state.programId != nextProps.programId) {
+            this.setState({programId: nextProps.programId})
+
+            if (nextProps.storeRoot.updates != undefined) {
+                this.createUniqueProgramUpdates()
+            }
+        }
+
+
+            if (this.state.planId != nextProps.planId) {
+                this.setState({planId: nextProps.planId})
+            }*/
+
+
+        }
+
+
+    buildOptionsFromList( theList) {
+        var theListAsArray = Object.keys(theList).map((key) => {
+            return theList[key]
+        })
+        return theListAsArray
+
+    }
+
+    removeDisabledPlans(thePlans) {
+        for(var i = thePlans.length - 1; i >= 0; i--) {
+    if(thePlans[i].isSubscribed == false) {
+       thePlans.splice(i, 1);
+    }
+}
+return thePlans
+    }
+
+    createUniqueProgramUpdates() {
+        var programUpdates = this.state.updates
+        var uniqueProgramUpdates = []
+        var uniqueProgramUpdatesTester = []
+        if (programUpdates != undefined ) {
+            var programUpdatesArray = Object.keys(programUpdates).map((key) => {
+                return programUpdates[key]
+            })
+
+            programUpdatesArray.map((theUpdate) => {
+                if (this.state.programId != undefined) {
+                    if (this.state.programId == theUpdate.program || theUpdate.default==true) {
+
+
+                        if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            })) == -1) {
+                            uniqueProgramUpdates.push(theUpdate)
+                            uniqueProgramUpdatesTester.push(JSON.stringify({
+                                name: theUpdate.name,
+                                measuringWhat: theUpdate.measuringWhat,
+                                units: theUpdate.units,
+                                metricLabel: theUpdate.metricLabel,
+                                format: theUpdate.format
+                            }))
+
+                        }
+                    }
+                } else if ((this.state.planId != undefined) && (this.state.planId != 'ALL')) {
+                    var theProgramId
+                    if (this.props.storeRoot != undefined) {
+                        if (this.props.storeRoot.plans != undefined) {
+                            theProgramId = this.props.storeRoot.plans[this.state.planId].program
+                            if (theProgramId == theUpdate.program || theUpdate.default==true) {
+
+                                if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    })) == -1) {
+                                    uniqueProgramUpdates.push(theUpdate)
+                                    uniqueProgramUpdatesTester.push(JSON.stringify({
+                                        name: theUpdate.name,
+                                        measuringWhat: theUpdate.measuringWhat,
+                                        units: theUpdate.units,
+                                        metricLabel: theUpdate.metricLabel,
+                                        format: theUpdate.format
+                                    }))
+                                }
+
+                            }
+                        }
+                    }
+                } else {
+                    if (uniqueProgramUpdatesTester.indexOf(JSON.stringify({
+                            name: theUpdate.name,
+                            measuringWhat: theUpdate.measuringWhat,
+                            units: theUpdate.units,
+                            metricLabel: theUpdate.metricLabel,
+                            format: theUpdate.format
+                        })) == -1) {
+                        uniqueProgramUpdates.push(theUpdate)
+                        uniqueProgramUpdatesTester.push(JSON.stringify({
+                            name: theUpdate.name,
+                            measuringWhat: theUpdate.measuringWhat,
+                            units: theUpdate.units,
+                            metricLabel: theUpdate.metricLabel,
+                            format: theUpdate.format
+                        }))
+
+                    }
+                }
+
+
+            })
+            this.setState({uniqueProgramUpdatesTester: uniqueProgramUpdatesTester})
+            this.setState({programUpdates: uniqueProgramUpdates})
+        }
+    }
+
+
+
+
+    setStateToData (visualizationModalData) {
+
+        this.setState({
+            modalIsOpen: visualizationModalData.modalIsOpen,
+
+        })
+        if (visualizationModalData.data != undefined ) {
+
+
+            var data = visualizationModalData.data
+
+            var name = data.name;
+            var kind = data.kind;
+            var dependentVariable = data.dependentVariable;
+            var independentVariable = data.independentVariable;
+            var mediatorVariable = data.mediatorVariable;
+            var programUpdates = data.programUpdates;
+            var programId = data.programId;
+            var planId = data.planId;
+
+
+
+            if (data.id != undefined) {
+                this.setState({
+                    id: data.id,
+                    saved:"Saved"
+                })
+            } else {
+                this.setState({
+                    id:"",
+                    saved:"Create"
+                })
+            }
+
+            this.setState({
+                id: data.id,
+                name: name,
+                kind: kind,
+                dependentVariable: dependentVariable,
+                independentVariable: independentVariable,
+                mediatorVariable: mediatorVariable,
+                programUpdates: programUpdates,
+                programId: programId,
+                planId: planId,
+                sourceDataType: data.sourceDataType
+
+            }, () => {this.createUniqueProgramUpdates()});
+
+
+
+        }
+    }
+
+
+
+    openModal() {
+        this.setState({
+            modalIsOpen: true
+        })
+
+        if (this.state.visualizationModalData) {
+            this.setState({
+                modalIsOpen: true,
+                id: this.state.visualizationModalData.id,
+                name: this.state.visualizationModalData.name,
+                kind: this.state.visualizationModalData.kind,
+                program: this.state.visualizationModalData.programId,
+                plan: this.state.visualizationModalData.planId,
+                dependentVariable: this.state.visualizationModalData.dependentVariable,
+                independentVariable: this.state.visualizationModalData.independentVariable,
+                mediatorVariable: this.state.visualizationModalData.mediatorVariable,
+            })
+        }
+
+    }
+
+    closeModal() {
+
+        this.setState({
+            modalIsOpen: false,
+
+            name: "",
+            kind: "",
+            dependentVariable: "",
+            independentVariable: "",
+            mediatorVariable: "",
+            programId: "",
+            planId:"",
+            sourceDataType:""
+
+        }, () => {
+            store.dispatch(setVisualizationModalData(this.state))
+        });
+
+
+    }
+
+    handleProgramChange(option) {
+        this.setState({programId: option.id}, () => {this.createUniqueProgramUpdates()})
+        this.setState({planId:""})
+    }
+
+    handlePlanChange(option) {
+            this.setState({planId: option.id})
+            this.setState({programId: undefined}, () => {
+                this.createUniqueProgramUpdates()
+            })
+
+
+    }
+
+    handleNameChange(value) {
+        this.setState({name: value});
+    }
+
+    handleKindChange(option) {
+
+        this.setState({kind: option.value});
+    }
+
+    handleDependentVariableChange(option) {
+        console.log(option.id)
+
+        this.setState({dependentVariable: option.id});
+    }
+
+    handleIndependentVariableChange(option) {
+
+        this.setState({independentVariable: option.id});
+    }
+
+    handleMediatorVariableChange(option) {
+
+
+        this.setState({mediatorVariable: option.id});
+    }
+
+    handleSubmit() {
+        var name = this.state.name;
+        var kind = this.state.kind;
+        var dependentVariable = this.state.dependentVariable;
+        var independentVariable = this.state.independentVariable;
+        var mediatorVariable = this.state.mediatorVariable;
+        var program = this.state.programId;
+        var plan = this.state.planId
+        if (plan = "ALL") {
+            plan=""
+        }
+        var visualizationData = {
+            name: name,
+                kind: kind,
+                dependentVariable: dependentVariable,
+                independentVariable: independentVariable,
+                mediatorVariable: mediatorVariable,
+                program: program,
+                plan:plan
+        }
+        //console.log("visualizationData")
+        //console.log(visualizationData)
+
+
+        if (this.state.id != "") {
+            visualizationData.id = this.state.id
+
+
+        }
+        // If this is an existing update that's just being added to a specific step
+        //this.submitToServer(visualizationData);
+        this.submitToViewingServer(visualizationData)
+
+    }
+
+    submitToViewingServer = (visualization) => {
+
+                 var theUrl = "/api/tempVisualization/";
+                 var theType = 'POST';
+
+             $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: theType,
+                 data: visualization,
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+                 },
+                 success: function (data) {
+                     console.log(data)
+                     //store.dispatch(setVisualizationViewerData(data))
+                     this.setState({visualizationViewerData:data})
+
+
+
+
+                     //this.props.updateAdded(data);
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                     this.setState({
+                         serverErrors: serverErrors,
+                     })
+
+                 }.bind(this)
+             })
+         }
+
+    submitToServer = (visualization) => {
+             if (visualization.id) {
+                 var theUrl = "/api/visualizations/" + visualization.id + "/";
+                 var theType = 'PATCH';
+
+             }
+             else {
+                 var theUrl = "/api/visualizations/";
+                 var theType = 'POST';
+             }
+             $.ajax({
+                 url: theUrl,
+                 dataType: 'json',
+                 type: theType,
+                 data: visualization,
+                 headers: {
+                     'Authorization': 'Token ' + localStorage.token
+                 },
+                 success: function (data) {
+                     console.log(data)
+
+                     if (visualization.id) {
+                         store.dispatch(editVisualization(data.id, data))
+                         this.closeModal()
+                     }
+                     else {
+                         store.dispatch(addVisualization(data))
+                         this.closeModal()
+                     }
+
+
+                     //this.props.updateAdded(data);
+
+                 }.bind(this),
+                 error: function (xhr, status, err) {
+
+                     console.error(theUrl, status, err.toString());
+                     var serverErrors = xhr.responseJSON;
+                     this.setState({
+                         serverErrors: serverErrors,
+                     })
+
+                 }.bind(this)
+             })
+         }
+
+
+
+    render() {
+         if (this.props.storeRoot != undefined) {
+            if (this.props.storeRoot.gui != undefined) {
+                var forMobile = this.props.storeRoot.gui.forMobile
+            }
+        }
+
+
+        if ((this.props.isListNode) || (forMobile)) {
+            var updateModal = mobileModalStyleHigher
+
+        } else {
+
+
+            var updateModal = desktopModalStyleHigher
+
+        }
+        return (
+
+            <Modal
+                isOpen={this.state.modalIsOpen}
+                onAfterOpen={this.afterOpenModal}
+                onRequestClose={this.closeModal}
+                style={updateModal}>
+
+                <div className="ui three column grid form">
+                    <div className="ui row">
+                    <div className="header column"><h2>Visualization</h2></div></div>
+
+
+                        {/*<div ref="ref_programSelect">
+                        <div className="ui row">
+                                <div className="sixteen wide column">
+                                    <div className="field">
+                                        <label htmlFor="kind">Program:</label>
+                                        <Select value={this.state.programId}  valueKey="id" labelKey="title"
+                                                onChange={this.handleProgramChange} name="dependentVariable"
+                                                options={this.state.programOptions} clearable={false}/>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        <div className="ui row">&nbsp;</div></div>*/}
+
+                                                                            {/*this.state.programId == undefined && this.state.planId == undefined?
+
+                                                                                <div className="field">
+
+
+                                        <label htmlFor="kind">Use Only Data from Specific Program:</label>
+                                        <Select value={this.state.programId} valueKey="id" labelKey="programTitle"
+                                                onChange={this.handleProgramChange}
+                                                options={this.state.programOptions} clearable={false}/>
+
+
+                                    </div>
+                                                                                    :
+
+                                    <div className="field">
+
+
+                                        <label htmlFor="kind">Use Only Data from Specific Plan:</label>
+                                        <Select value={this.state.planId} valueKey="id" labelKey="programTitle"
+                                                onChange={this.handlePlanChange}
+                                                options={this.state.planOptions} clearable={false}/>
+
+
+                                    </div>*/}
+                                        <div className="ui row">
+
+
+
+
+                                <div className="column">
+                                    <div className="field">
+                                        <label htmlFor="kind">Kind of Visualization:</label>
+                                        <Select value={this.state.kind} onChange={this.handleKindChange} name="kind"
+                                                options={visualizationChoices} clearable={false}/>
+
+
+                                    </div>
+                                </div>
+
+                                <div className="column">
+                                    <div className="field">
+                                        <label htmlFor="kind">Dependent Variable:</label>
+                                        <Select value={this.state.dependentVariable} valueKey="id" labelKey="measuringWhat"
+                                                onChange={this.handleDependentVariableChange} name="dependentVariable"
+
+                                                options={this.state.programUpdates} clearable={false}/>
+
+
+                                    </div>
+                                </div>
+                                <div className="column">
+                                    <div className="field">
+                                        <label htmlFor="kind">Independent Variable:</label>
+                                        <Select value={this.state.independentVariable} valueKey="id" labelKey="measuringWhat"
+                                                onChange={this.handleIndependentVariableChange} name="independentVariable"
+                                                options={this.state.programUpdates} clearable={false}/>
+
+
+                                    </div>
+                                </div></div>
+                    <div className="ui row">
+                        <div className="ui column">&nbsp;</div>
+
+                    <div className="column">
+                                    <ValidatedInput
+                                        type="text"
+                                        name="name"
+                                        label="Name:"
+                                        id="id_name"
+                                        placeholder="Distance x Date Line Graph"
+                                        value={this.state.name || ''}
+                                        initialValue={this.state.name}
+                                        validators='"!isEmpty(str)"'
+                                        onChange={this.validate}
+                                        stateCallback={this.handleNameChange}
+                                    />
+                                </div>
+                                            <div className="column">
+                                                <label>&nbsp;</label>
+
+                                    <StandardInteractiveButton color="purple" initial="View Data" processing="Building..." completed="Viewing" current={this.state.saved} clicked={this.handleSubmit}  />
+</div></div>
+                            <div className="ui row">&nbsp;</div>
+                    </div>
+
+                                        {this.state.visualizationViewerData != undefined ? <VisualizationChartView data={this.state.visualizationViewerData} type={this.state.kind} /> : null }
+
+                        {/*<div ref="ref_mediatorVariableSelect">
+                            <div className="ui row">
+                                <div className="sixteen wide column">
+                                    <div className="field">
+                                        <label htmlFor="kind">Mediator Variable:</label>
+                                        <Select value={this.state.mediatorVariable} valueKey="id" labelKey="measuringWhat"
+                                                onChange={this.handleMediatorVariableChange} name="mediatorVariable"
+                                                options={this.state.programUpdates} clearable={false}/>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="ui row">&nbsp;</div></div>*/}
+
+                <div className="ui three column grid form">
+
+                            <div className="ui row">&nbsp;</div>
+
+                                <div className="ui row">
+                                    <div className="ui column">
+                                        <div className="ui fluid button" onClick={this.closeModal}>Cancel</div>
+                                    </div>
+                                    <div className="ui  column">
+                                        <div className="ui primary fluid button" onClick={this.handleSubmit}>Save</div>
+                                    </div>
+                                    <div className="ui row">&nbsp;</div>
+                                </div>
+                    </div>
+
+
+
+            </Modal>
+        )
+    }
+}
+
 
 @connect(mapStateToProps, mapDispatchToProps)
 export class VisualizationModalForm extends React.Component {

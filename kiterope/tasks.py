@@ -95,6 +95,7 @@ def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId, eta=None
 
             for currentStepUpdate in currentStepUpdates:
 
+
                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
 
 

@@ -21,7 +21,6 @@ admin.site.register(Answer)
 admin.site.register(Interest)
 admin.site.register(StepOccurrence)
 admin.site.register(PlanOccurrence)
-admin.site.register(UpdateOccurrence)
 admin.site.register(Metric)
 admin.site.register(Participant)
 admin.site.register(ProgramRequest)
@@ -39,7 +38,8 @@ admin.site.register(SettingsSet)
 
 admin.site.register(CroppableImage)
 
-
+class UpdateOccurrenceAdmin(admin.ModelAdmin):
+    list_display = ('update', 'stepOccurrence','author','pictures_unpacked', 'time', 'integer', 'decimal', 'audio', 'video', 'url', 'text', 'longText', 'boolean', 'datetime')
 
 
 
@@ -71,4 +71,5 @@ admin.site.register(Program)
 
 admin.site.register(BlogPost)
 
+admin.site.register(UpdateOccurrence)
 

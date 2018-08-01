@@ -47,7 +47,7 @@ from kiterope.helpers import toUTC
 from scheduler.scheduler import TaskScheduler
 from scheduler.models import ScheduledTask
 from uuid import UUID
-
+from django.contrib.postgres.fields import JSONField
 from kiterope.tasks import send_email_notification
 
 
@@ -846,12 +846,15 @@ class UpdateOccurrenceViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
 
         instance = self.get_object()
+        print(instance.update.measuringWhat)
+
 
         if instance.update.measuringWhat == "Absolute Date/Time":
 
             instance.datetime = datetime.datetime.now()
-        if instance.update.measuringWhat == "Relative Date":
-            instance.integer = instance.stepOccurrence.planOccurrence.startDate - datetime.datetime.now()
+        if instance.update.measuringWhat == "Relative Date/Time":
+
+            instance.duration = datetime.datetime.now(datetime.timezone.utc) - instance.stepOccurrence.planOccurrence.startDateTime
 
 
 
@@ -1059,6 +1062,21 @@ class VisualizationViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
+
+class TempVisualizationViewSet(viewsets.ModelViewSet):
+    queryset = Visualization.objects.all()
+    required_scopes = ['groups']
+    permission_classes = [AllowAny]
+    serializer_class = VisualizationSerializer
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+
+
+        return VisualizationViewSet.list(request, *args, **kwargs)
+
+
 
 class PeriodViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwnerOrNone]
@@ -1292,12 +1310,13 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         try:
-            theUser = self.request.user.is_authenticated()
+            theUser = self.request.user
             userIsCurrentUser = Q(author=theUser)
+
             viewableByAnyone = Q(viewableBy="ANYONE")
             isActiveFilter = Q(isActive=True)
 
-            theQueryset = Program.objects.filter(isActive & (userIsCurrentUser | viewableByAnyone))
+            theQueryset = Program.objects.filter(isActiveFilter).filter(userIsCurrentUser | viewableByAnyone)
         except:
             isActiveFilter = Q(isActive=True)
 
@@ -1313,6 +1332,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
             theQueryset = theQueryset
 
         return theQueryset
+
 
 
 class ProgramNoStepsViewSet(viewsets.ModelViewSet):
@@ -1617,6 +1637,8 @@ class BrowseableProgramViewSet(viewsets.ModelViewSet):
 
 
 
+
+
 class ContactGroupViewSet(viewsets.ModelViewSet):
     serializer_class = ContactGroupSerializer
     queryset = ContactGroup.objects.all()
@@ -1661,8 +1683,6 @@ class ContactGroupViewSet(viewsets.ModelViewSet):
         theProfile = self.request.user.profile
         querySet = ContactGroup.objects.filter(profile=theProfile)
         return querySet
-
-
 
 
 

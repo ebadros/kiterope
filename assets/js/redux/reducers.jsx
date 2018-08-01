@@ -363,7 +363,12 @@ export const rootReducer = (state = {}, action) => {
 
             var thePrograms = Object.assign({},state.programs);
             var theProgram = thePrograms[action.programId];
-            var theSteps = theProgram.steps;
+            if (theProgram.steps != undefined) {
+                var theSteps = theProgram.steps;
+            } else {
+                var theSteps = {}
+            }
+
             theSteps[action.step.id] = action.step;
             return Object.assign({}, state, {programs: thePrograms});
             break;
@@ -421,6 +426,10 @@ export const rootReducer = (state = {}, action) => {
 
         case 'SET_UPDATE_OCCURRENCES':
             return Object.assign({}, state, {updateOccurrences: action.updateOccurrences});
+            break;
+
+        case 'SET_VISUALIZATION_VIEWER_DATA':
+            return Object.assign({}, state, {visualizationViewerData: action.visualizationViewerData});
             break;
 
         case 'SET_UPDATES':

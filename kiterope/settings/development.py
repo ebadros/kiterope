@@ -94,19 +94,21 @@ MIDDLEWARE_CLASSES = [
 SEO_JS_ENABLED = False
 
 
+
 DATABASES = {
-'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'ebdb',
-            'USER': 'kiteropeAdmin',
-            'PASSWORD': 'regul8or1',
-            'HOST': 'aa1arj4p56yj6vl.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
-            'PORT': '5432',
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ebdb',
+        'USER': 'kiteropeAdmin',
+        'PASSWORD': 'regul8or1',
+        'HOST': 'kiterope-development.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
 }
+
 
 '''DATABASE_ROUTERS = (
     'tenant_schemas.routers.TenantSyncRouter',
