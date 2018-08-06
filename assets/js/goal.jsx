@@ -17,7 +17,8 @@ import TinyMCEInput from 'react-tinymce-input';
 import {UserLink } from './profile'
 
 
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 
@@ -1256,7 +1257,7 @@ export class GoalModalForm extends React.Component {
 
                     <div className="ui row">
                         <div className={mediumColumnWidth}>
-                            <ValidatedInput
+                            <KRInput
                                 type="text"
                                 name="title"
                                 label="What is your goal? (Required)"
@@ -1276,7 +1277,7 @@ export class GoalModalForm extends React.Component {
                     <div className="ui row">
                         <div className={mediumColumnWidth}>
 
-                            <ValidatedInput
+                            <KRInput
                                 type="textarea"
                                 name="why"
                                 label="Why do you want to achieve this goal? What good will happen if you achieve it? What bad will happen if you don't achieve it? (Required)"
@@ -1300,7 +1301,7 @@ export class GoalModalForm extends React.Component {
                     <div className="ui row">
                         <div className={mediumColumnWidth}>
 
-                            <ValidatedInput
+                            <KRInput
                                 type="textarea"
                                 name="obstacles"
                                 label="What are some obstacles that could stand in your way? What obstacles do you envision encountering? (Required)"
@@ -1344,7 +1345,7 @@ export class GoalModalForm extends React.Component {
                     <div className="ui row">
                         <div className={mediumColumnWidth}>
 
-                            <ValidatedInput
+                            <KRInput
                                 type="text"
                                 name="metric"
                                 label="How will you measure your progress? (Required)"
@@ -1782,7 +1783,7 @@ export class GoalSMARTForm2 extends React.Component {
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row bold">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="title"
                                                     label="What is your goal? (Required)"
@@ -1818,7 +1819,7 @@ export class GoalSMARTForm2 extends React.Component {
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="metric"
                                                     label="How will you measure your progress?"
@@ -1855,7 +1856,7 @@ export class GoalSMARTForm2 extends React.Component {
 <div className="ui row">&nbsp;</div>
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="obstacles"
                                                     label="What obstacles have you encountered in the past or do you foresee encountering?"
@@ -1891,7 +1892,7 @@ export class GoalSMARTForm2 extends React.Component {
 
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="coreValues"
                                                     label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
@@ -1913,7 +1914,7 @@ export class GoalSMARTForm2 extends React.Component {
                                             <label htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
 <Select value={this.state.goalInAlignmentWithCoreValues}  onChange={this.handleGoalInAlignmentWithCoreValuesChange} name="goalInAlignmentWithCoreValues" options={goalInAlignmentWithCoreValuesOptions} /></div>
 <div className="ui row">&nbsp;</div><div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="why"
                                                     label="Why do you want to achieve this goal?"
@@ -2177,12 +2178,12 @@ export class GoalBasicView extends React.Component {
                                     <div className="ui two column grid">
 
                                             <div className="ui left aligned column">
-                                                 <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
+                                                 <IconLabelCombo tooltip="Goal's deadline" size="extramini" orientation="right" text={theDeadline} icon="deadline"
                                             background="Light" link="/goalEntry"/>
                                                 </div>
                                                                                     <div className="ui right aligned column">
 
-                                                 <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric}
+                                                 <IconLabelCombo tooltip="Goal's metric" size="extramini" orientation="right" text={this.state.data.metric}
                                             icon="metric"
                                             background="Light" link="/goalEntry"/>
                                                                                         </div>
@@ -2209,9 +2210,9 @@ export class GoalBasicView extends React.Component {
                             </div>
                         </div>
                         <div className="right aligned six wide column">
-                            <IconLabelCombo size="extramini" orientation="right" text={theDeadline} icon="deadline"
+                            <IconLabelCombo tooltip="Goal's deadline" size="extramini" orientation="right" text={theDeadline} icon="deadline"
                                             background="Light" link="/goalEntry"/>
-                            <IconLabelCombo size="extramini" orientation="right" text={this.state.data.metric}
+                            <IconLabelCombo tooltip="Goal's metric" size="extramini" orientation="right" text={this.state.data.metric}
                                             icon="metric"
                                             background="Light" link="/goalEntry"/>
                         </div>

@@ -9,7 +9,8 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { IconLabelCombo } from './elements'
 
 import Modal from 'react-modal'
@@ -107,13 +108,11 @@ export class VisualizationsPage extends React.Component {
     getVisualizations() {
 
                 if (this.state.visualizations != undefined) {
-                            console.log("getvisualizations")
 
 
 
                     var objectNodes = this.state.visualizations.map( (objectData) => {
                         if (objectData.visualizations != undefined) {
-                                                    console.log("objectData " + objectData.title)
 
 
                             return (<div key={`key_programVisualization_${objectData.id}`} >
@@ -515,7 +514,7 @@ export class VisualizationsListAndAdd extends React.Component {
         if (this.state.data) {
             var theProgramId = this.state.programId
 
-            if (theProgramId != undefined) {
+            if (theProgramId != undefined && theProgramId != "") {
                 var theData = this.state.data;
 
                 if (theData != undefined) {
@@ -1221,7 +1220,6 @@ return thePlans
     }
 
     handleDependentVariableChange(option) {
-        console.log(option.id)
 
         this.setState({dependentVariable: option.id});
     }
@@ -1257,8 +1255,6 @@ return thePlans
                 program: program,
                 plan:plan
         }
-        console.log("visualizationData")
-        console.log(visualizationData)
 
 
         if (this.state.id != "") {
@@ -1290,7 +1286,6 @@ return thePlans
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log(data)
 
                      if (visualization.id) {
                          store.dispatch(editVisualization(data.id, data))
@@ -1748,7 +1743,6 @@ return thePlans
     }
 
     handleDependentVariableChange(option) {
-        console.log(option.id)
 
         this.setState({dependentVariable: option.id});
     }
@@ -1813,7 +1807,6 @@ return thePlans
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log(data)
                      //store.dispatch(setVisualizationViewerData(data))
                      this.setState({visualizationViewerData:data})
 
@@ -1854,7 +1847,6 @@ return thePlans
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log(data)
 
                      if (visualization.id) {
                          store.dispatch(editVisualization(data.id, data))
@@ -1992,7 +1984,7 @@ return thePlans
                         <div className="ui column">&nbsp;</div>
 
                     <div className="column">
-                                    <ValidatedInput
+                                    <KRInput
                                         type="text"
                                         name="name"
                                         label="Name:"
@@ -2446,7 +2438,6 @@ return thePlans
     }
 
     handleDependentVariableChange(option) {
-        console.log(option.id)
 
         this.setState({dependentVariable: option.id});
     }
@@ -2482,8 +2473,6 @@ return thePlans
                 program: program,
                 plan:plan
         }
-        console.log("visualizationData")
-        console.log(visualizationData)
 
 
         if (this.state.id != "") {
@@ -2515,7 +2504,6 @@ return thePlans
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log(data)
 
                      if (visualization.id) {
                          store.dispatch(editVisualization(data.id, data))
@@ -2621,7 +2609,7 @@ return thePlans
                         <div className="ui row">&nbsp;</div></div>
                             <div className="ui row">
                                 <div className="sixteen wide column">
-                                    <ValidatedInput
+                                    <KRInput
                                         type="text"
                                         name="name"
                                         label="Name:"

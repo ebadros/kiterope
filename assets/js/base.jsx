@@ -4,7 +4,7 @@ var $  = require('jquery');
 global.rsui = require('react-semantic-ui');
 var forms = require('newforms');
 import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
-
+import {StandardInteractiveButton} from './settings'
 var ReactS3Uploader = require('react-s3-uploader');
 var S3Upload = require('react-s3-uploader/s3upload')
 
@@ -30,7 +30,7 @@ import { ItemMenu } from './elements'
 import  {store} from "./redux/store";
 
 
-import { updateStep, setContactGroups, setModalFormData, deleteVisualization, addContactGroup, addContact, replaceContact, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
+import { updateStep, setDisplayAlert, setContactGroups, setModalFormData, deleteVisualization, addContactGroup, addContact, replaceContact, setSignInOrSignupModalData, setSubscriptionModalData, setGoalModalData, setProfileModalData, setStepModalData, removePlan, deleteContact, setProgramModalData, setVisualizationModalData, setMessageWindowVisibility, setCurrentContact, addPlan, addStep, updateProgram, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, addGoal, updateGoal, deleteGoal, setContacts, setStepOccurrences } from './redux/actions'
 
 import { Provider, connect,  dispatch } from 'react-redux'
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
@@ -1025,7 +1025,7 @@ export class MyReactS3Uploader extends ReactS3Uploader {
 
     uploadFile ()   {
         this.setState({
-            buttonText:"Saving..."
+            saved:"Saving..."
         })
 
         var theFiles = []
@@ -1097,8 +1097,11 @@ export class MyReactS3Uploader extends ReactS3Uploader {
          }
 
 
-            return (<div><div className="ui large fluid grey button" style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
-                <SaveButton buttonSize="large" style={rightButtonStyle} saved={this.state.saved} clicked={this.uploadFile} />
+            return (<div>
+
+                <div className="ui large fluid grey button" style={leftButtonStyle} onClick={this.handleCancelEdit}>Cancel</div>
+                <StandardInteractiveButton style={rightButtonStyle} color="blue" initial="Save" processing="Saving..." completed="Saved" current={this.state.saved} clicked={this.uploadFile}  />
+                {/*<SaveButton buttonSize="large" style={rightButtonStyle} saved={this.state.saved} clicked={this.uploadFile} />*/}
 </div>)
         } else return(
             <div></div>
@@ -1245,49 +1248,52 @@ export class NewImageUploader extends React.Component {
      let url = URL.createObjectURL(file)
       this.readFileAsDataURL(file)
       this.setState({originalUncompressedImage: url}, () => {
+
           this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
+          this.setState({
+                    saved: "Save"
+                })
+
 
       })
 
   }
 
 
-    crop(){
+    crop() {
 
-        console.log("cropbox data")
-        console.log(this.state.cropperCropboxData)
-
-        var theCurrentCropboxData = this.refs.cropper.getCropBoxData()
-        let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
-        if (this.state.cropperCropboxData != undefined ) {
-            if (theCurrentCropboxData.left != this.state.cropperCropboxData.left
-                || theCurrentCropboxData.right != this.state.cropperCropboxData.right
-                || theCurrentCropboxData.width != this.state.cropperCropboxData.width
-                || theCurrentCropboxData.height != this.state.cropperCropboxData.height) {
-                this.setState({
-                    saved: "Save"
-                })
+        if (this.refs.cropper != undefined) {
+            var theCurrentCropboxData = this.refs.cropper.getCropBoxData()
+            let theFinalImage = this.refs.cropper.getCroppedCanvas().toDataURL()
+            if (this.state.cropperCropboxData != undefined) {
+                if (theCurrentCropboxData.left != this.state.cropperCropboxData.left
+                    || theCurrentCropboxData.right != this.state.cropperCropboxData.right
+                    || theCurrentCropboxData.width != this.state.cropperCropboxData.width
+                    || theCurrentCropboxData.height != this.state.cropperCropboxData.height) {
+                    this.setState({
+                        saved: "Save"
+                    })
+                } else {
+                    this.setState({
+                        saved: "Saved"
+                    })
+                }
             } else {
                 this.setState({
                     saved: "Saved"
                 })
             }
-        } else {
+
+
+            //var cropboxData = this.refs.cropper.getCropBoxData()
+
             this.setState({
-                    saved: "Saved"
-                })
+                finalImage: theFinalImage,
+                //cropperCropboxData: cropboxData,
+
+            })
+
         }
-
-
-
-        //var cropboxData = this.refs.cropper.getCropBoxData()
-
-      this.setState({
-          finalImage: theFinalImage,
-          //cropperCropboxData: cropboxData,
-
-      })
-
     }
 
 
@@ -1313,14 +1319,7 @@ export class NewImageUploader extends React.Component {
 
   onUploadStart(file, next) {
       var cropboxData = this.refs.cropper.getCropBoxData()
-      console.log("upload Start cropboxData")
-      console.log(cropboxData)
-
-
-
-      this.setState({cropperCropboxData:cropboxData}, () => console.log("this.state.cropboxData " + this.state.cropperCropboxData))
-
-
+      this.setState({cropperCropboxData:cropboxData}, )
 
        const imageCompressor = new ImageCompressor();
 
@@ -1352,9 +1351,6 @@ var theFilename = theFilenameURLSplit.pop() || theFilenameURLSplit.pop()
       if(this.state.cropperCropboxData == undefined) {
           this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
       }
-
-
-
 
       var xhr = new XMLHttpRequest();
 
@@ -1476,8 +1472,7 @@ xhr.send();
     handleCropperReady() {
 
         if(this.state.cropperCropboxData != "") {
-            console.log("inside cropper ready")
-            console.log(this.state.cropperCropboxData)
+
 
             this.refs.cropper.setCropBoxData(this.state.cropperCropboxData)
         }
@@ -1777,29 +1772,21 @@ export class ViewEditDeleteItem extends React.Component {
          $(this.refs["ref_form"]).hide();
          $(this.refs["ref_detail"]).hide();
 
-         if (this.props.currentView != undefined) {
-             this.setState({
-             data:this.props.data,
-             currentView: this.props.currentView,
+
+         this.setState({
+                 data: this.props.data,
+                 currentView: "Basic",
                  id: this.props.id,
 
-         })}
-         else {
-             this.setState({
-             data:this.props.data,
-             currentView: "Basic",
-                 id: this.props.id,
-
-         })
+             }, () => this.showHideUIElements(this.state.currentView)
+         )
 
 
-             }
          this.handleComponentDidMountSpecificActions();
 
-         this.showHideUIElements(this.props.currentView)
 
+     }
 
-         };
          handleComponentDidMountSpecificActions() {
 
          }
@@ -1909,12 +1896,6 @@ export class ViewEditDeleteItem extends React.Component {
             })
         }
 
-        if (this.state.currentView != nextProps.currentView) {
-            this.setState({
-                currentView:nextProps.currentView,
-            });
-            this.showHideUIElements(nextProps.currentView)
-        }
 
         if (this.state.serverErrors != nextProps.serverErrors) {
             this.setState({
@@ -1937,9 +1918,6 @@ export class ViewEditDeleteItem extends React.Component {
     };
 
     handleClick = (callbackData) => {
-        console.log("handle click called")
-
-        console.log(callbackData)
         this.setState({
             currentView:callbackData
         }, () => this.showHideUIElements(callbackData))
@@ -1948,15 +1926,15 @@ export class ViewEditDeleteItem extends React.Component {
 
     switchToDetailView = () => {
         $(this.refs["ref_form"]).hide();
-        $(this.refs["ref_detail"]).slideDown();
-                         this.setState({currentView:'Detail'})
+                         this.setState({currentView:'Detail'}, () =>         $(this.refs["ref_detail"]).slideDown()
+)
 
 
         };
 
     switchToEditView = () => {
-        $(this.refs["ref_basic"]).hide();
-        $(this.refs["ref_form"]).slideDown();
+        //$(this.refs["ref_basic"]).hide();
+       // $(this.refs["ref_form"]).slideDown();
                  this.setState({currentView:'Edit'})
 
 
@@ -1972,10 +1950,13 @@ export class ViewEditDeleteItem extends React.Component {
 
 
      switchToBasicView = () => {
-         $(this.refs["ref_detail"]).hide();
-         $(this.refs["ref_form"]).slideUp();
-         $(this.refs["ref_basic"]).slideDown();
-         this.setState({currentView:'Basic'})
+         //$(this.refs["ref_form"]).slideUp();
+
+         this.setState({currentView:'Basic'}, () => {
+             //$(this.refs["ref_basic"]).slideDown();
+                      $(this.refs["ref_detail"]).slideUp();
+
+         })
 
     };
 
@@ -2123,7 +2104,6 @@ export class GoalViewEditDeleteItem extends ViewEditDeleteItem {
   }
 
   switchToEditView = () => {
-      console.log("Switching to edit view")
 
         this.setState({
             modalIsOpen:true,
@@ -2305,7 +2285,6 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     handleGetDetailOnPlan = () => {
-        console.log("inside here");
       store.dispatch(push("/plan/view/" + this.props.id))
 
 };
@@ -2391,7 +2370,6 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
                      'Authorization': 'Token ' + localStorage.token
                  },
                  success: function (data) {
-                     console.log("here's a success");
                      this.switchToBasicView();
 
                      store.dispatch(updateProgram(data));
@@ -2404,7 +2382,6 @@ export class ProgramViewEditDeleteItem extends ViewEditDeleteItem {
 
                  }.bind(this),
                  error: function (xhr, status, err) {
-                                          console.log("here's failer");
 
                      var serverErrors = xhr.responseJSON;
             this.setState({
@@ -2574,8 +2551,6 @@ hideComponent = () => {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    console.log("success");
-                    console.log(data)
                     this.setState({data:data})
                     this.state.data.isSubscribed = false;
                             this.setState({subscribeButtonText: "Subscribe"})
@@ -2649,8 +2624,9 @@ hideComponent = () => {
               program={this.state.data}
 />*/}
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                                        {detailView}
+
                     <div>{basicView}</div>
-                    {detailView}
 
 
 
@@ -2675,6 +2651,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
              currentView:"Basic",
              serverErrors:"",
              openModal:false,
+             subscribeButtonText:"",
 
          }
      }
@@ -2684,6 +2661,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
          data:this.props.data,
          occurrenceData:this.props.data,
      })
+
+          if (this.props.data.isSubscribed) {
+                this.setState({subscribeButtonText:"Unsubscribe"})
+            } else {
+                                this.setState({subscribeButtonText:"Subscribe"})
+
+            }
 }
     handleComponentWillReceivePropsSpecificActions(nextProps) {
     if (this.state.occurrenceData != nextProps.occurrenceData) {
@@ -2700,6 +2684,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
             this.setState({
                 data: nextProps.data,
             })
+
+            if (nextProps.data.isSubscribed) {
+                this.setState({subscribeButtonText:"Unsubscribe"})
+            } else {
+                                this.setState({subscribeButtonText:"Subscribe"})
+
+            }
 
         }
     }
@@ -2850,18 +2841,18 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
 
         if (this.state.data != null) {
             return (
-                <div ref="ref_detail">
-                    <div className="itemDetailSmall">
+                    <div ref="ref_detail" className="itemDetailSmall">
                         <div dangerouslySetInnerHTML={{__html: this.state.data.description}}></div>
                     </div>
-                </div>
             )
-        } else return (<div></div>)
+        } else return (null)
 
 
     };
 
     handleSubscribeClick = () => {
+                this.setState({subscribeButtonText: "Subscribing..."})
+
         if (this.props.storeRoot.user != undefined) {
             this.setState({
                     openModal: true
@@ -2876,7 +2867,7 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     handleUnsubscribeClick = () => {
-        console.log("handleUnsubscribe click PlanViewEditDeleteItem")
+        this.setState({subscribeButtonText: "Unsubscribing..."})
         if (this.state.id) {
             var theUrl = "/api/planOccurrences/" + this.state.id + "/";
             console.log(theUrl)
@@ -2894,12 +2885,13 @@ export class PlanViewEditDeleteItem extends ViewEditDeleteItem {
                     'Authorization': 'Token ' + localStorage.token
                 },
                 success: function (data) {
-                    console.log("success");
-                    console.log(data)
+
                     this.setState({data:data})
                     this.setState({subscribeButtonText: "Subscribe"})
 
                     store.dispatch(removePlan(this.state.id))
+                    store.dispatch(setDisplayAlert({showAlert:true, text:"You have been unsubscribed from the plan.", style:{backgroundColor:'purple', color:'white'}}))
+
 
 
 
@@ -2934,17 +2926,19 @@ hideComponent = () => {
 
     render() {
 
+
+
         var controlBar = this.getControlBar();
         var detailView = this.getDetailView();
         var basicView = this.getBasicView();
         var editView = this.getEditView();
         var subscribeButton = <div className="ui purple bottom attached large button"
-                                           onClick={this.handleSubscribeClick}>Subscribe</div>;
+                                           onClick={this.handleSubscribeClick}>{this.state.subscribeButtonText}</div>;
 
         if (this.state.data) {
             if (this.state.data.isSubscribed) {
                  subscribeButton = <div className="ui purple bottom attached large button"
-                                           onClick={this.handleUnsubscribeClick}>Unsubscribe</div>
+                                           onClick={this.handleUnsubscribeClick}>{this.state.subscribeButtonText}</div>
 
             }
 
@@ -2964,8 +2958,9 @@ hideComponent = () => {
 />
 
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                                        {detailView}
+
                     <div>{basicView}</div>
-                    {detailView}
                     {editView}
 
                 </div>{subscribeButton}
@@ -3217,6 +3212,8 @@ export class ContactViewEditDeleteItem extends ViewEditDeleteItem {
             },
             success: function (data) {
                 store.dispatch(addContact(data))
+                store.dispatch(setDisplayAlert({showAlert:true, text:"Contact added", style:{backgroundColor:'purple', color:'white'}}))
+
 
 
             }.bind(this),
@@ -3379,8 +3376,9 @@ export class ContactViewEditDeleteItem extends ViewEditDeleteItem {
 
 
                     <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                                                {detailView}
+
                         <div>{basicView}</div>
-                        {detailView}
                     </div>
 
                     { this.state.data.wasConfirmed == "sender" && this.state.data.receiver != this.props.id ? <div className="ui purple bottom attached large button" onClick={this.handleConfirmContactClicked}>Accept Contact</div>:null}
@@ -3595,6 +3593,8 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
                  },
                  success: function (data) {
                      store.dispatch(addContact(data))
+                                     store.dispatch(setDisplayAlert({showAlert:true, text:"Contact added", style:{backgroundColor:'purple', color:'white'}}))
+
 
 
 
@@ -3697,6 +3697,8 @@ export class ProfileViewEditDeleteItem extends ViewEditDeleteItem {
             },
             success: function (data) {
                 store.dispatch(addContact(data))
+                                store.dispatch(setDisplayAlert({showAlert:true, text:"Contact added", style:{backgroundColor:'purple', color:'white'}}))
+
 
 
             }.bind(this),
@@ -3734,8 +3736,9 @@ hideComponent = () => {
 
 
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                                        {detailView}
+
                     <div>{basicView}</div>
-                    {detailView}
 
 
 
@@ -3782,6 +3785,8 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
             },
             success: function (data) {
                 store.dispatch(addStep(this.props.parentId, data));
+                                store.dispatch(setDisplayAlert({showAlert:true, text:"Step duplicated", style:{backgroundColor:'purple', color:'white'}}))
+
 
                 this.reload()
 
@@ -3812,7 +3817,7 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
     };
 
     switchToBasicView = () => {
-        $(this.refs["ref_detail"]).hide();
+        $(this.refs["ref_detail"]).slideUp();
         //$(this.refs["ref_form"]).slideUp();
         $(this.refs["ref_basic"]).slideDown();
         this.props.currentViewChanged("Basic")
@@ -4006,8 +4011,9 @@ export class StepViewEditDeleteItem extends ViewEditDeleteItem {
 
 
                 <div className="ui segment noBottomMargin noTopMargin noTopRadius">
+                                        {detailView}
+
                     <div>{basicView}</div>
-                    {detailView}
 
                     <div className="sixteen wide row">
 
@@ -4055,6 +4061,8 @@ export class VisualizationViewEditDeleteItem extends ViewEditDeleteItem {
             },
             success: function (data) {
                 store.dispatch(addVisualization(this.props.parentId, data));
+                                store.dispatch(setDisplayAlert({showAlert:true, text:"Visualization duplicated.", style:{backgroundColor:'purple', color:'white'}}))
+
 
                 this.reload()
 
@@ -4070,6 +4078,8 @@ export class VisualizationViewEditDeleteItem extends ViewEditDeleteItem {
 
     callDeleteReducer() {
         store.dispatch(deleteVisualization(this.props.parentId, this.props.id))
+                        store.dispatch(setDisplayAlert({showAlert:true, text:"Visualization removed.", style:{backgroundColor:'purple', color:'white'}}))
+
     }
 
     switchToEditView = () => {
@@ -4161,6 +4171,8 @@ export class VisualizationViewEditDeleteItem extends ViewEditDeleteItem {
 
             success: (data) => {
                 store.dispatch(deleteVisualization(this.state.data.id))
+                                store.dispatch(setDisplayAlert({showAlert:true, text:"Visualization removed", style:{backgroundColor:'purple', color:'white'}}))
+
                 //$(this.refs['ref_update_form_' + this.state.data.id]).slideUp();
 
                 //this.props.reloadItem()

@@ -29,7 +29,8 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 import {SaveButton} from './settings'
 import {ImageUploader,  NewImageUploader, Breadcrumb, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, Footer, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox, FormErrorMessage } from './inputElements'
+
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList, UpdateModalForm } from './update'
@@ -422,8 +423,8 @@ setDateAndTimeInfo() {
                         </div>                        <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
                     </div>
                     <div className="right aligned six wide column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
-                                    {this.state.timeInfo ? <IconLabelCombo size="extramini" orientation="right" text={this.state.timeInfo} icon="timeCommitment" background="Light" link="/goalEntry" /> :<div></div>}
+                                    <IconLabelCombo tooltip="Step's date" size="extramini" orientation="right" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
+                                    {this.state.timeInfo ? <IconLabelCombo tooltip="Step's time"size="extramini" orientation="right" text={this.state.timeInfo} icon="timeCommitment" background="Light" link="/goalEntry" /> :<div></div>}
 </div>
 
                 </div>
@@ -615,8 +616,8 @@ export class StepBasicView extends React.Component {
                         <div className="row" >
                             <div className="ui one column grid">
                                 <div className="ui left aligned column">
-                                    {this.state.data.type == 'TIME' && this.state.dateInfo != undefined ? <IconLabelCombo size="extramini" orientation="left" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />: null}
-                                    {this.state.data.type == 'COMPLETION' ? <IconLabelCombo size="extramini" orientation="left" text="COMPLETION" icon="calendar" background="Light" link="/goalEntry" />: null}
+                                    {this.state.data.type == 'TIME' && this.state.dateInfo != undefined ? <IconLabelCombo tooltip="Step's date" size="extramini" orientation="left" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />: null}
+                                    {this.state.data.type == 'COMPLETION' ? <IconLabelCombo tooltip="Step's time" size="extramini" orientation="left" text="COMPLETION" icon="calendar" background="Light" link="/goalEntry" />: null}
 
 </div>
 
@@ -641,7 +642,7 @@ export class StepBasicView extends React.Component {
                         </div>                        <div className="fluid row" dangerouslySetInnerHTML={{__html: this.state.data.description}}/>
                     </div>
                     <div className="right aligned six wide column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
+                                    <IconLabelCombo tooltip="Step's date" size="extramini" orientation="right" text={this.state.dateInfo} icon="calendar" background="Light" link="/goalEntry" />
 </div>
 
                 </div>
@@ -1174,6 +1175,8 @@ export class StepModalForm extends React.Component {
     }
 
     setStateToData (stepModalData) {
+        console.log("setStateToData")
+        console.log(stepModalData.data)
         this.setState({
             modalIsOpen: stepModalData.modalIsOpen,
 
@@ -1214,6 +1217,7 @@ export class StepModalForm extends React.Component {
             var frequency="ONCE"
 
              if (data.description != undefined) {
+                 console.log("description set to data.description")
                 description=data.description
             }
 
@@ -1408,11 +1412,11 @@ export class StepModalForm extends React.Component {
         this.state.title = stateValueFromChild;
     }
 
-    handleEditorChange(e)  {
+    handleDescriptionChange(value) {
+                this.setState({description: value,
+            saved:"Save"});
 
-        this.setState({description: e,
-                            saved: "Save"});
-  }
+    }
     handleDay01Change = (e) =>  {
 
         this.setState({day01: e,
@@ -1615,7 +1619,7 @@ export class StepModalForm extends React.Component {
                     type: "COMPLETION",
                     frequency: "",
                     image: defaultStepCroppableImage.image,
-                croppableImage:defaultStepCroppableImage,
+                    croppableImage:defaultStepCroppableImage,
                     day01: false,
                     day02: false,
                     day03: false,
@@ -1629,20 +1633,22 @@ export class StepModalForm extends React.Component {
                     useAbsoluteTime: false,
                     program: this.props.parentId,
                     updates: [],
-                endRecurrence:"NEVER",
-            monthlySpecificity:"SPECIFIC_DAYS",
-            monthlyDay: "MONDAY",
-            monthlyDayOption: "FIRST",
-            interval: 1,
-            numberOfOccurrences:1,
-            recurrenceRule:"",
+                    endRecurrence:"NEVER",
+                    monthlySpecificity:"SPECIFIC_DAYS",
+                    monthlyDay: "MONDAY",
+                    monthlyDayOption: "FIRST",
+                    interval: 1,
+                    numberOfOccurrences:1,
+                    recurrenceRule:"",
 
-                    modalIsOpen: false,
-                },            () =>        { store.dispatch(setStepModalData(this.state))}
+                },
+                () => {
+                    store.dispatch(setStepModalData({modalIsOpen:false, data:this.state}))
+                }
 
 
-            );
-        };
+            )
+        }
 
 
         handleImageChange = (callbackData) => {
@@ -1708,16 +1714,16 @@ export class StepModalForm extends React.Component {
                 } else {
                     return (<div className="ui row">
                         <div className={mediumColumnWidth}>
-                            <div className="field fluid">
-                                <label htmlFor="id_description">Description:</label>
-                                <TinyMCEInput name="description"
-                                      value={this.state.description}
-                                      tinymceConfig={TINYMCE_CONFIG}
-                                      onChange={this.handleEditorChange}
-                        />
 
+                             <KRRichText label="Description:"
+                                config={TINYMCE_CONFIG}
+                                value={this.state.description}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleDescriptionChange}
+                                serverErrors={this.getServerErrors("description")}
+                    />
 
-                            </div>
                         </div>
                         <div className="six wide column">&nbsp;</div>
 
@@ -1752,18 +1758,22 @@ export class StepModalForm extends React.Component {
                     <div ref="dailyUI" className="ui grid">
                          <div className="ui row">
                             <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
 
 
-                                        </div>
+                                <KRSelect value={this.state.frequency}
+                                            valueChange={this.handleFrequencyChange}
+                                            label="Repeat?:"
+                                            isClearable={false}
+                                            name="frequency"
+                                            options={frequencyOptions}
+                                             serverErrors={this.getServerErrors('frequency')}
+                                            />
                             </div>
                             <div className="one wide middle aligned column noLabel">every</div>
 
                             <div className="one wide column noLabel">
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="interval"
                                         label=""
@@ -1773,6 +1783,8 @@ export class StepModalForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleIntervalChange}
+                                        serverErrors={this.getServerErrors("interval")}
+
 
 
                                     />
@@ -1818,18 +1830,21 @@ export class StepModalForm extends React.Component {
                     <div ref="hourlyUI" className="ui grid">
                          <div className="ui row">
                             <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
 
-
-                                        </div>
+                                <KRSelect value={this.state.frequency}
+                                            valueChange={this.handleFrequencyChange}
+                                            label="Repeat?:"
+                                            isClearable={false}
+                                            name="frequency"
+                                            options={frequencyOptions}
+                                             serverErrors={this.getServerErrors('frequency')}
+                                            />
                             </div>
                             <div className="one wide middle aligned column noLabel">every</div>
 
                             <div className="one wide column noLabel">
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="interval"
                                         label=""
@@ -1839,6 +1854,8 @@ export class StepModalForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleIntervalChange}
+                                        serverErrors={this.getServerErrors('interval')}
+
 
 
                                     />
@@ -1886,12 +1903,14 @@ export class StepModalForm extends React.Component {
                         
                          <div className="ui row">
                             <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
-
-
-                                        </div>
+                                <KRSelect value={this.state.frequency}
+                                            valueChange={this.handleFrequencyChange}
+                                            label="Repeat?:"
+                                            isClearable={false}
+                                            name="frequency"
+                                            options={frequencyOptions}
+                                             serverErrors={this.getServerErrors('frequency')}
+                                            />
                             </div>
                              </div>
                         <div className="ui row">
@@ -1950,18 +1969,20 @@ export class StepModalForm extends React.Component {
                     <div ref="weeklyUI" className="ui grid">
                          <div className="ui row">
                             <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
-
-
-                                        </div>
+                                <KRSelect value={this.state.frequency}
+                                            valueChange={this.handleFrequencyChange}
+                                            label="Repeat?:"
+                                            isClearable={false}
+                                            name="frequency"
+                                            options={frequencyOptions}
+                                             serverErrors={this.getServerErrors('frequency')}
+                                            />
                             </div>
                             <div className="one wide middle aligned column noLabel">every</div>
 
                             <div className="one wide column noLabel">
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="interval"
                                         label=""
@@ -1971,6 +1992,8 @@ export class StepModalForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleIntervalChange}
+                                        serverErrors={this.getServerErrors('interval')}
+
 
 
                                     />
@@ -2199,17 +2222,20 @@ export class StepModalForm extends React.Component {
 
 
                             <div className={smallColumnWidth}>
-                                <div className="field fluid">
-                                            <label htmlFor="id_frequency">and ending:</label>
-                                    <Select value={this.state.endRecurrence}  onChange={this.handleEndRecurrenceChange} name="endRecurrence" options={endRecurrenceOptions} clearable={false}/>
 
-
-                                        </div>
+                                <KRSelect value={this.state.endRecurrence}
+                                            valueChange={this.handleEndRecurrenceChange}
+                                            label="and ending:"
+                                            isClearable={false}
+                                            name="endRecurrence"
+                                            options={endRecurrenceOptions}
+                                             serverErrors={this.getServerErrors('endRecurrence')}
+                                            />
                             </div>
                         {this.state.endRecurrence == "AFTER_NUMBER_OF_OCCURRENCES" ?  <div><div className="one wide column">
                                             <label htmlFor="id_frequency">&nbsp;</label>
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="interval"
                                         label=""
@@ -2276,18 +2302,20 @@ export class StepModalForm extends React.Component {
                     <div ref="monthlyUI" className="ui grid">
                          <div className="ui row">
                             <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Repeat?:</label>
-                                    <Select value={this.state.frequency}  onChange={this.handleFrequencyChange} name="frequency" options={frequencyOptions} clearable={false}/>
-
-
-                                        </div>
+                                 <KRSelect value={this.state.frequency}
+                                            valueChange={this.handleFrequencyChange}
+                                            label="Repeat?:"
+                                            isClearable={false}
+                                            name="frequency"
+                                            options={frequencyOptions}
+                                             serverErrors={this.getServerErrors('frequency')}
+                                            />
                             </div>
                             <div className="one wide middle aligned column noLabel">every</div>
 
                             <div className="one wide column noLabel">
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="interval"
                                         label=""
@@ -2312,42 +2340,62 @@ export class StepModalForm extends React.Component {
                         </div>
                          <div className="ui row">
                              <div className={smallColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">Schedule event to occur on:</label>
-                                    <Select value={this.state.monthlySpecificity}  onChange={this.handleMonthlySpecificityChange} name="monthlySpecificity" options={monthlySpecificityOptions} clearable={false}/>
 
 
-                                        </div>
+                                 <KRSelect value={this.state.monthlySpecificity}
+                                            valueChange={this.handleMonthlySpecificityChange}
+                                            label="Schedule event to occur on:"
+                                            isClearable={false}
+                                            name="monthlySpecificity"
+                                            options={monthlySpecificityOptions}
+                                             serverErrors={this.getServerErrors('monthlySpecificity')}
+                                            />
                             </div>
                              {this.state.monthlySpecificity == "SPECIFIC_DATES" ?
 
                             <div  className={smallColumnWidth}>
 
-                                <div className="field fluid">
+
+                                <KRInput
+                                        type="text"
+                                        name="monthlyDates"
+                                        label=""
+                                        placeholder="1, 6, 9-10, 15"
+                                        value={this.state.monthlyDates}
+                                        initialValue={this.state.monthlyDates}
+                                        validators=''
+                                        onChange={this.validate}
+                                        stateCallback={this.handleMonthlyDatesChange}
+                                        serverErrors={this.getServerErrors('monthlyDates')}
 
 
-                                    <label htmlFor="id_date">&nbsp;</label>
-                                    <input type="text" placeholder="1, 6, 9-10, 15" name="monthlyDates" id="id_monthlyDates" value={this.state.monthlyDates} onChange={this.handleMonthlyDatesChange}/>
-
-                                </div>
+                                    />
 
                             </div> :
                                  <div className={mediumColumnWidth}>
                              <div className="ui two column grid" >
                              <div  className="column">
-                                <div className="field">
-                                    <label htmlFor="id_frequency">&nbsp;</label>
-                                    <Select value={this.state.monthlyDayOption}  onChange={this.handleMonthlyDayOptionsChange} name="monthlyDayOption" options={monthlyDayOptions} clearable={false}/>
 
-                                        </div>
+                                 <KRSelect value={this.state.monthlyDayOption}
+                                            valueChange={this.handleMonthlyDayOptionsChange}
+                                            label="Schedule event to occur on:"
+                                            isClearable={false}
+                                            name="monthlyDayOption"
+                                            options={monthlyDayOptions}
+                                             serverErrors={this.getServerErrors('monthlyDayOption')}
+                                            />
                             </div>
                              <div className="column">
-                                <div className="field">
-                                            <label htmlFor="id_frequency">&nbsp;</label>
-                                    <Select value={this.state.monthlyDay}  onChange={this.handleMonthlyDayChange} name="monthlyDay" options={dayOptions} clearable={false}/>
 
+                                 <KRSelect value={this.state.monthlyDay}
+                                            valueChange={this.handleMonthlyDayChange}
+                                            label="Schedule event to occur on:"
+                                            isClearable={false}
+                                            name="monthlyDay"
+                                            options={dayOptions}
+                                             serverErrors={this.getServerErrors('monthlyDay')}
+                                            />
 
-                                        </div>
                             </div>
                                  </div>
                                      </div>
@@ -2444,7 +2492,7 @@ export class StepModalForm extends React.Component {
                             <div className={mediumColumnWidth}>
                                               <input type="hidden" name="program" id="id_program" value={this.props.parentId}/>
 
-                                <ValidatedInput
+                                <KRInput
                                         type="text"
                                         name="title"
                                         label="Title"
@@ -2454,6 +2502,7 @@ export class StepModalForm extends React.Component {
                                         validators='"!isEmpty(str)"'
                                         onChange={this.validate}
                                         stateCallback={this.handleTitleChange}
+                                        serverErrors={this.getServerErrors('title')}
 
 
                                     />
@@ -2467,12 +2516,15 @@ export class StepModalForm extends React.Component {
                           { descriptionEditor }
                           <div className="ui row">
                             <div className={mediumColumnWidth}>
-                                <div className="field">
-                                            <label htmlFor="id_frequency">What type of step is this?</label>
-                                    <Select value={this.state.type}  onChange={this.handleTypeChange} name="type" options={stepTypeOptions} clearable={false}/>
 
-
-                                        </div>
+                                <KRSelect value={this.state.type}
+                                            valueChange={this.handleTypeChange}
+                                            label="What type of step is this?"
+                                            isClearable={false}
+                                            name="type"
+                                            options={stepTypeOptions}
+                                             serverErrors={this.getServerErrors('type')}
+                                            />
                             </div>
                         </div>
                           </div>
@@ -2524,6 +2576,7 @@ export class StepModalForm extends React.Component {
                     <UpdatesList programId={this.props.parentId} stepId={this.state.id}/>
 
 
+<FormErrorMessage errors={this.state.serverErrors} />
 
                       <div className="ui three column stackable grid">
                                                     <div className="ui row">&nbsp;</div>
@@ -2599,11 +2652,10 @@ export class StepModalForm extends React.Component {
 
                 }.bind(this),
                 error: function (xhr, status, err) {
-                                        console.log("errror in here")
+                    console.log(theURL + " error")
 
                     var serverErrors = xhr.responseJSON;
-                    console.log("server Errors")
-                    console.log(serverErrors)
+
                     this.setState({
                         serverErrors: serverErrors,
                          saved: "Save"

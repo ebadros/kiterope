@@ -12,7 +12,7 @@ import autobind from 'class-autobind'
 import Measure from 'react-measure'
 
 
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRCheckBox, KRRichText } from './inputElements'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 import Pagination from "react-js-pagination";

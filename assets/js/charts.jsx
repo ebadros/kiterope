@@ -14,7 +14,7 @@ import { ReactDataGridPlugins } from 'react-data-grid-addons';
 import {VisualizationBasicView, VisualizationChartView} from './visualization'
 import {StandardInteractiveButton } from './settings'
 var moment = require('moment');
-import  { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 
 import autobind from 'class-autobind'
 
@@ -151,7 +151,6 @@ export class VisualizationChart extends React.Component {
                 for (var j=0; j < theKeys.length; j++) {
                     var theKey = theKeys[j]
                     if (theDataOptionsUnique.indexOf(theKey) === -1) {
-                    console.log("theKey is " + theKey)
                         theDataOptionsUnique.push(theKey)
                         theDataOptions.push({value:theKey, label:theKey})
                     }
@@ -253,7 +252,7 @@ export class VisualizationChart extends React.Component {
                                                 onChange={this.handleIndependentVariableChange} name="independentVariable"
                                                 options={this.state.dataOptions} clearable={false}/>
         </div>
-                <div className="ui column"> <ValidatedInput
+                <div className="ui column"> <KRInput
                                         type="text"
                                         name="name"
                                         label="Visualization Name"

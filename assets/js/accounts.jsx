@@ -14,7 +14,8 @@ var validator = require('validator');
 //import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
-import  { ValidatedInput, KRCheckBox } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 var auth = require('./auth');
 var Modal = require('react-modal');
 import {MessageWindowContainer} from './message'
@@ -31,6 +32,8 @@ import SubscriptionForm from './stripe/SubscriptionForm'
 import FormSubmitter from './formSubmitter'
 import { UniversalStyle as Style } from 'react-css-component'
 import PropTypes from 'prop-types'
+import ReactTooltip from 'react-tooltip'
+
 
 //var sb = new SendBird({
 //    appId: '36A8769D-9595-4CB5-B27C-47E0574CD7C7'
@@ -346,6 +349,7 @@ export class StandardSetOfComponents extends React.Component {
         return (
 
             <div>
+
 
                 <Alert />
                 <ReduxDataGetter  />
@@ -1228,7 +1232,7 @@ export class LoginForm extends React.Component {
                               <form className="ui form" method="POST"  encType="multipart/form-data" onSubmit={this.handleSubmit}>
 
 
-                                      <ValidatedInput
+                                      <KRInput
                                                     type="text"
                                                     name="email"
                                                     label="Email"
@@ -1241,7 +1245,7 @@ export class LoginForm extends React.Component {
                                                     stateCallback={this.handleEmailChange}
                                             />
 
-                                       <ValidatedInput
+                                       <KRInput
                                                     type="password"
                                                     name="password"
                                                     label="Password"
@@ -1362,7 +1366,7 @@ export class PasswordConfirmForm extends React.Component {
                     <div className="ui row">&nbsp;</div>
 
                     <form className="ui form" method="POST" encType="multipart/form-data" onSubmit={this.handleSubmit}>
-                        <ValidatedInput
+                        <KRInput
                                                     type="password"
                                                     name="password1"
                                                     label="Password"
@@ -1374,7 +1378,7 @@ export class PasswordConfirmForm extends React.Component {
                                                     onChange={this.validate}
                                                     stateCallback={this.handlePassword1Change}
                                             />
-                                  <ValidatedInput
+                                  <KRInput
                                                     type="password"
                                                     name="password2"
                                                     label="Password (again)"
@@ -1456,7 +1460,7 @@ export class PasswordResetForm extends React.Component {
                     <div>Enter your e-mail address to reset your password.</div>
 
                     <form className="ui form" method="POST" encType="multipart/form-data" onSubmit={this.handleSubmit}>
-                        <ValidatedInput
+                        <KRInput
                             type="text"
                             name="email"
                             label="Email"
@@ -1619,6 +1623,15 @@ _handleKeyPress = (e) => {
 
   };
 
+  _handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+
+      this.sendMessage()
+    }
+  };
+
   handlePassword1Change = (value) => {
       this.setState({
           password1:value,
@@ -1668,7 +1681,7 @@ _handleKeyPress = (e) => {
                                 <div className=" ui two column  vertically padded grid  ">
                                     <div className="ui row">
                                     <div className="ui column">
-                                <ValidatedInput
+                                <KRInput
                                           type="text"
                                           name="first_name"
                                           label="First Name"
@@ -1686,7 +1699,7 @@ _handleKeyPress = (e) => {
 
                                     <div className="ui column">
 
-                                      <ValidatedInput
+                                      <KRInput
                                           type="text"
                                           name="last_name"
                                           label="Last Name"
@@ -1704,7 +1717,7 @@ _handleKeyPress = (e) => {
                                         </div>
                                     </div>
 
-                                      <ValidatedInput
+                                      <KRInput
                                           type="text"
                                           name="email"
                                           label="Email"
@@ -1718,7 +1731,7 @@ _handleKeyPress = (e) => {
                                           serverErrors={this.getServerErrors("email")}
 
                                       />
-                                      <ValidatedInput
+                                      <KRInput
                                           type="password"
                                           name="password1"
                                           label="Password"
@@ -1728,6 +1741,7 @@ _handleKeyPress = (e) => {
                                           initialValue={this.state.password1}
                                           validators='"!isEmpty(str)"'
                                           onChange={this.validate}
+                                          onKeyPress={this._handleKeyPress}
                                           stateCallback={this.handlePassword1Change}
                                           serverErrors={this.getServerErrors("password1")}
 
@@ -2001,7 +2015,7 @@ export class ModalLoginForm extends React.Component {
                               <form className="ui form" method="POST"  encType="multipart/form-data" onSubmit={this.handleSubmit}>
 
 
-                                      <ValidatedInput
+                                      <KRInput
                                                     type="text"
                                                     name="email"
                                                     label="Email"
@@ -2016,7 +2030,7 @@ export class ModalLoginForm extends React.Component {
 
                                             />
 
-                                       <ValidatedInput
+                                       <KRInput
                                                     type="password"
                                                     name="password"
                                                     label="Password"
@@ -2026,6 +2040,8 @@ export class ModalLoginForm extends React.Component {
                                                     initialValue={this.state.password}
                                                     validators='"!isEmpty(str)"'
                                                     onChange={this.validate}
+                                                    keyPressCallback={this.handleSubmit}
+
                                                     stateCallback={this.handlePasswordChange}
                                                     serverErrors={this.state.serverErrors.password1}
                                             />

@@ -33,7 +33,8 @@ import {SaveButton } from './settings'
 
 import {ImageUploader,   Breadcrumb, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, Footer, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable, ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
@@ -266,7 +267,6 @@ export class StepOccurrenceItem extends React.Component {
                 },
                 success: function (data) {
 
-                    console.log("dispatching update step occurrece *****************************")
                     store.dispatch(updateStepOccurrence(data))
                     //if (this.state.stepOccurrenceDoneSaving) {
                     //    this.setState({doneSaving: true})
@@ -289,7 +289,6 @@ export class StepOccurrenceItem extends React.Component {
 
 
     handleSubmit(updateOccurrence) {
-        console.log("handle submit has been called")
         this.setState({doneSaving:false});
         this.setState({
             saved: "Saving"
@@ -437,7 +436,6 @@ export class StepOccurrenceDetailPage extends React.Component {
 
 
     loadStepOccurrence() {
-        console.log("load plans from server");
     $.ajax({
       url: "/api/stepOccurrences/" + this.props.params.stepOccurrence_id + "/",
       dataType: 'json',
@@ -468,7 +466,6 @@ export class StepOccurrenceDetailPage extends React.Component {
 
 
   componentDidMount() {
-      console.log("compoentnDidMount")
       this.loadStepOccurrence()
 
   }

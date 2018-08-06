@@ -69,7 +69,6 @@ class SubscriptionForm extends React.Component {
     }
 
     deleteCard = () => {
-      console.log("deleteCard")
       var theUrl = "/api/profiles/" + this.props.storeRoot.profile.id + "/";
 
             $.ajax({

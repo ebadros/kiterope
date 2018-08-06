@@ -13,7 +13,7 @@ import Measure from 'react-measure'
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
 
 
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox, FormErrorMessage } from './inputElements'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 import Pagination from "react-js-pagination";
@@ -43,7 +43,7 @@ import  {store} from "./redux/store";
 
 import { mapStateToProps, mapDispatchToProps } from './redux/containers2'
 
-import { addVisualization, deleteVisualization, setPlanModalData, setInitialCurrentFormValues, setCurrentFormValue, setDisplayAlert, setProgramRequestModalData, setSubscriptionModalData, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addVisualization, setDisplayAlert, deleteVisualization, setPlanModalData, setInitialCurrentFormValues, setCurrentFormValue, setProgramRequestModalData, setSubscriptionModalData, setProgramModalData, editVisualization, addPlan, removePlan, updateProgram, shouldReload, setStepModalData, setPlan, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { defaultProgramCroppableImage, mobileModalStyle, smallDesktopModalStyle, defaultStepCroppableImage, defaultUserCroppableImage, defaultGoalCroppableImage, theServer, times, s3IconUrl, formats, s3BaseUrl, stepModalStyle, programCategoryOptions, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions, subscribeModalStyle, customStepModalStyles, notificationSendMethodOptions, TINYMCE_CONFIG } from './constants'
@@ -102,8 +102,9 @@ export class ProgramModalForm extends React.Component {
             editable:false,
             data:"",
             category:"UNCATEGORIZED",
-            serverErrors:{},
+            serverErrors:"",
             modalIsOpen:false,
+            saved:"Create",
 
         }
 
@@ -119,10 +120,7 @@ export class ProgramModalForm extends React.Component {
         })
 
         $(this.refs['ref_whichProgramForm']).hide();
-        this.setState({
-            serverErrors: this.props.serverErrors,
 
-            })
 
         if (this.props.storeRoot != undefined) {
             if (this.props.storeRoot.programModalData != undefined) {
@@ -205,7 +203,9 @@ export class ProgramModalForm extends React.Component {
                 var cost = this.state.cost
             }
 
-            if (data.costFrequencyMetric != undefined) {
+            if (data.costFrequencyMetric != undefined && data.costFrequencyMetric != "") {
+                console.log("costFrequencyMetric")
+                console.log(data.costFrequencyMetric)
                 var costFrequencyMetric = data.costFrequencyMetric
             }
             else {
@@ -284,9 +284,6 @@ export class ProgramModalForm extends React.Component {
     componentWillReceiveProps(nextProps) {
 
 
-         if (this.state.serverErrors != nextProps.serverErrors) {
-            this.setState({serverErrors: nextProps.serverErrors})
-        }
 
         if (nextProps.storeRoot.programModalData != undefined ) {
             if (this.state.programModalData != nextProps.storeRoot.programModalData) {
@@ -302,7 +299,10 @@ export class ProgramModalForm extends React.Component {
     }
 
     handleStartDateTimeChange(dateTime)   {
-        this.setState({startDateTime: dateTime});
+        this.setState({
+            startDateTime: dateTime,
+            saved:"Save"
+        });
   }
 
 
@@ -310,35 +310,48 @@ export class ProgramModalForm extends React.Component {
 
     handleEditorChange(e)  {
 
-        this.setState({description: e});
+        this.setState({description: e,
+            saved:"Save"});
   }
 
     handleCostChange (newValue){
-        this.setState({cost: newValue});
+        this.setState({cost: newValue,
+            saved:"Save"});
     }
 
     handleScheduleLengthChange (option) {
-        this.setState({scheduleLength: option.value});
+        this.setState({scheduleLength: option.value,
+            saved:"Save"});
     }
 
     handleCostFrequencyMetricChange(option) {
 
-            this.setState({costFrequencyMetric: option.value})
+            this.setState({costFrequencyMetric: option.value,
+            saved:"Save"})
     }
 
     handleViewableByChange(option) {
 
-            this.setState({viewableBy: option.value})
+            this.setState({viewableBy: option.value,
+            saved:"Save"})
     }
 
 
 
     handleTimeCommitmentChange(option){
-        this.setState({timeCommitment: option.value});
+        this.setState({timeCommitment: option.value,
+            saved:"Save"});
     }
 
     handleCategoryChange(option){
-        this.setState({category: option.value});
+        this.setState({category: option.value,
+            saved:"Save"});
+    }
+
+    handleDescriptionChange(value) {
+                this.setState({description: value,
+            saved:"Save"});
+
     }
 
     getDescriptionEditor () {
@@ -366,7 +379,16 @@ export class ProgramModalForm extends React.Component {
 
             return (<div className="ui row">
                 <div className={wideColumnWidth}>
-                    <div className="field fluid">
+                    <KRRichText label="Description:"
+                                config={TINYMCE_CONFIG}
+                                value={this.state.description}
+                                validators='"!isEmpty(str)"'
+                                onChange={this.validate}
+                                stateCallback={this.handleDescriptionChange}
+                                serverErrors={this.getServerErrors("description")}
+                    />
+
+                    {/*<div className="field fluid">
                         <label htmlFor="id_description">Description:</label>
                         <TinyMCEInput name="description"
                                       value={this.state.description}
@@ -375,7 +397,7 @@ export class ProgramModalForm extends React.Component {
                         />
 
 
-                    </div>
+                    </div>*/}
                 </div>
                 <div className="six wide column">&nbsp;</div>
 
@@ -397,7 +419,8 @@ export class ProgramModalForm extends React.Component {
 
     handleTitleChange(value) {
 
-            this.setState({title: value})
+            this.setState({title: value,
+            saved:"Save"})
     }
 
 
@@ -423,37 +446,7 @@ closeModal() {
 this.closeModal()
     }
 
-    handleProgramSubmitOld (program, callback) {
 
-            var theUrl = "/api/programs/";
-
-            $.ajax({
-                url: theUrl,
-                dataType: 'json',
-                type: 'POST',
-                data: program,
-                headers: {
-                    'Authorization': 'Token ' + localStorage.token
-                },
-                success: function (data) {
-                    this.handleCloseForm();
-                    store.dispatch(addProgram(data));
-
-                    //this.loadProgramsFromServer()
-                    callback
-
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    var serverErrors = xhr.responseJSON;
-                    this.setState({
-                        serverErrors: serverErrors,
-                    })
-
-                }.bind(this)
-            });
-
-
-  }
 
     handleProgramSubmit = (program) => {
 
@@ -475,6 +468,8 @@ this.closeModal()
                          saved: "Saved"
                     });
                     store.dispatch(updateProgram(data));
+                    store.dispatch(setDisplayAlert({showAlert:true, text:"Program updated", style:{backgroundColor:'purple', color:'white'}}))
+
 
 
 
@@ -504,6 +499,8 @@ this.closeModal()
                 },
                 success: function (data) {
                     store.dispatch(addProgram(data));
+                    store.dispatch(setDisplayAlert({showAlert:true, text:"Program created", style:{backgroundColor:'purple', color:'white'}}))
+
                     this.closeModal();
 
 
@@ -523,7 +520,7 @@ this.closeModal()
     };
 
     handleSubmit() {
-        this.setState({saved:"Saving"})
+        this.setState({saved:"Saving..."})
 
 
         if (this.props.storeRoot.user) {
@@ -588,7 +585,7 @@ this.closeModal()
                     viewableBy: "ONLY_ME",
                     timeCommitment: "1h",
                     cost: "0",
-                    costFrequencyMetric: "MONTH",
+                    costFrequencyMetric: "month",
                     editable: false,
                     serverErrors:"",
                     data: "",
@@ -690,7 +687,7 @@ this.closeModal()
                           <div className="ui field row">
                               <div className={wideColumnWidth}>
 
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="title"
                                       label="Title"
@@ -713,14 +710,24 @@ this.closeModal()
 
                           <div className="ui row">
                               <div className={smallColumnWidth}>
-                                  <div className="field"><label htmlFor="id_lengthOfSchedule">Length of
+                                  {/*<div className="field"><label htmlFor="id_lengthOfSchedule">Length of
                                       Schedule:</label>
 
                                       <Select value={this.state.scheduleLength}
                                               onChange={this.handleScheduleLengthChange} name="scheduleLength"
                                               options={programScheduleLengths}   clearable={false}/>
-                                  </div>
+                                  </div>*/}
+
+                                   <KRSelect value={this.state.scheduleLength}
+                                            valueChange={this.handleScheduleLengthChange}
+                                            label="Length of Schedule:"
+                                            isClearable={false}
+                                            name="scheduleLength"
+                                            options={programScheduleLengths}
+                                             serverErrors={this.getServerErrors('scheduleLength')}
+                                            />
                               </div>
+
 
                               <div className={smallColumnWidth}>
                                   <div className="field">
@@ -737,12 +744,14 @@ this.closeModal()
                           </div>
                           <div className="ui row">
                               <div className={smallColumnWidth}>
-                                  <KSSelect value={this.state.timeCommitment}
+                                  <KRSelect value={this.state.timeCommitment}
                                             valueChange={this.handleTimeCommitmentChange}
                                             label="Time Commitment:"
                                             isClearable={false}
                                             name="timeCommitment"
                                             options={timeCommitmentOptions}
+                                            serverErrors={this.getServerErrors("timeCommitment")}
+
                                             />
                                   </div>
                               </div>
@@ -758,7 +767,7 @@ this.closeModal()
                               </div>
 
                               <div className={smallColumnWidth}>
-                                  <div className="field">
+                                  {/* <div className="field">
 
                                       <label htmlFor="id_costFrequencyMetric">Frequency:</label>
                                       <Select value={this.state.costFrequencyMetric}
@@ -766,13 +775,24 @@ this.closeModal()
                                               options={costFrequencyMetricOptions} clearable={false}/>
 
 
-                                  </div>
+                                  </div>*/}
+
+                                  <KRSelect value={this.state.costFrequencyMetric}
+                                            valueChange={this.handleCostFrequencyMetricChange}
+                                            label="Frequency:"
+                                            isClearable={false}
+                                            name="costFrequencyMetric"
+                                            options={costFrequencyMetricOptions}
+                                            serverErrors={this.getServerErrors("costFrequencyMetric")}
+
+                                            />
                               </div>
 
                               </div>
 
                           <div className="ui row">
                               <div className={mediumColumnWidth}>
+                                  {/*
                                   <div className='field'>
                                       <label>Who should be able to see this?:</label>
 
@@ -780,18 +800,30 @@ this.closeModal()
                                               name="viewableBy" options={viewableByOptions} clearable={false}/>
 
 
-                                  </div>
+                                  </div>*/}
+
+                                   <KRSelect value={this.state.viewableBy}
+                                            valueChange={this.handleViewableByChange}
+                                            label="Who should be able to see this?:"
+                                            isClearable={false}
+                                            name="viewableBy"
+                                            options={viewableByOptions}
+                                            serverErrors={this.getServerErrors("viewableBy")}
+
+                                            />
                               </div>
                           </div>
 
                           <div className="ui row">
                               <div className={mediumColumnWidth}>
-                                  <KSSelect value={this.state.category}
+                                  <KRSelect value={this.state.category}
                                             valueChange={this.handleCategoryChange}
                                             label="Category:"
                                             isClearable={false}
                                             name="programCategory"
                                             options={programCategoryOptions}
+                                            serverErrors={this.getServerErrors("programCategory")}
+
                                             />
                                   </div>
                               </div>
@@ -800,7 +832,7 @@ this.closeModal()
 
                   </div>
                                     <VisualizationsListAndAdd programId={this.state.id} />
-
+<FormErrorMessage errors={this.state.serverErrors} />
 
                       <div className="ui three column stackable grid">
                           <div className="column">&nbsp;</div>
@@ -808,7 +840,9 @@ this.closeModal()
                               <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
                           </div>
                           <div className="column">
-                              <div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>
+                              <StandardInteractiveButton color="blue" initial="Create" processing="Saving..." completed="Saved" current={this.state.saved} clicked={this.handleSubmit}  />
+
+                              {/*<div className="ui large fluid blue button" onClick={this.handleSubmit}>{buttonText}</div>*/}
                           </div>
                       </div>
 
@@ -905,6 +939,8 @@ export class ProgramListPage extends React.Component {
                 success: function (data) {
                     this.handleCloseForm();
                     store.dispatch(addProgram(data));
+                    store.dispatch(setDisplayAlert({showAlert:true, text:"Program added", style:{backgroundColor:'purple', color:'white'}}))
+
 
                     //this.loadProgramsFromServer()
                     callback
@@ -1009,8 +1045,7 @@ handleCancelClicked = () => {
 
     };
     handleActionClick = () => {
-    var theData ={modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage}}
-        console.log(theData)
+    var theData ={modalIsOpen:true, data:{croppableImage:defaultProgramCroppableImage, }}
       store.dispatch(setProgramModalData(theData))
 
       //store.dispatch(setStepModalData({modalIsOpen:true, data:{}}))
@@ -1125,6 +1160,8 @@ export class ProgramDetailPage extends React.Component {
 
 
                                 store.dispatch(updateProgram(data))
+                                                store.dispatch(setDisplayAlert({showAlert:true, text:"Program updated", style:{backgroundColor:'purple', color:'white'}}))
+
                                 var thePrograms = this.props.storeRoot.programs;
                                 this.setState({data: thePrograms[data.id]}, this.convertStepsIntoArray())
 
@@ -1228,7 +1265,7 @@ export class ProgramDetailPage extends React.Component {
       $(this.refs['ref_calendarView']).hide();
         $(this.refs['ref_listView']).hide();
 
-      this.loadProgramDetail()
+      //this.loadProgramDetail()
           var thePrograms = this.props.storeRoot.programs;
       if (thePrograms != undefined) {
 
@@ -1342,8 +1379,8 @@ export class ProgramDetailPage extends React.Component {
                                                    showCloseButton={false}
                                                    apiUrl="/api/programs/"
                                                    id={this.props.params.program_id}
-                                                   data={this.state.data}
                                                    currentView="Basic"
+                                                   data={this.state.data}
                                                    needsLogin={this.handleNeedsLogin}
                                                    reloadItem={this.handleReloadItem}
                                                    extendedBasic={false} />
@@ -1536,9 +1573,9 @@ export class ProgramDetailPageNoSteps extends React.Component {
                         <ProgramViewEditDeleteItem isListNode={listNodeOrMobile}
                                                 showCloseButton={false}
                                                 apiUrl="/api/programs/"
+                                                   currentView="Basic"
                                                 id={this.props.params.program_id}
                                                 data={this.state.data}
-                                                currentView="Basic"
                                                    userPlanOccurrenceId = {this.state.userPlanOccurrenceId}
 
                                                    extendedBasic={true}
@@ -1760,6 +1797,7 @@ export class ProgramRequestModalForm extends React.Component {
         }
     }
 
+
     getServerErrors(fieldName) {
         if (this.state.serverErrors == undefined) {
             return ""
@@ -1946,7 +1984,7 @@ export class ProgramRequestModalForm extends React.Component {
 
 
 
-                                      <KSSelect value={this.state.goal}
+                                      <KRSelect value={this.state.goal}
                                             valueChange={this.handleGoalChange}
                                             label="Goal to Be Shared:"
                                             isClearable={false}
@@ -2373,7 +2411,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
                                   </div></div>
                         <div className="ui field row">
                                 <div className="ui ten wide column">
-<KSSelect value={this.state.goal}
+<KRSelect value={this.state.goal}
                                             valueChange={this.handleGoalChange}
                                             label="Which goal is this plan for?:"
                                             isClearable={false}
@@ -2410,7 +2448,7 @@ export class ProgramSubscriptionModalForm extends React.Component {
                               <div className="ui large fluid button" onClick={this.handleCancelClicked}>Cancel</div>
                           </div>
                           <div className="column">
-                              <StandardInteractiveButton color="purple" initial="Subscribe" processing="Subscribing" completed="Subscribed" current={this.state.subscribed} clicked={this.handleSubscribeClicked}  />
+                              <StandardInteractiveButton color="purple" initial="Subscribe" processing="Subscribing..." completed="Subscribed" current={this.state.subscribed} clicked={this.handleSubscribeClicked}  />
 
                           </div>
                       </div>
@@ -2551,8 +2589,8 @@ export class ProgramList extends React.Component {
                                             showCloseButton={false}
                                             apiUrl="/api/programs/"
                                             id={program.id}
+                                               currentView="Basic"
                                             data={program}
-                                            currentView="Basic"
                                                needsLogin={this.handleNeedsLogin}
                                                reloadItem={this.handleReloadItem}
                                                userPlanOccurrenceId={program.planId}
@@ -2669,12 +2707,12 @@ export class SubscribeableProgramList extends React.Component {
                 return (
                     <ProgramViewEditDeleteItem key={objectData.id}
                                                isListNode={true}
-                                               currentView="Basic"
                                                showCloseButton={false}
                                                hideControlBar={true}
                                                apiUrl="/api/programs/"
                                                id={objectData.id}
                                                data={objectData}
+                                               currentView="Basic"
                                                editable={false}
                                                needsLogin={this.handleNeedsLogin}
                                                forSearch={true}
@@ -2781,7 +2819,7 @@ convertCost(theCost) {
             var theScheduleLength = this.findLabel(this.state.data.scheduleLength, programScheduleLengths);
             var theTimeCommitment = this.findLabel(this.state.data.timeCommitment, timeCommitmentOptions);
 
-            var startDateTime = moment(this.state.data.startDateTime).format('YYYY-MM-DD HH:mm')
+            var startDateTime = moment(this.state.data.startDateTime).format('MMM D, YYYY h:mm a')
 
             var authorName
             if (this.state.data.author_fullName) {
@@ -2837,6 +2875,7 @@ convertCost(theCost) {
                                             <div className="ui left aligned column">
                                             <IconLabelCombo size="extramini" orientation="left"
                                                             text={startDateTime} icon="deadline" background="Light"
+                                                            tooltip="Program Leader Start Time"
                                                             link="/goalEntry"/>
                                         </div>
 
@@ -2848,11 +2887,13 @@ convertCost(theCost) {
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
                                                                 text={theScheduleLength}
+                                                                tooltip="Program's Length of Schedule"
                                                                 icon="calendar" background="Light"/>
                                             </div> :
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
                                                                 text={theScheduleLength}
+                                                                tooltip="Program's Length of Schedule"
                                                                 icon="calendar" background="Light"/>
                                             </div>
                                         }
@@ -2866,17 +2907,21 @@ convertCost(theCost) {
                                     <div className="ui two column grid">
                                         <div className="ui left aligned column">
                                             <IconLabelCombo size="extramini" orientation="left" text={theCost}
+                                                            tooltip="Program's Cost"
                                                             icon="cost" background="Light" link="/goalEntry"/>
                                         </div>
                                         {this.props.forSearch ?
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
                                                                 text={theTimeCommitment} icon="timeCommitment"
+                                                                tooltip="Program's Time Commitment"
                                                                 background="Light" link="/goalEntry"/>
                                             </div> :
                                             <div className="ui right aligned column">
                                                 <IconLabelCombo size="extramini" orientation="right"
                                                                 text={theTimeCommitment} icon="timeCommitment"
+                                                                                                                                tooltip="Program's Time Commitment"
+
                                                                 background="Light" link="/goalEntry"/>
                                             </div>
                                         }
@@ -2909,11 +2954,18 @@ convertCost(theCost) {
                                             <UserLink orientation="right" fullName={this.state.data.authorName}
                                                             image={this.state.data.authorPhoto} /></Link>
                             <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength}
-                                            icon="deadline" background="Light" link="/goalEntry"/>
+                                            icon="deadline" background="Light" link="/goalEntry"
+                                                                                            tooltip="Program's Length of Schedule"
+/>
+
                             <IconLabelCombo size="extramini" orientation="right" text={theCost} icon="cost"
-                                            background="Light" link="/goalEntry"/>
+                                            background="Light" link="/goalEntry"
+                                                                                            tooltip="Program's Cost"
+/>
                             <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment}
-                                            icon="timeCommitment" background="Light" link="/goalEntry"/>
+                                            icon="timeCommitment" background="Light" link="/goalEntry"
+                                                                                            tooltip="Program's Time Commitment"
+/>
                         </div>
 
                     </div>

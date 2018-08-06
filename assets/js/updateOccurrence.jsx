@@ -33,7 +33,8 @@ const uuidv4 = require('uuid/v4');
 
 import {VideoUploader, AudioUploader, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList } from './update'
@@ -508,7 +509,7 @@ export class UpdateOccurrenceInput extends React.Component {
 
         return (
             <div className="ui form row">
-                <ValidatedInput
+                <KRInput
                                       type="textarea"
                                       name="text"
                                       label={this.state.metricLabel}
@@ -536,7 +537,7 @@ export class UpdateOccurrenceInput extends React.Component {
 
         return (
             <div className="ui form  row">
-                <ValidatedInput
+                <KRInput
                                       type="text"
                                       name="decimal"
                                       label={this.state.metricLabel}
@@ -565,7 +566,7 @@ export class UpdateOccurrenceInput extends React.Component {
         if (this.state.default != true) {
             return (
                 <div className="ui form  row">
-                    <ValidatedInput
+                    <KRInput
                         type="text"
                         name="integer"
                         label={this.state.metricLabel}
@@ -597,7 +598,7 @@ export class UpdateOccurrenceInput extends React.Component {
 
 
         <div className="ui form  row">
-                <ValidatedInput
+                <KRInput
                                       type="text"
                                       name="value"
                                       label={this.state.metricLabel}

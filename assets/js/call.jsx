@@ -15,7 +15,8 @@ var DatePicker = require('react-datepicker');
 var moment = require('moment');
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
-import ValidatedInput from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import autobind from 'class-autobind'
 var NotificationSystem = require('react-notification-system');
 var Iframe = require("react-iframe");

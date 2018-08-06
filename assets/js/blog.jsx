@@ -12,7 +12,7 @@ import {Sidebar} from './base'
 import autobind from 'class-autobind'
 var Select = require('react-select');
 
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 

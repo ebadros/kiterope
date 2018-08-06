@@ -16,7 +16,8 @@ var moment = require('moment');
 import { MessageWindowContainer } from './message'
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import autobind from 'class-autobind'
 import {SaveButton} from './settings'
 
@@ -577,7 +578,7 @@ if (this.state.user) {
                           <div className="ui row">
                               <div className={wideColumnWidth}>
 
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="firstName"
                                       label="First Name"
@@ -591,7 +592,7 @@ if (this.state.user) {
                                       serverErrors={this.getServerErrors("firstName")}
 
                                   />
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="lastName"
                                       label="Last Name"
@@ -615,7 +616,7 @@ if (this.state.user) {
 
                           <div className="ui row">
                               <div className={smallColumnWidth}>
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="zipCode"
                                       label="Zip Code"
@@ -1173,7 +1174,7 @@ componentWillReceiveProps(nextProps) {
                           <div className="ui row">
                               <div className={wideColumnWidth}>
 
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="firstName"
                                       label="First Name"
@@ -1187,7 +1188,7 @@ componentWillReceiveProps(nextProps) {
                                       serverErrors={this.getServerErrors("firstName")}
 
                                   />
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="lastName"
                                       label="Last Name"
@@ -1211,7 +1212,7 @@ componentWillReceiveProps(nextProps) {
 
                           <div className="ui row">
                               <div className={smallColumnWidth}>
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name="zipCode"
                                       label="Zip Code"

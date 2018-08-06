@@ -14,7 +14,8 @@ var validator = require('validator');
 //import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
-import  { ValidatedInput, KRCheckBox } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 var auth = require('./auth');
 var Modal = require('react-modal');
 import {MessageWindowContainer} from './message'
@@ -639,12 +640,10 @@ this.loadPublicGoalData()
 
 
     formatUpdateOccurrenceData(theUpdateOccurrences) {
-        console.log("formatUpdateOccurrenceData")
             var theData = []
             var uniqueStepOccurrenceIds = []
 
             for (var i=0; i < theUpdateOccurrences.length; i++) {
-                                console.log("i " + i)
 
 
                 //Compile all unique step occurrences
@@ -659,20 +658,16 @@ this.loadPublicGoalData()
 
 
             for (var i=0; i < uniqueStepOccurrenceIds.length; i++) {
-                console.log("i " + i)
                 var theStepOccurrenceId = uniqueStepOccurrenceIds[i]
                                     var theStepOccurrenceSetOfData = {}
 
                 for (var j=0; j < theUpdateOccurrences.length; j++) {
-                                    console.log("j " + j)
 
                     var theCurrentUpdateOccurrence = theUpdateOccurrences[j]
                     var theCurrentUpdateOccurrenceStepOccurrenceId = theCurrentUpdateOccurrence.stepOccurrence
                     if (theStepOccurrenceId == theCurrentUpdateOccurrenceStepOccurrenceId) {
-                        console.log("formatUpdate")
                         var measuringWhat = theCurrentUpdateOccurrence.update.measuringWhat
                         var theFormat = theCurrentUpdateOccurrence.update.format
-                                                console.log("formatUpdate 2")
 
                         if (theFormat == 'datetime') {
                              var theConvertedTime = convertDate(theCurrentUpdateOccurrence[theFormat], 0, "dateFormat", "absoluteTime")
@@ -702,8 +697,7 @@ this.loadPublicGoalData()
 
 
             }
-            console.log("theData")
-        console.log(theData)
+
                                 store.dispatch(setUpdateOccurrences(theData))
 
 

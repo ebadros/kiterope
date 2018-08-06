@@ -9,7 +9,7 @@ import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
 import Measure from 'react-measure'
 var Modal = require('react-modal');
 import moment from 'moment';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import DatePicker  from 'react-datepicker';
 
 
@@ -17,6 +17,7 @@ import { theServer, s3IconUrl, formats, s3ImageUrl, customModalStyles, dropzoneS
     costFrequencyMetricOptions, viewableByOptions, notificationSendMethodOptions, customStepModalStyles } from './constants'
 import { Textfit } from 'react-textfit';
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'
+import ReactTooltip from 'react-tooltip'
 
 const customModalStyles2 = {
     overlay : {
@@ -74,8 +75,8 @@ export class IconLabelCombo extends React.Component {
         if (this.props.orientation == "left") {
             return (
                 <div onClick={this.handleClick}>
-
-                <img className={`ui middle aligned ${this.props.size} image`} src={icon} />
+<ReactTooltip className="blue" place="bottom" type="info" effect="solid"/>
+                <img className={`ui middle aligned ${this.props.size} image`}  src={icon} data-tip={this.props.tooltip}  />
                     <span className="iconLabel">{this.props.text}</span>
                 </div>
 
@@ -85,9 +86,9 @@ export class IconLabelCombo extends React.Component {
         else {
             return (
                 <div onClick={this.handleClick}>
-
+<ReactTooltip className="blue" place="bottom" type="info" effect="solid"/>
                 <span className="iconLabel">{this.props.text}</span>
-                    <img className={`ui middle aligned ${this.props.size} image`} src={icon} />
+                    <img className={`ui middle aligned ${this.props.size} image`}   src={icon} data-tip={this.props.tooltip} />
 
                 </div>
 
@@ -155,7 +156,7 @@ export class ItemMenu extends React.Component {
                             <IconLabelCombo size="extramini" orientation="left" text="Steps" icon="step" background="Light" click={this.handleClick} />
                             </div>                    */}
                           <div className="ui item">
-                            <IconLabelCombo size="extramini" orientation="left" text="Author" icon="author" background="Light" click={this.handleClick} />
+                            <IconLabelCombo  size="extramini" orientation="left" text="Author" icon="author" background="Light" click={this.handleClick} />
                             </div>
     <div className="divider"></div>
 
@@ -418,7 +419,7 @@ export class SimpleModalInput extends React.Component {
 
     getForm() {
         return (
-            <ValidatedInput
+            <KRInput
                                 type="text"
                                 name={this.props.name}
                                 label={this.props.label}

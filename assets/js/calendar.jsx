@@ -31,7 +31,8 @@ import {convertDate, convertFromDateString, daysBetweenDates , convertStringDate
 import {ImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList , ToggleButton, } from './step';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { UpdatesList } from './update'
 

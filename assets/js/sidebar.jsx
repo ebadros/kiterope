@@ -15,7 +15,8 @@ var validator = require('validator');
 //import TimePicker from 'rc-time-picker';
 import DynamicSelectButton2 from './base'
 var Select = require('react-select');
-import  { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 var auth = require('./auth');
 var Modal = require('react-modal');
 import { syncHistoryWithStore, routerReducer, routerMiddleware, push } from 'react-router-redux'

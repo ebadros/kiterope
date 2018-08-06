@@ -10,7 +10,7 @@ var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
 var UpdatesList = require('./update');
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 
 var Modal = require('react-modal');
 var DatePicker = require('react-datepicker');
@@ -345,7 +345,7 @@ export class ContactListPage extends React.Component {
 
 
 
-                                            <div className="eleven wide column"> <KSSelect
+                                            <div className="eleven wide column"> <KRSelect
                                                            valueChange={this.handleSelectedContactGroupChange}
                                                            value={this.state.selectedContactGroup}
                                                            options={this.state.contactGroupOptions}

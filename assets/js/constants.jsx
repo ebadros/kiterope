@@ -28,8 +28,7 @@ export const TINYMCE_CONFIG = {
 };
 
 export const uploadFileToAWS = function (file, key) {
-    console.log("the key is")
-    console.log(key)
+
 
 
   return new Promise((resolve, reject) => {
@@ -196,7 +195,8 @@ export const programCategoryOptions = [
 
 export const frequencyOptions = [
      {value:'ONCE', label: "Don't repeat"},
-        {value:'HOURLY', label: "Hourly"},
+         {value:'HOURLY', label: "Hourly"},
+
     {value:'DAILY', label: "Daily"},
     {value:'WEEKLY', label: "Weekly"},
     {value:'MONTHLY', label: "Monthly"}];

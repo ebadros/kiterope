@@ -11,7 +11,7 @@ import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
 import autobind from 'class-autobind'
 import Modal from 'react-modal'
 
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 import Pagination from "react-js-pagination";
@@ -28,7 +28,7 @@ import {SaveButton, StandardInteractiveButton, SettingsForm } from './settings'
 import { makeEditable,  } from './calendar'
 import { MessageWindowContainer } from './message'
 
-import { addPlan, removePlan,  shouldReload, setPlan, setPlanModalData, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
+import { addPlan, removePlan,  setDisplayAlert, shouldReload, setPlan, setPlanModalData, addStep, deleteStep, setCurrentUser, reduxLogout, showSidebar, setOpenThreads, setCurrentThread, showMessageWindow, setPrograms, addProgram, deleteProgram, setGoals, setContacts, setStepOccurrences } from './redux/actions'
 
 import { theServer, s3IconUrl, formats, s3ImageUrl, stepModalStyle, mobileModalStyle, smallDesktopModalStyle, customModalStyles, dropzoneS3Style, uploaderProps, frequencyOptions, programScheduleLengths, timeCommitmentOptions,
     costFrequencyMetricOptions, viewableByOptions } from './constants'
@@ -215,6 +215,8 @@ export class PlanSettingsForm extends React.Component {
 
 
                     store.dispatch(addPlan(data));
+                                    store.dispatch(setDisplayAlert({showAlert:true, text:"You've subscribed to the plan", style:{backgroundColor:'purple', color:'white'}}))
+
                     store.dispatch(shouldReload("subscribed"));
                     this.resetForm()
                     var goalURL = "/goals/" + data.goal + "/plans"
@@ -271,6 +273,8 @@ export class PlanSettingsForm extends React.Component {
 
 
                     store.dispatch(addPlan(theData));
+                                     store.dispatch(setDisplayAlert({showAlert:true, text:"You've subscribed to the plan.", style:{backgroundColor:'purple', color:'white'}}))
+
                     store.dispatch(shouldReload("subscribed"));
                     this.resetForm()
                     var goalURL = "/goals/" + theData.goal + "/plans"
@@ -434,7 +438,7 @@ export class PlanSettingsForm extends React.Component {
                                   </div></div>
                         <div className="ui field row">
                                 <div className="ui ten wide column">
-<KSSelect value={this.state.goal}
+<KRSelect value={this.state.goal}
                                             valueChange={this.handleGoalChange}
                                             label="Which goal is this plan for?:"
                                             isClearable={false}
@@ -1450,22 +1454,25 @@ export class PlanBasicView extends React.Component {
                             <div className="ui two column grid">
                                 <div className="ui left aligned column">
 {this.state.occurrenceData != undefined ?
-                                                <IconLabelCombo size="extramini" orientation="left" text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
+                                                <IconLabelCombo tooltip="Plan's Start Date"
+                                                                size="extramini"
+                                                                orientation="left"
+                                                                text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
 :
                                                 <IconLabelCombo size="extramini" orientation="right" text="" icon="calendar" background="Light" />
 }</div>
                                 <div className="ui right aligned column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
+                                    <IconLabelCombo size="extramini" tooltip="Length of Plan" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
 </div></div>
                             </div>
                         <div className="row" >
 
                             <div className="ui two column grid">
                                 <div className="ui left aligned column">
-                                    <IconLabelCombo size="extramini" orientation="left" text={theCost} icon="cost" background="Light" link="/goalEntry" />
+                                    <IconLabelCombo tooltip="Cost" size="extramini" orientation="left" text={theCost} icon="cost" background="Light" link="/goalEntry" />
 </div>
                                 <div className="ui right aligned column">
-                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
+                                    <IconLabelCombo tooltip="Time Commitment" size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light" link="/goalEntry" />
 </div></div>
 </div>
 
@@ -1490,13 +1497,14 @@ export class PlanBasicView extends React.Component {
                     </div>
                     <div className="right aligned six wide column">
                         {this.state.occurrenceData != undefined ?
-                                                <IconLabelCombo size="extramini" orientation="right" text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
+                                                <IconLabelCombo tooltip="Plan's start date" size="extramini" orientation="right" text={this.state.occurrenceData.startDate} icon="calendar" background="Light" />
 :
                                                 <IconLabelCombo size="extramini" orientation="right" text="" icon="calendar" background="Light" />
 }
-                                    <IconLabelCombo size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" />
-                                    <IconLabelCombo size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light"  />
+                                    <IconLabelCombo tooltip="Plan's length of schedule" size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
+                                    <IconLabelCombo tooltip="Cost"
+                                                    size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" />
+                                    <IconLabelCombo tooltip="Time commitment" size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light"  />
 </div>
 
                 </div>

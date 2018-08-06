@@ -16,7 +16,8 @@ var moment = require('moment');
 import { MessageWindowContainer } from './message'
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import autobind from 'class-autobind'
 import { ClippedImage, ChoiceModal , IconLabelCombo } from './elements'
 import { ImageUploader, Header, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'

@@ -12,7 +12,8 @@ import autobind from 'class-autobind'
 import Measure from 'react-measure'
 
 
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 import Pagination from "react-js-pagination";
@@ -113,6 +114,9 @@ constructor(props) {
                     Some of our Services are available on mobile devices. Do not use such Services in a way that
                     distracts you and prevents you from obeying traffic or safety laws.
 
+                    Do not use our Services for requesting or collecting any data related to anything health-related. This is super important. DO NOT DO IT.
+
+
                 </div>
                 <h2>Your Kiterope Account</h2>
 
@@ -140,6 +144,10 @@ constructor(props) {
                     We provide information to help copyright holders manage their intellectual property online. If you
                     think somebody is violating your copyrights and want to notify us, you can find information about
                     submitting notices and Kiterope’s policy about responding to notices in our Help Center.
+<br /><br />
+                    Kiterope is not currently sufficiently robust in its implementation to guarantee that your data will
+                    remain private. Do not upload or add any data to Kiterope that you want to remain private. Do not upload or add any data that is health-related.
+
 
                 </div>
                 <h2>Your Content in our Services</h2>

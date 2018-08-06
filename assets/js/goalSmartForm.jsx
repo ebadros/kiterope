@@ -15,7 +15,8 @@ var Select = require('react-select');
 import TinyMCE from 'react-tinymce';
 import TinyMCEInput from 'react-tinymce-input';
 
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox, FormErrorMessage } from './inputElements'
+
 import DatePicker  from 'react-datepicker';
 import moment from 'moment';
 
@@ -162,6 +163,12 @@ export class GoalSMARTForm extends React.Component {
                 })
             }
 
+            var viewableBy = "ONLY_ME"
+
+            if (data.viewableBy != undefined || data.viewableBy == "") {
+                var viewableBy = data.viewableBy
+            }
+
             this.setState({
                 id: data.id,
                 description: description,
@@ -171,7 +178,7 @@ export class GoalSMARTForm extends React.Component {
                 why: data.why,
                 obstacles: data.obstacles,
                 image: data.image,
-                viewableBy: data.viewableBy,
+                viewableBy: viewableBy,
                 wasAchieved: data.wasAchieved,
                  goalInAlignmentWithCoreValues : data.goalInAlignmentWithCoreValues,
                  isThisReasonable : data.isThisReasonable
@@ -507,7 +514,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                             </div>
                                             <div className="ui row bold">
                                                 <div className={wideColumnWidth}>
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="title"
                                                     label="What is your goal? (Required)"
@@ -541,7 +548,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                             <div className="ui row">
                                                                                                 <div className={wideColumnWidth}>
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="metric"
                                                     label="How will you measure your progress?"
@@ -572,7 +579,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                             <div className="ui row">
                                                                                                 <div className={wideColumnWidth + " field"}>
                                             <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
-                            <KSSelect value={this.state.isThisReasonable}
+                            <KRSelect value={this.state.isThisReasonable}
                                       valueChange={this.handleIsThisReasonableChange}
                                       name="isThisReasonable" options={isThisReasonableOptions}
                                       serverErrors={this.getServerErrors("isThisReasonable")}
@@ -582,7 +589,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
                                             <div className="ui row">
                                                 <div className={wideColumnWidth}>
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="obstacles"
                                                     label="What obstacles have you encountered in the past or do you foresee encountering?"
@@ -616,7 +623,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
 
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="coreValues"
                                                     label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
@@ -639,7 +646,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                                 <div className={wideColumnWidth + " field"}>
 
                                             <label  htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
-                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                        <KRSelect value={this.state.goalInAlignmentWithCoreValues}
                                 valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
                                 name="goalInAlignmentWithCoreValues"
                                 options={goalInAlignmentWithCoreValuesOptions}
@@ -650,7 +657,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                                 <div className="ui row">
                                                     <div className={wideColumnWidth}>
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="why"
                                                     label="Why do you want to achieve this goal?"
@@ -719,7 +726,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                         <div className={wideColumnWidth + ' field'}>
                     <label htmlFor="id_lengthOfSchedule">Who should be able to see this goal?</label>
                     <Select value={this.state.viewableBy} clearable={false}
-                                              onChange={this.handleViewableByChange} name="viewingOptions"
+                                              onChange={this.handleViewableByChange} name="viewableBy"
                                               options={userSharingOptions}/>
                             </div>
                         </div>
@@ -727,6 +734,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                         </div>
                     </div>
                                             <div className="ui row">&nbsp;</div>
+<FormErrorMessage errors={this.state.serverErrors} />
 
                                 <div className="ui three column stackable grid">
                                     <div className="column">&nbsp;</div>
@@ -792,7 +800,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row bold">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="title"
                                                     label="What is your goal? (Required)"
@@ -829,7 +837,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="metric"
                                                     label="How will you measure your progress?"
@@ -863,7 +871,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                                         <div className="eleven wide column">
                                         <div className="ui field row">
                                             <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
-                            <KSSelect value={this.state.isThisReasonable}
+                            <KRSelect value={this.state.isThisReasonable}
                                       valueChange={this.handleIsThisReasonableChange}
                                       name="isThisReasonable" options={isThisReasonableOptions}
                                       serverErrors={this.getServerErrors("isThisReasonable")}
@@ -872,7 +880,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 <div className="ui row">&nbsp;</div>
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="obstacles"
                                                     label="What obstacles have you encountered in the past or do you foresee encountering?"
@@ -909,7 +917,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="coreValues"
                                                     label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
@@ -930,7 +938,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
 
                                             <div className="ui field row">
                                             <label htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
-                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                        <KRSelect value={this.state.goalInAlignmentWithCoreValues}
                                 valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
                                 name="goalInAlignmentWithCoreValues"
                                 options={goalInAlignmentWithCoreValuesOptions}
@@ -939,7 +947,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                         serverErrors={this.getServerErrors("goalInAlignmentWithCoreValues")}/>
                                             </div>
 <div className="ui row">&nbsp;</div><div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="why"
                                                     label="Why do you want to achieve this goal?"
@@ -1151,7 +1159,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                         <div>
 
                             <div className="ui one column grid container">
-                                <div className="ui centered row  massiveType">Great news! We can help you with that!
+                                <div className="ui centered row  massiveType">Great news! We can help you!
                                 </div>
                             </div>
                             <div className="ui one column grid">
@@ -1616,7 +1624,7 @@ getForm2 = () => {
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row bold">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="title"
                                                     label="What is your goal? (Required)"
@@ -1653,7 +1661,7 @@ getForm2 = () => {
                                         </div>
                                         <div className="eleven wide column">
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="metric"
                                                     label="How will you measure your progress?"
@@ -1687,7 +1695,7 @@ getForm2 = () => {
                                         <div className="eleven wide column">
                                         <div className="ui field row">
                                             <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
-                            <KSSelect value={this.state.isThisReasonable}
+                            <KRSelect value={this.state.isThisReasonable}
                                       valueChange={this.handleIsThisReasonableChange}
                                       name="isThisReasonable" options={isThisReasonableOptions}
                                       serverErrors={this.getServerErrors("isThisReasonable")}
@@ -1696,7 +1704,7 @@ getForm2 = () => {
 <div className="ui row">&nbsp;</div>
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="obstacles"
                                                     label="What obstacles have you encountered in the past or do you foresee encountering?"
@@ -1733,7 +1741,7 @@ getForm2 = () => {
 
 
                                             <div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="coreValues"
                                                     label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
@@ -1754,7 +1762,7 @@ getForm2 = () => {
 
                                             <div className="ui field row">
                                             <label htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
-                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                        <KRSelect value={this.state.goalInAlignmentWithCoreValues}
                                 valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
                                 name="goalInAlignmentWithCoreValues"
                                 options={goalInAlignmentWithCoreValuesOptions}
@@ -1763,7 +1771,7 @@ getForm2 = () => {
                         serverErrors={this.getServerErrors("goalInAlignmentWithCoreValues")}/>
                                             </div>
 <div className="ui row">&nbsp;</div><div className="ui row">
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="why"
                                                     label="Why do you want to achieve this goal?"
@@ -1911,7 +1919,7 @@ getForm = () => {
                                             </div>
                                             <div className="ui row bold">
                                                 <div className={wideColumnWidth}>
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="title"
                                                     label="What is your goal? (Required)"
@@ -1945,7 +1953,7 @@ getForm = () => {
                                             <div className="ui row">
                                                                                                 <div className={wideColumnWidth}>
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="text"
                                                     name="metric"
                                                     label="How will you measure your progress?"
@@ -1976,7 +1984,7 @@ getForm = () => {
                                             <div className="ui row">
                                                                                                 <div className={wideColumnWidth + " field"}>
                                             <label htmlFor="id_isThisReasonable">Does your goal challenge you while still being realistic?</label>
-                            <KSSelect value={this.state.isThisReasonable}
+                            <KRSelect value={this.state.isThisReasonable}
                                       valueChange={this.handleIsThisReasonableChange}
                                       name="isThisReasonable" options={isThisReasonableOptions}
                                       serverErrors={this.getServerErrors("isThisReasonable")}
@@ -1986,7 +1994,7 @@ getForm = () => {
 
                                             <div className="ui row">
                                                 <div className={wideColumnWidth}>
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="obstacles"
                                                     label="What obstacles have you encountered in the past or do you foresee encountering?"
@@ -2020,7 +2028,7 @@ getForm = () => {
 
 
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="coreValues"
                                                     label="What are your core values and beliefs? What is important to you? What is the purpose of life to you?"
@@ -2043,7 +2051,7 @@ getForm = () => {
                                                 <div className={wideColumnWidth + " field"}>
 
                                             <label  htmlFor="id_goalInAlignmentWithCoreValues">Is this goal in alignment with your core values?</label>
-                        <KSSelect value={this.state.goalInAlignmentWithCoreValues}
+                        <KRSelect value={this.state.goalInAlignmentWithCoreValues}
                                 valueChange={this.handleGoalInAlignmentWithCoreValuesChange}
                                 name="goalInAlignmentWithCoreValues"
                                 options={goalInAlignmentWithCoreValuesOptions}
@@ -2054,7 +2062,7 @@ getForm = () => {
                                                 <div className="ui row">
                                                     <div className={wideColumnWidth}>
 
-                                                <ValidatedInput
+                                                <KRInput
                                                     type="textarea"
                                                     name="why"
                                                     label="Why do you want to achieve this goal?"

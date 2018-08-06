@@ -30,7 +30,7 @@ import {convertDate, convertFromDateString, daysBetweenDates, daysBetween} from 
 import {SaveButton, StandardInteractiveButton} from './settings'
 import {ImageUploader,  NewImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable,  ProgramCalendar } from './calendar'
 import { UpdatesList, UpdateModalForm } from './update'
@@ -576,7 +576,7 @@ export class FormFactory extends React.Component {
             <div className="ui field row">
                               <div className={this.state.wideColumnWidth}>
 
-                                  <ValidatedInput
+                                  <KRInput
                                       type="text"
                                       name={fieldProperties.fieldName}
                                       label={fieldProperties.fieldLabel}
@@ -624,7 +624,7 @@ export class FormFactory extends React.Component {
         return (
              <div className="ui row">
                               <div className={this.state.smallColumnWidth}>
-                                  <KSSelect value={this.state[fieldProperties.fieldName]}
+                                  <KRSelect value={this.state[fieldProperties.fieldName]}
                                             valueChange={this.handleChange.bind(this, fieldProperties.fieldName)}
                                             label={fieldProperties.fieldLabel}
                                             isClearable={false}

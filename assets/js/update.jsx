@@ -9,7 +9,8 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 //var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { IconLabelCombo } from './elements'
 
 import Modal from 'react-modal'
@@ -707,7 +708,7 @@ export class UpdateModalForm extends React.Component {
                                                     onChange={this.handleExistingUpdateChange} name="existingUpdate"
                                                     options={ this.state.nonDefaultProgramUpdates} clearable={false}/>*/}
 
-                                            <KSSelect value={this.state.existingUpdate}
+                                            <KRSelect value={this.state.existingUpdate}
                                                       valueKey="id"
                                                       labelKey="name"
                                                       valueChange={this.handleExistingUpdateChange}
@@ -729,7 +730,7 @@ export class UpdateModalForm extends React.Component {
 
                                 <div className="ui row">
                                     <div className="sixteen wide column">
-                                        <ValidatedInput
+                                        <KRInput
                                             type="text"
                                             name="name"
                                             label="Name of Update"
@@ -753,7 +754,7 @@ export class UpdateModalForm extends React.Component {
                                             <label htmlFor="format">What type of input?</label>
                                             {/*<Select value={this.state.format} onChange={this.handleFormatChange}
                                                     name="format" options={metricFormatOptions} clearable={false}/>*/}
-                                            <KSSelect value={this.state.format}
+                                            <KRSelect value={this.state.format}
                                                       valueChange={this.handleFormatChange}
                                                       name="format"
                                                       options={metricFormatOptions}
@@ -769,7 +770,7 @@ export class UpdateModalForm extends React.Component {
 
                                 <div ref="ref_metricLabel" className="ui row">
                                     <div className="sixteen wide column">
-                                        <ValidatedInput
+                                        <KRInput
                                             type="text"
                                             name="metricLabel"
                                             label="How do you want to label this measurement?"
@@ -788,7 +789,7 @@ export class UpdateModalForm extends React.Component {
 
                                 <div ref="ref_measuringWhat" className="ui row">
                                     <div className="sixteen wide column">
-                                        <ValidatedInput
+                                        <KRInput
                                             type="text"
                                             name="measuringWhat"
                                             label="What are you measuring?"
@@ -807,7 +808,7 @@ export class UpdateModalForm extends React.Component {
 
                                                     <div ref="ref_units" className="ui row">
                                     <div className="sixteen wide column">
-                                        <ValidatedInput
+                                        <KRInput
                                             type="text"
                                             name="units"
                                             placeholder="miles, pounds, hours, etc"

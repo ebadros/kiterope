@@ -17,7 +17,8 @@ import { Router, Route, Link, browserHistory, hashHistory } from 'react-router'
 var MaskedInput = require('react-maskedinput');
 var classNames = require('classnames');
 import validator from 'validator';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
+
 import { Funnybar, SearchPage } from './search'
 
 import { StandardSetOfComponents, ErrorReporter, Footer} from './accounts'
@@ -149,7 +150,6 @@ export class DailyList extends React.Component{
         periodRangeEnd = moment(periodRangeEnd).format('YYYY-MM-DD');
         var theUrl = "/api/period/" + periodRangeStart + "/" + periodRangeEnd + "/";
 
-                console.log("sending now " + theUrl)
 
         $.ajax({
             url: theUrl,
@@ -327,7 +327,7 @@ export class DailyList extends React.Component{
                             <div  className="column field absolutelyNoMargin">
 
 
-                                        <KSSelect value={this.state.stepOccurrenceType}
+                                        <KRSelect value={this.state.stepOccurrenceType}
                                             valueChange={this.handleStepOccurrenceTypeChange}
                                             label=""
                                             isClearable={false}
@@ -339,7 +339,7 @@ export class DailyList extends React.Component{
                             <div  className="column field absolutelyNoMargin">
 
 
-                                        <KSSelect value={this.state.period}
+                                        <KRSelect value={this.state.period}
                                             valueChange={this.handlePeriodChange}
                                             label=""
                                             isClearable={false}
@@ -558,7 +558,7 @@ var UpdateOccurrenceForm = React.createClass({
         return (
             //<div className="ui divided link items">
                 <div className="ui row">
-                    <ValidatedInput
+                    <KRInput
                                         type="text"
                                         name="something"
                                         label={this.state.metricLabel}

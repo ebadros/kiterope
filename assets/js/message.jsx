@@ -35,7 +35,7 @@ import  {store} from "./redux/store";
 import {ImageUploader, PlanForm2, ViewEditDeleteItem, StepViewEditDeleteItem, PlanViewEditDeleteItem, FormAction, Sidebar, Header, FormHeaderWithActionButton, DetailPage} from './base';
 import {PlanHeader, StepList } from './step';
 import { Menubar, StandardSetOfComponents, ErrorReporter } from './accounts'
-import { ValidatedInput } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import { IconLabelCombo, ClippedImage, ContextualMenuItem, ChoiceModal, ChoiceModalButtonsList } from './elements'
 import { makeEditable,  } from './calendar'
 import { UpdatesList } from './update'
@@ -3172,7 +3172,7 @@ export class NewLabelModal extends ChoiceModal {
                 <div className="ui row">
                     <div className="eight wide column">
 
-                        <ValidatedInput type="text"
+                        <KRInput type="text"
                                         name="labelName"
                                         label="Label"
                                         id="id_labelName"

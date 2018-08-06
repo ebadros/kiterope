@@ -16,7 +16,7 @@ var moment = require('moment');
 import { MessageWindowContainer } from './message'
 require('react-datepicker/dist/react-datepicker.css');
 import TinyMCE from 'react-tinymce';
-import { ValidatedInput, KSSelect } from './app'
+import { KRInput, KRSelect, KRRichText, KRCheckBox } from './inputElements'
 import autobind from 'class-autobind'
 import { ClippedImage, ChoiceModal , IconLabelCombo } from './elements'
 import { ImageUploader, Header, Breadcrumb, FormHeaderWithActionButton, ProfileViewEditDeleteItem, } from './base'
@@ -207,7 +207,6 @@ export class SettingsForm extends React.Component {
                      this.setState({
                          saved:"Save"
                      });
-                                                   console.log("error");
 
                      console.error(theURL, status, err.toString());
                      var serverErrors = xhr.responseJSON;
@@ -372,7 +371,7 @@ export class SettingsForm extends React.Component {
                         <div className={mediumColumnWidth}>
 
                 <div className="fluid field">
-                <KSSelect value={this.state.defaultNotificationMethod}
+                <KRSelect value={this.state.defaultNotificationMethod}
                                             valueChange={this.handleDefaultNotificationMethodChange}
                                             label="How would you like your notifications sent?"
                                             isClearable={false}
@@ -388,7 +387,7 @@ export class SettingsForm extends React.Component {
 
                 <div className="ui row">
                             <div className={mediumColumnWidth}>
-                <ValidatedInput
+                <KRInput
                                       type="text"
                                       name="title"
                                       label="At what email would you like to receive notifications?"
@@ -423,7 +422,7 @@ export class SettingsForm extends React.Component {
                         <div className={mediumColumnWidth}>
 
                 <div className="fluid field">
-                <KSSelect value={this.state.defaultNotificationSendTime}
+                <KRSelect value={this.state.defaultNotificationSendTime}
                                             valueChange={this.handleDefaultNotificationSendTimeChange}
                                             label="At what time would you like your notifications sent (when not-specified by the plan)?"
                                             isClearable={false}
