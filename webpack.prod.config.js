@@ -36,6 +36,7 @@ module.exports = {
         'NODE_ENV': JSON.stringify('production')
       }
     }),
+  new webpack.optimize.CommonsChunkPlugin('common'),
 
     new webpack.optimize.DedupePlugin(), //dedupe similar code
     new webpack.optimize.UglifyJsPlugin(), //minify everything
