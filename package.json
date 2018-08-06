@@ -106,6 +106,7 @@
     "react-textfit": "^0.1.9",
     "react-tinymce": "^0.5.1",
     "react-tinymce-input": "^1.2.1",
+    "react-tooltip": "^3.6.1",
     "react-uniqueid": "0.0.1",
     "react-validated-input": "0.0.10",
     "react-websocket": "^1.1.6",

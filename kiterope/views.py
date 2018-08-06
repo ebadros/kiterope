@@ -1083,6 +1083,7 @@ class PeriodViewSet(viewsets.ModelViewSet):
     #permission_classes = [permissions.IsAuthenticated, TokenHasScope]
 
     required_scopes = ['groups']
+    required_scopes = ['groups']
     stepStart = -999
     stepEnd = -999
     serializer_class = StepOccurrenceSerializer
@@ -1316,7 +1317,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
             viewableByAnyone = Q(viewableBy="ANYONE")
             isActiveFilter = Q(isActive=True)
 
-            theQueryset = Program.objects.filter(isActiveFilter).filter(userIsCurrentUser | viewableByAnyone)
+            theQueryset = Program.objects.filter(userIsCurrentUser | (viewableByAnyone & isActiveFilter) )
         except:
             isActiveFilter = Q(isActive=True)
 
@@ -1883,6 +1884,7 @@ def twitter(request, *args, **kwargs):
 conn = boto.connect_s3(settings.S3_ACCESS_KEY_ID, settings.S3_SECRET_ACCESS_KEY)
 
 def sign_s3_upload(request):
+    print(request)
     object_name = request.GET['objectName']
     #extension = os.path.splitext(object_name)[1]
     #object_name = str(uuid.uuid4()) + extension
@@ -1898,6 +1900,8 @@ def sign_s3_upload(request):
         headers = {'Content-Type': content_type,
                    'x-amz-acl': 'public-read',
                    })
+
+    print(signed_url)
 
     return HttpResponse(json.dumps({'signedUrl': signed_url}))
 

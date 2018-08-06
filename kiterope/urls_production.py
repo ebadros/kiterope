@@ -182,8 +182,9 @@ urlpatterns = [
       url(r'^tinymce/', include('tinymce.urls')),
       url(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
 
+      url(r'^signS3Upload$', views.sign_s3_upload, name='sign_s3_upload'),
 
-      url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
+                    #url(r'^signS3Upload/$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
       url(r'^', views.React.as_view(), name='index'),

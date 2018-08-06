@@ -452,7 +452,7 @@ class Program(models.Model):
     cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     costFrequencyMetric = models.CharField(max_length=20, choices=PROGRAM_COST_FREQUENCY_METRIC_CHOICES, default="MONTH")
     category = models.CharField(max_length=20, choices=PROGRAM_CATEGORY_CHOICES, default="UNCATEGORIZED")
-    isActive = models.BooleanField(blank=True, default=True)
+    isActive = models.BooleanField(default=True)
     croppableImage = models.ForeignKey(CroppableImage, on_delete=CASCADE, null=True, blank=True, default="217")
     stripeProductId = models.CharField(max_length=100, blank=True, default="")
     stripePlanId = models.CharField(max_length=100, blank=True, default="")
@@ -1506,8 +1506,11 @@ class PlanOccurrence(models.Model):
             #self.create_step_occurrence_creator_tasks()
 
         elif self.isSubscribed == False and self.stripeSubscriptionId != "":
-            subscription = stripe.Subscription.retrieve(self.stripeSubscriptionId)
-            subscription.delete()
+            try:
+                subscription = stripe.Subscription.retrieve(self.stripeSubscriptionId)
+                subscription.delete()
+            except:
+                pass
 
             super(PlanOccurrence, self).save(*args, **kwargs)
             #createTimeBasedTasks.apply_async(args=[self.id])

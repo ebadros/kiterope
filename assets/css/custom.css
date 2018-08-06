@@ -366,6 +366,8 @@ ul.days2 {
 .red {
     background-color: #eb3b49;
     color:white;
+    border-top:0 !important;
+
 }
 
 .ui.card, .ui.cards>.card {
@@ -421,6 +423,8 @@ html { height: 100%; margin-bottom: 1px;}
 .errorText {
     color:red;
 }
+
+
 
 input.inline-edit{
   /* Eliminate borders and padding */
@@ -711,6 +715,11 @@ label.NLtextinput {
 
 
 
+}
+
+.ui.error.segment {
+    background-color:#fff6f6;
+    color: #9f3a38;
 }
 
 .mobileSearchInput {
@@ -1063,7 +1072,9 @@ img.listNodeImage {
 }
 
 .itemDetailSmall {
-    margin-top:2rem;
+    padding-top:1rem;
+        padding-bottom:4rem;
+
 }
 
 .choiceModalMargins {
@@ -1223,6 +1234,10 @@ img.listNodeImage {
 
 }
 
+.ui.right.corner.purple.large.label {
+    cursor:pointer;
+}
+
 .messageWindowMenuBarItemIcon {
     padding-left:10px;
 }
@@ -1289,7 +1304,10 @@ img.listNodeImage {
 div.messageLabelMenuItem:hover {
     background-color: #efefef;
 }
+.ui.button {
+    cursor:pointer,
 
+}
 
 .activeItem {
     background-color:#2185d0 !important;

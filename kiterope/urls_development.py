@@ -166,6 +166,7 @@ urlpatterns = [
 
 
                     #url(r'^s3/sign$', views.s3_sign_upload, name='s3_sign_upload'),
+
       url(r'^signS3Upload$', views.sign_s3_upload, name='sign_s3_upload'),
       url(r'^api-auth/', include('rest_framework.urls')),
       url(r'^favicon.ico$', RedirectView.as_view(url='/static/favicon2.ico'), name="favicon"),
