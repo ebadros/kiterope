@@ -1501,7 +1501,7 @@ export class PlanBasicView extends React.Component {
 :
                                                 <IconLabelCombo size="extramini" orientation="right" text="" icon="calendar" background="Light" />
 }
-                                    <IconLabelCombo tooltip="Plan's length of schedule" size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
+                                    <IconLabelCombo tooltip="Length of schedule" size="extramini" orientation="right" text={theScheduleLength} icon="deadline" background="Light"  />
                                     <IconLabelCombo tooltip="Cost"
                                                     size="extramini" orientation="right" text={theCost}  icon="cost" background="Light" />
                                     <IconLabelCombo tooltip="Time commitment" size="extramini" orientation="right" text={theTimeCommitment} icon="timeCommitment" background="Light"  />
