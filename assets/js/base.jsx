@@ -1421,6 +1421,12 @@ xhr.send();
           var theUrl = "/api/croppableImages/";
           var theStringData = JSON.stringify(theData)
 
+          if (this.props.anyoneCanUpload) {
+              var theHeaders = {}
+          } else {
+              var theHeaders = {'Authorization': 'Token ' + localStorage.token}
+          }
+
 
 
           $.ajax({
@@ -1429,10 +1435,7 @@ xhr.send();
               type: 'POST',
               data: theStringData,
               contentType: 'application/json',
-              headers: {
-                  'Authorization': 'Token ' + localStorage.token
-
-              },
+              headers: theHeaders,
               success: function (data) {
                   this.props.imageReturned(data)
                   this.setState({

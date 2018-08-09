@@ -1030,7 +1030,8 @@ class UpdateViewSet(viewsets.ModelViewSet):
 class CroppableImageViewSet(viewsets.ModelViewSet):
     queryset = CroppableImage.objects.all()
     required_scopes = ['groups']
-    permission_classes = [AllowAny]
+    permission_classes = [AllAccessPostingOrAdminAll]
+
     serializer_class = CroppableImageSerializer
 
     def post(self, request, *args, **kwargs):

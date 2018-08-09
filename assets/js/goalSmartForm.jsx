@@ -718,6 +718,7 @@ var goalInAlignmentWithCoreValues = this.state.goalInAlignmentWithCoreValues
                   defaultImage={defaultGoalCroppableImage.image}
                   forMobile={forMobile}
                   aspectRatio="square"
+                  anyoneCanUpload={true}
                   label="Select an image that will help motivate you."
                   croppableImage={this.state.croppableImage} /></div>
             </div>

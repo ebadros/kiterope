@@ -32,7 +32,7 @@ export const uploadFileToAWS = function (file, key) {
 
 
   return new Promise((resolve, reject) => {
-    let s3 = new AWS.S3({accessKeyId: REACT_APP_S3_ACCESS_KEY_ID, region:'us-west-1', secretAccessKey: REACT_APP_S3_SECRET_ACCESS_KEY});
+    let s3 = new AWS.S3({accessKeyId: process.env.REACT_APP_S3_ACCESS_KEY_ID, region:'us-west-1', secretAccessKey: process.env.REACT_APP_S3_SECRET_ACCESS_KEY});
     s3.upload({
       Bucket: 'kiterope-static',
       ACL: 'public-read',
@@ -93,8 +93,7 @@ export const stepOccurrenceTypeOptions = [
 
 ]
 
-const REACT_APP_S3_ACCESS_KEY_ID = 'AKIAJBHT4Q2VVU5CLFHQ'
-const REACT_APP_S3_SECRET_ACCESS_KEY = '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'
+
 
 export const s3config = {
 

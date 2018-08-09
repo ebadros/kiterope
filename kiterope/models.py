@@ -1395,7 +1395,7 @@ class UpdateOccurrence(models.Model):
 
 class ContactGroup(models.Model):
     name = models.CharField(max_length=20, default="")
-    profile = models.ForeignKey('Profile', on_delete=PROTECT, null=True, blank=True, default="")
+    profile = models.ForeignKey('Profile', on_delete=CASCADE, null=True, blank=True, default="")
     contacts = models.ManyToManyField('Contact', blank=True, )
     isDefault = models.BooleanField(default=False)
 
@@ -1408,7 +1408,7 @@ class Contact(models.Model):
     sender = models.ForeignKey('Profile', on_delete=CASCADE, related_name="contact_sender")
     receiver = models.ForeignKey('Profile', on_delete=CASCADE, related_name="contact_receiver")
     wasConfirmed = models.CharField(max_length=20, default=" ", blank=True)
-    contactGroups = models.ManyToManyField('ContactGroup', through=ContactGroup.contacts.through, blank=True)
+    contactGroups = models.ManyToManyField('ContactGroup',  through=ContactGroup.contacts.through, blank=True)
 
 
 
@@ -1730,10 +1730,10 @@ class Profile(models.Model):
 
             Goal.objects.create(user=instance, title="My first goal")
             customer = stripe.Customer.create(
-                email=self.user.email,
+                email=instance.email,
             )
-            self.stripeCustomerId = customer.id
-            self.save()
+            theProfile.stripeCustomerId = customer.id
+            theProfile.save()
 
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
@@ -1749,9 +1749,6 @@ class Profile(models.Model):
             customer = stripe.Customer.retrieve(self.stripeCustomerId)
             customer.sources.create(source=self.stripeSourceId)
             self.sourceAttached = True
-
-
-
 
 
         super(Profile, self).save(*args, **kwargs)

@@ -110,31 +110,7 @@ DATABASES = {
 }
 
 
-'''DATABASE_ROUTERS = (
-    'tenant_schemas.routers.TenantSyncRouter',
-)
-'''
-'''
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'kiterope',
-            'USER': 'kiteropeadmin',
-            'PASSWORD': 'regul8or1',
-            'HOST': 'localhost',
-            'PORT': '',
-        }
-    }
-'''
-'''
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'haystack',
-        'TIMEOUT': 60
-    },
-}'''
+
 
 host = 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com'
 awsauth = AWS4Auth('AKIAJ5YZL4QGGT7IUJRA', 'GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX', 'us-west-1', 'es')

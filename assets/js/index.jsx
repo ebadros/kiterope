@@ -5,6 +5,7 @@ var $ = require('jquery');
 var $ui = require('jquery-ui');
 
 var ObjectCreationPage = require('./plan');
+require('dotenv').config()
 import { DailyList } from './daily'
 import {LoginPage, JoinPage, PasswordResetPage, PasswordConfirmPage, PasswordConfirmForm} from './accounts'
 import {App, TestPage} from './app'

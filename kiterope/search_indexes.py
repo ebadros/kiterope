@@ -7,8 +7,8 @@ class ProfileIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     id = indexes.CharField(model_attr="id")
     bio = indexes.CharField(model_attr="bio")
-    notificationChannel = indexes.CharField(model_attr="notificationChannel")
-    notificationChannelLabel = indexes.CharField(model_attr="notificationChannel")
+    notificationChannel = indexes.CharField(model_attr="notificationChannel", null=True)
+    notificationChannelLabel = indexes.CharField(model_attr="notificationChannel", null=True)
     #croppableImage = indexes.CharField(model_attr="croppableImage")
 
     user = indexes.CharField(model_attr="user")
