@@ -490,4 +490,4 @@ beat_scheduler='django_celery_beat.schedulers.DatabaseScheduler',
 
 timezone = 'North America/Los Angeles'
 enable_utc = True
-include='kiterope.tasks'
+include='kiterope'

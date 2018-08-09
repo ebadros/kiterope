@@ -10,9 +10,9 @@ from django.conf import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kiterope.settings.settingsConfiguration')
 
 app = Celery('kiterope')
-#app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 #app.config_from_object('django.conf:settings')
-app.config_from_object('kiterope.celeryconfigDev', namespace='CELERY')
+#app.config_from_object('kiterope.celeryconfigDev', namespace='CELERY')
 app.autodiscover_tasks()
 
 if __name__ == '__main__':
