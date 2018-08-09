@@ -7,7 +7,7 @@ accept_content = ['json']
 
 timezone = 'North America/Los Angeles'
 enable_utc = True
-include=['kiterope.tasks']
+include=['kiterope']
 
 
 
