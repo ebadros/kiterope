@@ -29,9 +29,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
-#SECRET_KEY = '53)0ss5lr^$y$s%p=6^7_kq5dqukpw)&98zgx#m%zmk+4m27du'
 
 SECRET_KEY=os.environ.get('SECRET_KEY')
 # SECRET KEY is entered into virtualenv activate script for local and into Elastic Beanstalk's configuration file for production
