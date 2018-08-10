@@ -247,7 +247,6 @@ export const updateProgram = (theProgram) => {
 
 
 export const deleteProgram = (theProgramId) => {
-    console.log("theProgramId " + theProgramId);
     return {
         type: 'DELETE_PROGRAM',
         programId: theProgramId,

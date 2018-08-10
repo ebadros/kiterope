@@ -1284,7 +1284,10 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = AllProgramSerializer(queryset, context={'request': request}, many=True)
+        serializer = ProgramSerializer(queryset, context={'request': request}, many=True)
+        #serializer = AllProgramSerializer(queryset, context={'request': request}, many=True)
+        # Use the above to speed up initial get of all the programs, then get smaller amount when you go to the site
+
 
         # This is the line that allows us to get at the object without iterating over an array
         data = {i['id']: i for i in serializer.data}
