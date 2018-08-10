@@ -28,8 +28,7 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-local-stats.json'),
     }
 }
-S3_ACCESS_KEY_ID = 'AKIAJBHT4Q2VVU5CLFHQ'
-S3_SECRET_ACCESS_KEY = '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'
+
 
 ''
 

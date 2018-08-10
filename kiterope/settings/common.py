@@ -30,17 +30,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
+#SECRET_KEY = '53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
+#SECRET_KEY = '53)0ss5lr^$y$s%p=6^7_kq5dqukpw)&98zgx#m%zmk+4m27du'
 
-
+SECRET_KEY=os.environ.get('SECRET_KEY')
+# SECRET KEY is entered into virtualenv activate script for local and into Elastic Beanstalk's configuration file for production
 ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1',]
 
 
-TWILIO_ACCOUNT_SID = 'AC8d2c5238f8d12bb1b382e57428af3c90'
-TWILIO_AUTH_TOKEN = 'b60fb541d009c43132260367a4f84d56'
-TWILIO_DEFAULT_CALLERID = 'Kiterope'
-TWILIO_PHONE_NUMBER = 'Kiterope'
-SENDSMS_BACKEND = 'sendsms.backends.twiliorest.SmsBackend'
+TWILIO_ACCOUNT_SID='AC8d2c5238f8d12bb1b382e57428af3c90'
+TWILIO_AUTH_TOKEN='b60fb541d009c43132260367a4f84d56'
+TWILIO_DEFAULT_CALLERID='Kiterope'
+TWILIO_PHONE_NUMBER='Kiterope'
+SENDSMS_BACKEND='sendsms.backends.twiliorest.SmsBackend'
 
 
 # Stripe
@@ -408,7 +410,8 @@ SOCIALACCOUNT_PROVIDERS = \
 }
 USE_S3 = False
 
-
+S3_ACCESS_KEY_ID = os.environ.get('S3_ACCESS_KEY_ID')
+S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY')
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 
@@ -416,8 +419,8 @@ AUTH_PROFILE_MODULE = 'accounts.Profile'
 AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-AWS_ACCESS_KEY_ID = 'AKIAJ5YZL4QGGT7IUJRA'
-AWS_SECRET_ACCESS_KEY = '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'
+#AWS_ACCESS_KEY_ID = 'AKIAJ5YZL4QGGT7IUJRA'
+#AWS_SECRET_ACCESS_KEY = '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'
 
 
 

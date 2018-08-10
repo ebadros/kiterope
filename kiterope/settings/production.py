@@ -23,8 +23,7 @@ STATICFILES_DIRS = (
 # Celery stuff
 LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
 
-S3_ACCESS_KEY_ID = os.environ.get('S3_ACCESS_KEY_ID')
-S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY')
+
 
 
 broker_url = 'amqp://5ebe2294ecd0e0f08eab7690e2a6ee69:eac8d74fae134a9bbedb21ff824605ead6d858ef@localhost:5672'
@@ -78,7 +77,6 @@ CLUSTER_NAME='kiterope-es'
 EC2_TAG_NAME='kiterope-dev'
 MASTER_NODES=1
 PORT=9200
-SECRET_KEY='53)0ss5l+^$y$s%p=6^7_kq5dqukpw)&g8zgx#m%zmk+4m37du'
 
 import elasticsearch
 from requests_aws4auth import AWS4Auth
