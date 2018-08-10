@@ -23,8 +23,8 @@ STATICFILES_DIRS = (
 # Celery stuff
 LOCATION_OF_CELERY_CONFIG_FILE = 'kiterope.celeryconfig'
 
-#S3_ACCESS_KEY_ID = 'AKIAJBHT4Q2VVU5CLFHQ'
-#S3_SECRET_ACCESS_KEY = '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'
+S3_ACCESS_KEY_ID = os.environ.get('S3_ACCESS_KEY_ID')
+S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY')
 
 
 broker_url = 'amqp://5ebe2294ecd0e0f08eab7690e2a6ee69:eac8d74fae134a9bbedb21ff824605ead6d858ef@localhost:5672'
