@@ -1328,8 +1328,9 @@ class StepOccurrence(models.Model):
         return updateOccurrences
 
 class UpdateOccurrenceManager(models.Manager):
+
+    '''
     def create_occurrence(self, aStepOccurrenceId, anUpdateId):
-        print("inside create_occurrence")
         #print("aStepId %d" % aStepId)
         #print("aDate %s" % aDate)
         #print("aPlanOccurrenceId %d" % aPlanOccurrenceId)
@@ -1341,6 +1342,7 @@ class UpdateOccurrenceManager(models.Manager):
         #occurrence.full_clean()
         # do something with the book
         return occurrence
+        '''
 
 
 
@@ -1573,7 +1575,6 @@ class PlanOccurrence(models.Model):
                 except:
                     pass
             elif aStep.type == 'COMPLETION':
-                print("aStep type == COMPLETION" )
                 try:
                     if (self.isSubscribed):
                         aStepOccurrence = StepOccurrence.objects.create_completionBased_occurrence(aStep.id, self.id, self.user.id)

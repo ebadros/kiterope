@@ -61,10 +61,6 @@ def createTimeBasedTasks(thePlanOccurrenceId):
 
 @app.task(base=RepeatTask)
 def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId, eta=None):
-    #print("createStepOccurrence")
-    #print("datetime now")
-    #print(datetime.datetime.now)
-    #print(TaskScheduler.strptime(eta))
 
     Profile = apps.get_model('kiterope', 'Profile')
     PlanOccurrence = apps.get_model('kiterope', 'PlanOccurrence')
@@ -85,18 +81,17 @@ def createStepOccurrence(currentUserId, theStepId, thePlanOccurrenceId, eta=None
             aStepOccurrence = StepOccurrence.objects.create_occurrence(theStepId, stepDateTime, thePlanOccurrenceId,
                                                                        currentUserId)
 
+            ''' THIS IS NOW TAKEN CARE OF BY A POST_SAVE SIGNAL AFTER THE STEPOCCURRENCE SAVES
             defaultIsTrue = Q(default=True)
 
             stepIsCurrentStep = Q(steps=theStepId)
 
             currentStepUpdates = Update.objects.filter(defaultIsTrue | stepIsCurrentStep)
 
-
-
             for currentStepUpdate in currentStepUpdates:
 
-
                 anUpdateOccurrence = UpdateOccurrence.objects.create_occurrence(aStepOccurrence.id, currentStepUpdate.id)
+            '''
 
 
     except Exception as ex:
