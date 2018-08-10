@@ -16,6 +16,8 @@ import sys
 import os
 from os.path import abspath, basename, dirname, join, normpath
 import kiterope
+from requests_aws4auth import AWS4Auth
+
 
 IN_PRODUCTION = False
 IN_STAGING=False
@@ -35,18 +37,18 @@ SECRET_KEY=os.environ.get('SECRET_KEY')
 ALLOWED_HOSTS = ['192.168.1.48', '*', '127.0.0.1',]
 
 
-TWILIO_ACCOUNT_SID='AC8d2c5238f8d12bb1b382e57428af3c90'
-TWILIO_AUTH_TOKEN='b60fb541d009c43132260367a4f84d56'
+TWILIO_ACCOUNT_SID=os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN=os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_DEFAULT_CALLERID='Kiterope'
 TWILIO_PHONE_NUMBER='Kiterope'
 SENDSMS_BACKEND='sendsms.backends.twiliorest.SmsBackend'
 
 
 # Stripe
-STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_LIVE_PUBLIC_KEY", "<your publishable key>")
-STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
-STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "pk_test_PvGr7zfPVvMOFtDo1Kbk4fTo")
-STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "sk_test_Lfwtks7H5baMUFMZh0v5tPDq")
+STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_LIVE_PUBLIC_KEY")
+STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY")
+STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY")
+STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY")
 STRIPE_LIVE_MODE = False
 
 
@@ -358,9 +360,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'eric@kiterope.com'
-EMAIL_HOST_PASSWORD = 'passionate1'
-DEFAULT_FROM_EMAIL = 'support@kiterope.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL =  os.environ.get('DEFAULT_FROM_EMAIL')
+
+
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -416,8 +420,8 @@ AUTH_PROFILE_MODULE = 'accounts.Profile'
 AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-#AWS_ACCESS_KEY_ID = 'AKIAJ5YZL4QGGT7IUJRA'
-#AWS_SECRET_ACCESS_KEY = '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'
+awsauth = AWS4Auth(os.environ.get('AWS_KEY_ID'), os.environ.get('AWS_KEY'), 'us-west-1', 'es')
+
 
 
 
@@ -490,3 +494,17 @@ beat_scheduler='django_celery_beat.schedulers.DatabaseScheduler',
 timezone = 'North America/Los Angeles'
 enable_utc = True
 include='kiterope'
+
+DATABASES={
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ebdb',
+        'USER': os.environ.get('DATABASES_USER'),
+        'PASSWORD': os.environ.get('DATABASES_PASSWORD'),
+        'HOST': os.environ.get('DATABASES_HOST'),
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}

@@ -2,7 +2,6 @@
 from kiterope.settings.common import *
 from urllib.parse import urlparse
 import elasticsearch
-from requests_aws4auth import AWS4Auth
 
 
 DEBUG = True
@@ -95,25 +94,12 @@ SEO_JS_ENABLED = False
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ebdb',
-        'USER': 'kiteropeAdmin',
-        'PASSWORD': 'regul8or1',
-        'HOST': 'kiterope-development.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-    }
-}
+
 
 
 
 
 host = 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com'
-awsauth = AWS4Auth('AKIAJ5YZL4QGGT7IUJRA', 'GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX', 'us-west-1', 'es')
 
 es = elasticsearch.Elasticsearch(
     hosts=[{'host': host, 'port': 443}],

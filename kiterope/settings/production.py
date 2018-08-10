@@ -50,19 +50,6 @@ WEBPACK_LOADER = {
     }
 }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ebdb',
-        'USER': 'kiteropeAdmin',
-        'PASSWORD': 'regul8or1',
-        'HOST': 'kiterope-production.carvp3y5yq9m.us-west-1.rds.amazonaws.com',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-    }
-}
 
 REACT_SERVICE_URL = 'http://localhost:63578/render'
 
@@ -71,8 +58,7 @@ MIDDLEWARE_CLASSES += (
     'django_seo_js.middleware.UserAgentMiddleware',  # If you want to detect by user agent
 )
 
-AWS_KEY='GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX'
-AWS_KEY_ID='AKIAJ5YZL4QGGT7IUJRA'
+
 CLUSTER_NAME='kiterope-es'
 EC2_TAG_NAME='kiterope-dev'
 MASTER_NODES=1
@@ -82,7 +68,6 @@ import elasticsearch
 from requests_aws4auth import AWS4Auth
 
 host = 'search-kiterope-es-ghpxj2v7tzo6yzryzyfiyeof4i.us-west-1.es.amazonaws.com'
-awsauth = AWS4Auth('AKIAJ5YZL4QGGT7IUJRA', 'GaC4RBmmGb5hMWq/sTerxmMFAK8cLTnfYTwxfPOX', 'us-west-1', 'es')
 
 es = elasticsearch.Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -106,19 +91,6 @@ HAYSTACK_CONNECTIONS = {
         }
     },
 }
-'''
-if 'RDS_DB_NAME' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
-        }
-    }
-else:'''
 
 
 SECURE_SSL_REDIRECT = False
