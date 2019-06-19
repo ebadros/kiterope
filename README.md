@@ -4,4 +4,4 @@ Kiterope is a web application originally designed to function as a coaching appl
 
 In this way, in a more generalized way, Kiterope functions as a next-generation to-do list - one that can be shared for groups of tasks that have multiple steps, need to be scheduled, have multimedia components, or have dependent/precedent logic.
 
-Currently, I'm not doing any more development on it.
+Currently, I'm not doing any more development on it. 
