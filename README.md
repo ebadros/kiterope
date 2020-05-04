@@ -11,6 +11,7 @@ In this way, Kiterope functions as a next-generation, distributed to-do list - o
 The application uses Django/Python for the backend and then React for the frontend and was deployed on AWS Elastic Beanstalk. Feel free to use what you want.
 
 <strong>What I Learned</strong>
+
 Even though I knew that I should create and MVP and get some actual users first, I proceeeded building this app out without doing so. It's a great example of a project with huge feature creep. I kept adding features, so much that the whole project became unwieldy at the time. I also don't think it benefited me that I used PostgreSQL and Django on the backend. At the time, I was more comfortable with Django than with a NoSQL variant and I spent a lot of time making things realtime. Right now, I'd probably use my AppFactory builder that builds on Firebase. 
 
 
